@@ -2,85 +2,38 @@
 <html lang="id">
 <head>
 <!--
-╔══════════════════════════════════════════════════════════════════════╗
-║  SA_HARD SYSTEM — v5.1 FINAL                                         ║
-║  File   : index.html                                                 ║
-║  Status : PRODUCTION READY                                           ║
-╠══════════════════════════════════════════════════════════════════════╣
-║  PERUBAHAN v5.1 (dari v5.0):                                         ║
-║  • BREAKDOWN TERPISAH di semua fitur grup:                           ║
-║      - Preview grup: 2D DEPAN (kotak) + 2D BELAKANG (kotak) terpisah ║
-║      - Hasil: panel breakdown menunjukkan G1 / G2 / total terpisah   ║
-║      - Setiap 4-digit: 2 digit depan dari G1, 2 digit dari G2        ║
-║  • Highlight kotak mana yang dipakai fitur tersebut                  ║
-║  • Catatan "master 2-digit: 2D depan = 2D belakang (normal)"         ║
-╠══════════════════════════════════════════════════════════════════════╣
-║  INDEKS:                                                             ║
-║  B01 HEAD & META          B35 JS MASTER RENDER                       ║
-║  B02 CSS ROOT/RESET       B36 JS GRUP RENDER                         ║
-║  B03 CSS LOGIN            B37 JS CRUD MASTER                         ║
-║  B04 CSS LAYOUT           B38 JS STORAGE & SEED                      ║
-║  B05 CSS NAV              B39 JS HELPER FUNCTIONS                    ║
-║  B06 CSS CARD/LIST        B40 JS GROUP PREVIEW (RENDERER)            ║
-║  B07 CSS FORM             B40b JS BREAKDOWN BUILDERS (NEW v5.1!)     ║
-║  B08 CSS BUTTON           B41 JS INPUT MANUAL                        ║
-║  B09 CSS TOAST            B42 JS BBFS                                ║
-║  B10 CSS INSTALL          B43 JS ANGKA TARUNG                        ║
-║  B11 CSS OFFLINE          B44 JS CB BBFS                             ║
-║  B12 CSS SUBTABS          B45 JS GABUNG GRUP                         ║
-║  B13 CSS GRP PREVIEW      B46 JS GRUP + CB                           ║
-║  B13b CSS BREAKDOWN       B47 JS PAGINATION (updated)                ║
-║  B14 CSS PAGINATION       B48 JS PAGE NAV                            ║
-║  B15 BODY OFFLINE         B49 JS COPY/EXPORT                         ║
-║  B16 BODY LOGIN           B50 JS KONVERSI MANUAL                     ║
-║  B17 BODY SHELL           B51 JS KONVERSI GRUP                       ║
-║  B18 BODY MASTER          B52 JS KONVERSI CB                         ║
-║  B19 BODY INPUT 4         B53 JS KONVERSI AK                         ║
-║  B20 SUBPANEL MANUAL      B54 JS PWA INSTALL                         ║
-║  B21 SUBPANEL BBFS        B55 JS OFFLINE DETECT                      ║
-║  B22 SUBPANEL AK          B56 JS REFRESH DROPDOWN                    ║
-║  B23 SUBPANEL CBBF        B57 JS REFRESH ALL                         ║
-║  B24 SUBPANEL GABUNG      B58 JS ENTER HANDLERS                      ║
-║  B25 SUBPANEL GRCB        B59 JS SESSION RESTORE                     ║
-║  B26 BODY DATA GRUP       B60 JS BOOT                                ║
-║  B27 BODY KONVERSI x4     B61 APPENDIX A: FONTS                      ║
-║  B28 BODY INSTALL         B62 APPENDIX B: LICENSE                    ║
-║  B29 BODY TOAST           B63 APPENDIX C: CHANGELOG                  ║
-║  B30 JS CREDENTIALS       B64 APPENDIX D: TESTING                    ║
-║  B31 JS SEED_MASTER       B65 APPENDIX E: RUMUS 2D                   ║
-║  B32 JS STATE/CONFIG      B66 END OF FILE                            ║
-║  B33 JS LOGIN             (total: ~3200 baris)                       ║
-║  B34 JS NAV                                                          ║
-╚══════════════════════════════════════════════════════════════════════╝
+╔══════════════════════════════════════════════════════════════════╗
+║  SA_HARD SYSTEM — v5.2 FINAL                                     ║
+╠══════════════════════════════════════════════════════════════════╣
+║  PERUBAHAN v5.2:                                                 ║
+║  • INPUT MANUAL: tidak auto-fill saat pilih grup                 ║
+║    - Ada dropdown "Mode Grup":                                   ║
+║        Manual (tanpa grup) / Isi 2 Depan / Isi 2 Belakang        ║
+║    - Pilih salah satu sisi: DEPAN saja ATAU BELAKANG saja        ║
+║    - Sisi lain tetap manual                                      ║
+║  • BBFS: dropdown "Mode Filter 2D" (Depan / Belakang)           ║
+║  • AK: dropdown "Mode Filter 2D" (Depan / Belakang)             ║
+║  • Gabung Grup & Grup+CB: G1=Depan, G2=Belakang (tetap)         ║
+║  • Semua fitur konsisten: preview 2 kotak (Depan + Belakang)    ║
+║    dengan highlight kotak mana yang aktif                        ║
+╚══════════════════════════════════════════════════════════════════╝
 -->
-
-<!-- ═══════════════════════════════════════════════════════════════════
-     B01: HEAD & META
-     ═══════════════════════════════════════════════════════════════════ -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#0b1220">
-<meta name="description" content="SA_HARD v5.1 — Generator 4 Angka & Konversi Nomor">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="SA_HARD">
-<meta name="mobile-web-app-capable" content="yes">
-<title>SA_HARD System v5.1</title>
+<title>SA_HARD System v5.2</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon.svg">
 
 <style>
 /* ═══════════════════════════════════════════════════════════════════
-   B02: CSS — ROOT & RESET
+   ROOT & RESET
    ═══════════════════════════════════════════════════════════════════ */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
   --bg:        #0b1220;
@@ -101,13 +54,10 @@
   --radius-md: 10px;
   --radius-lg: 14px;
   --radius-xl: 20px;
-  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 20px 60px rgba(0,0,0,0.5);
 }
 
-html {
-  height: 100%;
-  -webkit-text-size-adjust: 100%;
-}
+html { height: 100%; -webkit-text-size-adjust: 100%; }
 
 body {
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -119,23 +69,13 @@ body {
   line-height: 1.5;
 }
 
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-::-webkit-scrollbar-track {
-  background: var(--card-2);
-}
-::-webkit-scrollbar-thumb {
-  background: var(--border-2);
-  border-radius: 9px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #3f5178;
-}
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--card-2); }
+::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 9px; }
+::-webkit-scrollbar-thumb:hover { background: #3f5178; }
 
 /* ═══════════════════════════════════════════════════════════════════
-   B03: CSS — LOGIN
+   LOGIN
    ═══════════════════════════════════════════════════════════════════ */
 #loginScreen {
   min-height: 100vh;
@@ -186,13 +126,9 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   B04: CSS — LAYOUT UTAMA
+   LAYOUT
    ═══════════════════════════════════════════════════════════════════ */
-#app {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
+#app { display: flex; flex-direction: column; min-height: 100vh; }
 
 header {
   display: flex;
@@ -225,11 +161,6 @@ header .brand {
   border-radius: var(--radius-sm);
   cursor: pointer;
   font-weight: 600;
-  transition: border-color 0.15s;
-}
-
-.logout-btn:hover {
-  border-color: var(--accent);
 }
 
 main {
@@ -240,34 +171,15 @@ main {
   width: 100%;
 }
 
-section {
-  display: none;
-}
+section { display: none; }
+section.active { display: block; animation: fadeIn 0.25s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
-section.active {
-  display: block;
-  animation: fadeIn 0.25s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-h2 {
-  font-size: 17px;
-  margin-bottom: 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-h3 {
-  font-size: 15px;
-}
+h2 { font-size: 17px; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+h3 { font-size: 15px; }
 
 /* ═══════════════════════════════════════════════════════════════════
-   B05: CSS — NAVIGATION
+   NAV
    ═══════════════════════════════════════════════════════════════════ */
 nav {
   display: flex;
@@ -294,7 +206,6 @@ nav button {
   border-radius: var(--radius-sm);
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s;
 }
 
 nav button.active {
@@ -304,13 +215,8 @@ nav button.active {
   font-weight: 700;
 }
 
-nav button:hover:not(.active) {
-  border-color: var(--accent);
-  color: var(--text);
-}
-
 /* ═══════════════════════════════════════════════════════════════════
-   B06: CSS — CARD & LIST
+   CARD & LIST
    ═══════════════════════════════════════════════════════════════════ */
 .card {
   background: var(--card);
@@ -320,21 +226,10 @@ nav button:hover:not(.active) {
   margin-bottom: 14px;
 }
 
-.grid-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 480px) { .grid-2 { grid-template-columns: 1fr; } }
 
-@media (max-width: 480px) {
-  .grid-2 { grid-template-columns: 1fr; }
-}
-
-.list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
+.list { display: flex; flex-direction: column; gap: 8px; }
 
 .list-item {
   display: flex;
@@ -348,75 +243,23 @@ nav button:hover:not(.active) {
   font-size: 14px;
 }
 
-.list-item .info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
-  flex: 1;
-}
+.list-item .info { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1; }
+.list-item .num { font-weight: 700; color: var(--accent); font-size: 16px; letter-spacing: 1px; }
+.list-item .meta { color: var(--muted); font-size: 12px; word-break: break-word; }
+.list-item .actions { display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
+.list-item .actions button { padding: 6px 10px; font-size: 12px; }
+.list-item .edit-fields { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+.list-item .edit-fields input { padding: 8px 10px; font-size: 13px; width: 100%; }
 
-.list-item .num {
-  font-weight: 700;
-  color: var(--accent);
-  font-size: 16px;
-  letter-spacing: 1px;
-}
-
-.list-item .meta {
-  color: var(--muted);
-  font-size: 12px;
-  word-break: break-word;
-}
-
-.list-item .actions {
-  display: flex;
-  gap: 6px;
-  flex-shrink: 0;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-}
-
-.list-item .actions button {
-  padding: 6px 10px;
-  font-size: 12px;
-}
-
-.list-item .edit-fields {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  width: 100%;
-}
-
-.list-item .edit-fields input {
-  padding: 8px 10px;
-  font-size: 13px;
-  width: 100%;
-}
-
-.empty {
-  text-align: center;
-  color: var(--muted);
-  padding: 30px 10px;
-  font-size: 14px;
-}
+.empty { text-align: center; color: var(--muted); padding: 30px 10px; font-size: 14px; }
 
 /* ═══════════════════════════════════════════════════════════════════
-   B07: CSS — FORM & INPUT
+   FORM & INPUT
    ═══════════════════════════════════════════════════════════════════ */
 .field { margin-bottom: 16px; }
+.field label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
 
-.field label {
-  display: block;
-  font-size: 13px;
-  color: var(--muted);
-  margin-bottom: 6px;
-}
-
-input,
-textarea,
-select {
+input, textarea, select {
   width: 100%;
   padding: 12px 14px;
   background: var(--card-2);
@@ -426,32 +269,15 @@ select {
   font-size: 15px;
   outline: none;
   font-family: inherit;
-  transition: border-color 0.15s;
 }
 
-input:focus,
-textarea:focus,
-select:focus {
-  border-color: var(--accent);
-}
-
-input:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-textarea {
-  resize: vertical;
-  min-height: 44px;
-}
-
-input[type="checkbox"] {
-  width: auto;
-  cursor: pointer;
-}
+input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+input:disabled { opacity: 0.55; cursor: not-allowed; }
+textarea { resize: vertical; min-height: 44px; }
+input[type="checkbox"] { width: auto; cursor: pointer; }
 
 /* ═══════════════════════════════════════════════════════════════════
-   B08: CSS — BUTTON
+   BUTTON
    ═══════════════════════════════════════════════════════════════════ */
 button {
   cursor: pointer;
@@ -467,45 +293,15 @@ button {
 button:active { transform: scale(0.98); }
 button:disabled { opacity: 0.4; cursor: not-allowed; }
 
-.btn-primary {
-  background: linear-gradient(90deg, var(--accent), var(--accent-2));
-  color: #04101c;
-  width: 100%;
-}
-
+.btn-primary { background: linear-gradient(90deg, var(--accent), var(--accent-2)); color: #04101c; width: 100%; }
 .btn-primary:hover:not(:disabled) { opacity: 0.9; }
-
-.btn-danger {
-  background: #3b1720;
-  color: #ffb4b4;
-  border: 1px solid #6b2130;
-}
-
-.btn-warn {
-  background: #3d2e14;
-  color: #fbbf24;
-  border: 1px solid #6b531e;
-}
-
-.btn-edit {
-  padding: 6px 10px;
-  font-size: 12px;
-  background: var(--card);
-  color: var(--text);
-  border: 1px solid var(--border);
-}
-
-.btn-save {
-  padding: 6px 10px;
-  font-size: 12px;
-  background: linear-gradient(90deg, var(--accent), var(--accent-2));
-  color: #04101c;
-  border: none;
-  width: auto;
-}
+.btn-danger { background: #3b1720; color: #ffb4b4; border: 1px solid #6b2130; }
+.btn-warn { background: #3d2e14; color: #fbbf24; border: 1px solid #6b531e; }
+.btn-edit { padding: 6px 10px; font-size: 12px; background: var(--card); color: var(--text); border: 1px solid var(--border); }
+.btn-save { padding: 6px 10px; font-size: 12px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); color: #04101c; border: none; width: auto; }
 
 /* ═══════════════════════════════════════════════════════════════════
-   B09: CSS — TOAST
+   TOAST
    ═══════════════════════════════════════════════════════════════════ */
 .toast {
   position: fixed;
@@ -526,16 +322,12 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
   opacity: 0;
 }
 
-.toast.show {
-  transform: translateX(-50%) translateY(0);
-  opacity: 1;
-}
-
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 .toast.success { border-color: var(--success); }
-.toast.error   { border-color: var(--danger); }
+.toast.error { border-color: var(--danger); }
 
 /* ═══════════════════════════════════════════════════════════════════
-   B10: CSS — INSTALL PROMPT
+   INSTALL PROMPT
    ═══════════════════════════════════════════════════════════════════ */
 #installPrompt {
   position: fixed;
@@ -553,15 +345,9 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
   gap: 12px;
   z-index: 1500;
   box-shadow: 0 10px 40px rgba(34, 211, 238, 0.25);
-  animation: slideUp 0.4s ease;
 }
 
 #installPrompt.show { display: flex; }
-
-@keyframes slideUp {
-  from { transform: translateY(120px); opacity: 0; }
-  to   { transform: translateY(0); opacity: 1; }
-}
 
 #installPrompt .icon {
   width: 42px;
@@ -575,44 +361,15 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
   flex-shrink: 0;
 }
 
-#installPrompt .text {
-  flex: 1;
-  font-size: 13px;
-  min-width: 0;
-}
-
-#installPrompt .text b {
-  display: block;
-  margin-bottom: 2px;
-  font-size: 14px;
-}
-
-#installPrompt .text span {
-  color: var(--muted);
-  font-size: 12px;
-}
-
-#installPrompt .actions {
-  display: flex;
-  gap: 4px;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-#installPrompt .actions button {
-  padding: 8px 12px;
-  font-size: 12px;
-}
-
-#installPrompt .close-btn {
-  background: transparent;
-  color: var(--muted);
-  padding: 4px 8px;
-  font-size: 14px;
-}
+#installPrompt .text { flex: 1; font-size: 13px; min-width: 0; }
+#installPrompt .text b { display: block; margin-bottom: 2px; font-size: 14px; }
+#installPrompt .text span { color: var(--muted); font-size: 12px; }
+#installPrompt .actions { display: flex; gap: 4px; align-items: center; flex-shrink: 0; }
+#installPrompt .actions button { padding: 8px 12px; font-size: 12px; }
+#installPrompt .close-btn { background: transparent; color: var(--muted); padding: 4px 8px; font-size: 14px; }
 
 /* ═══════════════════════════════════════════════════════════════════
-   B11: CSS — OFFLINE BADGE
+   OFFLINE BADGE
    ═══════════════════════════════════════════════════════════════════ */
 .offline-badge {
   display: none;
@@ -627,7 +384,7 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 body.offline .offline-badge { display: block; }
 
 /* ═══════════════════════════════════════════════════════════════════
-   B12: CSS — SUBTABS
+   SUBTABS
    ═══════════════════════════════════════════════════════════════════ */
 .subtabs {
   display: flex;
@@ -639,10 +396,7 @@ body.offline .offline-badge { display: block; }
 }
 
 .subtabs::-webkit-scrollbar { height: 5px; }
-.subtabs::-webkit-scrollbar-thumb {
-  background: var(--border-2);
-  border-radius: 9px;
-}
+.subtabs::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 9px; }
 
 .subtabs button {
   padding: 7px 13px;
@@ -654,7 +408,6 @@ body.offline .offline-badge { display: block; }
   border-radius: var(--radius-sm);
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s;
 }
 
 .subtabs button.active {
@@ -664,16 +417,11 @@ body.offline .offline-badge { display: block; }
   font-weight: 700;
 }
 
-.subtabs button:hover:not(.active) {
-  border-color: var(--accent);
-  color: var(--text);
-}
-
 .subpanel { display: none; }
 .subpanel.active { display: block; animation: fadeIn 0.2s ease; }
 
 /* ═══════════════════════════════════════════════════════════════════
-   B13: CSS — GROUP PREVIEW (Preview grup di dropdown)
+   GROUP PREVIEW
    ═══════════════════════════════════════════════════════════════════ */
 .group-preview {
   display: none;
@@ -687,7 +435,7 @@ body.offline .offline-badge { display: block; }
 }
 
 .group-preview.show { display: block; }
-.group-preview.ok    { border-color: var(--accent); }
+.group-preview.ok { border-color: var(--accent); }
 .group-preview.empty { border-color: var(--danger); }
 
 .group-preview .gp-header {
@@ -695,7 +443,6 @@ body.offline .offline-badge { display: block; }
   color: var(--accent);
   margin-bottom: 8px;
   font-size: 12.5px;
-  letter-spacing: 0.3px;
 }
 
 .group-preview .gp-row {
@@ -724,9 +471,7 @@ body.offline .offline-badge { display: block; }
   font-weight: 700;
 }
 
-.group-preview .gp-row.active .gp-label {
-  color: var(--accent);
-}
+.group-preview .gp-row.active .gp-label { color: var(--accent); }
 
 .group-preview .gp-values {
   color: var(--text-dim);
@@ -735,21 +480,9 @@ body.offline .offline-badge { display: block; }
   font-size: 11.5px;
 }
 
-.group-preview .gp-row.active .gp-values {
-  color: var(--accent);
-  font-weight: 700;
-}
-
-.group-preview .gp-sample .gp-values {
-  color: var(--warn);
-}
-
-.group-preview .gp-empty {
-  color: #fca5a5;
-  font-size: 12px;
-  text-align: center;
-  padding: 6px 0;
-}
+.group-preview .gp-row.active .gp-values { color: var(--accent); font-weight: 700; }
+.group-preview .gp-sample .gp-values { color: var(--warn); }
+.group-preview .gp-empty { color: #fca5a5; font-size: 12px; text-align: center; padding: 6px 0; }
 
 .group-preview .gp-hint {
   margin-top: 6px;
@@ -773,8 +506,7 @@ body.offline .offline-badge { display: block; }
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   B13b: CSS — RESULT BREAKDOWN (v5.1 KUNCI!)
-   Panel di atas hasil yang memisahkan 2D Depan / 2D Belakang
+   RESULT BREAKDOWN
    ═══════════════════════════════════════════════════════════════════ */
 .result-breakdown {
   background: var(--card-3);
@@ -785,30 +517,10 @@ body.offline .offline-badge { display: block; }
   margin-bottom: 12px;
 }
 
-.result-breakdown .rb-section {
-  padding: 10px 0;
-}
-
-.result-breakdown .rb-section + .rb-section {
-  border-top: 1px dashed var(--border-2);
-}
-
-.result-breakdown .rb-title {
-  font-size: 12.5px;
-  font-weight: 700;
-  color: var(--accent);
-  margin-bottom: 6px;
-  letter-spacing: 0.3px;
-}
-
-.result-breakdown .rb-label {
-  font-size: 10.5px;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  font-weight: 700;
-  margin-bottom: 3px;
-}
+.result-breakdown .rb-section { padding: 10px 0; }
+.result-breakdown .rb-section + .rb-section { border-top: 1px dashed var(--border-2); }
+.result-breakdown .rb-title { font-size: 12.5px; font-weight: 700; color: var(--accent); margin-bottom: 6px; }
+.result-breakdown .rb-label { font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; font-weight: 700; margin-bottom: 3px; }
 
 .result-breakdown .rb-values {
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
@@ -844,7 +556,6 @@ body.offline .offline-badge { display: block; }
   padding: 10px 0 4px;
   border-top: 1px dashed var(--border-2);
   margin-top: 8px;
-  letter-spacing: 0.5px;
 }
 
 .result-breakdown .rb-note {
@@ -860,7 +571,7 @@ body.offline .offline-badge { display: block; }
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   B14: CSS — PAGINATION & RESULT
+   PAGINATION
    ═══════════════════════════════════════════════════════════════════ */
 .page-info {
   font-size: 12.5px;
@@ -907,10 +618,7 @@ body.offline .offline-badge { display: block; }
   border-radius: var(--radius-sm);
 }
 
-.page-nav button:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
+.page-nav button:disabled { opacity: 0.35; cursor: not-allowed; }
 
 .page-jump {
   display: flex;
@@ -922,11 +630,7 @@ body.offline .offline-badge { display: block; }
   color: var(--muted);
 }
 
-.page-jump input {
-  width: 90px;
-  padding: 6px 8px;
-  font-size: 12px;
-}
+.page-jump input { width: 90px; padding: 6px 8px; font-size: 12px; }
 
 .page-jump button {
   padding: 6px 12px;
@@ -937,12 +641,7 @@ body.offline .offline-badge { display: block; }
   border-radius: var(--radius-sm);
 }
 
-.page-actions {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  margin-top: 10px;
-}
+.page-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
 
 .page-actions button {
   padding: 8px 12px;
@@ -971,26 +670,22 @@ body.offline .offline-badge { display: block; }
   min-height: 60px;
 }
 
-/* Utility */
-.text-muted  { color: var(--muted); }
+.text-muted { color: var(--muted); }
 .text-accent { color: var(--accent); }
 .mb-10 { margin-bottom: 10px; }
-.mt-10 { margin-top: 10px; }
 </style>
 </head>
 
 <body>
 
-<!-- B15: OFFLINE BADGE -->
 <div id="offlineBadge" class="offline-badge">
   ⚠️ Mode Offline — data tersimpan di perangkat
 </div>
 
-<!-- B16: LOGIN SCREEN -->
 <div id="loginScreen">
   <form class="login-card" id="loginForm" autocomplete="off">
     <div class="brand-title">SA_HARD</div>
-    <div class="brand-sub">SYSTEM v5.1</div>
+    <div class="brand-sub">SYSTEM v5.2</div>
     <div class="field">
       <label for="username">Username</label>
       <input type="text" id="username" autocomplete="off" autocapitalize="off" spellcheck="false" required>
@@ -1004,7 +699,6 @@ body.offline .offline-badge { display: block; }
   </form>
 </div>
 
-<!-- B17: APP SHELL -->
 <div id="app" hidden>
   <header>
     <div class="brand">SA_HARD</div>
@@ -1023,25 +717,20 @@ body.offline .offline-badge { display: block; }
 
   <main>
 
-    <!-- B18: MASTER NOMOR -->
     <section id="inputMaster" class="active">
       <h2>📋 Master Nomor</h2>
       <p class="text-muted mb-10" style="font-size:13px;">
         Data master <b>100 nomor (00–99) tertanam</b>. Bisa <b>Edit</b> atau <b>Hapus</b> per baris.
-        Data ini sumber semua grup dan filter 2D.
       </p>
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
           <h3>Data Master (<span id="masterCount">0</span>)</h3>
-          <button class="btn-warn" id="resetMasterBtn" style="padding:6px 10px;font-size:12px;">
-            🔄 Reset ke Data Bawaan
-          </button>
+          <button class="btn-warn" id="resetMasterBtn" style="padding:6px 10px;font-size:12px;">🔄 Reset ke Data Bawaan</button>
         </div>
         <div class="list" id="masterList"></div>
       </div>
     </section>
 
-    <!-- B19: INPUT 4 ANGKA -->
     <section id="input4Angka">
       <h2>🔢 Input 4 Angka</h2>
 
@@ -1054,31 +743,51 @@ body.offline .offline-badge { display: block; }
         <button data-subpanel="subpanel-grupCB">Grup + CB</button>
       </div>
 
-      <!-- B20: SUBPANEL INPUT MANUAL -->
+      <!-- ═══════════════════════════════════════════════════════
+           SUBPANEL INPUT MANUAL (v5.2 — mode seleksi sisi)
+           ═══════════════════════════════════════════════════════ -->
       <div id="subpanel-manual" class="subpanel active">
         <div class="card">
           <h3 style="margin-bottom:6px;">Input Manual Kombinasi 4 Angka</h3>
           <p class="text-muted" style="font-size:12.5px;margin-bottom:12px;">
-            Kombinasi <b>2 depan × 2 belakang</b>. Grup dipakai untuk <b>auto-fill 2 depan</b>
-            dari 2D DEPAN grup. 350 angka/halaman.
+            Kombinasi <b>2 depan × 2 belakang</b>. Pilih grup untuk <b>mengisi salah satu sisi</b>
+            (2 Depan saja ATAU 2 Belakang saja), sisi lain tetap manual.
           </p>
+
           <div class="field">
             <label for="manualDepan">Input 2 Angka Depan (pisah spasi / koma)</label>
             <input type="text" id="manualDepan" placeholder="20 21 22 23 24" autocomplete="off">
           </div>
+
           <div class="field">
             <label for="manualBelakang">Input 2 Angka Belakang (pisah spasi / koma)</label>
             <input type="text" id="manualBelakang" placeholder="01 02 03 04 05" autocomplete="off">
           </div>
+
           <div class="field">
-            <label for="manualGrup">Pilih Grup → 2D DEPAN untuk auto-fill</label>
-            <select id="manualGrup"><option value="">— Manual (tanpa grup) —</option></select>
+            <label for="manualGrup">Pilih Grup (untuk seleksi salah satu sisi)</label>
+            <select id="manualGrup">
+              <option value="">— Manual (tanpa grup) —</option>
+            </select>
             <div id="manualPreview" class="group-preview"></div>
           </div>
+
+          <div class="field" id="manualModeWrapper" style="display:none;">
+            <label for="manualMode">Mode Pengisian dari Grup</label>
+            <select id="manualMode">
+              <option value="depan" selected>🟡 Isi 2 DEPAN dari grup (2D Depan)</option>
+              <option value="belakang">🔵 Isi 2 BELAKANG dari grup (2D Belakang)</option>
+            </select>
+            <p style="color:var(--muted);font-size:11.5px;margin-top:6px;">
+              Pilih salah satu sisi yang akan diisi dari grup. Sisi lain tetap dari input manual Anda.
+            </p>
+          </div>
+
           <div class="field">
             <label for="manualCB">Input CB (opsional)</label>
             <input type="text" id="manualCB" placeholder="0 1 2 3 5" autocomplete="off">
           </div>
+
           <div class="field">
             <label for="manualCBMode">Mode Filter CB</label>
             <select id="manualCBMode">
@@ -1086,36 +795,51 @@ body.offline .offline-badge { display: block; }
               <option value="and">Semua Digit Harus Muncul (AND)</option>
             </select>
           </div>
+
           <p id="manualInfo" class="text-accent" style="font-size:13px;margin-bottom:12px;">
             Total kombinasi: — • Halaman: —
           </p>
+
           <button class="btn-primary" id="manualGenerateBtn">⚡ Generate Kombinasi</button>
         </div>
         <div class="card"><div id="manualResult"></div></div>
       </div>
 
-      <!-- B21: SUBPANEL BBFS -->
+      <!-- ═══════════════════════════════════════════════════════
+           SUBPANEL BBFS (v5.2 — mode filter Depan/Belakang)
+           ═══════════════════════════════════════════════════════ -->
       <div id="subpanel-bbfs" class="subpanel">
         <div class="card">
           <h3 style="margin-bottom:6px;">BBFS — Bolak-Balik (Max 16 Angka)</h3>
           <p class="text-muted" style="font-size:12.5px;margin-bottom:12px;">
-            Input 4–16 digit → permutasi 4-digit.
-            Grup dipakai sebagai <b>FILTER 2D BELAKANG</b>.
+            Input 4–16 digit → permutasi 4-digit. Grup dipakai sebagai FILTER.
             Input <b>tidak diubah</b>.
           </p>
+
           <div class="field">
             <label for="bbfsInput">Input BBFS (4–16 digit)</label>
             <input type="text" id="bbfsInput" placeholder="0123456789" maxlength="16" inputmode="numeric">
           </div>
+
           <div class="field">
-            <label for="bbfsGrup">Pilih Grup → 2D BELAKANG sebagai FILTER</label>
+            <label for="bbfsGrup">Pilih Grup → FILTER berdasarkan 2D grup</label>
             <select id="bbfsGrup"><option value="">— Manual (tanpa grup) —</option></select>
             <div id="bbfsPreview" class="group-preview"></div>
           </div>
+
+          <div class="field" id="bbfsModeWrapper" style="display:none;">
+            <label for="bbfsMode">Mode Filter 2D</label>
+            <select id="bbfsMode">
+              <option value="belakang" selected>🔵 Filter 2D BELAKANG (2 digit terakhir ∈ grup)</option>
+              <option value="depan">🟡 Filter 2D DEPAN (2 digit pertama ∈ grup)</option>
+            </select>
+          </div>
+
           <div class="field">
             <label for="bbfsCB">Input CB (opsional)</label>
             <input type="text" id="bbfsCB" placeholder="0 1 2 3 5" autocomplete="off">
           </div>
+
           <div class="field">
             <label for="bbfsCBMode">Mode Filter CB</label>
             <select id="bbfsCBMode">
@@ -1123,23 +847,27 @@ body.offline .offline-badge { display: block; }
               <option value="and">Semua Digit Harus Muncul (AND)</option>
             </select>
           </div>
+
           <p id="bbfsInfo" class="text-accent" style="font-size:13px;margin-bottom:12px;">
             Total kombinasi: — • Halaman: —
           </p>
+
           <button class="btn-primary" id="bbfsGenerateBtn">⚡ Generate BBFS</button>
         </div>
         <div class="card"><div id="bbfsResult"></div></div>
       </div>
 
-      <!-- B22: SUBPANEL ANGKA TARUNG -->
+      <!-- ═══════════════════════════════════════════════════════
+           SUBPANEL ANGKA TARUNG (v5.2 — mode filter Depan/Belakang)
+           ═══════════════════════════════════════════════════════ -->
       <div id="subpanel-angkaTarung" class="subpanel">
         <div class="card">
           <h3 style="margin-bottom:6px;">Angka Tarung (AK) — 4 Posisi Digit</h3>
           <p class="text-muted" style="font-size:12.5px;margin-bottom:12px;">
-            Cross product P1 × P2 × P3 × P4.
-            Grup dipakai sebagai <b>FILTER 2D BELAKANG</b>.
+            Cross product P1 × P2 × P3 × P4. Grup sebagai FILTER.
             Input posisi <b>tidak diubah</b>.
           </p>
+
           <div class="grid-2">
             <div class="field">
               <label for="atDigit1">Digit 1 (Posisi Pertama)</label>
@@ -1158,15 +886,26 @@ body.offline .offline-badge { display: block; }
               <input type="text" id="atDigit4" placeholder="0123456789" maxlength="10" inputmode="numeric">
             </div>
           </div>
+
           <div class="field">
-            <label for="atGrup">Pilih Grup → 2D BELAKANG sebagai FILTER</label>
+            <label for="atGrup">Pilih Grup → FILTER berdasarkan 2D grup</label>
             <select id="atGrup"><option value="">— Manual (tanpa grup) —</option></select>
             <div id="atPreview" class="group-preview"></div>
           </div>
+
+          <div class="field" id="atModeWrapper" style="display:none;">
+            <label for="atMode">Mode Filter 2D</label>
+            <select id="atMode">
+              <option value="belakang" selected>🔵 Filter 2D BELAKANG (2 digit terakhir ∈ grup)</option>
+              <option value="depan">🟡 Filter 2D DEPAN (2 digit pertama ∈ grup)</option>
+            </select>
+          </div>
+
           <div class="field">
             <label for="atCB">Input CB (opsional)</label>
             <input type="text" id="atCB" placeholder="0 1 2 3 5" autocomplete="off">
           </div>
+
           <div class="field">
             <label for="atCBMode">Mode Filter CB</label>
             <select id="atCBMode">
@@ -1174,20 +913,22 @@ body.offline .offline-badge { display: block; }
               <option value="and">Semua Digit Harus Muncul (AND)</option>
             </select>
           </div>
+
           <p id="atInfo" class="text-accent" style="font-size:13px;margin-bottom:12px;">
             Total kombinasi: — • Halaman: —
           </p>
+
           <button class="btn-primary" id="atGenerateBtn">⚡ Generate Angka Tarung</button>
         </div>
         <div class="card"><div id="atResult"></div></div>
       </div>
 
-      <!-- B23: SUBPANEL CB BBFS -->
+      <!-- SUBPANEL CB BBFS -->
       <div id="subpanel-cbBBFS" class="subpanel">
         <div class="card">
           <h3 style="margin-bottom:6px;">CB BBFS — Filter BBFS dengan CB</h3>
           <p class="text-muted" style="font-size:12.5px;margin-bottom:12px;">
-            Generate BBFS dari input, lalu filter hanya yang mengandung digit CB.
+            Generate BBFS, lalu filter hanya yang mengandung digit CB.
           </p>
           <div class="field">
             <label for="cbBBFSInput">Input BBFS (4–16 digit)</label>
@@ -1204,15 +945,13 @@ body.offline .offline-badge { display: block; }
               <option value="and">Semua Digit Harus Muncul (AND)</option>
             </select>
           </div>
-          <p id="cbBBFSInfo" class="text-accent" style="font-size:13px;margin-bottom:12px;">
-            Info: —
-          </p>
+          <p id="cbBBFSInfo" class="text-accent" style="font-size:13px;margin-bottom:12px;">Info: —</p>
           <button class="btn-primary" id="cbBBFSGenerateBtn">⚡ Generate CB BBFS</button>
         </div>
         <div class="card"><div id="cbBBFSResult"></div></div>
       </div>
 
-      <!-- B24: SUBPANEL GABUNG GRUP -->
+      <!-- SUBPANEL GABUNG GRUP -->
       <div id="subpanel-gabungGrup" class="subpanel">
         <div class="card">
           <h3 style="margin-bottom:6px;">Gabung Grup (Hasil 4 Angka)</h3>
@@ -1238,21 +977,18 @@ body.offline .offline-badge { display: block; }
               Aktifkan permutasi bolak-balik tiap hasil 4-digit
             </label>
           </div>
-          <p id="gabungInfo" class="text-accent" style="font-size:13px;margin-bottom:12px;">
-            Info: —
-          </p>
+          <p id="gabungInfo" class="text-accent" style="font-size:13px;margin-bottom:12px;">Info: —</p>
           <button class="btn-primary" id="gabungGenerateBtn">⚡ Gabung</button>
         </div>
         <div class="card"><div id="gabungResult"></div></div>
       </div>
 
-      <!-- B25: SUBPANEL GRUP + CB -->
+      <!-- SUBPANEL GRUP + CB -->
       <div id="subpanel-grupCB" class="subpanel">
         <div class="card">
           <h3 style="margin-bottom:6px;">Grup + CB (Hasil 4 Angka)</h3>
           <p class="text-muted" style="font-size:12.5px;margin-bottom:12px;">
             <b>Grup 1 = 2D DEPAN</b>, <b>Grup 2 = 2D BELAKANG</b> → 4 digit, lalu filter <b>CB</b>.
-            Grup boleh sama.
           </p>
           <div class="grid-2">
             <div class="field">
@@ -1283,9 +1019,7 @@ body.offline .offline-badge { display: block; }
               Aktifkan permutasi bolak-balik tiap hasil 4-digit
             </label>
           </div>
-          <p id="grupCBInfo" class="text-accent" style="font-size:13px;margin-bottom:12px;">
-            Info: —
-          </p>
+          <p id="grupCBInfo" class="text-accent" style="font-size:13px;margin-bottom:12px;">Info: —</p>
           <button class="btn-primary" id="grupCBGenerateBtn">⚡ Generate Grup + CB</button>
         </div>
         <div class="card"><div id="grupCBResult"></div></div>
@@ -1293,16 +1027,12 @@ body.offline .offline-badge { display: block; }
 
     </section>
 
-    <!-- B26: DATA GRUP -->
     <section id="dataGrup">
       <h2>🗂️ Data Grup</h2>
-      <p class="text-muted mb-10" style="font-size:13px;">
-        Diambil otomatis dari data Master Nomor
-      </p>
+      <p class="text-muted mb-10" style="font-size:13px;">Diambil otomatis dari data Master Nomor</p>
       <div id="grupList"></div>
     </section>
 
-    <!-- B27a: KONVERSI MANUAL -->
     <section id="konversiManual">
       <h2>🔄 Konversi Manual</h2>
       <div class="card">
@@ -1315,7 +1045,6 @@ body.offline .offline-badge { display: block; }
       </div>
     </section>
 
-    <!-- B27b: KONVERSI GRUP -->
     <section id="konversiGrup">
       <h2>🔄 Konversi Grup</h2>
       <div class="card">
@@ -1328,7 +1057,6 @@ body.offline .offline-badge { display: block; }
       </div>
     </section>
 
-    <!-- B27c: KONVERSI CB -->
     <section id="konversiCB">
       <h2>🔄 Konversi CB (Colok Bebas)</h2>
       <div class="card">
@@ -1341,7 +1069,6 @@ body.offline .offline-badge { display: block; }
       </div>
     </section>
 
-    <!-- B27d: KONVERSI AK -->
     <section id="konversiAK">
       <h2>🔄 Konversi AK (Angka Kembar)</h2>
       <div class="card">
@@ -1357,7 +1084,6 @@ body.offline .offline-badge { display: block; }
   </main>
 </div>
 
-<!-- B28: INSTALL PROMPT -->
 <div id="installPrompt">
   <div class="icon">📲</div>
   <div class="text">
@@ -1370,128 +1096,58 @@ body.offline .offline-badge { display: block; }
   </div>
 </div>
 
-<!-- B29: TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
 "use strict";
 
 /* ═══════════════════════════════════════════════════════════════════
-   B30: JS — CREDENTIALS
+   CREDENTIALS
    ═══════════════════════════════════════════════════════════════════ */
-const CREDENTIALS = {
-  username: 'SA_HARD',
-  password: 'MyHand0286'
-};
+const CREDENTIALS = { username: 'SA_HARD', password: 'MyHand0286' };
 
 /* ═══════════════════════════════════════════════════════════════════
-   B31: JS — SEED MASTER (100 data TERTANAM)
+   SEED MASTER (100 data TERTANAM)
    ═══════════════════════════════════════════════════════════════════ */
 const SEED_MASTER = [
-  ["00", "Mati Melahirkan",  "Kematian"],
-  ["01", "Setan",            "Figur 1"],
-  ["02", "Iblis",            "Figur 1"],
-  ["03", "Jin",              "Figur 1"],
-  ["04", "Insaf",            "Risau"],
-  ["05", "Dokter",           "Figur 2"],
-  ["06", "Sundal",           "Figur 2"],
-  ["07", "Gol",              "Risau"],
-  ["08", "Penggoda",         "Figur 2"],
-  ["09", "Risau",            "Risau"],
-  ["10", "Kotor",            "Kotor"],
-  ["11", "Sipilis",          "Kotor"],
-  ["12", "Penyakit",         "Kotor"],
-  ["13", "Mati",             "Kematian"],
-  ["14", "Siksa",            "Hukuman"],
-  ["15", "Ngeri",            "Hukuman"],
-  ["16", "Sengsara",         "Risau"],
-  ["17", "Celaka",           "Risau"],
-  ["18", "Sial",             "Risau"],
-  ["19", "Bahagia",          "Risau"],
-  ["20", "Mampus",           "Kematian"],
-  ["21", "Ikat Diri",        "Risau"],
-  ["22", "Bunuh Diri",       "Kematian"],
-  ["23", "Benci",            "Risau"],
-  ["24", "Berani",           "Risau"],
-  ["25", "Nafsu",            "Risau"],
-  ["26", "Bahaya",           "Hukuman"],
-  ["27", "Tangis",           "Risau"],
-  ["28", "Korban",           "Figur 2"],
-  ["29", "Terbunuh",         "Kematian"],
-  ["30", "Binasa",           "Kematian"],
-  ["31", "Penjara",          "Hukuman"],
-  ["32", "Hukuman",          "Hukuman"],
-  ["33", "Terbakar",         "Hukuman"],
-  ["34", "Api",              "Hukuman"],
-  ["35", "Cerita",           "Kata Bantu"],
-  ["36", "Biadab",           "Hukuman"],
-  ["37", "Kecewa",           "Risau"],
-  ["38", "Bajingan",         "Figur 2"],
-  ["39", "Menari",           "Risau"],
-  ["40", "Dirasuki",         "Risau"],
-  ["41", "Kecurian",         "Risau"],
-  ["42", "Jurang",           "Hukuman"],
-  ["43", "Kejam",            "Hukuman"],
-  ["44", "TBC",              "Kotor"],
-  ["45", "Gantung Diri",     "Kematian"],
-  ["46", "Telanjang Bulat",  "Nakal"],
-  ["47", "Gila Pangkat",     "Risau"],
-  ["48", "Calon Mati",       "Kematian"],
-  ["49", "Neraka",           "Hukuman"],
-  ["50", "Serakah",          "Nakal"],
-  ["51", "Isap Lidah",       "Risau"],
-  ["52", "Kubur",            "Kematian"],
-  ["53", "Maut",             "Kematian"],
-  ["54", "Draw",             "Kata Bantu"],
-  ["55", "Indah",            "Kotor"],
-  ["56", "Tertawa",          "Risau"],
-  ["57", "Menjolok",         "Kata Bantu"],
-  ["58", "Marah",            "Risau"],
-  ["59", "Tersinggung",      "Risau"],
-  ["60", "Sakit Hati",       "Risau"],
-  ["61", "Kalah",            "Risau"],
-  ["62", "Hina",             "Risau"],
-  ["63", "Kabur",            "Kabur"],
-  ["64", "Cantik",           "Figur 2"],
-  ["65", "Brengsek",         "Figur 2"],
-  ["66", "Nakal",            "Figur 2"],
-  ["67", "Begal",            "Figur 2"],
-  ["68", "Rusak",            "Nakal"],
-  ["69", "Menghajar",        "Risau"],
-  ["70", "Puji Diri",        "Risau"],
-  ["71", "Berkelana",        "Kabur"],
-  ["72", "Keinginan",        "Risau"],
-  ["73", "Imbalan",          "Hukuman"],
-  ["74", "Payudara",         "Figur 2"],
-  ["75", "Bosan",            "Risau"],
-  ["76", "Bantah",           "Risau"],
-  ["77", "Kecewa",           "Risau"],
-  ["78", "Durhaka",          "Nakal"],
-  ["79", "Menghajar",        "Risau"],
-  ["80", "Bingung",          "Risau"],
-  ["81", "Merantau",         "Kabur"],
-  ["82", "Lancong",          "Kabur"],
-  ["83", "Cinta",            "Kotor"],
-  ["84", "Ciuman",           "Nakal"],
-  ["85", "Hangus",           "Hukuman"],
-  ["86", "Pujaan",           "Figur 2"],
-  ["87", "Pusing",           "Risau"],
-  ["88", "Perbuatan",        "Risau"],
-  ["89", "Takut",            "Risau"],
-  ["90", "Langsung",         "Kata Bantu"],
-  ["91", "Telanjang",        "Nakal"],
-  ["92", "Dambaan",          "Figur 2"],
-  ["93", "Zina",             "Nakal"],
-  ["94", "Perkosa",          "Nakal"],
-  ["95", "Hamil",            "Nakal"],
-  ["96", "Mendapat Malu",    "Risau"],
-  ["97", "Besar",            "Kata Bantu"],
-  ["98", "Birahi",           "Risau"],
-  ["99", "Pasangan",         "Figur 2"]
+  ["00","Mati Melahirkan","Kematian"],["01","Setan","Figur 1"],["02","Iblis","Figur 1"],
+  ["03","Jin","Figur 1"],["04","Insaf","Risau"],["05","Dokter","Figur 2"],
+  ["06","Sundal","Figur 2"],["07","Gol","Risau"],["08","Penggoda","Figur 2"],
+  ["09","Risau","Risau"],["10","Kotor","Kotor"],["11","Sipilis","Kotor"],
+  ["12","Penyakit","Kotor"],["13","Mati","Kematian"],["14","Siksa","Hukuman"],
+  ["15","Ngeri","Hukuman"],["16","Sengsara","Risau"],["17","Celaka","Risau"],
+  ["18","Sial","Risau"],["19","Bahagia","Risau"],["20","Mampus","Kematian"],
+  ["21","Ikat Diri","Risau"],["22","Bunuh Diri","Kematian"],["23","Benci","Risau"],
+  ["24","Berani","Risau"],["25","Nafsu","Risau"],["26","Bahaya","Hukuman"],
+  ["27","Tangis","Risau"],["28","Korban","Figur 2"],["29","Terbunuh","Kematian"],
+  ["30","Binasa","Kematian"],["31","Penjara","Hukuman"],["32","Hukuman","Hukuman"],
+  ["33","Terbakar","Hukuman"],["34","Api","Hukuman"],["35","Cerita","Kata Bantu"],
+  ["36","Biadab","Hukuman"],["37","Kecewa","Risau"],["38","Bajingan","Figur 2"],
+  ["39","Menari","Risau"],["40","Dirasuki","Risau"],["41","Kecurian","Risau"],
+  ["42","Jurang","Hukuman"],["43","Kejam","Hukuman"],["44","TBC","Kotor"],
+  ["45","Gantung Diri","Kematian"],["46","Telanjang Bulat","Nakal"],["47","Gila Pangkat","Risau"],
+  ["48","Calon Mati","Kematian"],["49","Neraka","Hukuman"],["50","Serakah","Nakal"],
+  ["51","Isap Lidah","Risau"],["52","Kubur","Kematian"],["53","Maut","Kematian"],
+  ["54","Draw","Kata Bantu"],["55","Indah","Kotor"],["56","Tertawa","Risau"],
+  ["57","Menjolok","Kata Bantu"],["58","Marah","Risau"],["59","Tersinggung","Risau"],
+  ["60","Sakit Hati","Risau"],["61","Kalah","Risau"],["62","Hina","Risau"],
+  ["63","Kabur","Kabur"],["64","Cantik","Figur 2"],["65","Brengsek","Figur 2"],
+  ["66","Nakal","Figur 2"],["67","Begal","Figur 2"],["68","Rusak","Nakal"],
+  ["69","Menghajar","Risau"],["70","Puji Diri","Risau"],["71","Berkelana","Kabur"],
+  ["72","Keinginan","Risau"],["73","Imbalan","Hukuman"],["74","Payudara","Figur 2"],
+  ["75","Bosan","Risau"],["76","Bantah","Risau"],["77","Kecewa","Risau"],
+  ["78","Durhaka","Nakal"],["79","Menghajar","Risau"],["80","Bingung","Risau"],
+  ["81","Merantau","Kabur"],["82","Lancong","Kabur"],["83","Cinta","Kotor"],
+  ["84","Ciuman","Nakal"],["85","Hangus","Hukuman"],["86","Pujaan","Figur 2"],
+  ["87","Pusing","Risau"],["88","Perbuatan","Risau"],["89","Takut","Risau"],
+  ["90","Langsung","Kata Bantu"],["91","Telanjang","Nakal"],["92","Dambaan","Figur 2"],
+  ["93","Zina","Nakal"],["94","Perkosa","Nakal"],["95","Hamil","Nakal"],
+  ["96","Mendapat Malu","Risau"],["97","Besar","Kata Bantu"],["98","Birahi","Risau"],
+  ["99","Pasangan","Figur 2"]
 ];
 
 /* ═══════════════════════════════════════════════════════════════════
-   B32: JS — STATE & CONFIG
+   STATE & CONFIG
    ═══════════════════════════════════════════════════════════════════ */
 const LS_MASTER_KEY      = 'sa_master';
 const LS_SEED_VER        = 'sa_seed_version';
@@ -1503,16 +1159,15 @@ const MAX_AK_DIGITS      = 10;
 
 let master            = [];
 let editingIndex      = -1;
-let lastAutoFillManual = '';
 let deferredPrompt    = null;
 
 const pageState = {
-  manual:      { pages: [], current: 0, meta: '' },
-  bbfs:        { pages: [], current: 0, meta: '' },
-  angkaTarung: { pages: [], current: 0, meta: '' },
-  cbBBFS:      { pages: [], current: 0, meta: '' },
-  gabungGrup:  { pages: [], current: 0, meta: '' },
-  grupCB:      { pages: [], current: 0, meta: '' }
+  manual:      { pages: [], current: 0, meta: '', _breakdown: '' },
+  bbfs:        { pages: [], current: 0, meta: '', _breakdown: '' },
+  angkaTarung: { pages: [], current: 0, meta: '', _breakdown: '' },
+  cbBBFS:      { pages: [], current: 0, meta: '', _breakdown: '' },
+  gabungGrup:  { pages: [], current: 0, meta: '', _breakdown: '' },
+  grupCB:      { pages: [], current: 0, meta: '', _breakdown: '' }
 };
 
 const PAGE_MAP = {
@@ -1527,7 +1182,7 @@ const PAGE_MAP = {
 const $ = (id) => document.getElementById(id);
 
 /* ═══════════════════════════════════════════════════════════════════
-   B33: JS — LOGIN & AUTH
+   LOGIN & AUTH
    ═══════════════════════════════════════════════════════════════════ */
 $('loginForm').addEventListener('submit', (e) => {
   e.preventDefault();
@@ -1555,7 +1210,7 @@ $('logoutBtn').addEventListener('click', () => {
 });
 
 /* ═══════════════════════════════════════════════════════════════════
-   B34: JS — NAVIGATION
+   NAVIGATION
    ═══════════════════════════════════════════════════════════════════ */
 document.querySelectorAll('nav button').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -1563,7 +1218,6 @@ document.querySelectorAll('nav button').forEach(btn => {
     document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
     btn.classList.add('active');
     $(btn.dataset.section).classList.add('active');
-
     if (btn.dataset.section === 'inputMaster') renderMaster();
     if (btn.dataset.section === 'dataGrup')    renderGrup();
   });
@@ -1579,7 +1233,7 @@ document.querySelectorAll('#subTabs4Angka button').forEach(btn => {
 });
 
 /* ═══════════════════════════════════════════════════════════════════
-   B35: JS — MASTER RENDER
+   MASTER RENDER
    ═══════════════════════════════════════════════════════════════════ */
 function renderMaster() {
   const list = $('masterList');
@@ -1623,13 +1277,11 @@ function renderMaster() {
       </div>`;
   }).join('');
 
-  list.querySelectorAll('[data-act]').forEach(b => {
-    b.addEventListener('click', handleMasterAction);
-  });
+  list.querySelectorAll('[data-act]').forEach(b => b.addEventListener('click', handleMasterAction));
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   B36: JS — GRUP RENDER
+   GRUP RENDER
    ═══════════════════════════════════════════════════════════════════ */
 function renderGrup() {
   const container = $('grupList');
@@ -1647,7 +1299,7 @@ function renderGrup() {
   }
 
   container.innerHTML = keys.map(k => {
-    const items = grupMap[k].slice().sort((a, b) => a.nomor.localeCompare(b.nomor));
+    const items     = grupMap[k].slice().sort((a, b) => a.nomor.localeCompare(b.nomor));
     const depans    = [...new Set(items.map(m => to2DigitDepan(m.nomor)))].sort();
     const belakangs = [...new Set(items.map(m => to2DigitBelakang(m.nomor)))].sort();
 
@@ -1679,7 +1331,7 @@ function renderGrup() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   B37: JS — CRUD MASTER
+   CRUD MASTER
    ═══════════════════════════════════════════════════════════════════ */
 function handleMasterAction(e) {
   const btn = e.currentTarget;
@@ -1709,7 +1361,6 @@ function handleMasterAction(e) {
 
     if (!nomor)               { toast('Nomor wajib diisi', 'error'); return; }
     if (!/^\d+$/.test(nomor)) { toast('Nomor harus angka', 'error'); return; }
-
     if (master.some((m, i) => m.nomor === nomor && i !== idx)) {
       toast('Nomor sudah ada di data lain', 'error');
       return;
@@ -1734,7 +1385,7 @@ $('resetMasterBtn').addEventListener('click', () => {
 });
 
 /* ═══════════════════════════════════════════════════════════════════
-   B38: JS — STORAGE & SEED
+   STORAGE & SEED
    ═══════════════════════════════════════════════════════════════════ */
 function seedToObjects() {
   const ts = Date.now();
@@ -1747,9 +1398,7 @@ function loadMaster() {
   catch (e) { saved = []; }
   if (!Array.isArray(saved)) saved = [];
 
-  const seeded = localStorage.getItem(LS_SEED_VER);
-
-  if (!seeded) {
+  if (!localStorage.getItem(LS_SEED_VER)) {
     master = seedToObjects();
     localStorage.setItem(LS_SEED_VER, String(SEED_VERSION));
     saveMaster();
@@ -1766,13 +1415,12 @@ function saveMaster() {
 function resetToSeed() {
   master = seedToObjects();
   editingIndex = -1;
-  lastAutoFillManual = '';
   saveMaster();
   localStorage.setItem(LS_SEED_VER, String(SEED_VERSION));
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   B39: JS — HELPER FUNCTIONS
+   HELPERS
    ═══════════════════════════════════════════════════════════════════ */
 function esc(s) {
   return String(s ?? '').replace(/[&<>"']/g, c => ({
@@ -1793,15 +1441,12 @@ function onlyDigits(s) { return String(s ?? '').replace(/\D/g, ''); }
 
 function parseTwoDigitList(str) {
   return [...new Set(
-    String(str ?? '').split(/[\s,;|]+/).map(s => s.trim()).filter(Boolean)
-      .filter(s => /^\d{2}$/.test(s))
+    String(str ?? '').split(/[\s,;|]+/).map(s => s.trim()).filter(Boolean).filter(s => /^\d{2}$/.test(s))
   )];
 }
 
 function parseSingleDigitList(str) {
-  return [...new Set(
-    String(str ?? '').replace(/\D/g, '').split('').filter(Boolean)
-  )].sort();
+  return [...new Set(String(str ?? '').replace(/\D/g, '').split('').filter(Boolean))].sort();
 }
 
 function permutasi4DariDigit(digitString) {
@@ -1828,9 +1473,7 @@ function permutasi4DariNomor(nomor) {
   const result = new Set();
   function backtrack(cur, rem) {
     if (cur.length === 4) { result.add(cur); return; }
-    for (let i = 0; i < rem.length; i++) {
-      backtrack(cur + rem[i], rem.slice(0, i) + rem.slice(i + 1));
-    }
+    for (let i = 0; i < rem.length; i++) backtrack(cur + rem[i], rem.slice(0, i) + rem.slice(i + 1));
   }
   backtrack('', s);
   return [...result].sort();
@@ -1879,14 +1522,7 @@ function getGroupAs2DigitBelakang(grupName) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   B40: JS — GROUP PREVIEW RENDERER (SATU-SATUNYA)
-   ───────────────────────────────────────────────────────────────────
-   Dipakai di semua fitur grup untuk preview seragam.
-   Parameter:
-     grupName    : nama grup
-     containerEl : elemen DOM target
-     activeSide  : 'depan' | 'belakang' | 'both' | null
-     hint        : teks hint opsional
+   GROUP PREVIEW RENDERER
    ═══════════════════════════════════════════════════════════════════ */
 function renderGroupPreview(grupName, containerEl, activeSide, hint) {
   if (!containerEl) return;
@@ -1905,7 +1541,6 @@ function renderGroupPreview(grupName, containerEl, activeSide, hint) {
   const depans    = getGroupAs2DigitDepan(grupName);
   const belakangs = getGroupAs2DigitBelakang(grupName);
 
-  /* Sample 4-digit */
   const samples = [];
   outer:
   for (const d of depans) {
@@ -1925,7 +1560,6 @@ function renderGroupPreview(grupName, containerEl, activeSide, hint) {
 
   const hintHtml = hint ? `<div class="gp-hint">${esc(hint)}</div>` : '';
 
-  /* Deteksi master 2-digit */
   const allTwoDigit = nums.every(n => String(n).replace(/\D/g, '').length <= 2);
   const noteHtml = allTwoDigit
     ? `<div class="gp-note">ℹ️ Master 2-digit: 2D depan = 2D belakang (normal)</div>`
@@ -1952,19 +1586,10 @@ function renderGroupPreview(grupName, containerEl, activeSide, hint) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   B40b: JS — BREAKDOWN BUILDERS (v5.1 KUNCI)
-   ───────────────────────────────────────────────────────────────────
-   Panel breakdown di atas hasil — pisahkan 2D Depan & 2D Belakang
-   supaya jelas 4-digit hasil = [G1][G2]
+   BREAKDOWN BUILDERS
    ═══════════════════════════════════════════════════════════════════ */
-
-/**
- * Breakdown untuk Gabung Grup & Grup+CB.
- */
 function buildGabungBreakdown(g1, g2, depans, belakangs, totalCombo, permutasi, cb) {
-  const cbHtml = cb
-    ? `<div class="rb-arrow">+ CB Filter: ${cb.split('').join(' ')}</div>`
-    : '';
+  const cbHtml = cb ? `<div class="rb-arrow">+ CB Filter: ${cb.split('').join(' ')}</div>` : '';
   const permNote = permutasi ? ' (permutasi aktif)' : '';
   const masterNote = 'Master 2-digit: 2D depan = 2D belakang (normal)';
 
@@ -1984,64 +1609,70 @@ function buildGabungBreakdown(g1, g2, depans, belakangs, totalCombo, permutasi, 
         ⬇ Gabung: ${depans.length} × ${belakangs.length} = ${totalCombo.toLocaleString('id-ID')} kombinasi${permNote} ⬇
       </div>
       ${cbHtml}
-      <div class="rb-note">
-        Format hasil: <b>[2 digit G1][2 digit G2]</b> • ${masterNote}
-      </div>
+      <div class="rb-note">Format hasil: <b>[2 digit G1][2 digit G2]</b> • ${masterNote}</div>
     </div>
   `;
 }
 
-/**
- * Breakdown untuk BBFS & AK (filter 2D Belakang).
- */
-function buildFilterBreakdown(grup, filterValues, totalAwal, totalAkhir, cb) {
-  const cbHtml = cb
-    ? `<div class="rb-arrow">+ CB Filter: ${cb.split('').join(' ')}</div>`
-    : '';
-  const lolos = totalAwal - totalAkhir;
-  const pct = totalAwal > 0 ? ((totalAkhir / totalAwal) * 100).toFixed(1) : '0.0';
+function buildFilterBreakdown(grup, filterValues, totalAwal, totalAkhir, cb, filterMode) {
+  filterMode = filterMode || 'belakang';
+  const isDepan = filterMode === 'depan';
+  const sideLabel      = isDepan ? 'DEPAN' : 'BELAKANG';
+  const sideLabelLower = isDepan ? 'pertama' : 'terakhir';
+  const sliceCode      = isDepan ? 'slice(0, 2)' : 'slice(-2)';
+  const valuesClass    = isDepan ? 'highlight' : 'highlight-b';
+  const icon           = isDepan ? '🟡' : '🔵';
+
+  const cbHtml = cb ? `<div class="rb-arrow">+ CB Filter: ${cb.split('').join(' ')}</div>` : '';
+  const lolos  = totalAwal - totalAkhir;
+  const pct    = totalAwal > 0 ? ((totalAkhir / totalAwal) * 100).toFixed(1) : '0.0';
 
   return `
     <div class="result-breakdown">
       <div class="rb-section">
-        <div class="rb-title">📊 Grup "${esc(grup)}" → FILTER 2D BELAKANG</div>
-        <div class="rb-label">${filterValues.length} angka · hanya tampilkan yang 2 digit TERAKHIR ada di sini</div>
-        <div class="rb-values highlight-b">${filterValues.join(' ')}</div>
+        <div class="rb-title">${icon} Grup "${esc(grup)}" → FILTER 2D ${sideLabel}</div>
+        <div class="rb-label">${filterValues.length} angka · hanya tampilkan yang 2 digit ${sideLabelLower} ada di sini</div>
+        <div class="rb-values ${valuesClass}">${filterValues.join(' ')}</div>
       </div>
       <div class="rb-arrow">
         ⬇ ${totalAwal.toLocaleString('id-ID')} → ${totalAkhir.toLocaleString('id-ID')} lolos (${pct}%) · ${lolos.toLocaleString('id-ID')} terfilter ⬇
       </div>
       ${cbHtml}
-      <div class="rb-note">
-        Filter: <b>4-digit.slice(-2) ∈ list 2D belakang</b>
-      </div>
+      <div class="rb-note">Filter: <b>4-digit.${sliceCode} ∈ list 2D ${sideLabelLower}</b></div>
     </div>
   `;
 }
 
-/**
- * Breakdown untuk Input Manual.
- */
-function buildManualBreakdown(grup, depans, belakangs, totalCombo, cb) {
-  const grupTitle = grup
-    ? `📊 Grup "${esc(grup)}" → 2D DEPAN`
-    : `📝 Input Manual → 2D DEPAN`;
-  const depanNote = grup ? 'auto-fill dari grup' : 'dari input Anda';
-  const cbHtml = cb
-    ? `<div class="rb-arrow">+ CB Filter: ${cb.split('').join(' ')}</div>`
-    : '';
+function buildManualBreakdown(grup, mode, depans, belakangs, totalCombo, cb) {
+  let grupTitle, depanNote, belakangNote;
+  if (!grup) {
+    grupTitle = '📝 Input Manual (tanpa grup)';
+    depanNote = 'dari input manual';
+    belakangNote = 'dari input manual';
+  } else if (mode === 'depan') {
+    grupTitle = `🟡 Grup "${esc(grup)}" → isi 2 DEPAN`;
+    depanNote = 'dari grup (2D Depan)';
+    belakangNote = 'dari input manual';
+  } else {
+    grupTitle = `🔵 Grup "${esc(grup)}" → isi 2 BELAKANG`;
+    depanNote = 'dari input manual';
+    belakangNote = 'dari grup (2D Belakang)';
+  }
+
+  const cbHtml = cb ? `<div class="rb-arrow">+ CB Filter: ${cb.split('').join(' ')}</div>` : '';
+  const depanClass    = (grup && mode === 'depan')    ? 'highlight'   : '';
+  const belakangClass = (grup && mode === 'belakang') ? 'highlight-b' : '';
 
   return `
     <div class="result-breakdown">
       <div class="rb-section">
         <div class="rb-title">${grupTitle}</div>
-        <div class="rb-label">${depans.length} angka · ${depanNote}</div>
-        <div class="rb-values highlight">${depans.join(' ')}</div>
+        <div class="rb-label">2D DEPAN (${depans.length} angka) · ${depanNote}</div>
+        <div class="rb-values ${depanClass}">${depans.join(' ')}</div>
       </div>
       <div class="rb-section">
-        <div class="rb-title">📝 Input Manual → 2D BELAKANG</div>
-        <div class="rb-label">${belakangs.length} angka · dari input Anda</div>
-        <div class="rb-values highlight-b">${belakangs.join(' ')}</div>
+        <div class="rb-label">2D BELAKANG (${belakangs.length} angka) · ${belakangNote}</div>
+        <div class="rb-values ${belakangClass}">${belakangs.join(' ')}</div>
       </div>
       <div class="rb-arrow">
         ⬇ ${depans.length} × ${belakangs.length} = ${totalCombo.toLocaleString('id-ID')} kombinasi ⬇
@@ -2053,27 +1684,36 @@ function buildManualBreakdown(grup, depans, belakangs, totalCombo, cb) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   B41: JS — INPUT MANUAL GENERATOR
+   INPUT MANUAL GENERATOR (v5.2 — mode seleksi sisi)
    ═══════════════════════════════════════════════════════════════════ */
-$('manualGrup').addEventListener('change', () => {
-  const g = $('manualGrup').value;
-  const depanInput = $('manualDepan');
-  const curVal = depanInput.value.trim();
-  const canReplace = !curVal || curVal === lastAutoFillManual;
+function _refreshManualPreview() {
+  const g    = $('manualGrup').value;
+  const mode = $('manualMode').value;
+  const wrap = $('manualModeWrapper');
 
-  if (g && canReplace) {
-    const depan = getGroupAs2DigitDepan(g);
-    if (depan.length) {
-      depanInput.value = depan.join(' ');
-      lastAutoFillManual = depan.join(' ');
+  if (wrap) wrap.style.display = g ? 'block' : 'none';
+
+  if (g) {
+    if (mode === 'depan') {
+      const depan = getGroupAs2DigitDepan(g);
+      $('manualDepan').value = depan.join(' ');
+      renderGroupPreview(g, $('manualPreview'), 'depan',
+        'Grup mengisi 2 DEPAN (2D Depan). Isi 2 belakang manual.');
+    } else {
+      const belakang = getGroupAs2DigitBelakang(g);
+      $('manualBelakang').value = belakang.join(' ');
+      renderGroupPreview(g, $('manualPreview'), 'belakang',
+        'Grup mengisi 2 BELAKANG (2D Belakang). Isi 2 depan manual.');
     }
+  } else {
+    renderGroupPreview('', $('manualPreview'), null, '');
   }
 
-  renderGroupPreview(g, $('manualPreview'), 'depan',
-    'Grup untuk auto-fill 2 depan. 2 belakang tetap dari input Anda.');
-
   updateManualInfo();
-});
+}
+
+$('manualGrup').addEventListener('change', _refreshManualPreview);
+$('manualMode')?.addEventListener('change', _refreshManualPreview);
 
 ['manualDepan', 'manualBelakang', 'manualCB'].forEach(id => {
   $(id).addEventListener('input', updateManualInfo);
@@ -2085,6 +1725,7 @@ function updateManualInfo() {
   const belakang = parseTwoDigitList($('manualBelakang').value);
   const cb       = parseSingleDigitList($('manualCB').value);
   const grup     = $('manualGrup').value;
+  const mode     = $('manualMode').value;
   const info     = $('manualInfo');
 
   if (!depan.length || !belakang.length) {
@@ -2096,7 +1737,7 @@ function updateManualInfo() {
   const pages = Math.ceil(total / PER_PAGE);
 
   let text = `2 depan: ${depan.length} • 2 belakang: ${belakang.length} • Total: ${total.toLocaleString('id-ID')} kombinasi • ${pages} halaman`;
-  if (grup)      text += ` • Grup: ${grup}`;
+  if (grup)      text += ` • Grup: ${grup} (isi 2 ${mode})`;
   if (cb.length) text += ` • CB: ${cb.join(' ')}`;
 
   info.textContent = text;
@@ -2104,16 +1745,14 @@ function updateManualInfo() {
 
 $('manualGenerateBtn').addEventListener('click', () => {
   const grup     = $('manualGrup').value;
+  const mode     = $('manualMode').value;
+  const depan    = parseTwoDigitList($('manualDepan').value);
   const belakang = parseTwoDigitList($('manualBelakang').value);
   const cb       = parseSingleDigitList($('manualCB').value);
   const cbMode   = $('manualCBMode').value;
 
-  const depan = grup
-    ? getGroupAs2DigitDepan(grup)
-    : parseTwoDigitList($('manualDepan').value);
-
-  if (!depan.length)    { toast('Isi 2 depan atau pilih grup', 'error'); return; }
-  if (!belakang.length) { toast('Isi 2 belakang', 'error'); return; }
+  if (!depan.length)    { toast('Isi 2 depan (dari grup atau manual)', 'error'); return; }
+  if (!belakang.length) { toast('Isi 2 belakang (dari grup atau manual)', 'error'); return; }
 
   const combos = [];
   for (const d of depan) for (const b of belakang) combos.push(d + b);
@@ -2128,11 +1767,11 @@ $('manualGenerateBtn').addEventListener('click', () => {
   pageState.manual.current = 0;
   pageState.manual.meta    =
     `${depan.length} depan × ${belakang.length} belakang` +
-    (grup ? ` • Grup: ${grup}` : '') +
+    (grup ? ` • Grup: ${grup} (isi 2 ${mode})` : '') +
     (cb.length ? ` • CB: ${cb.join(' ')} (${cbMode.toUpperCase()})` : '');
 
   const breakdown = buildManualBreakdown(
-    grup, depan, belakang, filtered.length,
+    grup, mode, depan, belakang, filtered.length,
     cb.length ? cb.join('') : null
   );
 
@@ -2141,7 +1780,7 @@ $('manualGenerateBtn').addEventListener('click', () => {
 });
 
 /* ═══════════════════════════════════════════════════════════════════
-   B42: JS — BBFS GENERATOR
+   BBFS GENERATOR (v5.2 — mode filter Depan/Belakang)
    ═══════════════════════════════════════════════════════════════════ */
 $('bbfsInput').addEventListener('input', (e) => {
   e.target.value = onlyDigits(e.target.value).slice(0, MAX_BBFS_DIGITS);
@@ -2150,9 +1789,28 @@ $('bbfsInput').addEventListener('input', (e) => {
 $('bbfsCB').addEventListener('input', updateBBFSInfo);
 $('bbfsCBMode').addEventListener('change', updateBBFSInfo);
 
+function _refreshBBFSPreview() {
+  const g    = $('bbfsGrup').value;
+  const mode = $('bbfsMode').value;
+  const activeSide = mode === 'depan' ? 'depan' : 'belakang';
+
+  const wrap = $('bbfsModeWrapper');
+  if (wrap) wrap.style.display = g ? 'block' : 'none';
+
+  const hint = mode === 'depan'
+    ? 'Grup sebagai FILTER 2D DEPAN (2 digit pertama ∈ grup). Input BBFS tidak diubah.'
+    : 'Grup sebagai FILTER 2D BELAKANG (2 digit terakhir ∈ grup). Input BBFS tidak diubah.';
+
+  renderGroupPreview(g, $('bbfsPreview'), activeSide, hint);
+}
+
 $('bbfsGrup').addEventListener('change', () => {
-  renderGroupPreview($('bbfsGrup').value, $('bbfsPreview'), 'belakang',
-    'Grup sebagai FILTER 2D belakang. Input BBFS Anda tidak diubah.');
+  _refreshBBFSPreview();
+  updateBBFSInfo();
+});
+
+$('bbfsMode')?.addEventListener('change', () => {
+  _refreshBBFSPreview();
   updateBBFSInfo();
 });
 
@@ -2160,6 +1818,7 @@ function updateBBFSInfo() {
   const digits = onlyDigits($('bbfsInput').value);
   const cb     = onlyDigits($('bbfsCB').value);
   const grup   = $('bbfsGrup').value;
+  const mode   = $('bbfsMode').value;
   const info   = $('bbfsInfo');
 
   if (digits.length < 4) {
@@ -2172,7 +1831,7 @@ function updateBBFSInfo() {
   const pages = Math.ceil(total / PER_PAGE);
 
   let text = `BBFS: ${total.toLocaleString('id-ID')} kombinasi • ${pages} halaman`;
-  if (grup) text += ` • FILTER 2D belakang: "${grup}"`;
+  if (grup) text += ` • FILTER 2D ${mode === 'depan' ? 'DEPAN' : 'BELAKANG'}: "${grup}"`;
   if (cb)   text += ` • CB: ${cb.split('').join(' ')}`;
 
   info.textContent = text;
@@ -2183,6 +1842,7 @@ $('bbfsGenerateBtn').addEventListener('click', () => {
   const cb     = onlyDigits($('bbfsCB').value);
   const cbMode = $('bbfsCBMode').value;
   const grup   = $('bbfsGrup').value;
+  const filterMode = $('bbfsMode').value;
 
   if (raw.length < 4)  { toast('Minimal 4 digit', 'error'); return; }
   if (raw.length > 16) { toast('Maksimal 16 digit', 'error'); return; }
@@ -2194,11 +1854,23 @@ $('bbfsGenerateBtn').addEventListener('click', () => {
   let filterValues = [];
 
   if (grup) {
-    const ends = getGroupAs2DigitBelakang(grup);
+    const ends = filterMode === 'depan'
+      ? getGroupAs2DigitDepan(grup)
+      : getGroupAs2DigitBelakang(grup);
+
     if (!ends.length) { toast(`Grup "${grup}" kosong di master`, 'error'); return; }
     filterValues = ends;
-    all = all.filter(c => ends.includes(c.slice(-2)));
-    if (!all.length) { toast(`Tidak ada hasil yang 2D belakang ∈ grup "${grup}"`, 'error'); return; }
+
+    if (filterMode === 'depan') {
+      all = all.filter(c => ends.includes(c.slice(0, 2)));
+    } else {
+      all = all.filter(c => ends.includes(c.slice(-2)));
+    }
+
+    if (!all.length) {
+      toast(`Tidak ada hasil yang 2D ${filterMode} ∈ grup "${grup}"`, 'error');
+      return;
+    }
   }
 
   if (cb) {
@@ -2210,7 +1882,7 @@ $('bbfsGenerateBtn').addEventListener('click', () => {
   pageState.bbfs.current = 0;
 
   let meta = `BBFS: ${raw} • ${raw.length} digit`;
-  if (grup) meta += ` • FILTER 2D belakang: ${grup}`;
+  if (grup) meta += ` • FILTER 2D ${filterMode.toUpperCase()}: ${grup}`;
   if (cb)   meta += ` • CB: ${cb.split('').join(' ')} (${cbMode.toUpperCase()})`;
   if (grup || cb) meta += ` • ${all.length.toLocaleString('id-ID')}/${totalAwal.toLocaleString('id-ID')} lolos`;
   pageState.bbfs.meta = meta;
@@ -2218,7 +1890,7 @@ $('bbfsGenerateBtn').addEventListener('click', () => {
   let breakdown = '';
   if (grup) {
     breakdown = buildFilterBreakdown(grup, filterValues, totalAwal, all.length,
-      cb.length ? cb : null);
+      cb.length ? cb : null, filterMode);
   }
 
   renderPagination('bbfsResult', 'bbfs', 'Hasil', breakdown);
@@ -2226,7 +1898,7 @@ $('bbfsGenerateBtn').addEventListener('click', () => {
 });
 
 /* ═══════════════════════════════════════════════════════════════════
-   B43: JS — ANGKA TARUNG GENERATOR
+   ANGKA TARUNG GENERATOR (v5.2 — mode filter Depan/Belakang)
    ═══════════════════════════════════════════════════════════════════ */
 ['atDigit1', 'atDigit2', 'atDigit3', 'atDigit4'].forEach(id => {
   $(id).addEventListener('input', (e) => {
@@ -2237,9 +1909,28 @@ $('bbfsGenerateBtn').addEventListener('click', () => {
 $('atCB').addEventListener('input', updateATInfo);
 $('atCBMode').addEventListener('change', updateATInfo);
 
+function _refreshATPreview() {
+  const g    = $('atGrup').value;
+  const mode = $('atMode').value;
+  const activeSide = mode === 'depan' ? 'depan' : 'belakang';
+
+  const wrap = $('atModeWrapper');
+  if (wrap) wrap.style.display = g ? 'block' : 'none';
+
+  const hint = mode === 'depan'
+    ? 'Grup sebagai FILTER 2D DEPAN (2 digit pertama ∈ grup). Input posisi AK tidak diubah.'
+    : 'Grup sebagai FILTER 2D BELAKANG (2 digit terakhir ∈ grup). Input posisi AK tidak diubah.';
+
+  renderGroupPreview(g, $('atPreview'), activeSide, hint);
+}
+
 $('atGrup').addEventListener('change', () => {
-  renderGroupPreview($('atGrup').value, $('atPreview'), 'belakang',
-    'Grup sebagai FILTER 2D belakang. Input posisi AK Anda tidak diubah.');
+  _refreshATPreview();
+  updateATInfo();
+});
+
+$('atMode')?.addEventListener('change', () => {
+  _refreshATPreview();
   updateATInfo();
 });
 
@@ -2250,6 +1941,7 @@ function updateATInfo() {
   const p4   = parseSingleDigitList($('atDigit4').value);
   const cb   = parseSingleDigitList($('atCB').value);
   const grup = $('atGrup').value;
+  const mode = $('atMode').value;
   const info = $('atInfo');
 
   if (!p1.length || !p2.length || !p3.length || !p4.length) {
@@ -2261,7 +1953,7 @@ function updateATInfo() {
   const pages = Math.ceil(total / PER_PAGE);
 
   let text = `P1:${p1.length} P2:${p2.length} P3:${p3.length} P4:${p4.length} • ${total.toLocaleString('id-ID')} kombinasi • ${pages} halaman`;
-  if (grup)      text += ` • FILTER 2D belakang: "${grup}"`;
+  if (grup)      text += ` • FILTER 2D ${mode === 'depan' ? 'DEPAN' : 'BELAKANG'}: "${grup}"`;
   if (cb.length) text += ` • CB: ${cb.join(' ')}`;
 
   info.textContent = text;
@@ -2275,6 +1967,7 @@ $('atGenerateBtn').addEventListener('click', () => {
   const cb     = parseSingleDigitList($('atCB').value);
   const cbMode = $('atCBMode').value;
   const grup   = $('atGrup').value;
+  const filterMode = $('atMode').value;
 
   if (!p1.length || !p2.length || !p3.length || !p4.length) {
     toast('Isi keempat posisi digit', 'error');
@@ -2290,11 +1983,23 @@ $('atGenerateBtn').addEventListener('click', () => {
   let filterValues = [];
 
   if (grup) {
-    const ends = getGroupAs2DigitBelakang(grup);
+    const ends = filterMode === 'depan'
+      ? getGroupAs2DigitDepan(grup)
+      : getGroupAs2DigitBelakang(grup);
+
     if (!ends.length) { toast(`Grup "${grup}" kosong di master`, 'error'); return; }
     filterValues = ends;
-    filtered = filtered.filter(c => ends.includes(c.slice(-2)));
-    if (!filtered.length) { toast(`Tidak ada hasil yang 2D belakang ∈ grup "${grup}"`, 'error'); return; }
+
+    if (filterMode === 'depan') {
+      filtered = filtered.filter(c => ends.includes(c.slice(0, 2)));
+    } else {
+      filtered = filtered.filter(c => ends.includes(c.slice(-2)));
+    }
+
+    if (!filtered.length) {
+      toast(`Tidak ada hasil yang 2D ${filterMode} ∈ grup "${grup}"`, 'error');
+      return;
+    }
   }
 
   if (cb.length) {
@@ -2308,17 +2013,15 @@ $('atGenerateBtn').addEventListener('click', () => {
   pageState.angkaTarung.current = 0;
 
   let meta = `P1:${p1.join('')} P2:${p2.join('')} P3:${p3.join('')} P4:${p4.join('')}`;
-  if (grup)      meta += ` • FILTER 2D belakang: ${grup}`;
+  if (grup)      meta += ` • FILTER 2D ${filterMode.toUpperCase()}: ${grup}`;
   if (cb.length) meta += ` • CB: ${cb.join(' ')} (${cbMode.toUpperCase()})`;
   if (grup || cb.length) meta += ` • ${filtered.length.toLocaleString('id-ID')}/${totalAwal.toLocaleString('id-ID')} lolos`;
   pageState.angkaTarung.meta = meta;
 
   let breakdown = '';
   if (grup) {
-    breakdown = buildFilterBreakdown(
-      grup, filterValues, totalAwal, filtered.length,
-      cb.length ? cb.join('') : null
-    );
+    breakdown = buildFilterBreakdown(grup, filterValues, totalAwal, filtered.length,
+      cb.length ? cb.join('') : null, filterMode);
   }
 
   renderPagination('atResult', 'angkaTarung', 'Hasil', breakdown);
@@ -2326,7 +2029,7 @@ $('atGenerateBtn').addEventListener('click', () => {
 });
 
 /* ═══════════════════════════════════════════════════════════════════
-   B44: JS — CB BBFS GENERATOR
+   CB BBFS GENERATOR
    ═══════════════════════════════════════════════════════════════════ */
 $('cbBBFSInput').addEventListener('input', (e) => {
   e.target.value = onlyDigits(e.target.value).slice(0, MAX_BBFS_DIGITS);
@@ -2346,7 +2049,7 @@ function updateCBBFFSInfo() {
   const n = bbfs.length;
   const total = n * (n - 1) * (n - 2) * (n - 3);
   const pages = Math.ceil(total / PER_PAGE);
-  info.textContent = `BBFS: ${bbfs} • CB: ${cb.split('').join(' ')} • Maks ${total.toLocaleString('id-ID')} • ${pages} halaman (sebelum filter)`;
+  info.textContent = `BBFS: ${bbfs} • CB: ${cb.split('').join(' ')} • Maks ${total.toLocaleString('id-ID')} • ${pages} halaman`;
 }
 
 $('cbBBFSGenerateBtn').addEventListener('click', () => {
@@ -2371,7 +2074,7 @@ $('cbBBFSGenerateBtn').addEventListener('click', () => {
 });
 
 /* ═══════════════════════════════════════════════════════════════════
-   B45: JS — GABUNG GRUP GENERATOR
+   GABUNG GRUP GENERATOR
    ═══════════════════════════════════════════════════════════════════ */
 function crossProduct4Digit(depans, belakangs, withPerm) {
   const combos = [];
@@ -2395,8 +2098,8 @@ function updateGabungInfo() {
   const perm = $('gabungPermutasi').checked;
   const info = $('gabungInfo');
 
-  renderGroupPreview(g1, $('gabungPreviewDepan'),    'depan',    'Grup 1 → 2D DEPAN (2 digit pertama hasil)');
-  renderGroupPreview(g2, $('gabungPreviewBelakang'), 'belakang', 'Grup 2 → 2D BELAKANG (2 digit terakhir hasil)');
+  renderGroupPreview(g1, $('gabungPreviewDepan'),    'depan',    'Grup 1 → 2D DEPAN (2 digit pertama)');
+  renderGroupPreview(g2, $('gabungPreviewBelakang'), 'belakang', 'Grup 2 → 2D BELAKANG (2 digit terakhir)');
 
   if (!g1 || !g2) {
     info.textContent = 'Info: pilih 2 grup';
@@ -2447,19 +2150,16 @@ $('gabungGenerateBtn').addEventListener('click', () => {
 
   pageState.gabungGrup.pages   = paginateArray(results);
   pageState.gabungGrup.current = 0;
-  pageState.gabungGrup.meta    =
-    `${g1} (2D depan) + ${g2} (2D belakang)` + (perm ? ' • permutasi' : '');
+  pageState.gabungGrup.meta    = `${g1} (2D depan) + ${g2} (2D belakang)` + (perm ? ' • permutasi' : '');
 
-  const breakdown = buildGabungBreakdown(
-    g1, g2, depans, belakangs, results.length, perm, null
-  );
+  const breakdown = buildGabungBreakdown(g1, g2, depans, belakangs, results.length, perm, null);
 
   renderPagination('gabungResult', 'gabungGrup', 'Hasil', breakdown);
   toast(`Berhasil: ${results.length.toLocaleString('id-ID')} kombinasi`, 'success');
 });
 
 /* ═══════════════════════════════════════════════════════════════════
-   B46: JS — GRUP + CB GENERATOR
+   GRUP + CB GENERATOR
    ═══════════════════════════════════════════════════════════════════ */
 $('grupCB1').addEventListener('change', updateGrupCBInfo);
 $('grupCB2').addEventListener('change', updateGrupCBInfo);
@@ -2477,16 +2177,8 @@ function updateGrupCBInfo() {
   renderGroupPreview(g1, $('grupCBPreviewDepan'),    'depan',    'Grup 1 → 2D DEPAN');
   renderGroupPreview(g2, $('grupCBPreviewBelakang'), 'belakang', 'Grup 2 → 2D BELAKANG');
 
-  if (!g1 || !g2) {
-    info.textContent = 'Info: pilih 2 grup';
-    info.style.color = 'var(--muted)';
-    return;
-  }
-  if (!cb) {
-    info.textContent = 'Info: isi CB';
-    info.style.color = 'var(--muted)';
-    return;
-  }
+  if (!g1 || !g2) { info.textContent = 'Info: pilih 2 grup'; info.style.color = 'var(--muted)'; return; }
+  if (!cb)        { info.textContent = 'Info: isi CB'; info.style.color = 'var(--muted)'; return; }
 
   const depans    = getGroupAs2DigitDepan(g1);
   const belakangs = getGroupAs2DigitBelakang(g2);
@@ -2541,20 +2233,21 @@ $('grupCBGenerateBtn').addEventListener('click', () => {
     `${g1} (2D depan) + ${g2} (2D belakang) • CB: ${cb.split('').join(' ')} • ${mode.toUpperCase()}` +
     (perm ? ' • permutasi' : '');
 
-  const breakdown = buildGabungBreakdown(
-    g1, g2, depans, belakangs, results.length, perm, cb
-  );
+  const breakdown = buildGabungBreakdown(g1, g2, depans, belakangs, results.length, perm, cb);
 
   renderPagination('grupCBResult', 'grupCB', 'Hasil', breakdown);
   toast(`Berhasil: ${filtered.length.toLocaleString('id-ID')} dari ${results.length.toLocaleString('id-ID')} lolos CB`, 'success');
 });
 
 /* ═══════════════════════════════════════════════════════════════════
-   B47: JS — PAGINATION RENDER (updated v5.1 — terima breakdownHTML)
+   PAGINATION RENDER
    ═══════════════════════════════════════════════════════════════════ */
 function renderPagination(containerId, stateKey, labelPrefix, breakdownHTML) {
   const state = pageState[stateKey];
   const container = $(containerId);
+
+  if (breakdownHTML) state._breakdown = breakdownHTML;
+  const breakdown = state._breakdown || '';
 
   if (!state.pages.length) {
     container.innerHTML = '<div class="empty">Belum ada hasil. Klik tombol Generate.</div>';
@@ -2568,7 +2261,7 @@ function renderPagination(containerId, stateKey, labelPrefix, breakdownHTML) {
   const displayNum = current + 1;
 
   container.innerHTML = `
-    ${breakdownHTML || ''}
+    ${breakdown}
     <div class="page-info">
       ${esc(labelPrefix)} ${displayNum} dari ${totalPages}
       • ${pageData.length} angka di halaman ini
@@ -2595,7 +2288,7 @@ function renderPagination(containerId, stateKey, labelPrefix, breakdownHTML) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   B48: JS — PAGE NAVIGATION
+   PAGE NAVIGATION
    ═══════════════════════════════════════════════════════════════════ */
 window.goPage = function(stateKey, delta) {
   const state = pageState[stateKey];
@@ -2604,9 +2297,7 @@ window.goPage = function(stateKey, delta) {
   if (next < 0 || next >= state.pages.length) return;
   state.current = next;
   const [containerId, label] = PAGE_MAP[stateKey];
-  /* Simpan breakdown yang sedang ditampilkan agar tidak hilang saat pindah halaman */
-  const breakdown = state._breakdown || '';
-  renderPagination(containerId, stateKey, label, breakdown);
+  renderPagination(containerId, stateKey, label);
 };
 
 window.jumpPage = function(stateKey) {
@@ -2620,19 +2311,11 @@ window.jumpPage = function(stateKey) {
   }
   state.current = v - 1;
   const [containerId, label] = PAGE_MAP[stateKey];
-  const breakdown = state._breakdown || '';
-  renderPagination(containerId, stateKey, label, breakdown);
-};
-
-/* Simpan breakdown di state saat renderPagination dipanggil */
-const _origRenderPagination = renderPagination;
-renderPagination = function(containerId, stateKey, labelPrefix, breakdownHTML) {
-  pageState[stateKey]._breakdown = breakdownHTML || pageState[stateKey]._breakdown || '';
-  return _origRenderPagination(containerId, stateKey, labelPrefix, breakdownHTML);
+  renderPagination(containerId, stateKey, label);
 };
 
 /* ═══════════════════════════════════════════════════════════════════
-   B49: JS — COPY & EXPORT
+   COPY & EXPORT
    ═══════════════════════════════════════════════════════════════════ */
 async function copyTextToClipboard(text) {
   try {
@@ -2645,12 +2328,8 @@ async function copyTextToClipboard(text) {
     ta.style.opacity = '0';
     document.body.appendChild(ta);
     ta.select();
-    try {
-      document.execCommand('copy');
-      toast('Berhasil disalin', 'success');
-    } catch (err) {
-      toast('Gagal menyalin', 'error');
-    }
+    try { document.execCommand('copy'); toast('Berhasil disalin', 'success'); }
+    catch (err) { toast('Gagal menyalin', 'error'); }
     ta.remove();
   }
 }
@@ -2667,8 +2346,7 @@ window.copyAllPages = function(stateKey) {
   if (!state.pages.length) { toast('Tidak ada hasil', 'error'); return; }
   const total = state.pages.reduce((s, p) => s + p.length, 0);
   if (total > 10000 && !confirm(`Total ${total.toLocaleString('id-ID')} angka. Yakin copy semua?`)) return;
-  const all = state.pages.flat().join('*') + '*';
-  copyTextToClipboard(all);
+  copyTextToClipboard(state.pages.flat().join('*') + '*');
 };
 
 window.exportPages = function(stateKey) {
@@ -2686,7 +2364,7 @@ window.exportPages = function(stateKey) {
 };
 
 /* ═══════════════════════════════════════════════════════════════════
-   B50: JS — KONVERSI MANUAL
+   KONVERSI MANUAL
    ═══════════════════════════════════════════════════════════════════ */
 $('convertManualBtn').addEventListener('click', () => {
   const n = $('manualInput').value.trim();
@@ -2710,7 +2388,7 @@ $('convertManualBtn').addEventListener('click', () => {
 });
 
 /* ═══════════════════════════════════════════════════════════════════
-   B51: JS — KONVERSI GRUP
+   KONVERSI GRUP
    ═══════════════════════════════════════════════════════════════════ */
 $('convertGrupBtn').addEventListener('click', () => {
   const n = $('grupInput').value.trim();
@@ -2719,9 +2397,7 @@ $('convertGrupBtn').addEventListener('click', () => {
   const found = master.find(m => m.nomor === n);
   if (found) {
     $('grupResult').textContent =
-      `✅ Nomor ${n} ditemukan\n` +
-      `🗂️ Grup  : ${found.grup || '-'}\n` +
-      `📝 Syair : ${found.syair || '-'}`;
+      `✅ Nomor ${n} ditemukan\n🗂️ Grup  : ${found.grup || '-'}\n📝 Syair : ${found.syair || '-'}`;
     return;
   }
 
@@ -2730,8 +2406,7 @@ $('convertGrupBtn').addEventListener('click', () => {
 
   if (matches.length) {
     $('grupResult').textContent =
-      `❌ Nomor ${n} tidak ada di master\n\n` +
-      `🔍 Nomor dengan digit mirip:\n` +
+      `❌ Nomor ${n} tidak ada di master\n\n🔍 Nomor dengan digit mirip:\n` +
       matches.slice(0, 10).map(m => `• ${m.nomor} → Grup ${m.grup || '-'}`).join('\n');
   } else {
     $('grupResult').textContent = `❌ Nomor ${n} tidak ditemukan`;
@@ -2739,7 +2414,7 @@ $('convertGrupBtn').addEventListener('click', () => {
 });
 
 /* ═══════════════════════════════════════════════════════════════════
-   B52: JS — KONVERSI CB
+   KONVERSI CB
    ═══════════════════════════════════════════════════════════════════ */
 $('convertCBBtn').addEventListener('click', () => {
   const n = $('cbInput').value.trim();
@@ -2757,13 +2432,11 @@ $('convertCBBtn').addEventListener('click', () => {
   }
 
   $('cbResult').textContent =
-    `📌 Nomor Input : ${n}\n\n` +
-    `🎯 Colok Bebas :\n${cbLines}\n\n` +
-    `🔗 Kombinasi 2D:\n${pairs.slice(0, 12).join(', ') || '-'}`;
+    `📌 Nomor Input : ${n}\n\n🎯 Colok Bebas :\n${cbLines}\n\n🔗 Kombinasi 2D:\n${pairs.slice(0, 12).join(', ') || '-'}`;
 });
 
 /* ═══════════════════════════════════════════════════════════════════
-   B53: JS — KONVERSI AK
+   KONVERSI AK
    ═══════════════════════════════════════════════════════════════════ */
 $('convertAKBtn').addEventListener('click', () => {
   const n = $('akInput').value.trim();
@@ -2775,8 +2448,7 @@ $('convertAKBtn').addEventListener('click', () => {
   const kembar    = Object.entries(counts).filter(([, c]) => c > 1);
   const allDigits = Object.keys(counts).sort();
 
-  let out = `📌 Nomor Input : ${n}\n\n`;
-  out += `🔢 Digit Unik  : ${allDigits.join(', ')}\n\n`;
+  let out = `📌 Nomor Input : ${n}\n\n🔢 Digit Unik  : ${allDigits.join(', ')}\n\n`;
 
   if (kembar.length) {
     out += `✅ Angka Kembar Ditemukan:\n`;
@@ -2795,7 +2467,7 @@ $('convertAKBtn').addEventListener('click', () => {
 });
 
 /* ═══════════════════════════════════════════════════════════════════
-   B54: JS — PWA INSTALL
+   PWA INSTALL
    ═══════════════════════════════════════════════════════════════════ */
 const installPromptEl = $('installPrompt');
 
@@ -2835,17 +2507,17 @@ window.addEventListener('appinstalled', () => {
 });
 
 /* ═══════════════════════════════════════════════════════════════════
-   B55: JS — OFFLINE DETECT
+   OFFLINE DETECT
    ═══════════════════════════════════════════════════════════════════ */
 function updateOnlineStatus() {
   document.body.classList.toggle('offline', !navigator.onLine);
 }
-window.addEventListener('online',  updateOnlineStatus);
+window.addEventListener('online', updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
 updateOnlineStatus();
 
 /* ═══════════════════════════════════════════════════════════════════
-   B56: JS — REFRESH DROPDOWN
+   REFRESH DROPDOWN
    ═══════════════════════════════════════════════════════════════════ */
 function grupMapWithCount() {
   const map = {};
@@ -2891,19 +2563,16 @@ function refreshGrupDropdowns() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   B57: JS — REFRESH ALL
+   REFRESH ALL
    ═══════════════════════════════════════════════════════════════════ */
 function refreshAll() {
   renderMaster();
   renderGrup();
   refreshGrupDropdowns();
 
-  renderGroupPreview($('manualGrup').value, $('manualPreview'), 'depan',
-    'Grup untuk auto-fill 2 depan.');
-  renderGroupPreview($('bbfsGrup').value, $('bbfsPreview'), 'belakang',
-    'Grup sebagai FILTER 2D belakang.');
-  renderGroupPreview($('atGrup').value, $('atPreview'), 'belakang',
-    'Grup sebagai FILTER 2D belakang.');
+  _refreshManualPreview();
+  _refreshBBFSPreview();
+  _refreshATPreview();
 
   updateManualInfo();
   updateBBFSInfo();
@@ -2914,7 +2583,7 @@ function refreshAll() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   B58: JS — ENTER KEY HANDLERS
+   ENTER KEY HANDLERS
    ═══════════════════════════════════════════════════════════════════ */
 ['manualInput', 'grupInput', 'cbInput', 'akInput'].forEach(id => {
   $(id).addEventListener('keypress', (e) => {
@@ -2931,7 +2600,7 @@ function refreshAll() {
 });
 
 /* ═══════════════════════════════════════════════════════════════════
-   B59: JS — SESSION RESTORE
+   SESSION RESTORE
    ═══════════════════════════════════════════════════════════════════ */
 if (sessionStorage.getItem('sa_logged_in') === '1') {
   $('loginScreen').style.display = 'none';
@@ -2941,122 +2610,13 @@ if (sessionStorage.getItem('sa_logged_in') === '1') {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   B60: JS — BOOT
+   BOOT
    ═══════════════════════════════════════════════════════════════════ */
 console.log(
-  '%c SA_HARD v5.1 ',
+  '%c SA_HARD v5.2 ',
   'background:#22d3ee;color:#04101c;font-weight:bold;padding:4px 8px;border-radius:4px;'
 );
 console.log('Ready • Master:', master.length, 'records');
-console.log('✅ Breakdown terpisah: 2D Depan / 2D Belakang / Hasil');
-
-/* ═══════════════════════════════════════════════════════════════════
-   B61: APPENDIX A — FONTS
-   ═══════════════════════════════════════════════════════════════════
-   • system-ui      → default body
-   • ui-monospace   → angka (hasil, kode, konversi)
-   • Fallback: -apple-system, Segoe UI, Roboto, SF Mono, Menlo, Consolas
-   Tidak perlu import Google Fonts (offline-friendly)
-   ═══════════════════════════════════════════════════════════════════ */
-
-/* ═══════════════════════════════════════════════════════════════════
-   B62: APPENDIX B — LICENSE
-   ═══════════════════════════════════════════════════════════════════
-   SA_HARD System v5.1
-   Copyright © 2026
-   Licensed for personal use only.
-   ═══════════════════════════════════════════════════════════════════ */
-
-/* ═══════════════════════════════════════════════════════════════════
-   B63: APPENDIX C — CHANGELOG
-   ═══════════════════════════════════════════════════════════════════
-   v5.1 (2026) — FINAL
-     • BREAKDOWN TERPISAH di atas hasil (semua fitur grup):
-         - Panel G1 / G2 / total terpisah dengan warna berbeda
-         - Setiap 4-digit: [2 digit G1][2 digit G2] jelas
-         - Filter breakdown untuk BBFS/AK (total → lolos)
-     • Preview grup: highlight kotak aktif (2D Depan ATAU Belakang)
-     • Catatan "master 2-digit: 2D depan = 2D belakang"
-     • renderPagination terima parameter breakdownHTML
-     • Breakdown disimpan di state._breakdown agar tidak hilang saat navigasi
-
-   v5.0 (2026)
-     • Preview grup konsisten: 2D Depan + 2D Belakang + sample
-     • renderGroupPreview() satu-satunya renderer
-     • Input Manual: auto-fill 2 depan (non-destructive)
-     • BBFS/AK: FILTER 2D Belakang (input tidak diubah)
-     • Gabung Grup: G1=depan, G2=belakang, boleh sama
-     • Master tertanam
-
-   v3.9 (2026)
-     • Preview verifikasi 2D (partial)
-
-   v3.6 (2026)
-     • Grup boleh sama, auto-fill non-destructive, PWA
-   ═══════════════════════════════════════════════════════════════════ */
-
-/* ═══════════════════════════════════════════════════════════════════
-   B64: APPENDIX D — TESTING CHECKLIST
-   ═══════════════════════════════════════════════════════════════════
-   [ ] Login SA_HARD / MyHand0286
-   [ ] Master 100 nomor muncul
-   [ ] Edit / Hapus / Reset master berfungsi
-   [ ] Input Manual: pilih grup → auto-fill 2 depan
-   [ ] Input Manual: generate → breakdown 2D Depan (biru) + 2D Belakang (kuning) + total
-   [ ] BBFS: pilih grup → preview kotak 2D BELAKANG aktif (highlight)
-   [ ] BBFS: generate → breakdown filter + jumlah lolos + persen
-   [ ] BBFS: verifikasi setiap hasil slice(-2) ∈ filter values
-   [ ] AK: pilih grup → preview kotak 2D BELAKANG aktif
-   [ ] AK: generate → breakdown filter + jumlah lolos
-   [ ] Gabung Grup: pilih G1+Risau, G2=Kotor
-       → breakdown panel 1 = Risau 2D Depan (biru)
-       → breakdown panel 2 = Kotor 2D Belakang (kuning)
-       → setiap hasil [2 digit Risau][2 digit Kotor]
-   [ ] Gabung Grup: G1=G2 (Risau+Risau) → diizinkan
-   [ ] Grup+CB: sama seperti Gabung + CB panel
-   [ ] CB BBFS: filter OR/AND
-   [ ] Pagination: pindah halaman → breakdown tetap tampil
-   [ ] Copy / Export / Jump
-   [ ] Konversi 4 panel
-   [ ] Enter key di konversi
-   [ ] Offline badge
-   [ ] PWA install
-   [ ] Session restore
-   ═══════════════════════════════════════════════════════════════════ */
-
-/* ═══════════════════════════════════════════════════════════════════
-   B65: APPENDIX E — RUMUS 2D (referensi)
-   ═══════════════════════════════════════════════════════════════════
-   2D DEPAN (to2DigitDepan):
-     • Input "20" → "20"
-     • Input "2"  → "02"
-     • Input "123" → "12" (slice 0,2)
-
-   2D BELAKANG (to2DigitBelakang):
-     • Input "20" → "20"
-     • Input "2"  → "02"
-     • Input "123" → "23" (slice -2)
-
-   Untuk master 2-digit (00-99):
-     to2DigitDepan("20") = "20"
-     to2DigitBelakang("20") = "20"
-     → 2D depan = 2D belakang (NORMAL untuk master 2-digit)
-
-   Untuk master 4-digit (misal "1234"):
-     to2DigitDepan("1234") = "12"
-     to2DigitBelakang("1234") = "34"
-     → 2D depan ≠ 2D belakang
-
-   Filter BBFS/AK:
-     hasil.slice(-2) ∈ getGroupAs2DigitBelakang(grup)
-
-   Cross Product:
-     for (d of depans) for (b of belakangs) push(d + b)
-   ═══════════════════════════════════════════════════════════════════ */
-
-/* ═══════════════════════════════════════════════════════════════════
-   B66: END OF FILE
-   ═══════════════════════════════════════════════════════════════════ */
 </script>
 </body>
 </html>
