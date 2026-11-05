@@ -5,7 +5,7 @@
 ╔══════════════════════════════════════════════════════════════════╗
 ║  SA_HARD SYSTEM — INDEX BLOK KODE                                ║
 ║  File  : index.html                                              ║
-║  Versi : 3.5 (preview nomor grup sesuai master)                  ║
+║  Versi : 3.6 (grup boleh sama + auto-fill non-destructive)       ║
 ╠══════════════════════════════════════════════════════════════════╣
 ║  BLOK 01  HEAD & META                                            ║
 ║  BLOK 02  CSS — VARIABEL & RESET                                 ║
@@ -21,7 +21,7 @@
 ║  BLOK 12  BODY — APP HEADER                                      ║
 ║  BLOK 13  BODY — APP NAV                                         ║
 ║  BLOK 14  BODY — SECTION MASTER NOMOR                            ║
-║  BLOK 15  BODY — SECTION INPUT 4 ANGKA (sub-tab wrapper)         ║
+║  BLOK 15  BODY — SECTION INPUT 4 ANGKA                           ║
 ║  BLOK 16  BODY — SECTION DATA GRUP                               ║
 ║  BLOK 17  BODY — SECTION KONVERSI MANUAL                         ║
 ║  BLOK 18  BODY — SECTION KONVERSI GRUP                           ║
@@ -39,26 +39,26 @@
 ║  BLOK 30  JS — (kosong)                                          ║
 ║  BLOK 31  JS — RENDER GRUP                                       ║
 ║  BLOK 32  JS — CRUD MASTER                                       ║
-║  BLOK 33  JS — GENERATOR INPUT MANUAL                            ║
+║  BLOK 33  JS — GENERATOR INPUT MANUAL (v3.6)                     ║
 ║  BLOK 34  JS — KONVERSI MANUAL                                   ║
 ║  BLOK 35  JS — KONVERSI GRUP                                     ║
 ║  BLOK 36  JS — KONVERSI CB                                       ║
 ║  BLOK 37  JS — KONVERSI AK                                       ║
 ║  BLOK 38  JS — PWA INSTALL                                       ║
 ║  BLOK 39  JS — OFFLINE DETECT                                    ║
-║  BLOK 40  JS — AUTO INIT + isi dropdown grup                     ║
+║  BLOK 40  JS — AUTO INIT                                         ║
 ║  BLOK 41  CSS — SUB-TAB & PAGINATION                             ║
 ║  BLOK 42  BODY — SUB-TAB INPUT 4 ANGKA                           ║
 ║  BLOK 43  BODY — SUBPANEL INPUT MANUAL                           ║
 ║  BLOK 44  BODY — SUBPANEL BBFS                                   ║
 ║  BLOK 45  BODY — SUBPANEL ANGKA TARUNG (AK)                      ║
 ║  BLOK 46  BODY — SUBPANEL CB BBFS                                ║
-║  BLOK 47  BODY — SUBPANEL GABUNG GRUP (+ preview nomor)          ║
-║  BLOK 48  BODY — SUBPANEL GRUP + CB (+ preview nomor)            ║
+║  BLOK 47  BODY — SUBPANEL GABUNG GRUP (+ preview)                ║
+║  BLOK 48  BODY — SUBPANEL GRUP + CB (+ preview)                  ║
 ║  BLOK 49  JS — HELPER PERMUTASI / PARSE / PAGINATION             ║
-║  BLOK 50  JS — LOGIKA BBFS                                       ║
-║  BLOK 51  JS — LOGIKA ANGKA TARUNG (AK) + CB BBFS                ║
-║  BLOK 52  JS — LOGIKA GABUNG GRUP & GRUP + CB (preview master)   ║
+║  BLOK 50  JS — LOGIKA BBFS (v3.6)                                ║
+║  BLOK 51  JS — LOGIKA ANGKA TARUNG + CB BBFS (v3.6)              ║
+║  BLOK 52  JS — LOGIKA GABUNG GRUP & GRUP+CB (v3.6, grup boleh sama)║
 ║  BLOK 53  JS — COPY / EXPORT / END OF FILE                       ║
 ╚══════════════════════════════════════════════════════════════════╝
 -->
@@ -369,7 +369,7 @@ body.offline .offline-badge { display: block; }
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════
-         BLOK 15: BODY — SECTION INPUT 4 ANGKA (sub-tab wrapper)
+         BLOK 15: BODY — SECTION INPUT 4 ANGKA
          ═══════════════════════════════════════════════════════════ -->
     <section id="input4Angka">
       <h2>🔢 Input 4 Angka</h2>
@@ -403,7 +403,7 @@ body.offline .offline-badge { display: block; }
           </div>
 
           <div class="field">
-            <label for="manualGrup">Pilih Grup (isi otomatis 2 depan)</label>
+            <label for="manualGrup">Pilih Grup (isi otomatis 2 depan jika kosong)</label>
             <select id="manualGrup">
               <option value="">— Manual (tanpa grup) —</option>
             </select>
@@ -448,7 +448,7 @@ body.offline .offline-badge { display: block; }
           </div>
 
           <div class="field">
-            <label for="bbfsGrup">Pilih Grup (auto-isi BBFS dari digit grup)</label>
+            <label for="bbfsGrup">Pilih Grup (auto-isi BBFS jika kosong)</label>
             <select id="bbfsGrup">
               <option value="">— Manual (tanpa grup) —</option>
             </select>
@@ -506,7 +506,7 @@ body.offline .offline-badge { display: block; }
           </div>
 
           <div class="field">
-            <label for="atGrup">Pilih Grup (auto-isi semua posisi dari digit grup)</label>
+            <label for="atGrup">Pilih Grup (auto-isi posisi jika semua kosong)</label>
             <select id="atGrup">
               <option value="">— Manual (tanpa grup) —</option>
             </select>
@@ -571,7 +571,7 @@ body.offline .offline-badge { display: block; }
         <div class="card">
           <h3 style="margin-bottom:6px;">Gabung Grup (Hasil 4 Angka)</h3>
           <p style="color:var(--muted);font-size:12.5px;margin-bottom:12px;">
-            Nomor dari <b>Grup 1</b> dipakai sebagai <b>2D depan</b>, nomor dari <b>Grup 2</b> sebagai <b>2D belakang</b>, lalu di-cross product → hasil selalu <b>4 digit</b>. Nomor diambil <b>persis sesuai data Master</b>.
+            Nomor dari <b>Grup 1</b> dipakai sebagai <b>2D depan</b>, nomor dari <b>Grup 2</b> sebagai <b>2D belakang</b>, lalu di-cross product → hasil selalu <b>4 digit</b>. Nomor diambil <b>persis sesuai data Master</b>. <b>Grup boleh sama</b> (contoh: Risau + Risau).
           </p>
 
           <div class="grid-2">
@@ -606,7 +606,7 @@ body.offline .offline-badge { display: block; }
         <div class="card">
           <h3 style="margin-bottom:6px;">Grup + CB (Hasil 4 Angka)</h3>
           <p style="color:var(--muted);font-size:12.5px;margin-bottom:12px;">
-            Gabungkan <b>Grup 1 (2D depan)</b> + <b>Grup 2 (2D belakang)</b> → 4-digit, lalu filter dengan <b>CB</b>. Nomor diambil <b>persis sesuai data Master</b>.
+            Gabungkan <b>Grup 1 (2D depan)</b> + <b>Grup 2 (2D belakang)</b> → 4-digit, lalu filter dengan <b>CB</b>. Nomor diambil <b>persis sesuai data Master</b>. <b>Grup boleh sama</b>.
           </p>
 
           <div class="grid-2">
@@ -1121,7 +1121,7 @@ function renderMaster() {
 
 
 /* ═══════════════════════════════════════════════════════════════
-   BLOK 30: JS — DIHAPUS (renderAngka tidak dipakai lagi)
+   BLOK 30: JS — (kosong — renderAngka tidak dipakai lagi)
    ═══════════════════════════════════════════════════════════════ */
 /* (kosong — sengaja tidak dipakai) */
 
@@ -1229,13 +1229,17 @@ $('resetMasterBtn').addEventListener('click', () => {
 
 
 /* ═══════════════════════════════════════════════════════════════
-   BLOK 33: JS — GENERATOR INPUT MANUAL (2 depan × 2 belakang)
+   BLOK 33: JS — GENERATOR INPUT MANUAL (v3.6)
+   ─────────────────────────────────────────────────────────────
+   Pilih grup TIDAK menghapus / men-disable input.
+   Auto-fill 2 depan HANYA jika input masih kosong.
    ═══════════════════════════════════════════════════════════════ */
 $('manualGrup').addEventListener('change', () => {
   const g = $('manualGrup').value;
   const depanInput = $('manualDepan');
 
-  if (g) {
+  /* Auto-fill HANYA jika input masih kosong */
+  if (g && !depanInput.value.trim()) {
     const nums = getGroupNumbers(g);
     const twoDigit = nums
       .map(n => {
@@ -1245,13 +1249,8 @@ $('manualGrup').addEventListener('change', () => {
       })
       .filter(Boolean);
     depanInput.value = [...new Set(twoDigit)].join(' ');
-    depanInput.disabled = true;
-    depanInput.setAttribute('title', 'Diisi otomatis dari grup');
-  } else {
-    depanInput.value = '';
-    depanInput.disabled = false;
-    depanInput.removeAttribute('title');
   }
+  /* TIDAK men-disable, TIDAK mengosongkan input */
   updateManualInfo();
 });
 
@@ -1521,7 +1520,7 @@ function refreshGrupDropdowns() {
     return html;
   };
 
-  // Simpan pilihan lama
+  /* Simpan pilihan lama */
   const selected = {
     manualGrup: $('manualGrup').value,
     bbfsGrup: $('bbfsGrup').value,
@@ -1532,15 +1531,15 @@ function refreshGrupDropdowns() {
     grupCB2: $('grupCB2').value
   };
 
-  $('manualGrup').innerHTML = buildOptions('— Manual (tanpa grup) —');
-  $('bbfsGrup').innerHTML   = buildOptions('— Manual (tanpa grup) —');
-  $('atGrup').innerHTML     = buildOptions('— Manual (tanpa grup) —');
-  $('gabungGrup1').innerHTML = buildOptions('— Pilih Grup 1 —');
-  $('gabungGrup2').innerHTML = buildOptions('— Pilih Grup 2 —');
-  $('grupCB1').innerHTML     = buildOptions('— Pilih Grup 1 —');
-  $('grupCB2').innerHTML     = buildOptions('— Pilih Grup 2 —');
+  $('manualGrup').innerHTML   = buildOptions('— Manual (tanpa grup) —');
+  $('bbfsGrup').innerHTML     = buildOptions('— Manual (tanpa grup) —');
+  $('atGrup').innerHTML       = buildOptions('— Manual (tanpa grup) —');
+  $('gabungGrup1').innerHTML  = buildOptions('— Pilih Grup 1 —');
+  $('gabungGrup2').innerHTML  = buildOptions('— Pilih Grup 2 —');
+  $('grupCB1').innerHTML      = buildOptions('— Pilih Grup 1 —');
+  $('grupCB2').innerHTML      = buildOptions('— Pilih Grup 2 —');
 
-  // Restore pilihan lama kalau masih ada di master
+  /* Restore pilihan lama kalau masih ada di master */
   ['manualGrup', 'bbfsGrup', 'atGrup', 'gabungGrup1', 'gabungGrup2', 'grupCB1', 'grupCB2'].forEach(id => {
     const prev = selected[id];
     if (prev && names.includes(prev)) {
@@ -1742,7 +1741,10 @@ window.jumpPage = function(stateKey) {
 
 
 /* ═══════════════════════════════════════════════════════════════
-   BLOK 50: JS — LOGIKA BBFS
+   BLOK 50: JS — LOGIKA BBFS (v3.6)
+   ─────────────────────────────────────────────────────────────
+   Pilih grup TIDAK menghapus / men-disable input BBFS.
+   Auto-fill BBFS HANYA jika input masih kosong.
    ═══════════════════════════════════════════════════════════════ */
 $('bbfsInput').addEventListener('input', (e) => {
   e.target.value = onlyDigits(e.target.value).slice(0, 16);
@@ -1755,18 +1757,13 @@ $('bbfsGrup').addEventListener('change', () => {
   const g = $('bbfsGrup').value;
   const bbfsInput = $('bbfsInput');
 
-  if (g) {
+  /* Auto-fill HANYA jika input masih kosong */
+  if (g && !bbfsInput.value.trim()) {
     const nums = getGroupNumbers(g);
     const uniqueDigits = [...new Set(nums.join('').split(''))].sort();
-    const digitStr = uniqueDigits.join('').slice(0, 16);
-    bbfsInput.value = digitStr;
-    bbfsInput.disabled = true;
-    bbfsInput.setAttribute('title', 'Diisi otomatis dari grup');
-  } else {
-    bbfsInput.value = '';
-    bbfsInput.disabled = false;
-    bbfsInput.removeAttribute('title');
+    bbfsInput.value = uniqueDigits.join('').slice(0, 16);
   }
+  /* TIDAK men-disable, TIDAK mengosongkan input */
   updateBBFSInfo();
 });
 
@@ -1822,7 +1819,10 @@ $('bbfsGenerateBtn').addEventListener('click', () => {
 
 
 /* ═══════════════════════════════════════════════════════════════
-   BLOK 51: JS — LOGIKA ANGKA TARUNG (AK) + CB BBFS
+   BLOK 51: JS — LOGIKA ANGKA TARUNG (AK) + CB BBFS (v3.6)
+   ─────────────────────────────────────────────────────────────
+   Pilih grup TIDAK menghapus input posisi digit AK.
+   Auto-fill hanya jika SEMUA posisi masih kosong.
    ═══════════════════════════════════════════════════════════════ */
 ['atDigit1', 'atDigit2', 'atDigit3', 'atDigit4'].forEach(id => {
   $(id).addEventListener('input', (e) => {
@@ -1835,28 +1835,26 @@ $('atCBMode').addEventListener('change', updateATInfo);
 
 $('atGrup').addEventListener('change', () => {
   const g = $('atGrup').value;
+
   if (g) {
-    const nums = getGroupNumbers(g);
-    const uniqueDigits = [...new Set(nums.join('').split(''))].sort();
-    const str = uniqueDigits.join('');
-    $('atDigit1').value = str;
-    $('atDigit2').value = str;
-    $('atDigit3').value = str;
-    $('atDigit4').value = str;
-    $('atDigit1').setAttribute('title', 'Diisi otomatis dari grup');
-    $('atDigit2').setAttribute('title', 'Diisi otomatis dari grup');
-    $('atDigit3').setAttribute('title', 'Diisi otomatis dari grup');
-    $('atDigit4').setAttribute('title', 'Diisi otomatis dari grup');
-  } else {
-    $('atDigit1').value = '';
-    $('atDigit2').value = '';
-    $('atDigit3').value = '';
-    $('atDigit4').value = '';
-    $('atDigit1').removeAttribute('title');
-    $('atDigit2').removeAttribute('title');
-    $('atDigit3').removeAttribute('title');
-    $('atDigit4').removeAttribute('title');
+    /* Auto-fill HANYA jika keempat posisi masih kosong */
+    const allEmpty =
+      !$('atDigit1').value.trim() &&
+      !$('atDigit2').value.trim() &&
+      !$('atDigit3').value.trim() &&
+      !$('atDigit4').value.trim();
+
+    if (allEmpty) {
+      const nums = getGroupNumbers(g);
+      const uniqueDigits = [...new Set(nums.join('').split(''))].sort();
+      const str = uniqueDigits.join('');
+      $('atDigit1').value = str;
+      $('atDigit2').value = str;
+      $('atDigit3').value = str;
+      $('atDigit4').value = str;
+    }
   }
+  /* TIDAK mengosongkan input saat ganti ke Manual */
   updateATInfo();
 });
 
@@ -1973,23 +1971,22 @@ $('cbBBFSGenerateBtn').addEventListener('click', () => {
 
 
 /* ═══════════════════════════════════════════════════════════════
-   BLOK 52: JS — LOGIKA GABUNG GRUP & GRUP + CB
+   BLOK 52: JS — LOGIKA GABUNG GRUP & GRUP + CB (v3.6)
    ─────────────────────────────────────────────────────────────
-   PERBAIKAN v3.5:
-   • Nomor 2D depan & 2D belakang DIAMBIL LANGSUNG dari master
+   Perubahan v3.6:
+   • Grup boleh sama (tidak ada validasi g1===g2)
+   • Nomor 2D depan & belakang diambil langsung dari master
    • Preview nomor grup ditampilkan di bawah dropdown
-   • Saat generate, logika ambil ulang dari master (bukan cache)
+   • Saat generate, ambil ulang dari master (bukan cache)
    • Jika grup kosong di master → peringatan jelas
    ═══════════════════════════════════════════════════════════════ */
 
-/* Konversi nomor jadi 2 digit (pad + slice) — dipakai untuk 2D depan/belakang */
 function to2Digit(n) {
   const s = String(n ?? '').replace(/\D/g, '');
   if (!s) return '00';
   return s.padStart(2, '0').slice(0, 2);
 }
 
-/* Ambil 2D unik dari semua nomor pada grup tertentu di master */
 function getGroupAs2Digit(grupName) {
   if (!grupName) return [];
   return [...new Set(
@@ -1997,7 +1994,6 @@ function getGroupAs2Digit(grupName) {
   )].sort();
 }
 
-/* Cross product 4-digit + permutasi opsional */
 function crossProduct4Digit(depans, belakangs, withPermutasi) {
   const combos = [];
   for (const d of depans) {
@@ -2016,7 +2012,6 @@ function crossProduct4Digit(depans, belakangs, withPermutasi) {
   return results.sort();
 }
 
-/* Update preview nomor 2D di bawah dropdown */
 function updatePreview2D(grupName, previewEl) {
   if (!grupName) {
     previewEl.textContent = '';
@@ -2051,7 +2046,6 @@ function updateGabungInfo() {
   updatePreview2D(g2, $('gabungPreviewBelakang'));
 
   if (!g1 || !g2) { info.textContent = 'Info: pilih 2 grup'; return; }
-  if (g1 === g2)  { info.textContent = 'Info: Grup 1 dan Grup 2 harus berbeda'; return; }
 
   const depans    = getGroupAs2Digit(g1);
   const belakangs = getGroupAs2Digit(g2);
@@ -2089,9 +2083,8 @@ $('gabungGenerateBtn').addEventListener('click', () => {
   const perm = $('gabungPermutasi').checked;
 
   if (!g1 || !g2) { toast('Pilih 2 grup', 'error'); return; }
-  if (g1 === g2)  { toast('Grup 1 dan Grup 2 harus berbeda', 'error'); return; }
 
-  /* Selalu ambil ulang dari master (bukan cache) */
+  /* Ambil ulang dari master (bukan cache) */
   const depans    = getGroupAs2Digit(g1);
   const belakangs = getGroupAs2Digit(g2);
 
@@ -2129,7 +2122,6 @@ function updateGrupCBInfo() {
   updatePreview2D(g2, $('grupCBPreviewBelakang'));
 
   if (!g1 || !g2) { info.textContent = 'Info: pilih 2 grup'; return; }
-  if (g1 === g2)  { info.textContent = 'Info: Grup 1 dan Grup 2 harus berbeda'; return; }
   if (!cb)        { info.textContent = 'Info: isi CB'; return; }
 
   const depans    = getGroupAs2Digit(g1);
@@ -2169,10 +2161,9 @@ $('grupCBGenerateBtn').addEventListener('click', () => {
   const perm = $('grupCBPermutasi').checked;
 
   if (!g1 || !g2) { toast('Pilih 2 grup', 'error'); return; }
-  if (g1 === g2)  { toast('Grup 1 dan Grup 2 harus berbeda', 'error'); return; }
   if (!cb)        { toast('CB wajib diisi', 'error'); return; }
 
-  /* Selalu ambil ulang dari master (bukan cache) */
+  /* Ambil ulang dari master (bukan cache) */
   const depans    = getGroupAs2Digit(g1);
   const belakangs = getGroupAs2Digit(g2);
 
