@@ -2,107 +2,83 @@
 <html lang="id">
 <head>
 <!--
-╔══════════════════════════════════════════════════════════════════╗
-║  SA_HARD SYSTEM — v4.0 FINAL                                     ║
-║  File  : index.html                                              ║
-║  Status: STABLE — PRODUCTION READY                               ║
-╠══════════════════════════════════════════════════════════════════╣
-║  FITUR UTAMA:                                                    ║
-║  • Master Nomor 100 data (00-99) + CRUD                          ║
-║  • Input Manual 4 Angka (2D Depan × 2D Belakang)                 ║
-║  • BBFS (Bolak-Balik) dengan FILTER 2D BELAKANG dari grup        ║
-║  • Angka Tarung (AK) dengan FILTER 2D BELAKANG dari grup         ║
-║  • CB BBFS (Filter BBFS dengan Colok Bebas)                      ║
-║  • Gabung Grup (G1=2D Depan, G2=2D Belakang) — grup boleh sama   ║
-║  • Grup + CB (kombinasi + filter CB)                             ║
-║  • Konversi Manual/Grup/CB/AK                                    ║
-║  • Pagination 350 angka/halaman + Copy + Export + Jump           ║
-║  • Preview verifikasi 2D di setiap dropdown grup                 ║
-║  • PWA Install + Offline mode                                    ║
-╠══════════════════════════════════════════════════════════════════╣
-║  INDEKS BLOK:                                                    ║
-║  BLOK 01  HEAD & META                                            ║
-║  BLOK 02  CSS — VARIABEL & RESET                                 ║
-║  BLOK 03  CSS — LOGIN                                            ║
-║  BLOK 04  CSS — LAYOUT                                           ║
-║  BLOK 05  CSS — NAVIGATION                                       ║
-║  BLOK 06  CSS — CARD & LIST                                      ║
-║  BLOK 07  CSS — FORM & INPUT                                     ║
-║  BLOK 08  CSS — BUTTON                                           ║
-║  BLOK 09  CSS — TOAST                                            ║
-║  BLOK 10  CSS — INSTALL PROMPT                                   ║
-║  BLOK 11  CSS — OFFLINE BADGE                                    ║
-║  BLOK 12  CSS — SUBTABS                                          ║
-║  BLOK 13  CSS — PREVIEW INFO                                     ║
-║  BLOK 14  CSS — PAGINATION & RESULT                              ║
-║  BLOK 15  BODY — LOGIN SCREEN                                    ║
-║  BLOK 16  BODY — APP SHELL                                       ║
-║  BLOK 17  BODY — SECTION MASTER                                  ║
-║  BLOK 18  BODY — SECTION INPUT 4 ANGKA                           ║
-║  BLOK 19  BODY — SUBPANEL INPUT MANUAL                           ║
-║  BLOK 20  BODY — SUBPANEL BBFS                                   ║
-║  BLOK 21  BODY — SUBPANEL ANGKA TARUNG                           ║
-║  BLOK 22  BODY — SUBPANEL CB BBFS                                ║
-║  BLOK 23  BODY — SUBPANEL GABUNG GRUP                            ║
-║  BLOK 24  BODY — SUBPANEL GRUP + CB                              ║
-║  BLOK 25  BODY — SECTION DATA GRUP                               ║
-║  BLOK 26  BODY — SECTION KONVERSI (4)                            ║
-║  BLOK 27  BODY — INSTALL PROMPT + TOAST                          ║
-║  BLOK 28  JS — CREDENTIALS                                       ║
-║  BLOK 29  JS — SEED MASTER (100 data)                            ║
-║  BLOK 30  JS — STATE & CONFIG                                    ║
-║  BLOK 31  JS — STORAGE & SEED                                    ║
-║  BLOK 32  JS — HELPER FUNCTIONS                                  ║
-║  BLOK 33  JS — LOGIN & AUTH                                      ║
-║  BLOK 34  JS — NAVIGATION & TABS                                 ║
-║  BLOK 35  JS — MASTER RENDER                                     ║
-║  BLOK 36  JS — GRUP RENDER                                       ║
-║  BLOK 37  JS — CRUD MASTER                                       ║
-║  BLOK 38  JS — GROUP 2D HELPERS                                  ║
-║  BLOK 39  JS — PREVIEW FUNCTIONS                                 ║
-║  BLOK 40  JS — INPUT MANUAL GENERATOR                            ║
-║  BLOK 41  JS — BBFS GENERATOR                                    ║
-║  BLOK 42  JS — ANGKA TARUNG GENERATOR                            ║
-║  BLOK 43  JS — CB BBFS GENERATOR                                 ║
-║  BLOK 44  JS — GABUNG GRUP GENERATOR                             ║
-║  BLOK 45  JS — GRUP + CB GENERATOR                               ║
-║  BLOK 46  JS — PAGINATION RENDER                                 ║
-║  BLOK 47  JS — PAGE NAVIGATION                                   ║
-║  BLOK 48  JS — COPY & EXPORT                                     ║
-║  BLOK 49  JS — KONVERSI MANUAL                                   ║
-║  BLOK 50  JS — KONVERSI GRUP                                     ║
-║  BLOK 51  JS — KONVERSI CB                                       ║
-║  BLOK 52  JS — KONVERSI AK                                       ║
-║  BLOK 53  JS — PWA INSTALL                                       ║
-║  BLOK 54  JS — OFFLINE DETECT                                    ║
-║  BLOK 55  JS — DROPDOWN REFRESH                                  ║
-║  BLOK 56  JS — REFRESH ALL                                       ║
-║  BLOK 57  JS — ENTER KEY HANDLERS                                ║
-║  BLOK 58  JS — SESSION RESTORE                                   ║
-║  BLOK 59  JS — END OF FILE                                       ║
-╚══════════════════════════════════════════════════════════════════╝
+╔══════════════════════════════════════════════════════════════════════╗
+║  SA_HARD SYSTEM — v5.0 FINAL                                         ║
+║  File   : index.html                                                 ║
+║  Status : PRODUCTION READY                                           ║
+╠══════════════════════════════════════════════════════════════════════╣
+║  PERUBAHAN v5.0 (dari v3.6/v4.0):                                    ║
+║  • Preview Grup KONSISTEN di semua fitur:                            ║
+║      - Selalu tampilkan 2D DEPAN + 2D BELAKANG + contoh 4-digit      ║
+║      - Highlight 2D mana yang dipakai oleh fitur tersebut            ║
+║  • Input Manual     : auto-fill 2 depan dari 2D DEPAN grup           ║
+║  • BBFS             : FILTER berdasarkan 2D BELAKANG grup            ║
+║  • Angka Tarung (AK): FILTER berdasarkan 2D BELAKANG grup            ║
+║  • Gabung Grup      : G1 (2D DEPAN) × G2 (2D BELAKANG)               ║
+║  • Grup + CB        : G1 (2D DEPAN) × G2 (2D BELAKANG) + filter CB   ║
+║  • Grup boleh sama (Risau + Risau)                                   ║
+║  • Master 100 nomor TERTANAM (SEED_MASTER)                           ║
+║  • Pagination 350/halaman + Copy + Export + Jump                     ║
+║  • PWA install + Offline mode + Session restore                      ║
+║  • Konversi Manual / Grup / CB / AK                                  ║
+╠══════════════════════════════════════════════════════════════════════╣
+║  INDEKS:                                                             ║
+║  B01 HEAD & META         B33 JS LOGIN & AUTH                         ║
+║  B02 CSS ROOT/RESET      B34 JS NAVIGATION                           ║
+║  B03 CSS LOGIN           B35 JS MASTER RENDER                        ║
+║  B04 CSS LAYOUT          B36 JS GRUP RENDER                          ║
+║  B05 CSS NAV             B37 JS CRUD MASTER                          ║
+║  B06 CSS CARD/LIST       B38 JS GROUP 2D HELPERS                     ║
+║  B07 CSS FORM            B39 JS RENDER GROUP PREVIEW (KUNCI!)        ║
+║  B08 CSS BUTTON          B40 JS INPUT MANUAL                         ║
+║  B09 CSS TOAST           B41 JS BBFS                                 ║
+║  B10 CSS INSTALL PROMPT  B42 JS ANGKA TARUNG                         ║
+║  B11 CSS OFFLINE         B43 JS CB BBFS                              ║
+║  B12 CSS SUBTABS         B44 JS GABUNG GRUP                          ║
+║  B13 CSS PREVIEW BOX     B45 JS GRUP + CB                            ║
+║  B14 CSS PAGINATION      B46 JS PAGINATION RENDER                    ║
+║  B15 BODY OFFLINE        B47 JS PAGE NAVIGATION                      ║
+║  B16 BODY LOGIN          B48 JS COPY/EXPORT                          ║
+║  B17 BODY APP SHELL      B49 JS KONVERSI MANUAL                      ║
+║  B18 BODY MASTER         B50 JS KONVERSI GRUP                        ║
+║  B19 BODY INPUT 4 ANGKA  B51 JS KONVERSI CB                          ║
+║  B20 BODY SUBPANEL MANUAL B52 JS KONVERSI AK                         ║
+║  B21 BODY SUBPANEL BBFS  B53 JS PWA INSTALL                          ║
+║  B22 BODY SUBPANEL AK    B54 JS OFFLINE DETECT                       ║
+║  B23 BODY SUBPANEL CBBF  B55 JS REFRESH DROPDOWN                     ║
+║  B24 BODY SUBPANEL GAB   B56 JS REFRESH ALL                          ║
+║  B25 BODY SUBPANEL GRCB  B57 JS ENTER HANDLERS                       ║
+║  B26 BODY DATA GRUP      B58 JS SESSION RESTORE                      ║
+║  B27 BODY KONVERSI x4    B59 JS BOOT                                 ║
+║  B28 BODY INSTALL PROMPT B60 JS END                                  ║
+║  B29 BODY TOAST          B61 APPENDIX A: FONTS                       ║
+║  B30 JS CREDENTIALS      B62 APPENDIX B: LICENSE                     ║
+║  B31 JS SEED_MASTER      B63 APPENDIX C: CHANGELOG                   ║
+║  B32 JS STATE/CONFIG     B64 APPENDIX D: TESTING                     ║
+╚══════════════════════════════════════════════════════════════════════╝
 -->
 
-<!-- ═══════════════════════════════════════════════════════════════
-     BLOK 01: HEAD & META
-     ═══════════════════════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════════════
+     B01: HEAD & META
+     ═══════════════════════════════════════════════════════════════════ -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#0b1220">
-<meta name="description" content="SA_HARD System — Generator 4 Angka & Konversi Nomor">
+<meta name="description" content="SA_HARD System v5.0 — Generator 4 Angka & Konversi Nomor">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="SA_HARD">
 <meta name="mobile-web-app-capable" content="yes">
-<title>SA_HARD System v4.0</title>
+<title>SA_HARD System v5.0</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon.svg">
 
 <style>
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 02: CSS — VARIABEL & RESET
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B02: CSS — ROOT & RESET
+   ═══════════════════════════════════════════════════════════════════ */
+
 *,
 *::before,
 *::after {
@@ -112,33 +88,31 @@
 }
 
 :root {
-  /* Warna dasar */
-  --bg:       #0b1220;
-  --card:     #131c2e;
-  --card-2:   #1a2540;
-  --border:   #24314f;
-
-  /* Warna teks */
-  --text:     #e6ecf7;
-  --muted:    #8b9ab3;
-
-  /* Warna aksen */
-  --accent:   #22d3ee;
-  --accent-2: #6366f1;
-  --danger:   #ef4444;
-  --success:  #22c55e;
-  --warn:     #fbbf24;
-
-  /* Layout */
+  --bg:        #0b1220;
+  --card:      #131c2e;
+  --card-2:    #1a2540;
+  --card-3:    #222f52;
+  --border:    #24314f;
+  --border-2:  #2f3f63;
+  --text:      #e6ecf7;
+  --text-dim:  #c5cfe0;
+  --muted:     #8b9ab3;
+  --accent:    #22d3ee;
+  --accent-2:  #6366f1;
+  --danger:    #ef4444;
+  --success:   #22c55e;
+  --warn:      #fbbf24;
   --radius-sm: 8px;
   --radius-md: 10px;
   --radius-lg: 14px;
   --radius-xl: 20px;
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.5);
 }
 
-html,
-body {
+html {
   height: 100%;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -151,7 +125,6 @@ body {
   line-height: 1.5;
 }
 
-/* Scrollbar kustom */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -160,16 +133,17 @@ body {
   background: var(--card-2);
 }
 ::-webkit-scrollbar-thumb {
-  background: #2f3f63;
+  background: var(--border-2);
   border-radius: 9px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #3f5178;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 03: CSS — LOGIN
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B03: CSS — LOGIN
+   ═══════════════════════════════════════════════════════════════════ */
+
 #loginScreen {
   min-height: 100vh;
   display: flex;
@@ -186,7 +160,7 @@ body {
   padding: 32px 26px;
   width: 100%;
   max-width: 380px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--shadow-lg);
 }
 
 .login-card .brand-title {
@@ -201,6 +175,15 @@ body {
   background-clip: text;
 }
 
+.login-card .brand-sub {
+  text-align: center;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: -16px;
+  margin-bottom: 22px;
+  letter-spacing: 1px;
+}
+
 .error {
   color: #ff6b6b;
   font-size: 13px;
@@ -209,9 +192,10 @@ body {
   min-height: 18px;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 04: CSS — LAYOUT UTAMA
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B04: CSS — LAYOUT UTAMA
+   ═══════════════════════════════════════════════════════════════════ */
+
 #app {
   display: flex;
   flex-direction: column;
@@ -296,9 +280,10 @@ h3 {
   font-size: 15px;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 05: CSS — NAVIGATION
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B05: CSS — NAVIGATION
+   ═══════════════════════════════════════════════════════════════════ */
+
 nav {
   display: flex;
   gap: 8px;
@@ -341,9 +326,10 @@ nav button:hover:not(.active) {
   color: var(--text);
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 06: CSS — CARD & LIST
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B06: CSS — CARD & LIST
+   ═══════════════════════════════════════════════════════════════════ */
+
 .card {
   background: var(--card);
   border: 1px solid var(--border);
@@ -436,9 +422,10 @@ nav button:hover:not(.active) {
   font-size: 14px;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 07: CSS — FORM & INPUT
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B07: CSS — FORM & INPUT
+   ═══════════════════════════════════════════════════════════════════ */
+
 .field {
   margin-bottom: 16px;
 }
@@ -486,9 +473,10 @@ input[type="checkbox"] {
   cursor: pointer;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 08: CSS — BUTTON
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B08: CSS — BUTTON
+   ═══════════════════════════════════════════════════════════════════ */
+
 button {
   cursor: pointer;
   font-family: inherit;
@@ -548,9 +536,10 @@ button:disabled {
   width: auto;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 09: CSS — TOAST
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B09: CSS — TOAST
+   ═══════════════════════════════════════════════════════════════════ */
+
 .toast {
   position: fixed;
   bottom: 24px;
@@ -564,7 +553,7 @@ button:disabled {
   font-size: 14px;
   z-index: 2000;
   transition: transform 0.3s ease, opacity 0.3s ease;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  box-shadow: var(--shadow-lg);
   max-width: calc(100% - 32px);
   text-align: center;
   opacity: 0;
@@ -583,9 +572,10 @@ button:disabled {
   border-color: var(--danger);
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 10: CSS — INSTALL PROMPT
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B10: CSS — INSTALL PROMPT
+   ═══════════════════════════════════════════════════════════════════ */
+
 #installPrompt {
   position: fixed;
   bottom: 16px;
@@ -668,9 +658,10 @@ button:disabled {
   font-size: 14px;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 11: CSS — OFFLINE BADGE
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B11: CSS — OFFLINE BADGE
+   ═══════════════════════════════════════════════════════════════════ */
+
 .offline-badge {
   display: none;
   background: #7f1d1d;
@@ -685,9 +676,10 @@ body.offline .offline-badge {
   display: block;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 12: CSS — SUBTABS
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B12: CSS — SUBTABS
+   ═══════════════════════════════════════════════════════════════════ */
+
 .subtabs {
   display: flex;
   gap: 6px;
@@ -702,7 +694,7 @@ body.offline .offline-badge {
 }
 
 .subtabs::-webkit-scrollbar-thumb {
-  background: #233158;
+  background: var(--border-2);
   border-radius: 9px;
 }
 
@@ -740,29 +732,105 @@ body.offline .offline-badge {
   animation: fadeIn 0.2s ease;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 13: CSS — PREVIEW INFO
-   ═══════════════════════════════════════════════════════════════ */
-.preview-info {
-  color: var(--muted);
-  font-size: 11.5px;
-  margin-top: 6px;
-  line-height: 1.5;
-  word-break: break-word;
-  min-height: 16px;
+/* ═══════════════════════════════════════════════════════════════════
+   B13: CSS — GROUP PREVIEW BOX (KUNCI KONSISTENSI v5.0)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.group-preview {
+  display: none;
+  margin-top: 8px;
+  background: var(--card-3);
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.55;
 }
 
-.preview-info.ok {
+.group-preview.show {
+  display: block;
+}
+
+.group-preview.ok {
+  border-color: var(--accent);
+}
+
+.group-preview.warn {
+  border-color: var(--warn);
+}
+
+.group-preview.empty {
+  border-color: var(--danger);
+}
+
+.group-preview .gp-header {
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 8px;
+  font-size: 12.5px;
+  letter-spacing: 0.3px;
+}
+
+.group-preview .gp-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 0;
+  border-top: 1px dashed var(--border-2);
+}
+
+.group-preview .gp-row:first-of-type {
+  border-top: none;
+}
+
+.group-preview .gp-label {
+  font-size: 10.5px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-weight: 700;
+}
+
+.group-preview .gp-row.active .gp-label {
   color: var(--accent);
 }
 
-.preview-info.empty {
-  color: #fca5a5;
+.group-preview .gp-row.active .gp-values {
+  color: var(--accent);
+  font-weight: 700;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 14: CSS — PAGINATION & RESULT
-   ═══════════════════════════════════════════════════════════════ */
+.group-preview .gp-values {
+  color: var(--text-dim);
+  word-break: break-word;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 11.5px;
+}
+
+.group-preview .gp-sample .gp-values {
+  color: var(--warn);
+}
+
+.group-preview .gp-empty {
+  color: #fca5a5;
+  font-size: 12px;
+  text-align: center;
+  padding: 6px 0;
+}
+
+.group-preview .gp-hint {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed var(--border-2);
+  color: var(--muted);
+  font-size: 10.5px;
+  font-style: italic;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   B14: CSS — PAGINATION & RESULT BOX
+   ═══════════════════════════════════════════════════════════════════ */
+
 .page-info {
   font-size: 12.5px;
   color: var(--muted);
@@ -875,28 +943,29 @@ body.offline .offline-badge {
 }
 
 /* Utility */
-.mt-10 { margin-top: 10px; }
-.mb-10 { margin-bottom: 10px; }
 .text-muted { color: var(--muted); }
 .text-accent { color: var(--accent); }
+.mb-10 { margin-bottom: 10px; }
+.mt-10 { margin-top: 10px; }
 </style>
 </head>
 
 <body>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     BLOK 15: BODY — OFFLINE BADGE
-     ═══════════════════════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════════════
+     B15: BODY — OFFLINE BADGE
+     ═══════════════════════════════════════════════════════════════════ -->
 <div id="offlineBadge" class="offline-badge">
   ⚠️ Mode Offline — data tersimpan di perangkat
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     BLOK 16: BODY — LOGIN SCREEN
-     ═══════════════════════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════════════
+     B16: BODY — LOGIN SCREEN
+     ═══════════════════════════════════════════════════════════════════ -->
 <div id="loginScreen">
   <form class="login-card" id="loginForm" autocomplete="off">
     <div class="brand-title">SA_HARD</div>
+    <div class="brand-sub">SYSTEM v5.0</div>
     <div class="field">
       <label for="username">Username</label>
       <input type="text" id="username" autocomplete="off" autocapitalize="off" spellcheck="false" required>
@@ -910,9 +979,9 @@ body.offline .offline-badge {
   </form>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     BLOK 17: BODY — APP SHELL
-     ═══════════════════════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════════════
+     B17: BODY — APP SHELL
+     ═══════════════════════════════════════════════════════════════════ -->
 <div id="app" hidden>
   <header>
     <div class="brand">SA_HARD</div>
@@ -931,14 +1000,14 @@ body.offline .offline-badge {
 
   <main>
 
-    <!-- ═══════════════════════════════════════════════════════════
-         BLOK 18: BODY — SECTION MASTER NOMOR
-         ═══════════════════════════════════════════════════════════ -->
+    <!-- ═══════════════════════════════════════════════════════════════
+         B18: BODY — SECTION MASTER NOMOR
+         ═══════════════════════════════════════════════════════════════ -->
     <section id="inputMaster" class="active">
       <h2>📋 Master Nomor</h2>
       <p class="text-muted mb-10" style="font-size:13px;">
-        Data master bawaan 100 nomor (00–99). Bisa <b>Edit</b> atau <b>Hapus</b> per baris.
-        Data ini menjadi sumber semua grup dan filter 2D.
+        Data master <b>100 nomor (00–99) tertanam</b>. Bisa <b>Edit</b> atau <b>Hapus</b> per baris.
+        Data ini sumber semua grup dan filter 2D.
       </p>
 
       <div class="card">
@@ -952,9 +1021,9 @@ body.offline .offline-badge {
       </div>
     </section>
 
-    <!-- ═══════════════════════════════════════════════════════════
-         BLOK 19: BODY — SECTION INPUT 4 ANGKA (dengan 6 subtab)
-         ═══════════════════════════════════════════════════════════ -->
+    <!-- ═══════════════════════════════════════════════════════════════
+         B19: BODY — SECTION INPUT 4 ANGKA + 6 SUBTABS
+         ═══════════════════════════════════════════════════════════════ -->
     <section id="input4Angka">
       <h2>🔢 Input 4 Angka</h2>
 
@@ -967,15 +1036,15 @@ body.offline .offline-badge {
         <button data-subpanel="subpanel-grupCB">Grup + CB</button>
       </div>
 
-      <!-- ═════════════════════════════════════════════════════════
-           BLOK 20: SUBPANEL INPUT MANUAL
-           ═════════════════════════════════════════════════════════ -->
+      <!-- ═════════════════════════════════════════════════════════════
+           B20: SUBPANEL INPUT MANUAL
+           ═════════════════════════════════════════════════════════════ -->
       <div id="subpanel-manual" class="subpanel active">
         <div class="card">
           <h3 style="margin-bottom:6px;">Input Manual Kombinasi 4 Angka</h3>
           <p class="text-muted" style="font-size:12.5px;margin-bottom:12px;">
-            Kombinasi <b>2 depan × 2 belakang</b>. Contoh: depan <code>20 21</code> + belakang <code>01 02</code>
-            → <code>2001*2002*2101*2102*</code>. Tampil 350 angka/halaman.
+            Kombinasi <b>2 depan × 2 belakang</b>. Grup dipakai untuk <b>auto-fill 2 depan</b>
+            dari 2D DEPAN grup. 350 angka/halaman.
           </p>
 
           <div class="field">
@@ -989,15 +1058,15 @@ body.offline .offline-badge {
           </div>
 
           <div class="field">
-            <label for="manualGrup">Pilih Grup (auto-fill 2 depan dari 2D DEPAN grup)</label>
+            <label for="manualGrup">Pilih Grup → 2D DEPAN dipakai untuk auto-fill</label>
             <select id="manualGrup">
               <option value="">— Manual (tanpa grup) —</option>
             </select>
-            <p id="manualPreview" class="preview-info"></p>
+            <div id="manualPreview" class="group-preview"></div>
           </div>
 
           <div class="field">
-            <label for="manualCB">Input CB (opsional — pisah spasi, contoh: 0 1 2 3 5)</label>
+            <label for="manualCB">Input CB (opsional)</label>
             <input type="text" id="manualCB" placeholder="0 1 2 3 5" autocomplete="off">
           </div>
 
@@ -1021,16 +1090,16 @@ body.offline .offline-badge {
         </div>
       </div>
 
-      <!-- ═════════════════════════════════════════════════════════
-           BLOK 21: SUBPANEL BBFS
-           ═════════════════════════════════════════════════════════ -->
+      <!-- ═════════════════════════════════════════════════════════════
+           B21: SUBPANEL BBFS
+           ═════════════════════════════════════════════════════════════ -->
       <div id="subpanel-bbfs" class="subpanel">
         <div class="card">
           <h3 style="margin-bottom:6px;">BBFS — Bolak-Balik (Max 16 Angka)</h3>
           <p class="text-muted" style="font-size:12.5px;margin-bottom:12px;">
-            Input 4–16 digit → semua permutasi 4-digit.
-            <b>Grup = FILTER 2 digit belakang</b> (hanya tampilkan hasil yang 2 digit terakhirnya ada di 2D belakang grup).
-            Input <b>tidak diubah</b> saat pilih grup.
+            Input 4–16 digit → permutasi 4-digit.
+            Grup dipakai sebagai <b>FILTER 2D BELAKANG</b> (hanya tampil hasil yang 2 digit terakhirnya ∈ 2D belakang grup).
+            Input <b>tidak diubah</b>.
           </p>
 
           <div class="field">
@@ -1039,11 +1108,11 @@ body.offline .offline-badge {
           </div>
 
           <div class="field">
-            <label for="bbfsGrup">Pilih Grup (FILTER 2D BELAKANG — tidak mengubah input)</label>
+            <label for="bbfsGrup">Pilih Grup → 2D BELAKANG dipakai sebagai FILTER</label>
             <select id="bbfsGrup">
               <option value="">— Manual (tanpa grup) —</option>
             </select>
-            <p id="bbfsPreview" class="preview-info"></p>
+            <div id="bbfsPreview" class="group-preview"></div>
           </div>
 
           <div class="field">
@@ -1071,15 +1140,16 @@ body.offline .offline-badge {
         </div>
       </div>
 
-      <!-- ═════════════════════════════════════════════════════════
-           BLOK 22: SUBPANEL ANGKA TARUNG (AK)
-           ═════════════════════════════════════════════════════════ -->
+      <!-- ═════════════════════════════════════════════════════════════
+           B22: SUBPANEL ANGKA TARUNG (AK)
+           ═════════════════════════════════════════════════════════════ -->
       <div id="subpanel-angkaTarung" class="subpanel">
         <div class="card">
           <h3 style="margin-bottom:6px;">Angka Tarung (AK) — 4 Posisi Digit</h3>
           <p class="text-muted" style="font-size:12.5px;margin-bottom:12px;">
-            Cross product P1 × P2 × P3 × P4 → 4 digit.
-            <b>Grup = FILTER 2 digit belakang</b>. Input posisi <b>tidak diubah</b> saat pilih grup.
+            Cross product P1 × P2 × P3 × P4.
+            Grup dipakai sebagai <b>FILTER 2D BELAKANG</b>.
+            Input posisi <b>tidak diubah</b> saat pilih grup.
           </p>
 
           <div class="grid-2">
@@ -1102,11 +1172,11 @@ body.offline .offline-badge {
           </div>
 
           <div class="field">
-            <label for="atGrup">Pilih Grup (FILTER 2D BELAKANG — tidak mengubah input)</label>
+            <label for="atGrup">Pilih Grup → 2D BELAKANG dipakai sebagai FILTER</label>
             <select id="atGrup">
               <option value="">— Manual (tanpa grup) —</option>
             </select>
-            <p id="atPreview" class="preview-info"></p>
+            <div id="atPreview" class="group-preview"></div>
           </div>
 
           <div class="field">
@@ -1134,9 +1204,9 @@ body.offline .offline-badge {
         </div>
       </div>
 
-      <!-- ═════════════════════════════════════════════════════════
-           BLOK 23: SUBPANEL CB BBFS
-           ═════════════════════════════════════════════════════════ -->
+      <!-- ═════════════════════════════════════════════════════════════
+           B23: SUBPANEL CB BBFS
+           ═════════════════════════════════════════════════════════════ -->
       <div id="subpanel-cbBBFS" class="subpanel">
         <div class="card">
           <h3 style="margin-bottom:6px;">CB BBFS — Filter BBFS dengan CB</h3>
@@ -1174,27 +1244,27 @@ body.offline .offline-badge {
         </div>
       </div>
 
-      <!-- ═════════════════════════════════════════════════════════
-           BLOK 24: SUBPANEL GABUNG GRUP
-           ═════════════════════════════════════════════════════════ -->
+      <!-- ═════════════════════════════════════════════════════════════
+           B24: SUBPANEL GABUNG GRUP
+           ═════════════════════════════════════════════════════════════ -->
       <div id="subpanel-gabungGrup" class="subpanel">
         <div class="card">
           <h3 style="margin-bottom:6px;">Gabung Grup (Hasil 4 Angka)</h3>
           <p class="text-muted" style="font-size:12.5px;margin-bottom:12px;">
-            <b>Grup 1 = 2D DEPAN</b>, <b>Grup 2 = 2D BELAKANG</b> → cross product → 4 digit.
-            Nomor diambil <b>persis sesuai data Master</b>. <b>Grup boleh sama</b>.
+            <b>Grup 1 = 2D DEPAN</b>, <b>Grup 2 = 2D BELAKANG</b> → cross product 4-digit.
+            Grup boleh sama.
           </p>
 
           <div class="grid-2">
             <div class="field">
               <label for="gabungGrup1">Grup 1 (2D Depan)</label>
               <select id="gabungGrup1"></select>
-              <p id="gabungPreviewDepan" class="preview-info"></p>
+              <div id="gabungPreviewDepan" class="group-preview"></div>
             </div>
             <div class="field">
               <label for="gabungGrup2">Grup 2 (2D Belakang)</label>
               <select id="gabungGrup2"></select>
-              <p id="gabungPreviewBelakang" class="preview-info"></p>
+              <div id="gabungPreviewBelakang" class="group-preview"></div>
             </div>
           </div>
 
@@ -1217,27 +1287,27 @@ body.offline .offline-badge {
         </div>
       </div>
 
-      <!-- ═════════════════════════════════════════════════════════
-           BLOK 25: SUBPANEL GRUP + CB
-           ═════════════════════════════════════════════════════════ -->
+      <!-- ═════════════════════════════════════════════════════════════
+           B25: SUBPANEL GRUP + CB
+           ═════════════════════════════════════════════════════════════ -->
       <div id="subpanel-grupCB" class="subpanel">
         <div class="card">
           <h3 style="margin-bottom:6px;">Grup + CB (Hasil 4 Angka)</h3>
           <p class="text-muted" style="font-size:12.5px;margin-bottom:12px;">
             <b>Grup 1 = 2D DEPAN</b>, <b>Grup 2 = 2D BELAKANG</b> → 4 digit, lalu filter <b>CB</b>.
-            <b>Grup boleh sama</b>.
+            Grup boleh sama.
           </p>
 
           <div class="grid-2">
             <div class="field">
               <label for="grupCB1">Grup 1 (2D Depan)</label>
               <select id="grupCB1"></select>
-              <p id="grupCBPreviewDepan" class="preview-info"></p>
+              <div id="grupCBPreviewDepan" class="group-preview"></div>
             </div>
             <div class="field">
               <label for="grupCB2">Grup 2 (2D Belakang)</label>
               <select id="grupCB2"></select>
-              <p id="grupCBPreviewBelakang" class="preview-info"></p>
+              <div id="grupCBPreviewBelakang" class="group-preview"></div>
             </div>
           </div>
 
@@ -1275,9 +1345,9 @@ body.offline .offline-badge {
 
     </section>
 
-    <!-- ═══════════════════════════════════════════════════════════
-         BLOK 26: BODY — SECTION DATA GRUP
-         ═══════════════════════════════════════════════════════════ -->
+    <!-- ═══════════════════════════════════════════════════════════════
+         B26: BODY — SECTION DATA GRUP
+         ═══════════════════════════════════════════════════════════════ -->
     <section id="dataGrup">
       <h2>🗂️ Data Grup</h2>
       <p class="text-muted mb-10" style="font-size:13px;">
@@ -1286,9 +1356,9 @@ body.offline .offline-badge {
       <div id="grupList"></div>
     </section>
 
-    <!-- ═══════════════════════════════════════════════════════════
-         BLOK 27: BODY — SECTION KONVERSI MANUAL
-         ═══════════════════════════════════════════════════════════ -->
+    <!-- ═══════════════════════════════════════════════════════════════
+         B27a: BODY — SECTION KONVERSI MANUAL
+         ═══════════════════════════════════════════════════════════════ -->
     <section id="konversiManual">
       <h2>🔄 Konversi Manual</h2>
       <div class="card">
@@ -1301,9 +1371,9 @@ body.offline .offline-badge {
       </div>
     </section>
 
-    <!-- ═══════════════════════════════════════════════════════════
-         BLOK 28: BODY — SECTION KONVERSI GRUP
-         ═══════════════════════════════════════════════════════════ -->
+    <!-- ═══════════════════════════════════════════════════════════════
+         B27b: BODY — SECTION KONVERSI GRUP
+         ═══════════════════════════════════════════════════════════════ -->
     <section id="konversiGrup">
       <h2>🔄 Konversi Grup</h2>
       <div class="card">
@@ -1316,9 +1386,9 @@ body.offline .offline-badge {
       </div>
     </section>
 
-    <!-- ═══════════════════════════════════════════════════════════
-         BLOK 29: BODY — SECTION KONVERSI CB
-         ═══════════════════════════════════════════════════════════ -->
+    <!-- ═══════════════════════════════════════════════════════════════
+         B27c: BODY — SECTION KONVERSI CB
+         ═══════════════════════════════════════════════════════════════ -->
     <section id="konversiCB">
       <h2>🔄 Konversi CB (Colok Bebas)</h2>
       <div class="card">
@@ -1331,9 +1401,9 @@ body.offline .offline-badge {
       </div>
     </section>
 
-    <!-- ═══════════════════════════════════════════════════════════
-         BLOK 30: BODY — SECTION KONVERSI AK
-         ═══════════════════════════════════════════════════════════ -->
+    <!-- ═══════════════════════════════════════════════════════════════
+         B27d: BODY — SECTION KONVERSI AK
+         ═══════════════════════════════════════════════════════════════ -->
     <section id="konversiAK">
       <h2>🔄 Konversi AK (Angka Kembar)</h2>
       <div class="card">
@@ -1349,9 +1419,9 @@ body.offline .offline-badge {
   </main>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     BLOK 31: BODY — INSTALL PROMPT
-     ═══════════════════════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════════════
+     B28: BODY — INSTALL PROMPT
+     ═══════════════════════════════════════════════════════════════════ -->
 <div id="installPrompt">
   <div class="icon">📲</div>
   <div class="text">
@@ -1364,25 +1434,25 @@ body.offline .offline-badge {
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     BLOK 32: BODY — TOAST
-     ═══════════════════════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════════════
+     B29: BODY — TOAST
+     ═══════════════════════════════════════════════════════════════════ -->
 <div class="toast" id="toast"></div>
 
 <script>
 "use strict";
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 33: JS — CREDENTIALS
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B30: JS — CREDENTIALS
+   ═══════════════════════════════════════════════════════════════════ */
 const CREDENTIALS = {
   username: 'SA_HARD',
   password: 'MyHand0286'
 };
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 34: JS — SEED MASTER (100 data)
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B31: JS — SEED MASTER (100 data TERTANAM)
+   ═══════════════════════════════════════════════════════════════════ */
 const SEED_MASTER = [
   ["00", "Mati Melahirkan",  "Kematian"],
   ["01", "Setan",            "Figur 1"],
@@ -1486,9 +1556,9 @@ const SEED_MASTER = [
   ["99", "Pasangan",         "Figur 2"]
 ];
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 35: JS — STATE & CONFIG
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B32: JS — STATE & CONFIG
+   ═══════════════════════════════════════════════════════════════════ */
 const LS_MASTER_KEY      = 'sa_master';
 const LS_SEED_VER        = 'sa_seed_version';
 const LS_INSTALL_DISMISS = 'sa_install_dismissed';
@@ -1497,10 +1567,10 @@ const PER_PAGE           = 350;
 const MAX_BBFS_DIGITS    = 16;
 const MAX_AK_DIGITS      = 10;
 
-let master         = [];
-let editingIndex   = -1;
+let master            = [];
+let editingIndex      = -1;
 let lastAutoFillManual = '';
-let deferredPrompt = null;
+let deferredPrompt    = null;
 
 const pageState = {
   manual:      { pages: [], current: 0, meta: '' },
@@ -1522,221 +1592,9 @@ const PAGE_MAP = {
 
 const $ = (id) => document.getElementById(id);
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 36: JS — STORAGE & SEED
-   ═══════════════════════════════════════════════════════════════ */
-function seedToObjects() {
-  const ts = Date.now();
-  return SEED_MASTER.map(([nomor, syair, grup]) => ({
-    nomor,
-    syair,
-    grup,
-    createdAt: ts
-  }));
-}
-
-function loadMaster() {
-  let saved = [];
-  try {
-    saved = JSON.parse(localStorage.getItem(LS_MASTER_KEY) || '[]');
-  } catch (e) {
-    saved = [];
-  }
-
-  if (!Array.isArray(saved)) saved = [];
-
-  const seeded = localStorage.getItem(LS_SEED_VER);
-
-  if (!seeded) {
-    master = seedToObjects();
-    localStorage.setItem(LS_SEED_VER, String(SEED_VERSION));
-    saveMaster();
-  } else {
-    master = saved;
-  }
-}
-
-function saveMaster() {
-  try {
-    localStorage.setItem(LS_MASTER_KEY, JSON.stringify(master));
-  } catch (e) {
-    toast('Gagal menyimpan data', 'error');
-  }
-}
-
-function resetToSeed() {
-  master = seedToObjects();
-  editingIndex = -1;
-  lastAutoFillManual = '';
-  saveMaster();
-  localStorage.setItem(LS_SEED_VER, String(SEED_VERSION));
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 37: JS — HELPER FUNCTIONS
-   ═══════════════════════════════════════════════════════════════ */
-
-/**
- * Escape HTML entities
- */
-function esc(s) {
-  return String(s ?? '').replace(/[&<>"']/g, c => ({
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;'
-  }[c]));
-}
-
-/**
- * Tampilkan toast message
- */
-function toast(msg, type = '') {
-  const t = $('toast');
-  if (!t) return;
-  t.textContent = msg;
-  t.className = 'toast show ' + type;
-  clearTimeout(t._timeout);
-  t._timeout = setTimeout(() => t.classList.remove('show'), 2400);
-}
-
-/**
- * Ambil hanya digit dari string
- */
-function onlyDigits(s) {
-  return String(s ?? '').replace(/\D/g, '');
-}
-
-/**
- * Parse list 2-digit (dipisah spasi/koma/titik-koma/pipe)
- */
-function parseTwoDigitList(str) {
-  return [...new Set(
-    String(str ?? '')
-      .split(/[\s,;|]+/)
-      .map(s => s.trim())
-      .filter(Boolean)
-      .filter(s => /^\d{2}$/.test(s))
-  )];
-}
-
-/**
- * Parse list 1-digit unik terurut
- */
-function parseSingleDigitList(str) {
-  return [...new Set(
-    String(str ?? '').replace(/\D/g, '').split('').filter(Boolean)
-  )].sort();
-}
-
-/**
- * Permutasi 4 digit dari sekumpulan digit unik (tanpa pengulangan indeks)
- */
-function permutasi4DariDigit(digitString) {
-  const digits = onlyDigits(digitString).split('');
-  if (digits.length < 4) return [];
-
-  const result = new Set();
-  const n = digits.length;
-
-  for (let a = 0; a < n; a++) {
-    for (let b = 0; b < n; b++) {
-      if (b === a) continue;
-      for (let c = 0; c < n; c++) {
-        if (c === a || c === b) continue;
-        for (let d = 0; d < n; d++) {
-          if (d === a || d === b || d === c) continue;
-          result.add(digits[a] + digits[b] + digits[c] + digits[d]);
-        }
-      }
-    }
-  }
-
-  return [...result].sort();
-}
-
-/**
- * Permutasi 4 digit dari sebuah nomor 4-digit
- */
-function permutasi4DariNomor(nomor) {
-  const s = String(nomor);
-  if (s.length !== 4) return [s];
-
-  const result = new Set();
-
-  function backtrack(current, remaining) {
-    if (current.length === 4) {
-      result.add(current);
-      return;
-    }
-    for (let i = 0; i < remaining.length; i++) {
-      backtrack(
-        current + remaining[i],
-        remaining.slice(0, i) + remaining.slice(i + 1)
-      );
-    }
-  }
-
-  backtrack('', s);
-  return [...result].sort();
-}
-
-/**
- * Bagi array menjadi halaman-halaman
- */
-function paginateArray(arr, size = PER_PAGE) {
-  const pages = [];
-  for (let i = 0; i < arr.length; i += size) {
-    pages.push(arr.slice(i, i + size));
-  }
-  return pages;
-}
-
-/**
- * Ambil semua nomor dalam grup, sorted
- */
-function getGroupNumbers(grupName) {
-  return master
-    .filter(m => (m.grup || '').trim() === grupName)
-    .sort((a, b) => a.nomor.localeCompare(b.nomor))
-    .map(m => m.nomor);
-}
-
-/**
- * Filter array string berdasarkan digit CB
- */
-function filterByCB(arr, cbDigits, mode = 'or') {
-  const digits = onlyDigits(cbDigits).split('').filter(Boolean);
-  if (!digits.length) return arr;
-
-  if (mode === 'and') {
-    return arr.filter(s => digits.every(d => s.includes(d)));
-  }
-  return arr.filter(s => digits.some(d => s.includes(d)));
-}
-
-/**
- * Normalisasi nomor ke 2-digit depan
- */
-function to2DigitDepan(n) {
-  const s = String(n ?? '').replace(/\D/g, '');
-  if (!s) return '00';
-  return s.padStart(2, '0').slice(0, 2);
-}
-
-/**
- * Normalisasi nomor ke 2-digit belakang
- */
-function to2DigitBelakang(n) {
-  const s = String(n ?? '').replace(/\D/g, '');
-  if (!s) return '00';
-  return s.length >= 2 ? s.slice(-2) : s.padStart(2, '0');
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 38: JS — LOGIN & AUTH
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B33: JS — LOGIN & AUTH
+   ═══════════════════════════════════════════════════════════════════ */
 $('loginForm').addEventListener('submit', (e) => {
   e.preventDefault();
 
@@ -1763,9 +1621,9 @@ $('logoutBtn').addEventListener('click', () => {
   }
 });
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 39: JS — NAVIGATION & TABS
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B34: JS — NAVIGATION & SUBTABS
+   ═══════════════════════════════════════════════════════════════════ */
 document.querySelectorAll('nav button').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
@@ -1787,9 +1645,9 @@ document.querySelectorAll('#subTabs4Angka button').forEach(btn => {
   });
 });
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 40: JS — MASTER RENDER
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B35: JS — MASTER RENDER
+   ═══════════════════════════════════════════════════════════════════ */
 function renderMaster() {
   const list = $('masterList');
   $('masterCount').textContent = master.length;
@@ -1837,9 +1695,9 @@ function renderMaster() {
   });
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 41: JS — GRUP RENDER
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B36: JS — GRUP RENDER
+   ═══════════════════════════════════════════════════════════════════ */
 function renderGrup() {
   const container = $('grupList');
   const grupMap = {};
@@ -1857,9 +1715,22 @@ function renderGrup() {
 
   container.innerHTML = keys.map(k => {
     const items = grupMap[k].slice().sort((a, b) => a.nomor.localeCompare(b.nomor));
+    const depans = [...new Set(items.map(m => to2DigitDepan(m.nomor)))].sort();
+    const belakangs = [...new Set(items.map(m => to2DigitBelakang(m.nomor)))].sort();
+
     return `
       <div class="card">
         <h3 style="margin-bottom:10px;color:var(--accent);">Grup: ${esc(k)} (${items.length})</h3>
+        <div class="group-preview show ok" style="margin-bottom:10px;">
+          <div class="gp-row">
+            <span class="gp-label">2D DEPAN</span>
+            <span class="gp-values">${depans.join(' ')}</span>
+          </div>
+          <div class="gp-row">
+            <span class="gp-label">2D BELAKANG</span>
+            <span class="gp-values">${belakangs.join(' ')}</span>
+          </div>
+        </div>
         <div class="list">
           ${items.map(m => `
             <div class="list-item">
@@ -1874,9 +1745,9 @@ function renderGrup() {
   }).join('');
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 42: JS — CRUD MASTER
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B37: JS — CRUD MASTER
+   ═══════════════════════════════════════════════════════════════════ */
 function handleMasterAction(e) {
   const btn = e.currentTarget;
   const act = btn.dataset.act;
@@ -1938,12 +1809,233 @@ $('resetMasterBtn').addEventListener('click', () => {
   }
 });
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 43: JS — GROUP 2D HELPERS
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B38: JS — STORAGE & SEED
+   ═══════════════════════════════════════════════════════════════════ */
+function seedToObjects() {
+  const ts = Date.now();
+  return SEED_MASTER.map(([nomor, syair, grup]) => ({
+    nomor,
+    syair,
+    grup,
+    createdAt: ts
+  }));
+}
+
+function loadMaster() {
+  let saved = [];
+  try {
+    saved = JSON.parse(localStorage.getItem(LS_MASTER_KEY) || '[]');
+  } catch (e) {
+    saved = [];
+  }
+
+  if (!Array.isArray(saved)) saved = [];
+
+  const seeded = localStorage.getItem(LS_SEED_VER);
+
+  if (!seeded) {
+    master = seedToObjects();
+    localStorage.setItem(LS_SEED_VER, String(SEED_VERSION));
+    saveMaster();
+  } else {
+    master = saved.length ? saved : seedToObjects();
+  }
+}
+
+function saveMaster() {
+  try {
+    localStorage.setItem(LS_MASTER_KEY, JSON.stringify(master));
+  } catch (e) {
+    toast('Gagal menyimpan data', 'error');
+  }
+}
+
+function resetToSeed() {
+  master = seedToObjects();
+  editingIndex = -1;
+  lastAutoFillManual = '';
+  saveMaster();
+  localStorage.setItem(LS_SEED_VER, String(SEED_VERSION));
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   B39: JS — HELPER FUNCTIONS
+   ═══════════════════════════════════════════════════════════════════ */
 
 /**
- * Ambil 2D DEPAN dari grup (slice 0,2)
+ * Escape HTML entities untuk mencegah XSS.
+ * @param {*} s - Nilai apapun akan diubah ke string
+ * @returns {string}
+ */
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[c]));
+}
+
+/**
+ * Tampilkan toast notification selama 2.4 detik.
+ * @param {string} msg  - Pesan
+ * @param {string} type - '' | 'success' | 'error'
+ */
+function toast(msg, type = '') {
+  const t = $('toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  clearTimeout(t._timeout);
+  t._timeout = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+/**
+ * Ambil hanya digit dari string.
+ */
+function onlyDigits(s) {
+  return String(s ?? '').replace(/\D/g, '');
+}
+
+/**
+ * Parse string menjadi array 2-digit unik.
+ * Contoh: "20 21, 22" -> ["20","21","22"]
+ */
+function parseTwoDigitList(str) {
+  return [...new Set(
+    String(str ?? '')
+      .split(/[\s,;|]+/)
+      .map(s => s.trim())
+      .filter(Boolean)
+      .filter(s => /^\d{2}$/.test(s))
+  )];
+}
+
+/**
+ * Parse string menjadi array 1-digit unik terurut.
+ * Contoh: "0 1 2 3 5" -> ["0","1","2","3","5"]
+ */
+function parseSingleDigitList(str) {
+  return [...new Set(
+    String(str ?? '').replace(/\D/g, '').split('').filter(Boolean)
+  )].sort();
+}
+
+/**
+ * Permutasi 4 digit dari sekumpulan digit unik (tanpa pengulangan indeks).
+ * Contoh: "0123" -> 24 hasil (4! = 24)
+ */
+function permutasi4DariDigit(digitString) {
+  const digits = onlyDigits(digitString).split('');
+  if (digits.length < 4) return [];
+
+  const result = new Set();
+  const n = digits.length;
+
+  for (let a = 0; a < n; a++) {
+    for (let b = 0; b < n; b++) {
+      if (b === a) continue;
+      for (let c = 0; c < n; c++) {
+        if (c === a || c === b) continue;
+        for (let d = 0; d < n; d++) {
+          if (d === a || d === b || d === c) continue;
+          result.add(digits[a] + digits[b] + digits[c] + digits[d]);
+        }
+      }
+    }
+  }
+
+  return [...result].sort();
+}
+
+/**
+ * Permutasi 4 digit dari sebuah nomor 4-digit (bisa ada digit kembar).
+ * Contoh: "1122" -> 6 hasil unik
+ */
+function permutasi4DariNomor(nomor) {
+  const s = String(nomor);
+  if (s.length !== 4) return [s];
+
+  const result = new Set();
+
+  function backtrack(current, remaining) {
+    if (current.length === 4) {
+      result.add(current);
+      return;
+    }
+    for (let i = 0; i < remaining.length; i++) {
+      backtrack(
+        current + remaining[i],
+        remaining.slice(0, i) + remaining.slice(i + 1)
+      );
+    }
+  }
+
+  backtrack('', s);
+  return [...result].sort();
+}
+
+/**
+ * Bagi array jadi halaman-halaman.
+ */
+function paginateArray(arr, size = PER_PAGE) {
+  const pages = [];
+  for (let i = 0; i < arr.length; i += size) {
+    pages.push(arr.slice(i, i + size));
+  }
+  return pages;
+}
+
+/**
+ * Filter array string berdasarkan digit CB.
+ * @param {string[]} arr
+ * @param {string} cbDigits - contoh "01235"
+ * @param {string} mode - 'or' (salah satu muncul) | 'and' (semua muncul)
+ */
+function filterByCB(arr, cbDigits, mode = 'or') {
+  const digits = onlyDigits(cbDigits).split('').filter(Boolean);
+  if (!digits.length) return arr;
+
+  if (mode === 'and') {
+    return arr.filter(s => digits.every(d => s.includes(d)));
+  }
+  return arr.filter(s => digits.some(d => s.includes(d)));
+}
+
+/**
+ * Normalisasi nomor ke 2-digit depan (slice 0,2).
+ * Contoh: "20" -> "20", "2" -> "02", "123" -> "12"
+ */
+function to2DigitDepan(n) {
+  const s = String(n ?? '').replace(/\D/g, '');
+  if (!s) return '00';
+  return s.padStart(2, '0').slice(0, 2);
+}
+
+/**
+ * Normalisasi nomor ke 2-digit belakang (slice -2).
+ * Contoh: "20" -> "20", "2" -> "02", "123" -> "23"
+ */
+function to2DigitBelakang(n) {
+  const s = String(n ?? '').replace(/\D/g, '');
+  if (!s) return '00';
+  return s.length >= 2 ? s.slice(-2) : s.padStart(2, '0');
+}
+
+/**
+ * Ambil semua nomor dalam grup, terurut.
+ */
+function getGroupNumbers(grupName) {
+  return master
+    .filter(m => (m.grup || '').trim() === grupName)
+    .sort((a, b) => a.nomor.localeCompare(b.nomor))
+    .map(m => m.nomor);
+}
+
+/**
+ * Ambil 2D DEPAN dari grup (slice 0,2).
  */
 function getGroupAs2DigitDepan(grupName) {
   if (!grupName) return [];
@@ -1953,7 +2045,7 @@ function getGroupAs2DigitDepan(grupName) {
 }
 
 /**
- * Ambil 2D BELAKANG dari grup (slice -2)
+ * Ambil 2D BELAKANG dari grup (slice -2).
  */
 function getGroupAs2DigitBelakang(grupName) {
   if (!grupName) return [];
@@ -1962,140 +2054,88 @@ function getGroupAs2DigitBelakang(grupName) {
   )].sort();
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 44: JS — PREVIEW FUNCTIONS
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B40: JS — GROUP PREVIEW (KUNCI KONSISTENSI v5.0)
+   ───────────────────────────────────────────────────────────────────
+   Fungsi ini adalah SATU-SATUNYA tempat rendering preview grup.
+   Dipakai di semua fitur (Input Manual, BBFS, AK, Gabung, GrupCB).
 
-/**
- * Preview untuk Input Manual — 2D DEPAN
- */
-function updateManualPreview(grupName) {
-  const el = $('manualPreview');
-  if (!el) return;
+   Parameter:
+     - grupName     : nama grup (string)
+     - containerEl  : elemen DOM target preview
+     - activeSide   : 'depan' | 'belakang' | 'both' | null
+                      → yang di-highlight sebagai "dipakai fitur ini"
+     - hint         : teks hint opsional (string)
+   ═══════════════════════════════════════════════════════════════════ */
+function renderGroupPreview(grupName, containerEl, activeSide, hint) {
+  if (!containerEl) return;
 
+  /* Reset */
+  containerEl.className = 'group-preview';
+  containerEl.innerHTML = '';
+
+  /* Tidak ada grup dipilih */
   if (!grupName) {
-    el.textContent = '';
-    el.className = 'preview-info';
     return;
   }
 
   const nums = getGroupNumbers(grupName);
   if (!nums.length) {
-    el.textContent = '⚠️ Grup kosong di master';
-    el.className = 'preview-info empty';
+    containerEl.className = 'group-preview show empty';
+    containerEl.innerHTML = '<div class="gp-empty">⚠️ Grup kosong di master</div>';
     return;
   }
 
-  const depan = getGroupAs2DigitDepan(grupName);
-  el.textContent = `Grup "${grupName}" (${nums.length} nomor) → 2D DEPAN: ${depan.join(' ')}`;
-  el.className = 'preview-info ok';
+  const depans    = getGroupAs2DigitDepan(grupName);
+  const belakangs = getGroupAs2DigitBelakang(grupName);
+
+  /* Sample 4-digit: cross product 2D depan × 2D belakang, ambil 5 pertama */
+  const samples = [];
+  outer:
+  for (const d of depans) {
+    for (const b of belakangs) {
+      samples.push(d + b);
+      if (samples.length >= 5) break outer;
+    }
+  }
+
+  const depanActive    = (activeSide === 'depan'    || activeSide === 'both');
+  const belakangActive = (activeSide === 'belakang' || activeSide === 'both');
+
+  const depanClass    = depanActive    ? 'gp-row active' : 'gp-row';
+  const belakangClass = belakangActive ? 'gp-row active' : 'gp-row';
+
+  const depanLabel    = depanActive    ? '2D DEPAN ← dipakai'    : '2D DEPAN';
+  const belakangLabel = belakangActive ? '2D BELAKANG ← dipakai' : '2D BELAKANG';
+
+  const hintHtml = hint
+    ? `<div class="gp-hint">${esc(hint)}</div>`
+    : '';
+
+  containerEl.className = 'group-preview show ok';
+  containerEl.innerHTML = `
+    <div class="gp-header">Grup "${esc(grupName)}" — ${nums.length} nomor</div>
+    <div class="${depanClass}">
+      <span class="gp-label">${depanLabel}</span>
+      <span class="gp-values">${depans.join(' ')}</span>
+    </div>
+    <div class="${belakangClass}">
+      <span class="gp-label">${belakangLabel}</span>
+      <span class="gp-values">${belakangs.join(' ')}</span>
+    </div>
+    <div class="gp-row gp-sample">
+      <span class="gp-label">Contoh 4-digit</span>
+      <span class="gp-values">${samples.join('*')}${samples.length ? '*' : ''}</span>
+    </div>
+    ${hintHtml}
+  `;
 }
 
-/**
- * Preview untuk BBFS — 2D BELAKANG (filter)
- */
-function updateBBFSPreview(grupName) {
-  const el = $('bbfsPreview');
-  if (!el) return;
-
-  if (!grupName) {
-    el.textContent = '';
-    el.className = 'preview-info';
-    return;
-  }
-
-  const nums = getGroupNumbers(grupName);
-  if (!nums.length) {
-    el.textContent = '⚠️ Grup kosong di master';
-    el.className = 'preview-info empty';
-    return;
-  }
-
-  const ends = getGroupAs2DigitBelakang(grupName);
-  el.textContent = `Grup "${grupName}" (${nums.length} nomor) → 2D BELAKANG: ${ends.join(' ')} — FILTER akhiran BBFS`;
-  el.className = 'preview-info ok';
-}
-
-/**
- * Preview untuk Angka Tarung — 2D BELAKANG (filter)
- */
-function updateATPreview(grupName) {
-  const el = $('atPreview');
-  if (!el) return;
-
-  if (!grupName) {
-    el.textContent = '';
-    el.className = 'preview-info';
-    return;
-  }
-
-  const nums = getGroupNumbers(grupName);
-  if (!nums.length) {
-    el.textContent = '⚠️ Grup kosong di master';
-    el.className = 'preview-info empty';
-    return;
-  }
-
-  const ends = getGroupAs2DigitBelakang(grupName);
-  el.textContent = `Grup "${grupName}" (${nums.length} nomor) → 2D BELAKANG: ${ends.join(' ')} — FILTER akhiran AK`;
-  el.className = 'preview-info ok';
-}
-
-/**
- * Preview umum untuk 2D depan (Gabung Grup & Grup+CB)
- */
-function updatePreviewDepan(g, el) {
-  if (!el) return;
-
-  if (!g) {
-    el.textContent = '';
-    el.className = 'preview-info';
-    return;
-  }
-
-  const nums = getGroupNumbers(g);
-  if (!nums.length) {
-    el.textContent = '⚠️ Grup kosong di master';
-    el.className = 'preview-info empty';
-    return;
-  }
-
-  const vals = getGroupAs2DigitDepan(g);
-  el.textContent = `Grup "${g}" (${nums.length} nomor) → 2D DEPAN: ${vals.join(' ')}`;
-  el.className = 'preview-info ok';
-}
-
-/**
- * Preview umum untuk 2D belakang (Gabung Grup & Grup+CB)
- */
-function updatePreviewBelakang(g, el) {
-  if (!el) return;
-
-  if (!g) {
-    el.textContent = '';
-    el.className = 'preview-info';
-    return;
-  }
-
-  const nums = getGroupNumbers(g);
-  if (!nums.length) {
-    el.textContent = '⚠️ Grup kosong di master';
-    el.className = 'preview-info empty';
-    return;
-  }
-
-  const vals = getGroupAs2DigitBelakang(g);
-  el.textContent = `Grup "${g}" (${nums.length} nomor) → 2D BELAKANG: ${vals.join(' ')}`;
-  el.className = 'preview-info ok';
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 45: JS — INPUT MANUAL GENERATOR
-   ═══════════════════════════════════════════════════════════════ */
-
-/**
- * Ganti grup → auto-fill 2 depan (non-destructive)
- */
+/* ═══════════════════════════════════════════════════════════════════
+   B41: JS — INPUT MANUAL GENERATOR
+   ───────────────────────────────────────────────────────────────────
+   Grup → auto-fill 2 DEPAN dari 2D DEPAN grup (non-destructive).
+   ═══════════════════════════════════════════════════════════════════ */
 $('manualGrup').addEventListener('change', () => {
   const g = $('manualGrup').value;
   const depanInput = $('manualDepan');
@@ -2110,7 +2150,13 @@ $('manualGrup').addEventListener('change', () => {
     }
   }
 
-  updateManualPreview(g);
+  renderGroupPreview(
+    g,
+    $('manualPreview'),
+    'depan',
+    'Grup digunakan untuk auto-fill 2 depan. 2 belakang tetap dari input Anda.'
+  );
+
   updateManualInfo();
 });
 
@@ -2147,6 +2193,7 @@ $('manualGenerateBtn').addEventListener('click', () => {
   const cb       = parseSingleDigitList($('manualCB').value);
   const cbMode   = $('manualCBMode').value;
 
+  /* Ambil depan dari grup jika grup dipilih, selain itu dari input */
   const depan = grup
     ? getGroupAs2DigitDepan(grup)
     : parseTwoDigitList($('manualDepan').value);
@@ -2154,6 +2201,7 @@ $('manualGenerateBtn').addEventListener('click', () => {
   if (!depan.length)    { toast('Isi 2 depan atau pilih grup', 'error'); return; }
   if (!belakang.length) { toast('Isi 2 belakang', 'error'); return; }
 
+  /* Cross product */
   const combos = [];
   for (const d of depan) {
     for (const b of belakang) {
@@ -2179,9 +2227,11 @@ $('manualGenerateBtn').addEventListener('click', () => {
   toast(`Berhasil: ${filtered.length.toLocaleString('id-ID')} kombinasi`, 'success');
 });
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 46: JS — BBFS GENERATOR
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B42: JS — BBFS GENERATOR
+   ───────────────────────────────────────────────────────────────────
+   Grup = FILTER 2D BELAKANG. Input TIDAK diubah saat pilih grup.
+   ═══════════════════════════════════════════════════════════════════ */
 $('bbfsInput').addEventListener('input', (e) => {
   e.target.value = onlyDigits(e.target.value).slice(0, MAX_BBFS_DIGITS);
   updateBBFSInfo();
@@ -2190,7 +2240,12 @@ $('bbfsCB').addEventListener('input', updateBBFSInfo);
 $('bbfsCBMode').addEventListener('change', updateBBFSInfo);
 
 $('bbfsGrup').addEventListener('change', () => {
-  updateBBFSPreview($('bbfsGrup').value);
+  renderGroupPreview(
+    $('bbfsGrup').value,
+    $('bbfsPreview'),
+    'belakang',
+    'Grup dipakai sebagai FILTER 2D belakang. Input BBFS Anda tidak diubah.'
+  );
   updateBBFSInfo();
 });
 
@@ -2210,7 +2265,7 @@ function updateBBFSInfo() {
   const pages = Math.ceil(total / PER_PAGE);
 
   let text = `BBFS: ${total.toLocaleString('id-ID')} kombinasi • ${pages} halaman`;
-  if (grup) text += ` • FILTER 2D belakang grup "${grup}"`;
+  if (grup) text += ` • FILTER 2D belakang: "${grup}"`;
   if (cb)   text += ` • CB: ${cb.split('').join(' ')}`;
 
   info.textContent = text;
@@ -2229,6 +2284,7 @@ $('bbfsGenerateBtn').addEventListener('click', () => {
   const totalAwal = all.length;
   if (!all.length) { toast('Tidak ada kombinasi', 'error'); return; }
 
+  /* Filter grup: hanya hasil yang 2 digit terakhir ∈ 2D belakang grup */
   if (grup) {
     const ends = getGroupAs2DigitBelakang(grup);
     if (!ends.length) { toast(`Grup "${grup}" kosong di master`, 'error'); return; }
@@ -2236,6 +2292,7 @@ $('bbfsGenerateBtn').addEventListener('click', () => {
     if (!all.length) { toast(`Tidak ada hasil yang 2D belakang ∈ grup "${grup}"`, 'error'); return; }
   }
 
+  /* Filter CB */
   if (cb) {
     all = filterByCB(all, cb, cbMode);
     if (!all.length) { toast('Tidak ada hasil setelah CB', 'error'); return; }
@@ -2256,9 +2313,11 @@ $('bbfsGenerateBtn').addEventListener('click', () => {
   toast(`Berhasil: ${all.length.toLocaleString('id-ID')} dari ${totalAwal.toLocaleString('id-ID')}`, 'success');
 });
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 47: JS — ANGKA TARUNG GENERATOR
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B43: JS — ANGKA TARUNG GENERATOR
+   ───────────────────────────────────────────────────────────────────
+   Grup = FILTER 2D BELAKANG. Input posisi TIDAK diubah.
+   ═══════════════════════════════════════════════════════════════════ */
 ['atDigit1', 'atDigit2', 'atDigit3', 'atDigit4'].forEach(id => {
   $(id).addEventListener('input', (e) => {
     e.target.value = onlyDigits(e.target.value).slice(0, MAX_AK_DIGITS);
@@ -2269,7 +2328,12 @@ $('atCB').addEventListener('input', updateATInfo);
 $('atCBMode').addEventListener('change', updateATInfo);
 
 $('atGrup').addEventListener('change', () => {
-  updateATPreview($('atGrup').value);
+  renderGroupPreview(
+    $('atGrup').value,
+    $('atPreview'),
+    'belakang',
+    'Grup dipakai sebagai FILTER 2D belakang. Input posisi AK Anda tidak diubah.'
+  );
   updateATInfo();
 });
 
@@ -2291,7 +2355,7 @@ function updateATInfo() {
   const pages = Math.ceil(total / PER_PAGE);
 
   let text = `P1:${p1.length} P2:${p2.length} P3:${p3.length} P4:${p4.length} • ${total.toLocaleString('id-ID')} kombinasi • ${pages} halaman`;
-  if (grup)      text += ` • FILTER 2D belakang grup "${grup}"`;
+  if (grup)      text += ` • FILTER 2D belakang: "${grup}"`;
   if (cb.length) text += ` • CB: ${cb.join(' ')}`;
 
   info.textContent = text;
@@ -2325,6 +2389,7 @@ $('atGenerateBtn').addEventListener('click', () => {
   const totalAwal = results.length;
   let filtered = results;
 
+  /* Filter grup: 2D belakang */
   if (grup) {
     const ends = getGroupAs2DigitBelakang(grup);
     if (!ends.length) { toast(`Grup "${grup}" kosong di master`, 'error'); return; }
@@ -2332,6 +2397,7 @@ $('atGenerateBtn').addEventListener('click', () => {
     if (!filtered.length) { toast(`Tidak ada hasil yang 2D belakang ∈ grup "${grup}"`, 'error'); return; }
   }
 
+  /* Filter CB */
   if (cb.length) {
     filtered = filterByCB(filtered, cb.join(''), cbMode);
     if (!filtered.length) { toast('Tidak ada hasil setelah CB', 'error'); return; }
@@ -2354,9 +2420,9 @@ $('atGenerateBtn').addEventListener('click', () => {
   toast(`Berhasil: ${filtered.length.toLocaleString('id-ID')} dari ${totalAwal.toLocaleString('id-ID')}`, 'success');
 });
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 48: JS — CB BBFS GENERATOR
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B44: JS — CB BBFS GENERATOR
+   ═══════════════════════════════════════════════════════════════════ */
 $('cbBBFSInput').addEventListener('input', (e) => {
   e.target.value = onlyDigits(e.target.value).slice(0, MAX_BBFS_DIGITS);
   updateCBBFFSInfo();
@@ -2399,9 +2465,11 @@ $('cbBBFSGenerateBtn').addEventListener('click', () => {
   toast(`Berhasil: ${filtered.length} dari ${all.length}`, 'success');
 });
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 49: JS — GABUNG GRUP GENERATOR
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B45: JS — GABUNG GRUP GENERATOR
+   ───────────────────────────────────────────────────────────────────
+   G1 = 2D DEPAN, G2 = 2D BELAKANG. Grup boleh sama.
+   ═══════════════════════════════════════════════════════════════════ */
 function crossProduct4Digit(depans, belakangs, withPerm) {
   const combos = [];
   for (const d of depans) {
@@ -2428,8 +2496,8 @@ function updateGabungInfo() {
   const perm = $('gabungPermutasi').checked;
   const info = $('gabungInfo');
 
-  updatePreviewDepan(g1, $('gabungPreviewDepan'));
-  updatePreviewBelakang(g2, $('gabungPreviewBelakang'));
+  renderGroupPreview(g1, $('gabungPreviewDepan'), 'depan',    'Grup 1 → 2D DEPAN');
+  renderGroupPreview(g2, $('gabungPreviewBelakang'), 'belakang', 'Grup 2 → 2D BELAKANG');
 
   if (!g1 || !g2) {
     info.textContent = 'Info: pilih 2 grup';
@@ -2491,9 +2559,11 @@ $('gabungGenerateBtn').addEventListener('click', () => {
   toast(`Berhasil: ${results.length.toLocaleString('id-ID')} kombinasi`, 'success');
 });
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 50: JS — GRUP + CB GENERATOR
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B46: JS — GRUP + CB GENERATOR
+   ───────────────────────────────────────────────────────────────────
+   G1 = 2D DEPAN, G2 = 2D BELAKANG + filter CB.
+   ═══════════════════════════════════════════════════════════════════ */
 $('grupCB1').addEventListener('change', updateGrupCBInfo);
 $('grupCB2').addEventListener('change', updateGrupCBInfo);
 $('grupCBDigits').addEventListener('input', updateGrupCBInfo);
@@ -2507,8 +2577,8 @@ function updateGrupCBInfo() {
   const perm = $('grupCBPermutasi').checked;
   const info = $('grupCBInfo');
 
-  updatePreviewDepan(g1, $('grupCBPreviewDepan'));
-  updatePreviewBelakang(g2, $('grupCBPreviewBelakang'));
+  renderGroupPreview(g1, $('grupCBPreviewDepan'),    'depan',    'Grup 1 → 2D DEPAN');
+  renderGroupPreview(g2, $('grupCBPreviewBelakang'), 'belakang', 'Grup 2 → 2D BELAKANG');
 
   if (!g1 || !g2) {
     info.textContent = 'Info: pilih 2 grup';
@@ -2581,9 +2651,9 @@ $('grupCBGenerateBtn').addEventListener('click', () => {
   toast(`Berhasil: ${filtered.length.toLocaleString('id-ID')} dari ${results.length.toLocaleString('id-ID')}`, 'success');
 });
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 51: JS — PAGINATION RENDER
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B47: JS — PAGINATION RENDER
+   ═══════════════════════════════════════════════════════════════════ */
 function renderPagination(containerId, stateKey, labelPrefix) {
   const state = pageState[stateKey];
   const container = $(containerId);
@@ -2625,9 +2695,9 @@ function renderPagination(containerId, stateKey, labelPrefix) {
   `;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 52: JS — PAGE NAVIGATION
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B48: JS — PAGE NAVIGATION
+   ═══════════════════════════════════════════════════════════════════ */
 window.goPage = function(stateKey, delta) {
   const state = pageState[stateKey];
   if (!state.pages.length) return;
@@ -2656,9 +2726,9 @@ window.jumpPage = function(stateKey) {
   renderPagination(containerId, stateKey, label);
 };
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 53: JS — COPY & EXPORT
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B49: JS — COPY & EXPORT
+   ═══════════════════════════════════════════════════════════════════ */
 async function copyTextToClipboard(text) {
   try {
     await navigator.clipboard.writeText(text);
@@ -2714,9 +2784,9 @@ window.exportPages = function(stateKey) {
   toast('File diexport', 'success');
 };
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 54: JS — KONVERSI MANUAL
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B50: JS — KONVERSI MANUAL
+   ═══════════════════════════════════════════════════════════════════ */
 $('convertManualBtn').addEventListener('click', () => {
   const n = $('manualInput').value.trim();
   if (!/^\d+$/.test(n)) { toast('Masukkan angka valid', 'error'); return; }
@@ -2738,9 +2808,9 @@ $('convertManualBtn').addEventListener('click', () => {
     `🎲 2D           : ${n.slice(-2)}`;
 });
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 55: JS — KONVERSI GRUP
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B51: JS — KONVERSI GRUP
+   ═══════════════════════════════════════════════════════════════════ */
 $('convertGrupBtn').addEventListener('click', () => {
   const n = $('grupInput').value.trim();
   if (!n) { toast('Masukkan nomor', 'error'); return; }
@@ -2767,9 +2837,9 @@ $('convertGrupBtn').addEventListener('click', () => {
   }
 });
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 56: JS — KONVERSI CB
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B52: JS — KONVERSI CB
+   ═══════════════════════════════════════════════════════════════════ */
 $('convertCBBtn').addEventListener('click', () => {
   const n = $('cbInput').value.trim();
   if (!/^\d+$/.test(n)) { toast('Masukkan angka valid', 'error'); return; }
@@ -2791,9 +2861,9 @@ $('convertCBBtn').addEventListener('click', () => {
     `🔗 Kombinasi 2D:\n${pairs.slice(0, 12).join(', ') || '-'}`;
 });
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 57: JS — KONVERSI AK
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B53: JS — KONVERSI AK
+   ═══════════════════════════════════════════════════════════════════ */
 $('convertAKBtn').addEventListener('click', () => {
   const n = $('akInput').value.trim();
   if (!/^\d+$/.test(n)) { toast('Masukkan angka valid', 'error'); return; }
@@ -2823,9 +2893,9 @@ $('convertAKBtn').addEventListener('click', () => {
   $('akResult').textContent = out;
 });
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 58: JS — PWA INSTALL
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B54: JS — PWA INSTALL
+   ═══════════════════════════════════════════════════════════════════ */
 const installPromptEl = $('installPrompt');
 
 if ('serviceWorker' in navigator) {
@@ -2867,9 +2937,9 @@ window.addEventListener('appinstalled', () => {
   toast('Aplikasi berhasil diinstall', 'success');
 });
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 59: JS — OFFLINE DETECT
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B55: JS — OFFLINE DETECT
+   ═══════════════════════════════════════════════════════════════════ */
 function updateOnlineStatus() {
   document.body.classList.toggle('offline', !navigator.onLine);
 }
@@ -2878,9 +2948,9 @@ window.addEventListener('online',  updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
 updateOnlineStatus();
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 60: JS — DROPDOWN REFRESH
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B56: JS — REFRESH DROPDOWN
+   ═══════════════════════════════════════════════════════════════════ */
 function grupMapWithCount() {
   const map = {};
   master.forEach(m => {
@@ -2930,19 +3000,29 @@ function refreshGrupDropdowns() {
   });
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 61: JS — REFRESH ALL
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B57: JS — REFRESH ALL
+   ═══════════════════════════════════════════════════════════════════ */
 function refreshAll() {
   renderMaster();
   renderGrup();
   refreshGrupDropdowns();
 
-  /* Refresh semua preview & info */
-  updateManualPreview($('manualGrup').value);
-  updateBBFSPreview($('bbfsGrup').value);
-  updateATPreview($('atGrup').value);
+  /* Refresh semua preview grup */
+  renderGroupPreview(
+    $('manualGrup').value, $('manualPreview'), 'depan',
+    'Grup digunakan untuk auto-fill 2 depan.'
+  );
+  renderGroupPreview(
+    $('bbfsGrup').value, $('bbfsPreview'), 'belakang',
+    'Grup dipakai sebagai FILTER 2D belakang.'
+  );
+  renderGroupPreview(
+    $('atGrup').value, $('atPreview'), 'belakang',
+    'Grup dipakai sebagai FILTER 2D belakang.'
+  );
 
+  /* Refresh semua info */
   updateManualInfo();
   updateBBFSInfo();
   updateATInfo();
@@ -2951,9 +3031,9 @@ function refreshAll() {
   updateCBBFFSInfo();
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 62: JS — ENTER KEY HANDLERS
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B58: JS — ENTER KEY HANDLERS
+   ═══════════════════════════════════════════════════════════════════ */
 ['manualInput', 'grupInput', 'cbInput', 'akInput'].forEach(id => {
   $(id).addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
@@ -2968,9 +3048,9 @@ function refreshAll() {
   });
 });
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 63: JS — SESSION RESTORE
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   B59: JS — SESSION RESTORE
+   ═══════════════════════════════════════════════════════════════════ */
 if (sessionStorage.getItem('sa_logged_in') === '1') {
   $('loginScreen').style.display = 'none';
   $('app').hidden = false;
@@ -2978,11 +3058,98 @@ if (sessionStorage.getItem('sa_logged_in') === '1') {
   refreshAll();
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   BLOK 64: JS — END OF FILE
-   ═══════════════════════════════════════════════════════════════ */
-console.log('%c SA_HARD v4.0 ', 'background:#22d3ee;color:#04101c;font-weight:bold;padding:4px 8px;border-radius:4px;');
+/* ═══════════════════════════════════════════════════════════════════
+   B60: JS — BOOT / END
+   ═══════════════════════════════════════════════════════════════════ */
+console.log(
+  '%c SA_HARD v5.0 ',
+  'background:#22d3ee;color:#04101c;font-weight:bold;padding:4px 8px;border-radius:4px;'
+);
 console.log('Ready • Master:', master.length, 'records');
+console.log('Konsistensi grup: 2D DEPAN + 2D BELAKANG di semua fitur ✅');
+
+/* ═══════════════════════════════════════════════════════════════════
+   B61: APPENDIX A — FONTS
+   ═══════════════════════════════════════════════════════════════════
+   Font yang dipakai:
+   • system-ui      → default untuk body
+   • ui-monospace   → untuk angka (hasil, kode, konversi)
+   • Fallback: -apple-system, Segoe UI, Roboto, SF Mono, Menlo, Consolas
+
+   Tidak perlu import Google Fonts (PWA offline-friendly).
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════
+   B62: APPENDIX B — LICENSE
+   ═══════════════════════════════════════════════════════════════════
+   SA_HARD System v5.0
+   Copyright © 2026
+   
+   Licensed for personal use only.
+   Tidak untuk didistribusikan tanpa izin.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════
+   B63: APPENDIX C — CHANGELOG
+   ═══════════════════════════════════════════════════════════════════
+   v5.0 (2026) — FINAL
+     • Preview grup KONSISTEN: 2D DEPAN + 2D BELAKANG + contoh 4-digit
+     • renderGroupPreview() sebagai satu-satunya renderer preview
+     • Input Manual: auto-fill 2 depan (non-destructive)
+     • BBFS: FILTER 2D BELAKANG (input tidak diubah)
+     • AK: FILTER 2D BELAKANG (input tidak diubah)
+     • Gabung Grup: G1=2D depan, G2=2D belakang, grup boleh sama
+     • Grup+CB: G1=2D depan, G2=2D belakang + filter CB
+     • Master 100 nomor tertanam (SEED_MASTER)
+     • PWA install + offline detect
+     • Session restore
+     • Konversi 4 panel (Manual/Grup/CB/AK)
+     • Enter key handler di 4 input konversi
+
+   v3.9 (sebelumnya)
+     • Preview verifikasi 2D (partial)
+     • BBFS/AK pakai filter 2D belakang
+     
+   v3.6 (sebelumnya)
+     • Grup boleh sama
+     • Auto-fill non-destructive
+     • PWA + offline
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════
+   B64: APPENDIX D — TESTING CHECKLIST
+   ═══════════════════════════════════════════════════════════════════
+   [ ] Login SA_HARD / MyHand0286
+   [ ] Master 100 nomor muncul
+   [ ] Edit nomor → dropdown grup refresh
+   [ ] Hapus nomor → preview grup jadi merah jika kosong
+   [ ] Reset → 100 nomor kembali
+   [ ] Input Manual: pilih grup → 2 depan auto-fill
+   [ ] Input Manual: generate → pagination 350
+   [ ] Input Manual: CB OR & AND berbeda
+   [ ] BBFS: input "0123456789" → 5040 kombinasi
+   [ ] BBFS: pilih grup → preview 2D depan+belakang+sample
+   [ ] BBFS: generate → hanya hasil yang 2D belakang ∈ grup
+   [ ] BBFS: input tidak berubah saat ganti grup
+   [ ] AK: isi 4 posisi → cross product
+   [ ] AK: pilih grup → filter 2D belakang
+   [ ] AK: input tidak berubah saat ganti grup
+   [ ] Gabung Grup: G1=G2 → diizinkan
+   [ ] Gabung Grup: preview 2D depan & belakang benar
+   [ ] Gabung Grup: permutasi ON/OFF berbeda jumlah
+   [ ] Grup+CB: sama seperti Gabung + filter CB
+   [ ] Konversi Manual: hasil lengkap
+   [ ] Konversi Grup: nomor ada / tidak ada
+   [ ] Konversi CB: CB unik + 2D
+   [ ] Konversi AK: digit unik + kembar
+   [ ] Enter key di 4 input konversi → trigger
+   [ ] Copy halaman / copy semua / export TXT
+   [ ] Jump ke halaman invalid → toast error
+   [ ] Offline badge muncul saat disconnect
+   [ ] PWA install prompt muncul (setelah 3 detik)
+   [ ] Dismiss install → tidak muncul lagi
+   [ ] Session restore: reload → tetap login
+   ═══════════════════════════════════════════════════════════════════ */
 </script>
 </body>
 </html>
