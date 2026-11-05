@@ -5,7 +5,7 @@
 ╔══════════════════════════════════════════════════════════════════╗
 ║  SA_HARD SYSTEM — INDEX BLOK KODE                                ║
 ║  File  : index.html                                              ║
-║  Versi : 3.2 (BBFS + Grup auto-fill + CB filter)                 ║
+║  Versi : 3.4 (Angka Tarung AK + Grup 4-digit + CB)               ║
 ╠══════════════════════════════════════════════════════════════════╣
 ║  BLOK 01  HEAD & META                                            ║
 ║  BLOK 02  CSS — VARIABEL & RESET                                 ║
@@ -31,15 +31,15 @@
 ║  BLOK 22  BODY — TOAST                                           ║
 ║  BLOK 23  JS — CREDENTIALS                                       ║
 ║  BLOK 24  JS — SEED_MASTER (100 data)                            ║
-║  BLOK 25  JS — STATE & HELPERS                                   ║
+║  BLOK 25  JS — STATE & HELPERS (+angkaTarung)                    ║
 ║  BLOK 26  JS — STORAGE & SEED                                    ║
 ║  BLOK 27  JS — LOGIN & AUTH                                      ║
-║  BLOK 28  JS — NAVIGATION (nav utama + sub-tab)                  ║
+║  BLOK 28  JS — NAVIGATION                                        ║
 ║  BLOK 29  JS — RENDER MASTER                                     ║
-║  BLOK 30  JS — (kosong — renderAngka sudah tidak dipakai)        ║
+║  BLOK 30  JS — (kosong)                                          ║
 ║  BLOK 31  JS — RENDER GRUP                                       ║
 ║  BLOK 32  JS — CRUD MASTER                                       ║
-║  BLOK 33  JS — GENERATOR INPUT MANUAL (2 depan × 2 belakang)     ║
+║  BLOK 33  JS — GENERATOR INPUT MANUAL                            ║
 ║  BLOK 34  JS — KONVERSI MANUAL                                   ║
 ║  BLOK 35  JS — KONVERSI GRUP                                     ║
 ║  BLOK 36  JS — KONVERSI CB                                       ║
@@ -48,17 +48,17 @@
 ║  BLOK 39  JS — OFFLINE DETECT                                    ║
 ║  BLOK 40  JS — AUTO INIT + isi dropdown grup                     ║
 ║  BLOK 41  CSS — SUB-TAB & PAGINATION                             ║
-║  BLOK 42  BODY — SUB-TAB INPUT 4 ANGKA                           ║
+║  BLOK 42  BODY — SUB-TAB INPUT 4 ANGKA (AK gantikan Grup BBFS)   ║
 ║  BLOK 43  BODY — SUBPANEL INPUT MANUAL                           ║
-║  BLOK 44  BODY — SUBPANEL BBFS (+ grup + CB)                     ║
-║  BLOK 45  BODY — SUBPANEL GRUP BBFS                              ║
+║  BLOK 44  BODY — SUBPANEL BBFS                                   ║
+║  BLOK 45  BODY — SUBPANEL ANGKA TARUNG (AK) — 4 posisi + grup+CB ║
 ║  BLOK 46  BODY — SUBPANEL CB BBFS                                ║
-║  BLOK 47  BODY — SUBPANEL GABUNG GRUP                            ║
-║  BLOK 48  BODY — SUBPANEL GRUP + CB                              ║
+║  BLOK 47  BODY — SUBPANEL GABUNG GRUP (4-digit cross product)    ║
+║  BLOK 48  BODY — SUBPANEL GRUP + CB (4-digit + CB filter)        ║
 ║  BLOK 49  JS — HELPER PERMUTASI / PARSE / PAGINATION             ║
-║  BLOK 50  JS — LOGIKA BBFS (+ grup + CB)                         ║
-║  BLOK 51  JS — LOGIKA GRUP BBFS & CB BBFS                        ║
-║  BLOK 52  JS — LOGIKA GABUNG GRUP & GRUP + CB                    ║
+║  BLOK 50  JS — LOGIKA BBFS                                       ║
+║  BLOK 51  JS — LOGIKA ANGKA TARUNG (AK) + CB BBFS                ║
+║  BLOK 52  JS — LOGIKA GABUNG GRUP & GRUP + CB (4-digit)          ║
 ║  BLOK 53  JS — COPY / EXPORT / END OF FILE                       ║
 ╚══════════════════════════════════════════════════════════════════╝
 -->
@@ -378,7 +378,7 @@ body.offline .offline-badge { display: block; }
       <div class="subtabs" id="subTabs4Angka">
         <button data-subpanel="subpanel-manual" class="active">Input Manual</button>
         <button data-subpanel="subpanel-bbfs">BBFS</button>
-        <button data-subpanel="subpanel-gruppbbfs">Grup BBFS</button>
+        <button data-subpanel="subpanel-angkaTarung">Angka Tarung (AK)</button>
         <button data-subpanel="subpanel-cbBBFS">CB BBFS</button>
         <button data-subpanel="subpanel-gabungGrup">Gabung Grup</button>
         <button data-subpanel="subpanel-grupCB">Grup + CB</button>
@@ -439,7 +439,7 @@ body.offline .offline-badge { display: block; }
         <div class="card">
           <h3 style="margin-bottom:6px;">BBFS — Bolak-Balik (Max 16 Angka)</h3>
           <p style="color:var(--muted);font-size:12.5px;margin-bottom:12px;">
-            Masukkan 4–16 digit. Akan di-generate semua permutasi 4-digit, dipisah <b>*</b>, 350 angka per halaman. Bisa juga auto-isi dari <b>Grup</b> dan filter dengan <b>CB</b>.
+            Masukkan 4–16 digit. Akan di-generate semua permutasi 4-digit, dipisah <b>*</b>, 350 angka per halaman. Bisa auto-isi dari <b>Grup</b> dan filter dengan <b>CB</b>.
           </p>
 
           <div class="field">
@@ -448,7 +448,7 @@ body.offline .offline-badge { display: block; }
           </div>
 
           <div class="field">
-            <label for="bbfsGrup">Pilih Grup (isi otomatis BBFS dari 2D awal grup)</label>
+            <label for="bbfsGrup">Pilih Grup (auto-isi BBFS dari digit grup)</label>
             <select id="bbfsGrup">
               <option value="">— Manual (tanpa grup) —</option>
             </select>
@@ -478,28 +478,61 @@ body.offline .offline-badge { display: block; }
         </div>
       </div>
 
-      <!-- BLOK 45: SUBPANEL GRUP BBFS -->
-      <div id="subpanel-gruppbbfs" class="subpanel">
+      <!-- BLOK 45: SUBPANEL ANGKA TARUNG (AK) — 4 posisi + grup + CB -->
+      <div id="subpanel-angkaTarung" class="subpanel">
         <div class="card">
-          <h3 style="margin-bottom:6px;">Grup BBFS</h3>
+          <h3 style="margin-bottom:6px;">Angka Tarung (AK) — 4 Posisi Digit</h3>
           <p style="color:var(--muted);font-size:12.5px;margin-bottom:12px;">
-            Ambil semua nomor dari grup terpilih. Opsional: aktifkan permutasi bolak-balik untuk nomor 4-digit. 350 angka/halaman.
+            Isi masing-masing posisi (maks 10 digit 0–9). Hasil = cross product posisi 1 × 2 × 3 × 4, contoh <code>1234*</code>. Tampil 350 angka/halaman. Bisa auto-isi dari <b>Grup</b> dan filter dengan <b>CB</b>.
           </p>
+
+          <div class="grid-2">
+            <div class="field">
+              <label for="atDigit1">Digit 1 (Posisi Pertama)</label>
+              <input type="text" id="atDigit1" placeholder="0123456789" maxlength="10" inputmode="numeric">
+            </div>
+            <div class="field">
+              <label for="atDigit2">Digit 2 (Posisi Kedua)</label>
+              <input type="text" id="atDigit2" placeholder="0123456789" maxlength="10" inputmode="numeric">
+            </div>
+            <div class="field">
+              <label for="atDigit3">Digit 3 (Posisi Ketiga)</label>
+              <input type="text" id="atDigit3" placeholder="0123456789" maxlength="10" inputmode="numeric">
+            </div>
+            <div class="field">
+              <label for="atDigit4">Digit 4 (Posisi Keempat)</label>
+              <input type="text" id="atDigit4" placeholder="0123456789" maxlength="10" inputmode="numeric">
+            </div>
+          </div>
+
           <div class="field">
-            <label for="gruppbbfsSel">Pilih Grup</label>
-            <select id="gruppbbfsSel"></select>
+            <label for="atGrup">Pilih Grup (auto-isi semua posisi dari digit grup)</label>
+            <select id="atGrup">
+              <option value="">— Manual (tanpa grup) —</option>
+            </select>
           </div>
-          <div class="field" style="display:flex;align-items:center;gap:8px;">
-            <input type="checkbox" id="gruppbbfsPermutasi" style="width:auto;">
-            <label for="gruppbbfsPermutasi" style="margin:0;cursor:pointer;text-transform:none;letter-spacing:0;font-size:13px;color:var(--text);">
-              Aktifkan permutasi bolak-balik untuk nomor 4-digit
-            </label>
+
+          <div class="field">
+            <label for="atCB">Input CB (opsional — filter hasil AK)</label>
+            <input type="text" id="atCB" placeholder="0 1 2 3 5" autocomplete="off">
           </div>
-          <p id="gruppbbfsInfo" style="color:var(--accent);font-size:13px;margin-bottom:12px;">Info: —</p>
-          <button class="btn-primary" id="gruppbbfsGenerateBtn">⚡ Generate Grup BBFS</button>
+
+          <div class="field">
+            <label for="atCBMode">Mode Filter CB</label>
+            <select id="atCBMode">
+              <option value="or" selected>Salah Satu Digit Muncul (OR)</option>
+              <option value="and">Semua Digit Harus Muncul (AND)</option>
+            </select>
+          </div>
+
+          <p id="atInfo" style="color:var(--accent);font-size:13px;margin-bottom:12px;">
+            Total kombinasi: — • Halaman: —
+          </p>
+
+          <button class="btn-primary" id="atGenerateBtn">⚡ Generate Angka Tarung</button>
         </div>
         <div class="card">
-          <div id="gruppbbfsResult"></div>
+          <div id="atResult"></div>
         </div>
       </div>
 
@@ -533,27 +566,27 @@ body.offline .offline-badge { display: block; }
         </div>
       </div>
 
-      <!-- BLOK 47: SUBPANEL GABUNG GRUP -->
+      <!-- BLOK 47: SUBPANEL GABUNG GRUP (4-digit cross product) -->
       <div id="subpanel-gabungGrup" class="subpanel">
         <div class="card">
-          <h3 style="margin-bottom:6px;">Gabung Grup (Mandiri)</h3>
+          <h3 style="margin-bottom:6px;">Gabung Grup (Hasil 4 Angka)</h3>
           <p style="color:var(--muted);font-size:12.5px;margin-bottom:12px;">
-            Gabungkan nomor dari 2 grup. Opsional: aktifkan permutasi bolak-balik untuk nomor 4-digit.
+            Nomor dari <b>Grup 1</b> dipakai sebagai <b>2D depan</b>, nomor dari <b>Grup 2</b> sebagai <b>2D belakang</b>, lalu di-cross product → hasil selalu <b>4 digit</b>. Contoh: Grup 1 <code>37 77</code> + Grup 2 <code>05 06</code> → <code>3705*3706*7705*7706*</code>.
           </p>
           <div class="grid-2">
             <div class="field">
-              <label for="gabungGrup1">Grup 1</label>
+              <label for="gabungGrup1">Grup 1 (2D Depan)</label>
               <select id="gabungGrup1"></select>
             </div>
             <div class="field">
-              <label for="gabungGrup2">Grup 2</label>
+              <label for="gabungGrup2">Grup 2 (2D Belakang)</label>
               <select id="gabungGrup2"></select>
             </div>
           </div>
           <div class="field" style="display:flex;align-items:center;gap:8px;">
             <input type="checkbox" id="gabungPermutasi" style="width:auto;">
             <label for="gabungPermutasi" style="margin:0;cursor:pointer;text-transform:none;letter-spacing:0;font-size:13px;color:var(--text);">
-              Aktifkan permutasi bolak-balik untuk nomor 4-digit
+              Aktifkan permutasi bolak-balik (tiap hasil 4-digit diacak semua posisinya)
             </label>
           </div>
           <p id="gabungInfo" style="color:var(--accent);font-size:13px;margin-bottom:12px;">Info: —</p>
@@ -564,25 +597,25 @@ body.offline .offline-badge { display: block; }
         </div>
       </div>
 
-      <!-- BLOK 48: SUBPANEL GRUP + CB -->
+      <!-- BLOK 48: SUBPANEL GRUP + CB (4-digit + CB) -->
       <div id="subpanel-grupCB" class="subpanel">
         <div class="card">
-          <h3 style="margin-bottom:6px;">Grup + CB</h3>
+          <h3 style="margin-bottom:6px;">Grup + CB (Hasil 4 Angka)</h3>
           <p style="color:var(--muted);font-size:12.5px;margin-bottom:12px;">
-            Gabungkan nomor dari 2 grup, lalu filter hanya yang mengandung digit CB.
+            Gabungkan <b>Grup 1 (2D depan)</b> + <b>Grup 2 (2D belakang)</b> → 4-digit, lalu filter dengan <b>CB</b>. Contoh: gabungan <code>3705*3706*7705*7706*</code> + CB <code>5</code> → hanya yang mengandung digit 5.
           </p>
           <div class="grid-2">
             <div class="field">
-              <label for="grupCB1">Grup 1</label>
+              <label for="grupCB1">Grup 1 (2D Depan)</label>
               <select id="grupCB1"></select>
             </div>
             <div class="field">
-              <label for="grupCB2">Grup 2</label>
+              <label for="grupCB2">Grup 2 (2D Belakang)</label>
               <select id="grupCB2"></select>
             </div>
           </div>
           <div class="field">
-            <label for="grupCBDigits">Input CB (dipisah spasi)</label>
+            <label for="grupCBDigits">Input CB (dipisah spasi, contoh: 0 1 2 3 5)</label>
             <input type="text" id="grupCBDigits" placeholder="0 1 2 3 5">
           </div>
           <div class="field">
@@ -595,7 +628,7 @@ body.offline .offline-badge { display: block; }
           <div class="field" style="display:flex;align-items:center;gap:8px;">
             <input type="checkbox" id="grupCBPermutasi" style="width:auto;">
             <label for="grupCBPermutasi" style="margin:0;cursor:pointer;text-transform:none;letter-spacing:0;font-size:13px;color:var(--text);">
-              Aktifkan permutasi bolak-balik untuk nomor 4-digit
+              Aktifkan permutasi bolak-balik (tiap hasil 4-digit diacak semua posisinya)
             </label>
           </div>
           <p id="grupCBInfo" style="color:var(--accent);font-size:13px;margin-bottom:12px;">Info: —</p>
@@ -914,12 +947,12 @@ let master = [];
 let editingIndex = -1;
 
 const pageState = {
-  manual:     { pages: [], current: 0, meta: '' },
-  bbfs:       { pages: [], current: 0, meta: '' },
-  gruppbbfs:  { pages: [], current: 0, meta: '' },
-  cbBBFS:     { pages: [], current: 0, meta: '' },
-  gabungGrup: { pages: [], current: 0, meta: '' },
-  grupCB:     { pages: [], current: 0, meta: '' }
+  manual:      { pages: [], current: 0, meta: '' },
+  bbfs:        { pages: [], current: 0, meta: '' },
+  angkaTarung: { pages: [], current: 0, meta: '' },
+  cbBBFS:      { pages: [], current: 0, meta: '' },
+  gabungGrup:  { pages: [], current: 0, meta: '' },
+  grupCB:      { pages: [], current: 0, meta: '' }
 };
 
 const $ = (id) => document.getElementById(id);
@@ -1467,13 +1500,13 @@ function refreshGrupDropdowns() {
     `<option value="">${placeholder}</option>` +
     names.map(g => `<option value="${esc(g)}">${esc(g)}</option>`).join('');
 
-  $('manualGrup').innerHTML    = buildOptions('— Manual (tanpa grup) —');
-  $('bbfsGrup').innerHTML      = buildOptions('— Manual (tanpa grup) —');
-  $('gruppbbfsSel').innerHTML  = buildOptions('— Pilih Grup —');
-  $('gabungGrup1').innerHTML   = buildOptions('— Pilih Grup 1 —');
-  $('gabungGrup2').innerHTML   = buildOptions('— Pilih Grup 2 —');
-  $('grupCB1').innerHTML       = buildOptions('— Pilih Grup 1 —');
-  $('grupCB2').innerHTML       = buildOptions('— Pilih Grup 2 —');
+  $('manualGrup').innerHTML = buildOptions('— Manual (tanpa grup) —');
+  $('bbfsGrup').innerHTML   = buildOptions('— Manual (tanpa grup) —');
+  $('atGrup').innerHTML     = buildOptions('— Manual (tanpa grup) —');
+  $('gabungGrup1').innerHTML = buildOptions('— Pilih Grup 1 —');
+  $('gabungGrup2').innerHTML = buildOptions('— Pilih Grup 2 —');
+  $('grupCB1').innerHTML     = buildOptions('— Pilih Grup 1 —');
+  $('grupCB2').innerHTML     = buildOptions('— Pilih Grup 2 —');
 }
 
 function refreshAll() {
@@ -1482,6 +1515,7 @@ function refreshAll() {
   refreshGrupDropdowns();
   updateManualInfo();
   updateBBFSInfo();
+  updateATInfo();
 }
 
 ['manualInput', 'grupInput', 'cbInput', 'akInput'].forEach(id => {
@@ -1632,12 +1666,12 @@ function renderPagination(containerId, stateKey, labelPrefix) {
 }
 
 const PAGE_MAP = {
-  manual:     ['manualResult',     'Hasil'],
-  bbfs:       ['bbfsResult',       'Hasil'],
-  gruppbbfs:  ['gruppbbfsResult',  'Hasil'],
-  cbBBFS:     ['cbBBFSResult',     'Hasil'],
-  gabungGrup: ['gabungResult',     'Hasil'],
-  grupCB:     ['grupCBResult',     'Hasil']
+  manual:      ['manualResult',  'Hasil'],
+  bbfs:        ['bbfsResult',    'Hasil'],
+  angkaTarung: ['atResult',      'Hasil'],
+  cbBBFS:      ['cbBBFSResult',  'Hasil'],
+  gabungGrup:  ['gabungResult',  'Hasil'],
+  grupCB:      ['grupCBResult',  'Hasil']
 };
 
 window.goPage = function(stateKey, delta) {
@@ -1667,16 +1701,11 @@ window.jumpPage = function(stateKey) {
 
 /* ═══════════════════════════════════════════════════════════════
    BLOK 50: JS — LOGIKA BBFS (dengan Grup + CB)
-   ─────────────────────────────────────────────────────────────
-   Fitur baru:
-   • Dropdown Grup → auto-fill input BBFS dengan digit unik 2D awal
-   • Input CB → filter hasil BBFS (OR / AND)
    ═══════════════════════════════════════════════════════════════ */
 $('bbfsInput').addEventListener('input', (e) => {
   e.target.value = onlyDigits(e.target.value).slice(0, 16);
   updateBBFSInfo();
 });
-
 $('bbfsCB').addEventListener('input', updateBBFSInfo);
 $('bbfsCBMode').addEventListener('change', updateBBFSInfo);
 
@@ -1686,17 +1715,11 @@ $('bbfsGrup').addEventListener('change', () => {
 
   if (g) {
     const nums = getGroupNumbers(g);
-    /* Ambil 2D awal dari tiap nomor, kumpulkan digit unik */
-    const twoDigitFront = nums.map(n => {
-      if (n.length === 2) return n;
-      if (n.length >= 2)  return n.slice(0, 2);
-      return n;
-    });
-    const uniqueDigits = [...new Set(twoDigitFront.join('').split(''))].sort();
+    const uniqueDigits = [...new Set(nums.join('').split(''))].sort();
     const digitStr = uniqueDigits.join('').slice(0, 16);
     bbfsInput.value = digitStr;
     bbfsInput.disabled = true;
-    bbfsInput.setAttribute('title', 'Diisi otomatis dari grup (2D awal)');
+    bbfsInput.setAttribute('title', 'Diisi otomatis dari grup');
   } else {
     bbfsInput.value = '';
     bbfsInput.disabled = false;
@@ -1732,7 +1755,7 @@ $('bbfsGenerateBtn').addEventListener('click', () => {
   const cbMode = $('bbfsCBMode').value;
   const grup   = $('bbfsGrup').value;
 
-  if (raw.length < 4) { toast('Minimal 4 digit', 'error'); return; }
+  if (raw.length < 4)  { toast('Minimal 4 digit', 'error'); return; }
   if (raw.length > 16) { toast('Maksimal 16 digit', 'error'); return; }
 
   let all = permutasi4DariDigit(raw);
@@ -1757,57 +1780,125 @@ $('bbfsGenerateBtn').addEventListener('click', () => {
 
 
 /* ═══════════════════════════════════════════════════════════════
-   BLOK 51: JS — LOGIKA GRUP BBFS & CB BBFS
+   BLOK 51: JS — LOGIKA ANGKA TARUNG (AK) + CB BBFS
+   ─────────────────────────────────────────────────────────────
+   Angka Tarung:
+   • 4 posisi, masing-masing berisi digit 0–9 (max 10 digit)
+   • Hasil = cross product pos1 × pos2 × pos3 × pos4
+   • Contoh: P1={1,2} P2={3} P3={4,5} P4={6} → 1346, 1356, 2346, 2356
+   • Grup → auto-isi semua posisi dengan digit unik dari grup
+   • CB filter (OR/AND)
    ═══════════════════════════════════════════════════════════════ */
-$('gruppbbfsSel').addEventListener('change', updateGrupBBFSInfo);
-$('gruppbbfsPermutasi').addEventListener('change', updateGrupBBFSInfo);
 
-function updateGrupBBFSInfo() {
-  const g = $('gruppbbfsSel').value;
-  const perm = $('gruppbbfsPermutasi').checked;
-  const info = $('gruppbbfsInfo');
-  if (!g) { info.textContent = 'Info: pilih grup'; return; }
-  const nums = getGroupNumbers(g);
-  let total = 0;
-  if (perm) {
-    nums.forEach(n => {
-      total += (n.length === 4) ? permutasi4DariNomor(n).length : 1;
-    });
+/* Batasi input digit 0–9 saja */
+['atDigit1', 'atDigit2', 'atDigit3', 'atDigit4'].forEach(id => {
+  $(id).addEventListener('input', (e) => {
+    e.target.value = onlyDigits(e.target.value).slice(0, 10);
+    updateATInfo();
+  });
+});
+$('atCB').addEventListener('input', updateATInfo);
+$('atCBMode').addEventListener('change', updateATInfo);
+
+$('atGrup').addEventListener('change', () => {
+  const g = $('atGrup').value;
+  if (g) {
+    const nums = getGroupNumbers(g);
+    const uniqueDigits = [...new Set(nums.join('').split(''))].sort();
+    const str = uniqueDigits.join('');
+    $('atDigit1').value = str;
+    $('atDigit2').value = str;
+    $('atDigit3').value = str;
+    $('atDigit4').value = str;
+    $('atDigit1').setAttribute('title', 'Diisi otomatis dari grup');
+    $('atDigit2').setAttribute('title', 'Diisi otomatis dari grup');
+    $('atDigit3').setAttribute('title', 'Diisi otomatis dari grup');
+    $('atDigit4').setAttribute('title', 'Diisi otomatis dari grup');
   } else {
-    total = nums.length;
+    $('atDigit1').value = '';
+    $('atDigit2').value = '';
+    $('atDigit3').value = '';
+    $('atDigit4').value = '';
+    $('atDigit1').removeAttribute('title');
+    $('atDigit2').removeAttribute('title');
+    $('atDigit3').removeAttribute('title');
+    $('atDigit4').removeAttribute('title');
   }
-  info.textContent = `Grup: ${g} • ${nums.length} nomor • ${total} hasil • ${Math.ceil(total / PER_PAGE)} halaman`;
-}
-
-$('gruppbbfsGenerateBtn').addEventListener('click', () => {
-  const g = $('gruppbbfsSel').value;
-  if (!g) { toast('Pilih grup terlebih dahulu', 'error'); return; }
-  const perm = $('gruppbbfsPermutasi').checked;
-  const nums = getGroupNumbers(g);
-  if (!nums.length) { toast('Grup kosong', 'error'); return; }
-
-  let results = [];
-  if (perm) {
-    nums.forEach(n => {
-      if (n.length === 4) {
-        results.push(...permutasi4DariNomor(n));
-      } else {
-        results.push(n);
-      }
-    });
-  } else {
-    results = nums.slice();
-  }
-  results = [...new Set(results)].sort();
-
-  pageState.gruppbbfs.pages = paginateArray(results);
-  pageState.gruppbbfs.current = 0;
-  pageState.gruppbbfs.meta = `Grup: ${g} • ${nums.length} nomor${perm ? ' • permutasi' : ''}`;
-
-  renderPagination('gruppbbfsResult', 'gruppbbfs', 'Hasil');
-  toast(`Grup ${g}: ${results.length} hasil`, 'success');
+  updateATInfo();
 });
 
+function updateATInfo() {
+  const p1 = parseSingleDigitList($('atDigit1').value);
+  const p2 = parseSingleDigitList($('atDigit2').value);
+  const p3 = parseSingleDigitList($('atDigit3').value);
+  const p4 = parseSingleDigitList($('atDigit4').value);
+  const cb = parseSingleDigitList($('atCB').value);
+  const grup = $('atGrup').value;
+  const info = $('atInfo');
+
+  if (!p1.length || !p2.length || !p3.length || !p4.length) {
+    info.textContent = 'Total kombinasi: — • Halaman: — (isi keempat posisi)';
+    return;
+  }
+
+  const total = p1.length * p2.length * p3.length * p4.length;
+  const pages = Math.ceil(total / PER_PAGE);
+
+  let text = `P1:${p1.length} • P2:${p2.length} • P3:${p3.length} • P4:${p4.length} • Total: ${total.toLocaleString('id-ID')} kombinasi • ${pages} halaman`;
+  if (grup) text += ` • Grup: ${grup}`;
+  if (cb.length) text += ` • CB: ${cb.join(' ')}`;
+  info.textContent = text;
+}
+
+$('atGenerateBtn').addEventListener('click', () => {
+  const p1 = parseSingleDigitList($('atDigit1').value);
+  const p2 = parseSingleDigitList($('atDigit2').value);
+  const p3 = parseSingleDigitList($('atDigit3').value);
+  const p4 = parseSingleDigitList($('atDigit4').value);
+  const cb = parseSingleDigitList($('atCB').value);
+  const cbMode = $('atCBMode').value;
+  const grup = $('atGrup').value;
+
+  if (!p1.length || !p2.length || !p3.length || !p4.length) {
+    toast('Isi keempat posisi digit', 'error');
+    return;
+  }
+
+  /* Cross product */
+  const results = [];
+  for (const a of p1) {
+    for (const b of p2) {
+      for (const c of p3) {
+        for (const d of p4) {
+          results.push(a + b + c + d);
+        }
+      }
+    }
+  }
+
+  let filtered = results;
+
+  if (cb.length) {
+    filtered = filterByCB(results, cb.join(''), cbMode);
+    if (!filtered.length) { toast('Tidak ada hasil setelah filter CB', 'error'); return; }
+  }
+
+  filtered.sort();
+
+  pageState.angkaTarung.pages   = paginateArray(filtered);
+  pageState.angkaTarung.current = 0;
+
+  let meta = `P1:${p1.join('')} P2:${p2.join('')} P3:${p3.join('')} P4:${p4.join('')}`;
+  if (grup) meta += ` • Grup: ${grup}`;
+  if (cb.length) meta += ` • CB: ${cb.join(' ')} (${cbMode.toUpperCase()})`;
+  pageState.angkaTarung.meta = meta;
+
+  renderPagination('atResult', 'angkaTarung', 'Hasil');
+  toast(`Berhasil: ${filtered.length.toLocaleString('id-ID')} kombinasi`, 'success');
+});
+
+
+/* ── CB BBFS (sub-panel terpisah) ─────────────────────────── */
 $('cbBBFSInput').addEventListener('input', (e) => {
   e.target.value = onlyDigits(e.target.value).slice(0, 16);
   updateCBBFFSInfo();
@@ -1850,8 +1941,48 @@ $('cbBBFSGenerateBtn').addEventListener('click', () => {
 
 
 /* ═══════════════════════════════════════════════════════════════
-   BLOK 52: JS — LOGIKA GABUNG GRUP & GRUP + CB
+   BLOK 52: JS — LOGIKA GABUNG GRUP & GRUP + CB (hasil 4-digit)
+   ─────────────────────────────────────────────────────────────
+   Logika:
+   • Grup 1 → 2D DEPAN (ambil 2 digit pertama dari tiap nomor)
+   • Grup 2 → 2D BELAKANG (ambil 2 digit pertama dari tiap nomor)
+   • Cross product (depan × belakang) → 4-digit
+   • Opsional: permutasi bolak-balik tiap 4-digit
+   • Grup + CB: setelah cross product, filter CB (OR / AND)
    ═══════════════════════════════════════════════════════════════ */
+
+function to2Digit(n) {
+  const s = String(n ?? '').replace(/\D/g, '');
+  if (!s) return '00';
+  return s.padStart(2, '0').slice(0, 2);
+}
+
+function getGroupAs2Digit(grupName) {
+  return [...new Set(
+    getGroupNumbers(grupName).map(n => to2Digit(n))
+  )].sort();
+}
+
+function crossProduct4Digit(depans, belakangs, withPermutasi) {
+  const combos = [];
+  for (const d of depans) {
+    for (const b of belakangs) {
+      combos.push(d + b);
+    }
+  }
+  let results = [...new Set(combos)];
+  if (withPermutasi) {
+    const expanded = new Set();
+    results.forEach(c => {
+      permutasi4DariNomor(c).forEach(p => expanded.add(p));
+    });
+    results = [...expanded];
+  }
+  return results.sort();
+}
+
+
+/* ── GABUNG GRUP ──────────────────────────────────────────── */
 $('gabungGrup1').addEventListener('change', updateGabungInfo);
 $('gabungGrup2').addEventListener('change', updateGabungInfo);
 $('gabungPermutasi').addEventListener('change', updateGabungInfo);
@@ -1861,19 +1992,31 @@ function updateGabungInfo() {
   const g2 = $('gabungGrup2').value;
   const perm = $('gabungPermutasi').checked;
   const info = $('gabungInfo');
+
   if (!g1 || !g2) { info.textContent = 'Info: pilih 2 grup'; return; }
-  const n1 = getGroupNumbers(g1);
-  const n2 = getGroupNumbers(g2);
-  const gabung = [...new Set([...n1, ...n2])];
-  let total = 0;
+  if (g1 === g2)  { info.textContent = 'Info: Grup 1 dan Grup 2 harus berbeda'; return; }
+
+  const depans    = getGroupAs2Digit(g1);
+  const belakangs = getGroupAs2Digit(g2);
+  const totalRaw  = depans.length * belakangs.length;
+
+  let total = totalRaw;
   if (perm) {
-    gabung.forEach(n => {
-      total += (n.length === 4) ? permutasi4DariNomor(n).length : 1;
-    });
-  } else {
-    total = gabung.length;
+    const expanded = new Set();
+    for (const d of depans) {
+      for (const b of belakangs) {
+        permutasi4DariNomor(d + b).forEach(p => expanded.add(p));
+      }
+    }
+    total = expanded.size;
   }
-  info.textContent = `Grup 1: ${g1} (${n1.length}) • Grup 2: ${g2} (${n2.length}) • Gabungan: ${gabung.length} • ${total} hasil${perm ? ' (permutasi)' : ''}`;
+
+  info.textContent =
+    `Grup 1 "${g1}": ${depans.length} 2D depan • ` +
+    `Grup 2 "${g2}": ${belakangs.length} 2D belakang • ` +
+    `${totalRaw} kombinasi 4-digit` +
+    (perm ? ` → ${total} (permutasi)` : '') +
+    ` • ${Math.ceil(total / PER_PAGE)} halaman`;
 }
 
 $('gabungGenerateBtn').addEventListener('click', () => {
@@ -1882,34 +2025,27 @@ $('gabungGenerateBtn').addEventListener('click', () => {
   const perm = $('gabungPermutasi').checked;
 
   if (!g1 || !g2) { toast('Pilih 2 grup', 'error'); return; }
-  if (g1 === g2)   { toast('Grup 1 dan Grup 2 harus berbeda', 'error'); return; }
+  if (g1 === g2)  { toast('Grup 1 dan Grup 2 harus berbeda', 'error'); return; }
 
-  const n1 = getGroupNumbers(g1);
-  const n2 = getGroupNumbers(g2);
-  const gabung = [...new Set([...n1, ...n2])].sort();
+  const depans    = getGroupAs2Digit(g1);
+  const belakangs = getGroupAs2Digit(g2);
 
-  let results = [];
-  if (perm) {
-    gabung.forEach(n => {
-      if (n.length === 4) {
-        results.push(...permutasi4DariNomor(n));
-      } else {
-        results.push(n);
-      }
-    });
-  } else {
-    results = gabung.slice();
-  }
-  results = [...new Set(results)].sort();
+  if (!depans.length)    { toast(`Grup "${g1}" kosong`, 'error'); return; }
+  if (!belakangs.length) { toast(`Grup "${g2}" kosong`, 'error'); return; }
 
-  pageState.gabungGrup.pages = paginateArray(results);
+  const results = crossProduct4Digit(depans, belakangs, perm);
+
+  pageState.gabungGrup.pages   = paginateArray(results);
   pageState.gabungGrup.current = 0;
-  pageState.gabungGrup.meta = `${g1} + ${g2}${perm ? ' • permutasi' : ''}`;
+  pageState.gabungGrup.meta    = `${g1} (${depans.length} depan) + ${g2} (${belakangs.length} belakang)` +
+                                  (perm ? ' • permutasi' : '');
 
   renderPagination('gabungResult', 'gabungGrup', 'Hasil');
-  toast(`Gabungan ${g1} + ${g2}: ${results.length} hasil`, 'success');
+  toast(`Berhasil: ${results.length.toLocaleString('id-ID')} kombinasi 4-digit`, 'success');
 });
 
+
+/* ── GRUP + CB ────────────────────────────────────────────── */
 $('grupCB1').addEventListener('change', updateGrupCBInfo);
 $('grupCB2').addEventListener('change', updateGrupCBInfo);
 $('grupCBDigits').addEventListener('input', updateGrupCBInfo);
@@ -1922,20 +2058,31 @@ function updateGrupCBInfo() {
   const cb = onlyDigits($('grupCBDigits').value);
   const perm = $('grupCBPermutasi').checked;
   const info = $('grupCBInfo');
+
   if (!g1 || !g2) { info.textContent = 'Info: pilih 2 grup'; return; }
-  if (!cb) { info.textContent = 'Info: isi CB'; return; }
-  const n1 = getGroupNumbers(g1);
-  const n2 = getGroupNumbers(g2);
-  const gabung = [...new Set([...n1, ...n2])];
-  let total = 0;
+  if (g1 === g2)  { info.textContent = 'Info: Grup 1 dan Grup 2 harus berbeda'; return; }
+  if (!cb)        { info.textContent = 'Info: isi CB'; return; }
+
+  const depans    = getGroupAs2Digit(g1);
+  const belakangs = getGroupAs2Digit(g2);
+  const totalRaw  = depans.length * belakangs.length;
+
+  let total = totalRaw;
   if (perm) {
-    gabung.forEach(n => {
-      total += (n.length === 4) ? permutasi4DariNomor(n).length : 1;
-    });
-  } else {
-    total = gabung.length;
+    const expanded = new Set();
+    for (const d of depans) {
+      for (const b of belakangs) {
+        permutasi4DariNomor(d + b).forEach(p => expanded.add(p));
+      }
+    }
+    total = expanded.size;
   }
-  info.textContent = `${g1} + ${g2} • ${gabung.length} nomor • ${total} kombinasi • CB: ${cb.split('').join(' ')} • ${Math.ceil(total / PER_PAGE)} halaman`;
+
+  info.textContent =
+    `Grup 1 "${g1}": ${depans.length} depan • Grup 2 "${g2}": ${belakangs.length} belakang • ` +
+    `${totalRaw} kombinasi 4-digit` +
+    (perm ? ` → ${total} (permutasi)` : '') +
+    ` • CB: ${cb.split('').join(' ')} • ${Math.ceil(total / PER_PAGE)} halaman`;
 }
 
 $('grupCBGenerateBtn').addEventListener('click', () => {
@@ -1946,36 +2093,27 @@ $('grupCBGenerateBtn').addEventListener('click', () => {
   const perm = $('grupCBPermutasi').checked;
 
   if (!g1 || !g2) { toast('Pilih 2 grup', 'error'); return; }
-  if (g1 === g2)   { toast('Grup 1 dan Grup 2 harus berbeda', 'error'); return; }
-  if (!cb)         { toast('CB wajib diisi', 'error'); return; }
+  if (g1 === g2)  { toast('Grup 1 dan Grup 2 harus berbeda', 'error'); return; }
+  if (!cb)        { toast('CB wajib diisi', 'error'); return; }
 
-  const n1 = getGroupNumbers(g1);
-  const n2 = getGroupNumbers(g2);
-  const gabung = [...new Set([...n1, ...n2])].sort();
+  const depans    = getGroupAs2Digit(g1);
+  const belakangs = getGroupAs2Digit(g2);
 
-  let results = [];
-  if (perm) {
-    gabung.forEach(n => {
-      if (n.length === 4) {
-        results.push(...permutasi4DariNomor(n));
-      } else {
-        results.push(n);
-      }
-    });
-  } else {
-    results = gabung.slice();
-  }
-  results = [...new Set(results)].sort();
+  if (!depans.length)    { toast(`Grup "${g1}" kosong`, 'error'); return; }
+  if (!belakangs.length) { toast(`Grup "${g2}" kosong`, 'error'); return; }
 
+  const results  = crossProduct4Digit(depans, belakangs, perm);
   const filtered = filterByCB(results, cb, mode);
+
   if (!filtered.length) { toast('Tidak ada hasil setelah filter CB', 'error'); return; }
 
-  pageState.grupCB.pages = paginateArray(filtered);
+  pageState.grupCB.pages   = paginateArray(filtered);
   pageState.grupCB.current = 0;
-  pageState.grupCB.meta = `${g1} + ${g2} • CB: ${cb.split('').join(' ')} • Mode: ${mode.toUpperCase()}${perm ? ' • permutasi' : ''}`;
+  pageState.grupCB.meta    = `${g1} + ${g2} • CB: ${cb.split('').join(' ')} • Mode: ${mode.toUpperCase()}` +
+                              (perm ? ' • permutasi' : '');
 
   renderPagination('grupCBResult', 'grupCB', 'Hasil');
-  toast(`Berhasil: ${filtered.length} dari ${results.length} kombinasi`, 'success');
+  toast(`Berhasil: ${filtered.length.toLocaleString('id-ID')} dari ${results.length.toLocaleString('id-ID')} kombinasi`, 'success');
 });
 
 
