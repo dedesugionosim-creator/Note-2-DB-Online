@@ -1251,6 +1251,20 @@ tr:hover {
     font-size: 10px;
     opacity: 0.8;
 }
+
+/* CSS Tambahan untuk Hasil Prediksi */
+.syair-relation-title {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-weight: bold;
+    margin-top: 12px;
+}
+input[type="radio"] {
+    accent-color: var(--accent);
+    transform: scale(1.2);
+}
+
 </style>
 </head>
 
@@ -1785,29 +1799,60 @@ tr:hover {
         <!-- ═══════════════════════════════════════════════════════════════════
              BLOK 22: BODY - SECTION RUMUS SYAIR (BARU)
              ═══════════════════════════════════════════════════════════════════ -->
-        <section id="rumusSyair">
-            <h2>🔮 Rumus Syair Analyzer</h2>
+                <section id="rumusSyair">
+            <h2>🔮 Rumus Syair & Prediksi</h2>
             <p class="text-muted mb-10" style="font-size:13px;">
-                Masukkan 2 angka (misal: 01). Sistem akan mencari angka yang memiliki <b>hubungan makna Syair/Grup</b> dan menganalisa <b>history</b> untuk melihat jawaban yang sering muncul.
+                Pilih mode analisa, lalu generate prediksi 4D dan 2D Master.
             </p>
             
             <div class="card">
+                <div class="field" style="background-color:var(--card-2); padding:12px; border-radius:8px; border:1px solid var(--border); margin-bottom:12px;">
+                    <label style="margin-bottom:8px; color:var(--text);">Pilih Mode Analisa:</label>
+                    <div style="display:flex; gap:16px; flex-wrap:wrap;">
+                        <label style="display:flex; align-items:center; gap:6px; cursor:pointer; margin:0; text-transform:none; letter-spacing:0;">
+                            <input type="radio" name="modeSyair" value="aturan" checked style="width:auto; margin:0;">
+                            <span>Analisa Aturan Bawaan (Hardcoded)</span>
+                        </label>
+                        <label style="display:flex; align-items:center; gap:6px; cursor:pointer; margin:0; text-transform:none; letter-spacing:0;">
+                            <input type="radio" name="modeSyair" value="history" style="width:auto; margin:0;">
+                            <span>Analisa History Tabel Result</span>
+                        </label>
+                    </div>
+                </div>
+
                 <div class="field">
                     <label for="syairTargetInput">Masukkan 2 Angka Target</label>
                     <input type="text" id="syairTargetInput" placeholder="01" maxlength="2" inputmode="numeric" autocomplete="off">
                 </div>
-                <button class="btn-primary" id="analyzeSyairBtn">Analisa Jawaban</button>
+                <button class="btn-primary" id="analyzeSyairBtn">🔍 Analisa & Generate Prediksi</button>
             </div>
 
             <div id="syairResultContainer" class="syair-result-card">
                 <div class="syair-header" id="syairMainTitle">—</div>
                 <div class="syair-group" id="syairMainGroup">—</div>
                 
-                <div class="syair-relation-title">Angka Berelasi (Berdasarkan Syair/Grup):</div>
+                <div class="syair-relation-title" id="syairRelationTitle">Angka Berelasi:</div>
                 <div class="syair-relation-list" id="syairRelationList"></div>
                 
-                <div class="syair-relation-title">Jawaban Sering Muncul (Berdasarkan History Tabel):</div>
+                <div class="syair-relation-title" id="syairHistoryTitle">Jawaban Sering Muncul:</div>
                 <div class="syair-relation-list" id="syairHistoryList"></div>
+                
+                <hr style="border:0; border-top:1px dashed var(--border-2); margin:16px 0;">
+                
+                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;">
+                    <button class="btn-warn" id="btnCopy4D" style="padding:8px 12px; font-size:12px;">📋 Copy 350/25 Angka</button>
+                    <button class="btn-warn" id="btnCopy2D" style="padding:8px 12px; font-size:12px;">📋 Copy 2D Master</button>
+                    <button class="btn-primary" id="btnSendManual" style="padding:8px 12px; font-size:12px; width:auto;">➡ Kirim 2D ke Input Manual</button>
+                </div>
+                
+                <div class="syair-relation-title">350 Angka Prediksi (Format 4D):</div>
+                <div class="page-content" id="prediksi350" style="max-height:150px;"></div>
+                
+                <div class="syair-relation-title">25 Angka Master (Format 4D):</div>
+                <div class="page-content" id="prediksi25" style="max-height:100px;"></div>
+                
+                <div class="syair-relation-title">2D Master (Depan & Belakang):</div>
+                <div class="page-content" id="prediksi2D" style="max-height:100px; color:var(--warn);"></div>
             </div>
         </section>
 
@@ -4726,8 +4771,15 @@ $('searchPatternBtn').addEventListener('click', function() {
 });
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 54: FITUR UTAMA - RUMUS SYAIR ANALYZER
+   BLOK 54: FITUR UTAMA - RUMUS SYAIR ANALYZER & PREDIKSI
    ═══════════════════════════════════════════════════════════════════════════════ */
+
+let currentPrediksiData = {
+    angka350: [],
+    angka25: [],
+    depan2D: [],
+    belakang2D: []
+};
 
 $('analyzeSyairBtn').addEventListener('click', function() {
     const target = onlyDigits($('syairTargetInput').value).slice(0, 2);
@@ -4736,6 +4788,8 @@ $('analyzeSyairBtn').addEventListener('click', function() {
         toast('Masukkan tepat 2 angka (contoh: 01)', 'error');
         return;
     }
+    
+    const mode = document.querySelector('input[name="modeSyair"]:checked').value;
     
     // 1. Cari data master untuk target
     let targetMaster = null;
@@ -4755,25 +4809,21 @@ $('analyzeSyairBtn').addEventListener('click', function() {
     $('syairMainTitle').textContent = target + ' - ' + targetMaster.syair;
     $('syairMainGroup').textContent = 'Grup: ' + targetMaster.grup;
     
-    // 3. Cari Angka Berelasi (Berdasarkan Grup yang sama & Tema)
+    // 3. Cari Angka Berelasi (Berdasarkan Aturan Bawaan)
     const relatedNumbers = [];
     const targetGrup = targetMaster.grup;
     const keywords = targetMaster.syair.toLowerCase().split(' ');
     
     for (let i = 0; i < master.length; i++) {
         const m = master[i];
-        if (m.nomor === target) {
-            continue;
-        }
+        if (m.nomor === target) continue;
         
         let isRelated = false;
         
         // Cek grup sama
-        if (m.grup === targetGrup) {
-            isRelated = true;
-        }
+        if (m.grup === targetGrup) isRelated = true;
         
-        // Cek kecocokan keyword syair (misal kata "Setan" ada di syair lain)
+        // Cek kecocokan keyword syair
         const mSyair = (m.syair || '').toLowerCase();
         for (let k = 0; k < keywords.length; k++) {
             if (keywords[k].length > 3 && mSyair.includes(keywords[k])) {
@@ -4782,7 +4832,7 @@ $('analyzeSyairBtn').addEventListener('click', function() {
             }
         }
         
-        // Aturan spesifik tema gelap (Asosiasi bebas)
+        // Aturan tema gelap
         const darkThemes = ['setan', 'iblis', 'penggoda', 'binasa', 'perkosa', 'biadab', 'kejam', 'neraka', 'hukuman', 'kematian'];
         let targetIsDark = false;
         for (let d = 0; d < darkThemes.length; d++) {
@@ -4796,12 +4846,9 @@ $('analyzeSyairBtn').addEventListener('click', function() {
             isRelated = true;
         }
         
-        if (isRelated) {
-            relatedNumbers.push(m.nomor);
-        }
+        if (isRelated) relatedNumbers.push(m.nomor);
     }
     
-    // Urutkan dan batasi maksimal 12 angka berelasi
     relatedNumbers.sort();
     const displayRelated = relatedNumbers.slice(0, 12);
     
@@ -4815,80 +4862,179 @@ $('analyzeSyairBtn').addEventListener('click', function() {
     }
     $('syairRelationList').innerHTML = relHtml;
     
-    // 4. Analisa History dari Tabel Result
-    const activeTable = getActiveTable();
-    const entries = activeTable.entries;
+    // 4. Logika Berdasarkan Mode
+    let finalPool4D = [];
     
-    if (entries.length < 2) {
-        $('syairHistoryList').innerHTML = '<div style="font-size:12px; color:var(--muted);">Belum cukup data history (butuh min 2 result) untuk analisa frekuensi.</div>';
-        $('syairResultContainer').classList.add('show');
-        return;
-    }
-    
-    const sortedEntries = entries.slice().sort(function(a, b) {
-        return a.periode.localeCompare(b.periode, undefined, { numeric: true, sensitivity: 'base' });
-    });
-    
-    const freqMap = {};
-    
-    for (let i = 0; i < sortedEntries.length - 1; i++) {
-        const r = sortedEntries[i].result;
-        const pairs = [r.slice(0, 2), r.slice(2, 4)];
+    if (mode === 'aturan') {
+        // MODE 1: Aturan Bawaan
+        $('syairHistoryTitle').textContent = 'Jawaban Sering Muncul (Mode Aturan Bawaan):';
         
-        let isMatch = false;
+        // Pool 4D diambil dari cross product 2D relasi (depan & belakang)
+        let pool2D = displayRelated;
+        if (pool2D.length < 5) pool2D = [...new Set([...pool2D, '01','02','03','04','05','06','07','08','09'])]; // Fallback
         
-        if (pairs.includes(target)) {
-            isMatch = true;
-        }
-        
-        if (!isMatch) {
-            for (let j = 0; j < displayRelated.length; j++) {
-                if (pairs.includes(displayRelated[j])) {
-                    isMatch = true;
-                    break;
-                }
+        for(let i=0; i<pool2D.length; i++) {
+            for(let j=0; j<pool2D.length; j++) {
+                finalPool4D.push(pool2D[i] + pool2D[j]);
             }
         }
         
-        if (isMatch) {
-            const nextResult = sortedEntries[i + 1].result;
-            const nextPairs = [nextResult.slice(0, 2), nextResult.slice(2, 4)];
-            
-            for (let j = 0; j < nextPairs.length; j++) {
-                const p = nextPairs[j];
-                if (!freqMap[p]) {
-                    freqMap[p] = 0;
-                }
-                freqMap[p]++;
-            }
-        }
-    }
-    
-    const entriesArr = Object.entries(freqMap);
-    
-    if (entriesArr.length === 0) {
-        $('syairHistoryList').innerHTML = '<div style="font-size:12px; color:var(--muted);">Belum ada pola history yang cocok dengan tema/grup ini.</div>';
+        $('syairHistoryList').innerHTML = '<div style="font-size:12px; color:var(--muted);">Menggunakan rumus asosiasi teks (Belum ada data history yang diproses).</div>';
+        
     } else {
-        entriesArr.sort(function(a, b) {
-            return b[1] - a[1];
-        });
+        // MODE 2: History Tabel
+        $('syairHistoryTitle').textContent = 'Jawaban Sering Muncul (Mode History Tabel):';
+        const activeTable = getActiveTable();
+        const entries = activeTable.entries;
         
-        let histHtml = '';
-        const limit = Math.min(8, entriesArr.length);
-        
-        for (let i = 0; i < limit; i++) {
-            const isTop = (i === 0) ? 'hot' : '';
-            histHtml += `
-            <div class="syair-badge ${isTop}">
-                <span class="badge-num">${entriesArr[i][0]}</span>
-                <span class="badge-freq">${entriesArr[i][1]}x</span>
-            </div>
-            `;
+        if (entries.length < 2) {
+            $('syairHistoryList').innerHTML = '<div style="font-size:12px; color:var(--danger);">Tabel Result kosong (butuh min 2 data). Silakan isi tabel atau gunakan Mode Aturan Bawaan.</div>';
+            // Tetap gunakan aturan bawaan sebagai fallback
+            let pool2D = displayRelated.length ? displayRelated : ['01','02','03','04','05'];
+            for(let i=0; i<pool2D.length; i++) {
+                for(let j=0; j<pool2D.length; j++) {
+                    finalPool4D.push(pool2D[i] + pool2D[j]);
+                }
+            }
+        } else {
+            const sortedEntries = entries.slice().sort(function(a, b) {
+                return a.periode.localeCompare(b.periode, undefined, { numeric: true, sensitivity: 'base' });
+            });
+            
+            const freqMap = {};
+            
+            for (let i = 0; i < sortedEntries.length - 1; i++) {
+                const r = sortedEntries[i].result;
+                const pairs = [r.slice(0, 2), r.slice(2, 4)];
+                
+                let isMatch = pairs.includes(target);
+                if (!isMatch) {
+                    for (let j = 0; j < displayRelated.length; j++) {
+                        if (pairs.includes(displayRelated[j])) { isMatch = true; break; }
+                    }
+                }
+                
+                if (isMatch) {
+                    const nextResult = sortedEntries[i + 1].result;
+                    const nextPairs = [nextResult.slice(0, 2), nextResult.slice(2, 4)];
+                    
+                    for (let j = 0; j < nextPairs.length; j++) {
+                        const p = nextPairs[j];
+                        if (!freqMap[p]) freqMap[p] = 0;
+                        freqMap[p]++;
+                    }
+                }
+            }
+            
+            const entriesArr = Object.entries(freqMap).sort((a, b) => b[1] - a[1]);
+            
+            if (entriesArr.length === 0) {
+                 $('syairHistoryList').innerHTML = '<div style="font-size:12px; color:var(--muted);">Belum ada pola history yang cocok.</div>';
+                 // Fallback
+                 let pool2D = displayRelated.length ? displayRelated : ['01','02','03','04','05'];
+                 for(let i=0; i<pool2D.length; i++) {
+                     for(let j=0; j<pool2D.length; j++) {
+                         finalPool4D.push(pool2D[i] + pool2D[j]);
+                     }
+                 }
+            } else {
+                let histHtml = '';
+                const limit = Math.min(8, entriesArr.length);
+                for (let i = 0; i < limit; i++) {
+                    const isTop = (i === 0) ? 'hot' : '';
+                    histHtml += `
+                    <div class="syair-badge ${isTop}">
+                        <span class="badge-num">${entriesArr[i][0]}</span>
+                        <span class="badge-freq">${entriesArr[i][1]}x</span>
+                    </div>`;
+                }
+                $('syairHistoryList').innerHTML = histHtml;
+                
+                // Pool 4D dari history
+                const top2D = entriesArr.slice(0, 5).map(item => item[0]);
+                for(let i=0; i<top2D.length; i++) {
+                    for(let j=0; j<top2D.length; j++) {
+                        finalPool4D.push(top2D[i] + top2D[j]);
+                    }
+                }
+                // Tambah pool dengan angka relasi
+                for(let i=0; i<displayRelated.length; i++) {
+                    for(let j=0; j<displayRelated.length; j++) {
+                        finalPool4D.push(displayRelated[i] + displayRelated[j]);
+                    }
+                }
+            }
         }
-        $('syairHistoryList').innerHTML = histHtml;
     }
+    
+    // 5. Buat Prediksi 350, 25, dan 2D
+    finalPool4D = [...new Set(finalPool4D)]; // Hapus duplikat
+    finalPool4D.sort();
+    
+    // Ambil 350 (atau kurang jika data tidak cukup)
+    let angka350 = finalPool4D.slice(0, 350);
+    
+    // Ambil 25 Master (10 pertama dari pool, sisanya random/acak dari pool)
+    let angka25 = angka350.slice(0, 25);
+    
+    // Ekstrak 2D Depan dan 2D Belakang
+    let depanSet = new Set();
+    let belakangSet = new Set();
+    
+    for(let i=0; i<angka350.length; i++) {
+        depanSet.add(angka350[i].slice(0,2));
+        belakangSet.add(angka350[i].slice(2,4));
+    }
+    
+    currentPrediksiData.angka350 = angka350;
+    currentPrediksiData.angka25 = angka25;
+    currentPrediksiData.depan2D = Array.from(depanSet).sort();
+    currentPrediksiData.belakang2D = Array.from(belakangSet).sort();
+    
+    // Tampilkan ke UI
+    $('prediksi350').textContent = angka350.join('*') + (angka350.length ? '*' : '');
+    $('prediksi25').textContent = angka25.join('*') + (angka25.length ? '*' : '');
+    
+    let tdHtml = `DEPAN: ${currentPrediksiData.depan2D.join(' ')}\nBELAKANG: ${currentPrediksiData.belakang2D.join(' ')}`;
+    $('prediksi2D').textContent = tdHtml;
     
     $('syairResultContainer').classList.add('show');
+});
+
+// Tombol Copy 4D
+$('btnCopy4D').addEventListener('click', function() {
+    if (currentPrediksiData.angka350.length === 0) { toast('Belum ada data', 'error'); return; }
+    const text = currentPrediksiData.angka350.join('*') + '*';
+    copyTextToClipboard(text);
+});
+
+// Tombol Copy 2D
+$('btnCopy2D').addEventListener('click', function() {
+    if (currentPrediksiData.depan2D.length === 0) { toast('Belum ada data', 'error'); return; }
+    const text = `DEPAN: ${currentPrediksiData.depan2D.join(' ')}\nBELAKANG: ${currentPrediksiData.belakang2D.join(' ')}`;
+    copyTextToClipboard(text);
+});
+
+// Tombol Kirim ke Input Manual
+$('btnSendManual').addEventListener('click', function() {
+    if (currentPrediksiData.depan2D.length === 0) { toast('Belum ada data', 'error'); return; }
+    
+    // Isi field di Input Manual
+    $('manualDepan').value = currentPrediksiData.depan2D.join(' ');
+    $('manualBelakang').value = currentPrediksiData.belakang2D.join(' ');
+    
+    // Trigger update info
+    updateManualInfo();
+    
+    // Pindah ke Tab Input Manual
+    const navBtn = document.querySelector('nav button[data-section="input4Angka"]');
+    if (navBtn) navBtn.click();
+    
+    // Pindah ke Subpanel Manual
+    const subTabBtn = document.querySelector('#subTabs4Angka button[data-subpanel="subpanel-manual"]');
+    if (subTabBtn) subTabBtn.click();
+    
+    toast('2D Master berhasil dikirim ke Input Manual!', 'success');
 });
 
 /* ═══════════════════════════════════════════════════════════════════════════════
