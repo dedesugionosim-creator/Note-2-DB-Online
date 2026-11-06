@@ -3,19 +3,16 @@
 <head>
 <!--
 ╔══════════════════════════════════════════════════════════════════╗
-║  SA_HARD SYSTEM — v5.2 FINAL                                     ║
+║  SA_HARD SYSTEM — v5.3 FINAL                                     ║
 ╠══════════════════════════════════════════════════════════════════╣
-║  PERUBAHAN v5.2:                                                 ║
-║  • INPUT MANUAL: tidak auto-fill saat pilih grup                 ║
-║    - Ada dropdown "Mode Grup":                                   ║
-║        Manual (tanpa grup) / Isi 2 Depan / Isi 2 Belakang        ║
-║    - Pilih salah satu sisi: DEPAN saja ATAU BELAKANG saja        ║
-║    - Sisi lain tetap manual                                      ║
-║  • BBFS: dropdown "Mode Filter 2D" (Depan / Belakang)           ║
-║  • AK: dropdown "Mode Filter 2D" (Depan / Belakang)             ║
-║  • Gabung Grup & Grup+CB: G1=Depan, G2=Belakang (tetap)         ║
-║  • Semua fitur konsisten: preview 2 kotak (Depan + Belakang)    ║
-║    dengan highlight kotak mana yang aktif                        ║
+║  PERUBAHAN v5.3:                                                 ║
+║  • INPUT MANUAL: Dropdown grup HANYA menseleksi angka.           ║
+║    - Input teks TIDAK diubah/ditimpa (tetap dari user)           ║
+║    - Mode filter: Depan / Belakang / Keduanya                    ║
+║    - Hanya angka yang match dgn 2D Grup yang diproses            ║
+║  • BBFS: Mode filter Depan / Belakang / Keduanya                 ║
+║  • AK: Mode filter Depan / Belakang / Keduanya                   ║
+║  • Gabung Grup & Grup+CB: Tetap (G1=Depan, G2=Belakang)          ║
 ╚══════════════════════════════════════════════════════════════════╝
 -->
 <meta charset="UTF-8">
@@ -24,7 +21,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="SA_HARD">
-<title>SA_HARD System v5.2</title>
+<title>SA_HARD System v5.3</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon.svg">
@@ -685,7 +682,7 @@ body.offline .offline-badge { display: block; }
 <div id="loginScreen">
   <form class="login-card" id="loginForm" autocomplete="off">
     <div class="brand-title">SA_HARD</div>
-    <div class="brand-sub">SYSTEM v5.2</div>
+    <div class="brand-sub">SYSTEM v5.3</div>
     <div class="field">
       <label for="username">Username</label>
       <input type="text" id="username" autocomplete="off" autocapitalize="off" spellcheck="false" required>
@@ -744,14 +741,13 @@ body.offline .offline-badge { display: block; }
       </div>
 
       <!-- ═══════════════════════════════════════════════════════
-           SUBPANEL INPUT MANUAL (v5.2 — mode seleksi sisi)
+           SUBPANEL INPUT MANUAL (v5.3 — Seleksi Tanpa Merubah Input)
            ═══════════════════════════════════════════════════════ -->
       <div id="subpanel-manual" class="subpanel active">
         <div class="card">
           <h3 style="margin-bottom:6px;">Input Manual Kombinasi 4 Angka</h3>
           <p class="text-muted" style="font-size:12.5px;margin-bottom:12px;">
-            Kombinasi <b>2 depan × 2 belakang</b>. Pilih grup untuk <b>mengisi salah satu sisi</b>
-            (2 Depan saja ATAU 2 Belakang saja), sisi lain tetap manual.
+            Kombinasi <b>2 depan × 2 belakang</b>. Grup hanya <b>menseleksi angka</b> yang sesuai (input teks tidak diubah).
           </p>
 
           <div class="field">
@@ -765,21 +761,22 @@ body.offline .offline-badge { display: block; }
           </div>
 
           <div class="field">
-            <label for="manualGrup">Pilih Grup (untuk seleksi salah satu sisi)</label>
+            <label for="manualGrup">Pilih Grup (Seleksi Angka)</label>
             <select id="manualGrup">
               <option value="">— Manual (tanpa grup) —</option>
             </select>
             <div id="manualPreview" class="group-preview"></div>
           </div>
 
-          <div class="field" id="manualModeWrapper" style="display:none;">
-            <label for="manualMode">Mode Pengisian dari Grup</label>
-            <select id="manualMode">
-              <option value="depan" selected>🟡 Isi 2 DEPAN dari grup (2D Depan)</option>
-              <option value="belakang">🔵 Isi 2 BELAKANG dari grup (2D Belakang)</option>
+          <div class="field" id="manualFilterModeWrapper" style="display:none;">
+            <label for="manualFilterMode">Mode Seleksi Grup</label>
+            <select id="manualFilterMode">
+              <option value="depan" selected>🟡 Filter 2D DEPAN (seleksi angka depan)</option>
+              <option value="belakang">🔵 Filter 2D BELAKANG (seleksi angka belakang)</option>
+              <option value="keduanya">🟣 Filter DEPAN & BELAKANG (seleksi keduanya)</option>
             </select>
             <p style="color:var(--muted);font-size:11.5px;margin-top:6px;">
-              Pilih salah satu sisi yang akan diisi dari grup. Sisi lain tetap dari input manual Anda.
+              Hanya angka yang ada di grup yang akan di-generate. Input teks tetap utuh.
             </p>
           </div>
 
@@ -805,15 +802,12 @@ body.offline .offline-badge { display: block; }
         <div class="card"><div id="manualResult"></div></div>
       </div>
 
-      <!-- ═══════════════════════════════════════════════════════
-           SUBPANEL BBFS (v5.2 — mode filter Depan/Belakang)
-           ═══════════════════════════════════════════════════════ -->
+      <!-- SUBPANEL BBFS -->
       <div id="subpanel-bbfs" class="subpanel">
         <div class="card">
           <h3 style="margin-bottom:6px;">BBFS — Bolak-Balik (Max 16 Angka)</h3>
           <p class="text-muted" style="font-size:12.5px;margin-bottom:12px;">
-            Input 4–16 digit → permutasi 4-digit. Grup dipakai sebagai FILTER.
-            Input <b>tidak diubah</b>.
+            Input 4–16 digit → permutasi 4-digit. Grup sebagai FILTER.
           </p>
 
           <div class="field">
@@ -832,6 +826,7 @@ body.offline .offline-badge { display: block; }
             <select id="bbfsMode">
               <option value="belakang" selected>🔵 Filter 2D BELAKANG (2 digit terakhir ∈ grup)</option>
               <option value="depan">🟡 Filter 2D DEPAN (2 digit pertama ∈ grup)</option>
+              <option value="keduanya">🟣 Filter DEPAN & BELAKANG (keduanya harus cocok)</option>
             </select>
           </div>
 
@@ -857,15 +852,12 @@ body.offline .offline-badge { display: block; }
         <div class="card"><div id="bbfsResult"></div></div>
       </div>
 
-      <!-- ═══════════════════════════════════════════════════════
-           SUBPANEL ANGKA TARUNG (v5.2 — mode filter Depan/Belakang)
-           ═══════════════════════════════════════════════════════ -->
+      <!-- SUBPANEL AK -->
       <div id="subpanel-angkaTarung" class="subpanel">
         <div class="card">
           <h3 style="margin-bottom:6px;">Angka Tarung (AK) — 4 Posisi Digit</h3>
           <p class="text-muted" style="font-size:12.5px;margin-bottom:12px;">
             Cross product P1 × P2 × P3 × P4. Grup sebagai FILTER.
-            Input posisi <b>tidak diubah</b>.
           </p>
 
           <div class="grid-2">
@@ -898,6 +890,7 @@ body.offline .offline-badge { display: block; }
             <select id="atMode">
               <option value="belakang" selected>🔵 Filter 2D BELAKANG (2 digit terakhir ∈ grup)</option>
               <option value="depan">🟡 Filter 2D DEPAN (2 digit pertama ∈ grup)</option>
+              <option value="keduanya">🟣 Filter DEPAN & BELAKANG (keduanya harus cocok)</option>
             </select>
           </div>
 
@@ -957,7 +950,6 @@ body.offline .offline-badge { display: block; }
           <h3 style="margin-bottom:6px;">Gabung Grup (Hasil 4 Angka)</h3>
           <p class="text-muted" style="font-size:12.5px;margin-bottom:12px;">
             <b>Grup 1 = 2D DEPAN</b>, <b>Grup 2 = 2D BELAKANG</b> → cross product 4-digit.
-            Grup boleh sama.
           </p>
           <div class="grid-2">
             <div class="field">
@@ -1550,8 +1542,8 @@ function renderGroupPreview(grupName, containerEl, activeSide, hint) {
     }
   }
 
-  const depanActive    = (activeSide === 'depan'    || activeSide === 'both');
-  const belakangActive = (activeSide === 'belakang' || activeSide === 'both');
+  const depanActive    = (activeSide === 'depan'    || activeSide === 'both' || activeSide === 'keduanya');
+  const belakangActive = (activeSide === 'belakang' || activeSide === 'both' || activeSide === 'keduanya');
 
   const depanClass    = depanActive    ? 'gp-row active' : 'gp-row';
   const belakangClass = belakangActive ? 'gp-row active' : 'gp-row';
@@ -1617,28 +1609,38 @@ function buildGabungBreakdown(g1, g2, depans, belakangs, totalCombo, permutasi, 
 function buildFilterBreakdown(grup, filterValues, totalAwal, totalAkhir, cb, filterMode) {
   filterMode = filterMode || 'belakang';
   const isDepan = filterMode === 'depan';
-  const sideLabel      = isDepan ? 'DEPAN' : 'BELAKANG';
-  const sideLabelLower = isDepan ? 'pertama' : 'terakhir';
-  const sliceCode      = isDepan ? 'slice(0, 2)' : 'slice(-2)';
-  const valuesClass    = isDepan ? 'highlight' : 'highlight-b';
-  const icon           = isDepan ? '🟡' : '🔵';
+  const isKeduanya = filterMode === 'keduanya';
+
+  let title = `Grup "${esc(grup)}" → FILTER 2D`;
+  if (isDepan) title += ` DEPAN`;
+  else if (isKeduanya) title += ` DEPAN & BELAKANG`;
+  else title += ` BELAKANG`;
+
+  let subLabel = '';
+  if (isDepan) subLabel = 'hanya tampilkan yang 2 digit pertama ada di sini';
+  else if (isKeduanya) subLabel = 'hanya tampilkan yang 2 digit depan & belakang ada di sini';
+  else subLabel = 'hanya tampilkan yang 2 digit terakhir ada di sini';
+
+  const sliceCode = isDepan ? 'slice(0, 2)' : isKeduanya ? 'slice(0, 2) && slice(-2)' : 'slice(-2)';
+  const valuesClass = isKeduanya ? 'highlight' : (isDepan ? 'highlight' : 'highlight-b');
+  const icon = isKeduanya ? '🟣' : (isDepan ? '🟡' : '🔵');
 
   const cbHtml = cb ? `<div class="rb-arrow">+ CB Filter: ${cb.split('').join(' ')}</div>` : '';
-  const lolos  = totalAwal - totalAkhir;
-  const pct    = totalAwal > 0 ? ((totalAkhir / totalAwal) * 100).toFixed(1) : '0.0';
+  const lolos = totalAwal - totalAkhir;
+  const pct = totalAwal > 0 ? ((totalAkhir / totalAwal) * 100).toFixed(1) : '0.0';
 
   return `
     <div class="result-breakdown">
       <div class="rb-section">
-        <div class="rb-title">${icon} Grup "${esc(grup)}" → FILTER 2D ${sideLabel}</div>
-        <div class="rb-label">${filterValues.length} angka · hanya tampilkan yang 2 digit ${sideLabelLower} ada di sini</div>
+        <div class="rb-title">${icon} ${title}</div>
+        <div class="rb-label">${filterValues.length} angka · ${subLabel}</div>
         <div class="rb-values ${valuesClass}">${filterValues.join(' ')}</div>
       </div>
       <div class="rb-arrow">
         ⬇ ${totalAwal.toLocaleString('id-ID')} → ${totalAkhir.toLocaleString('id-ID')} lolos (${pct}%) · ${lolos.toLocaleString('id-ID')} terfilter ⬇
       </div>
       ${cbHtml}
-      <div class="rb-note">Filter: <b>4-digit.${sliceCode} ∈ list 2D ${sideLabelLower}</b></div>
+      <div class="rb-note">Filter: <b>4-digit.${sliceCode} ∈ list 2D grup</b></div>
     </div>
   `;
 }
@@ -1647,21 +1649,17 @@ function buildManualBreakdown(grup, mode, depans, belakangs, totalCombo, cb) {
   let grupTitle, depanNote, belakangNote;
   if (!grup) {
     grupTitle = '📝 Input Manual (tanpa grup)';
-    depanNote = 'dari input manual';
-    belakangNote = 'dari input manual';
-  } else if (mode === 'depan') {
-    grupTitle = `🟡 Grup "${esc(grup)}" → isi 2 DEPAN`;
-    depanNote = 'dari grup (2D Depan)';
-    belakangNote = 'dari input manual';
+    depanNote = 'semua input manual';
+    belakangNote = 'semua input manual';
   } else {
-    grupTitle = `🔵 Grup "${esc(grup)}" → isi 2 BELAKANG`;
-    depanNote = 'dari input manual';
-    belakangNote = 'dari grup (2D Belakang)';
+    grupTitle = `🔍 Grup "${esc(grup)}" → Seleksi: ${mode.toUpperCase()}`;
+    depanNote = (mode === 'depan' || mode === 'keduanya') ? 'dari grup (2D Depan)' : 'input manual';
+    belakangNote = (mode === 'belakang' || mode === 'keduanya') ? 'dari grup (2D Belakang)' : 'input manual';
   }
 
+  const depanClass = (grup && (mode === 'depan' || mode === 'keduanya')) ? 'highlight' : '';
+  const belakangClass = (grup && (mode === 'belakang' || mode === 'keduanya')) ? 'highlight-b' : '';
   const cbHtml = cb ? `<div class="rb-arrow">+ CB Filter: ${cb.split('').join(' ')}</div>` : '';
-  const depanClass    = (grup && mode === 'depan')    ? 'highlight'   : '';
-  const belakangClass = (grup && mode === 'belakang') ? 'highlight-b' : '';
 
   return `
     <div class="result-breakdown">
@@ -1684,36 +1682,30 @@ function buildManualBreakdown(grup, mode, depans, belakangs, totalCombo, cb) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   INPUT MANUAL GENERATOR (v5.2 — mode seleksi sisi)
+   INPUT MANUAL GENERATOR (v5.3 — murni seleksi, tidak mengubah input)
    ═══════════════════════════════════════════════════════════════════ */
 function _refreshManualPreview() {
-  const g    = $('manualGrup').value;
-  const mode = $('manualMode').value;
-  const wrap = $('manualModeWrapper');
+  const g = $('manualGrup').value;
+  const mode = $('manualFilterMode').value;
+  const wrap = $('manualFilterModeWrapper');
 
   if (wrap) wrap.style.display = g ? 'block' : 'none';
 
   if (g) {
-    if (mode === 'depan') {
-      const depan = getGroupAs2DigitDepan(g);
-      $('manualDepan').value = depan.join(' ');
-      renderGroupPreview(g, $('manualPreview'), 'depan',
-        'Grup mengisi 2 DEPAN (2D Depan). Isi 2 belakang manual.');
-    } else {
-      const belakang = getGroupAs2DigitBelakang(g);
-      $('manualBelakang').value = belakang.join(' ');
-      renderGroupPreview(g, $('manualPreview'), 'belakang',
-        'Grup mengisi 2 BELAKANG (2D Belakang). Isi 2 depan manual.');
-    }
+    let activeSide = 'both';
+    if (mode === 'depan') activeSide = 'depan';
+    else if (mode === 'belakang') activeSide = 'belakang';
+
+    renderGroupPreview(g, $('manualPreview'), activeSide,
+      'Grup hanya menseleksi angka yang sesuai. Input teks Anda tidak diubah.');
   } else {
     renderGroupPreview('', $('manualPreview'), null, '');
   }
-
   updateManualInfo();
 }
 
 $('manualGrup').addEventListener('change', _refreshManualPreview);
-$('manualMode')?.addEventListener('change', _refreshManualPreview);
+$('manualFilterMode')?.addEventListener('change', _refreshManualPreview);
 
 ['manualDepan', 'manualBelakang', 'manualCB'].forEach(id => {
   $(id).addEventListener('input', updateManualInfo);
@@ -1725,7 +1717,7 @@ function updateManualInfo() {
   const belakang = parseTwoDigitList($('manualBelakang').value);
   const cb       = parseSingleDigitList($('manualCB').value);
   const grup     = $('manualGrup').value;
-  const mode     = $('manualMode').value;
+  const mode     = $('manualFilterMode').value;
   const info     = $('manualInfo');
 
   if (!depan.length || !belakang.length) {
@@ -1737,22 +1729,40 @@ function updateManualInfo() {
   const pages = Math.ceil(total / PER_PAGE);
 
   let text = `2 depan: ${depan.length} • 2 belakang: ${belakang.length} • Total: ${total.toLocaleString('id-ID')} kombinasi • ${pages} halaman`;
-  if (grup)      text += ` • Grup: ${grup} (isi 2 ${mode})`;
+  if (grup)      text += ` • Grup: ${grup} (Seleksi: ${mode})`;
   if (cb.length) text += ` • CB: ${cb.join(' ')}`;
 
   info.textContent = text;
 }
 
 $('manualGenerateBtn').addEventListener('click', () => {
-  const grup     = $('manualGrup').value;
-  const mode     = $('manualMode').value;
-  const depan    = parseTwoDigitList($('manualDepan').value);
-  const belakang = parseTwoDigitList($('manualBelakang').value);
-  const cb       = parseSingleDigitList($('manualCB').value);
-  const cbMode   = $('manualCBMode').value;
+  const grup = $('manualGrup').value;
+  const mode = $('manualFilterMode').value;
+  const cb   = parseSingleDigitList($('manualCB').value);
+  const cbMode = $('manualCBMode').value;
 
-  if (!depan.length)    { toast('Isi 2 depan (dari grup atau manual)', 'error'); return; }
-  if (!belakang.length) { toast('Isi 2 belakang (dari grup atau manual)', 'error'); return; }
+  let depan = parseTwoDigitList($('manualDepan').value);
+  let belakang = parseTwoDigitList($('manualBelakang').value);
+
+  if (!depan.length)    { toast('Isi 2 depan', 'error'); return; }
+  if (!belakang.length) { toast('Isi 2 belakang', 'error'); return; }
+
+  let selectedDepans = [];
+  let selectedBelakangs = [];
+
+  if (grup) {
+    if (mode === 'depan' || mode === 'keduanya') {
+      selectedDepans = getGroupAs2DigitDepan(grup);
+      depan = depan.filter(d => selectedDepans.includes(d));
+    }
+    if (mode === 'belakang' || mode === 'keduanya') {
+      selectedBelakangs = getGroupAs2DigitBelakang(grup);
+      belakang = belakang.filter(b => selectedBelakangs.includes(b));
+    }
+
+    if (!depan.length) { toast('Tidak ada 2 depan yang cocok dengan grup', 'error'); return; }
+    if (!belakang.length) { toast('Tidak ada 2 belakang yang cocok dengan grup', 'error'); return; }
+  }
 
   const combos = [];
   for (const d of depan) for (const b of belakang) combos.push(d + b);
@@ -1767,7 +1777,7 @@ $('manualGenerateBtn').addEventListener('click', () => {
   pageState.manual.current = 0;
   pageState.manual.meta    =
     `${depan.length} depan × ${belakang.length} belakang` +
-    (grup ? ` • Grup: ${grup} (isi 2 ${mode})` : '') +
+    (grup ? ` • Grup: ${grup} (Seleksi: ${mode})` : '') +
     (cb.length ? ` • CB: ${cb.join(' ')} (${cbMode.toUpperCase()})` : '');
 
   const breakdown = buildManualBreakdown(
@@ -1780,7 +1790,7 @@ $('manualGenerateBtn').addEventListener('click', () => {
 });
 
 /* ═══════════════════════════════════════════════════════════════════
-   BBFS GENERATOR (v5.2 — mode filter Depan/Belakang)
+   BBFS GENERATOR (v5.3 — mode filter Depan/Belakang/Keduanya)
    ═══════════════════════════════════════════════════════════════════ */
 $('bbfsInput').addEventListener('input', (e) => {
   e.target.value = onlyDigits(e.target.value).slice(0, MAX_BBFS_DIGITS);
@@ -1792,15 +1802,15 @@ $('bbfsCBMode').addEventListener('change', updateBBFSInfo);
 function _refreshBBFSPreview() {
   const g    = $('bbfsGrup').value;
   const mode = $('bbfsMode').value;
-  const activeSide = mode === 'depan' ? 'depan' : 'belakang';
 
   const wrap = $('bbfsModeWrapper');
   if (wrap) wrap.style.display = g ? 'block' : 'none';
 
-  const hint = mode === 'depan'
-    ? 'Grup sebagai FILTER 2D DEPAN (2 digit pertama ∈ grup). Input BBFS tidak diubah.'
-    : 'Grup sebagai FILTER 2D BELAKANG (2 digit terakhir ∈ grup). Input BBFS tidak diubah.';
+  let activeSide = 'both';
+  if (mode === 'depan') activeSide = 'depan';
+  else if (mode === 'belakang') activeSide = 'belakang';
 
+  const hint = 'Grup dipakai sebagai FILTER hasil. Input BBFS tidak diubah.';
   renderGroupPreview(g, $('bbfsPreview'), activeSide, hint);
 }
 
@@ -1831,7 +1841,7 @@ function updateBBFSInfo() {
   const pages = Math.ceil(total / PER_PAGE);
 
   let text = `BBFS: ${total.toLocaleString('id-ID')} kombinasi • ${pages} halaman`;
-  if (grup) text += ` • FILTER 2D ${mode === 'depan' ? 'DEPAN' : 'BELAKANG'}: "${grup}"`;
+  if (grup) text += ` • FILTER 2D ${mode.toUpperCase()}: "${grup}"`;
   if (cb)   text += ` • CB: ${cb.split('').join(' ')}`;
 
   info.textContent = text;
@@ -1854,21 +1864,23 @@ $('bbfsGenerateBtn').addEventListener('click', () => {
   let filterValues = [];
 
   if (grup) {
-    const ends = filterMode === 'depan'
-      ? getGroupAs2DigitDepan(grup)
-      : getGroupAs2DigitBelakang(grup);
-
-    if (!ends.length) { toast(`Grup "${grup}" kosong di master`, 'error'); return; }
-    filterValues = ends;
+    const depans = getGroupAs2DigitDepan(grup);
+    const belakangs = getGroupAs2DigitBelakang(grup);
 
     if (filterMode === 'depan') {
-      all = all.filter(c => ends.includes(c.slice(0, 2)));
-    } else {
-      all = all.filter(c => ends.includes(c.slice(-2)));
+      filterValues = depans;
+      all = all.filter(c => depans.includes(c.slice(0, 2)));
+    } else if (filterMode === 'belakang') {
+      filterValues = belakangs;
+      all = all.filter(c => belakangs.includes(c.slice(-2)));
+    } else if (filterMode === 'keduanya') {
+      filterValues = [...new Set([...depans, ...belakangs])].sort();
+      all = all.filter(c => depans.includes(c.slice(0, 2)) && belakangs.includes(c.slice(-2)));
     }
 
+    if (!filterValues.length) { toast(`Grup "${grup}" kosong di master`, 'error'); return; }
     if (!all.length) {
-      toast(`Tidak ada hasil yang 2D ${filterMode} ∈ grup "${grup}"`, 'error');
+      toast(`Tidak ada hasil yang cocok dengan filter 2D ${filterMode} grup "${grup}"`, 'error');
       return;
     }
   }
@@ -1898,7 +1910,7 @@ $('bbfsGenerateBtn').addEventListener('click', () => {
 });
 
 /* ═══════════════════════════════════════════════════════════════════
-   ANGKA TARUNG GENERATOR (v5.2 — mode filter Depan/Belakang)
+   ANGKA TARUNG GENERATOR (v5.3 — mode filter Depan/Belakang/Keduanya)
    ═══════════════════════════════════════════════════════════════════ */
 ['atDigit1', 'atDigit2', 'atDigit3', 'atDigit4'].forEach(id => {
   $(id).addEventListener('input', (e) => {
@@ -1912,15 +1924,15 @@ $('atCBMode').addEventListener('change', updateATInfo);
 function _refreshATPreview() {
   const g    = $('atGrup').value;
   const mode = $('atMode').value;
-  const activeSide = mode === 'depan' ? 'depan' : 'belakang';
 
   const wrap = $('atModeWrapper');
   if (wrap) wrap.style.display = g ? 'block' : 'none';
 
-  const hint = mode === 'depan'
-    ? 'Grup sebagai FILTER 2D DEPAN (2 digit pertama ∈ grup). Input posisi AK tidak diubah.'
-    : 'Grup sebagai FILTER 2D BELAKANG (2 digit terakhir ∈ grup). Input posisi AK tidak diubah.';
+  let activeSide = 'both';
+  if (mode === 'depan') activeSide = 'depan';
+  else if (mode === 'belakang') activeSide = 'belakang';
 
+  const hint = 'Grup dipakai sebagai FILTER hasil. Input AK tidak diubah.';
   renderGroupPreview(g, $('atPreview'), activeSide, hint);
 }
 
@@ -1953,7 +1965,7 @@ function updateATInfo() {
   const pages = Math.ceil(total / PER_PAGE);
 
   let text = `P1:${p1.length} P2:${p2.length} P3:${p3.length} P4:${p4.length} • ${total.toLocaleString('id-ID')} kombinasi • ${pages} halaman`;
-  if (grup)      text += ` • FILTER 2D ${mode === 'depan' ? 'DEPAN' : 'BELAKANG'}: "${grup}"`;
+  if (grup)      text += ` • FILTER 2D ${mode.toUpperCase()}: "${grup}"`;
   if (cb.length) text += ` • CB: ${cb.join(' ')}`;
 
   info.textContent = text;
@@ -1983,21 +1995,23 @@ $('atGenerateBtn').addEventListener('click', () => {
   let filterValues = [];
 
   if (grup) {
-    const ends = filterMode === 'depan'
-      ? getGroupAs2DigitDepan(grup)
-      : getGroupAs2DigitBelakang(grup);
-
-    if (!ends.length) { toast(`Grup "${grup}" kosong di master`, 'error'); return; }
-    filterValues = ends;
+    const depans = getGroupAs2DigitDepan(grup);
+    const belakangs = getGroupAs2DigitBelakang(grup);
 
     if (filterMode === 'depan') {
-      filtered = filtered.filter(c => ends.includes(c.slice(0, 2)));
-    } else {
-      filtered = filtered.filter(c => ends.includes(c.slice(-2)));
+      filterValues = depans;
+      filtered = filtered.filter(c => depans.includes(c.slice(0, 2)));
+    } else if (filterMode === 'belakang') {
+      filterValues = belakangs;
+      filtered = filtered.filter(c => belakangs.includes(c.slice(-2)));
+    } else if (filterMode === 'keduanya') {
+      filterValues = [...new Set([...depans, ...belakangs])].sort();
+      filtered = filtered.filter(c => depans.includes(c.slice(0, 2)) && belakangs.includes(c.slice(-2)));
     }
 
+    if (!filterValues.length) { toast(`Grup "${grup}" kosong di master`, 'error'); return; }
     if (!filtered.length) {
-      toast(`Tidak ada hasil yang 2D ${filterMode} ∈ grup "${grup}"`, 'error');
+      toast(`Tidak ada hasil yang cocok dengan filter 2D ${filterMode} grup "${grup}"`, 'error');
       return;
     }
   }
@@ -2613,7 +2627,7 @@ if (sessionStorage.getItem('sa_logged_in') === '1') {
    BOOT
    ═══════════════════════════════════════════════════════════════════ */
 console.log(
-  '%c SA_HARD v5.2 ',
+  '%c SA_HARD v5.3 ',
   'background:#22d3ee;color:#04101c;font-weight:bold;padding:4px 8px;border-radius:4px;'
 );
 console.log('Ready • Master:', master.length, 'records');
