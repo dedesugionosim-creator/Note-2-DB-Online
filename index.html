@@ -3667,56 +3667,117 @@ function renderResultTable() {
 
 
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 41: JS — KONVERSI (MANUAL, GRUP, CB, AK) - IMPROVED
+   BLOK 41: JS — KONVERSI (MANUAL, GRUP, CB, AK) - LOGIC UPDATE v2.0
    ═══════════════════════════════════════════════════════════════════════ */
 
-// 1. KONVERSI MANUAL
-$('convertManualBtn').addEventListener('click', function() {
-    const n = $('manualInput').value.trim();
-    if (!/^\d+$/.test(n)) { toast('Masukkan angka valid', 'error'); return; }
-
-    const digits = n.split('').map(Number);
-    const sum = digits.reduce((a, b) => a + b, 0);
-    const sumRepeat = String(sum).split('').reduce((a, b) => a + Number(b), 0);
-    const reversed = n.split('').reverse().join('');
-    const mod10 = sum % 10;
-    const bbfs = [...new Set(n.split(''))].sort().join('');
-
-    // Pisahkan 4 digit jika panjangnya 4
-    let askop = '-';
-    let kepalaekor = '-';
-    let as = '-', kop = '-', kepala = '-', ekor = '-';
+// Helper: Membuat semua kombinasi 2-digit dari input string
+function getAllCombinations2D(str) {
+    const digits = onlyDigits(str).split('');
+    if (digits.length < 2) return [];
     
-    if (n.length === 4) {
-        askop = n.slice(0, 2);
-        kepalaekor = n.slice(2, 4);
-        as = n[0];
-        kop = n[1];
-        kepala = n[2];
-        ekor = n[3];
+    const result = new Set();
+    // Loop untuk mengambil kombinasi (i < j) sesuai urutan string
+    for (let i = 0; i < digits.length; i++) {
+        for (let j = i + 1; j < digits.length; j++) {
+            result.add(digits[i] + digits[j]);
+        }
     }
+    return Array.from(result).sort();
+}
 
-    $('manualResultBox').textContent =
-        `📌 NOMOR ASLI : ${n}\n` +
-        `🔄 DIBALIK   : ${reversed}\n` +
-        `🔢 BBFS UNIK : ${bbfs}\n` +
-        `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
-        `🧮 RUMUS MATEMATIKA:\n` +
-        `➕ Jumlah Digit : ${sum}\n` +
-        `🔁 Jumlah Total : ${sumRepeat}\n` +
-        `🎯 Mod 10       : ${mod10}\n` +
-        `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
-        `✂️ PECAHAN POSISI (AS, KOP, KEPALA, EKOR):\n` +
-        `   • AS (Depan)    : ${as}\n` +
-        `   • KOP (Tengah 1): ${kop}\n` +
-        `   • KEPALA (Tengah 2): ${kepala}\n` +
-        `   • EKOR (Belakang): ${ekor}\n` +
-        `   ---------------------------------\n` +
-        `   • 2D Depan (AsKop) : ${askop}\n` +
-        `   • 2D Belakang (KepEkor) : ${kepalaekor}`;
+// Helper: Mencari angka prediksi dari Master
+function findPredictionForPair(pair, grupTarget, inputDigits) {
+    const results = [];
+    
+    for (let i = 0; i < master.length; i++) {
+        const m = master[i];
+        
+        // Syarat 1: Grup harus sama
+        if ((m.grup || '').trim() !== grupTarget) {
+            continue;
+        }
+        
+        // Syarat 2: Angka tidak boleh sama dengan pair aslinya
+        if (m.nomor === pair) {
+            continue;
+        }
+        
+        // Syarat 3: Digit angka harus ada di inputDigits
+        let valid = true;
+        for (let j = 0; j < m.nomor.length; j++) {
+            if (!inputDigits.includes(m.nomor[j])) {
+                valid = false;
+                break;
+            }
+        }
+        
+        if (valid) {
+            results.push(m);
+        }
+    }
+    
+    return results;
+}
+
+// ─────────────────────────────────────────────────────────
+// 1. KONVERSI MANUAL
+// ─────────────────────────────────────────────────────────
+$('convertManualBtn').addEventListener('click', function() {
+    const raw = $('manualInput').value.trim();
+    
+    if (!/^\d+$/.test(raw) || raw.length < 2) {
+        toast('Masukkan minimal 2 angka valid', 'error');
+        return;
+    }
+    
+    const combos = getAllCombinations2D(raw);
+    let out = `📌 NOMOR INPUT : ${raw}\n`;
+    out += `🔢 KOMBINASI 2D (${combos.length}):\n`;
+    out += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+    
+    const grupCount = {};
+    let foundCount = 0;
+    
+    combos.forEach(pair => {
+        let m = null;
+        for (let i = 0; i < master.length; i++) {
+            if (master[i].nomor === pair) { m = master[i]; break; }
+        }
+        
+        if (m) {
+            out += `${pair} → ${m.syair} (${m.grup})\n`;
+            // Hitung frekuensi grup
+            grupCount[m.grup] = (grupCount[m.grup] || 0) + 1;
+            foundCount++;
+        } else {
+            out += `${pair} → (Tidak ada di Master)\n`;
+        }
+    });
+    
+    out += `\n📊 GRUP PALING DOMINAN:\n`;
+    
+    if (foundCount === 0) {
+        out += `- Tidak ada kombinasi yang cocok di Master.`;
+    } else {
+        // Urutkan grup dari yang paling banyak
+        const sortedGrup = Object.entries(grupCount).sort((a, b) => b[1] - a[1]);
+        const topCount = sortedGrup[0][1];
+        
+        sortedGrup.forEach(([namaGrup, jumlah]) => {
+            if (jumlah === topCount) {
+                out += `🏆 ${namaGrup} (Muncul ${jumlah}x)\n`;
+            } else {
+                out += `   ${namaGrup} (Muncul ${jumlah}x)\n`;
+            }
+        });
+    }
+    
+    $('manualResultBox').textContent = out;
 });
 
-// 2. KONVERSI GRUP (Sama seperti sebelumnya)
+// ─────────────────────────────────────────────────────────
+// 2. KONVERSI GRUP
+// ─────────────────────────────────────────────────────────
 $('convertGrupBtn').addEventListener('click', function() {
     const n = $('grupInput').value.trim();
     if (!n) { toast('Masukkan nomor', 'error'); return; }
@@ -3748,7 +3809,9 @@ $('convertGrupBtn').addEventListener('click', function() {
     }
 });
 
-// 3. KONVERSI CB (Sama seperti sebelumnya)
+// ─────────────────────────────────────────────────────────
+// 3. KONVERSI CB
+// ─────────────────────────────────────────────────────────
 $('convertCBBtn').addEventListener('click', function() {
     const n = $('cbInput').value.trim();
     if (!/^\d+$/.test(n)) { toast('Masukkan angka valid', 'error'); return; }
@@ -3770,46 +3833,48 @@ $('convertCBBtn').addEventListener('click', function() {
         `🔗 Kombinasi 2D:\n${pairs.slice(0, 12).join(', ') || '-'}`;
 });
 
-// 4. KONVERSI AK (ANGKA KEMBAR) - IMPROVED
+// ─────────────────────────────────────────────────────────
+// 4. KONVERSI AK (ANGKA KEMBAR / PREDIKSI JAWABAN)
+// ─────────────────────────────────────────────────────────
 $('convertAKBtn').addEventListener('click', function() {
-    const n = $('akInput').value.trim();
-    if (!/^\d+$/.test(n)) { toast('Masukkan angka valid', 'error'); return; }
-
-    const counts = {};
-    n.split('').forEach(d => counts[d] = (counts[d] || 0) + 1);
-
-    const kembar = Object.entries(counts).filter(([, c]) => c > 1);
-    const allDigits = Object.keys(counts).sort();
-
-    let out = `📌 Nomor Input : ${n}\n`;
-    out += `🔢 Digit Unik  : ${allDigits.join(', ')}\n`;
+    const raw = $('akInput').value.trim();
+    
+    if (!/^\d+$/.test(raw) || raw.length < 2) {
+        toast('Masukkan minimal 2 angka valid', 'error');
+        return;
+    }
+    
+    const combos = getAllCombinations2D(raw);
+    const inputDigits = onlyDigits(raw).split('');
+    
+    let out = `📌 NOMOR INPUT : ${raw}\n`;
+    out += `🔢 KOMBINASI 2D (${combos.length}):\n`;
     out += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-
-    if (kembar.length > 0) {
-        out += `✅ ANGKA KEMBAR DITEMUKAN:\n`;
-        kembar.forEach(([d, c]) => out += `   • Angka ${d} muncul ${c}x\n`);
-        out += `\n`;
-    } else {
-        out += `❌ Tidak ada angka kembar (semua unik)\n\n`;
-    }
-
-    // Pencarian Master Relevan + Syair
-    const matches = master.filter(m => allDigits.some(d => m.nomor.includes(d)));
-    if (matches.length > 0) {
-        out += `📋 ANGKA BERELASI DI MASTER (Total ${matches.length}):\n`;
-        
-        // Tampilkan maksimal 20 agar tidak terlalu panjang
-        matches.slice(0, 20).forEach(m => {
-            out += `   • ${m.nomor} : ${m.syair} (${m.grup})\n`;
-        });
-        
-        if (matches.length > 20) {
-            out += `   ... dan ${matches.length - 20} angka lainnya.\n`;
+    
+    combos.forEach(pair => {
+        let m = null;
+        for (let i = 0; i < master.length; i++) {
+            if (master[i].nomor === pair) { m = master[i]; break; }
         }
-    } else {
-        out += `📋 Tidak ada angka yang berelasi di Master.\n`;
-    }
-
+        
+        if (m) {
+            out += `${pair} = ${m.syair} (${m.grup})\n`;
+            
+            const predictions = findPredictionForPair(pair, m.grup, inputDigits);
+            
+            if (predictions.length > 0) {
+                predictions.forEach(pred => {
+                    out += `  → ${pred.nomor} ${pred.syair} (${pred.grup})\n`;
+                });
+            } else {
+                out += `  → (Tidak ada angka prediksi di grup ini yang cocok)\n`;
+            }
+        } else {
+            out += `${pair} = (Tidak ada di Master)\n`;
+        }
+        out += `\n`; // Jarak antar pair
+    });
+    
     $('akResult').textContent = out;
 });
 
