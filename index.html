@@ -1674,7 +1674,6 @@ tr:hover {
     <header>
         <div class="brand">SA_HARD</div>
         
-        <!-- INFO USER / ADMIN -->
         <div class="header-user-info" id="headerUserInfo">
             <span class="name" id="headerUserName">Admin</span>
             <span class="status" id="headerUserStatus">Superadmin</span>
@@ -1685,7 +1684,6 @@ tr:hover {
     
     <!-- NAVIGATION -->
     <nav id="mainNav">
-        <!-- Menu Admin & User Umum -->
         <button data-section="inputMaster" class="active">📋 Master Nomor</button>
         <button data-section="input4Angka">🔢 Input 4 Angka</button>
         <button data-section="dataGrup">🗂️ Data Grup</button>
@@ -1693,11 +1691,7 @@ tr:hover {
         <button data-section="tabelResult" style="color:var(--warn); border-color:var(--warn);">📊 Tabel Result</button>
         <button data-section="dataPasar" style="color:#a78bfa; border-color:#a78bfa;">📚 Data Pasar</button>
         <button data-section="rumusSyair" style="color:var(--success); border-color:var(--success);">🔮 Rumus Syair</button>
-        
-        <!-- Menu Khusus Chat (Admin & User) -->
         <button data-section="chatMenu" style="color:var(--accent); border-color:var(--accent);">💬 Chat</button>
-        
-        <!-- Menu Khusus Admin (Akan ditampilkan via JS jika login sebagai Admin) -->
         <button data-section="userMenu" id="navBtnUser" hidden style="color:var(--danger); border-color:var(--danger);">👑 Menu User</button>
     </nav>
     
@@ -1706,7 +1700,6 @@ tr:hover {
         <!-- ═══════════════════════════════════════════════════════════════════════
              BLOK 20: BODY — SECTION CHAT (ADMIN & USER)
              ═══════════════════════════════════════════════════════════════════════ -->
-
         <section id="chatMenu">
             <h2>💬 Pusat Chat</h2>
             <p class="text-muted mb-10" style="font-size:13px;">
@@ -1714,61 +1707,44 @@ tr:hover {
             </p>
             
             <div class="chat-container">
-                
-                <!-- SIDEBAR CHAT -->
                 <div class="chat-sidebar" id="chatSidebar">
-                    <div class="chat-sidebar-header">
-                        Ruang Obrolan
-                    </div>
-                    <!-- Item kontak akan digenerate via JS -->
+                    <div class="chat-sidebar-header">Ruang Obrolan</div>
                 </div>
                 
-                <!-- AREA CHAT UTAMA -->
                 <div class="chat-main">
-                    <div class="chat-main-header" id="chatHeaderTitle">
-                        Pilih Obrolan
-                    </div>
-                    
+                    <div class="chat-main-header" id="chatHeaderTitle">Pilih Obrolan</div>
                     <div class="chat-messages" id="chatMessages">
-                        <!-- Balon chat akan digenerate via JS -->
                         <div class="empty" style="margin:auto;">Belum ada pesan. Pilih kontak di samping.</div>
                     </div>
-                    
                     <div class="chat-input-area" id="chatInputArea" style="display:none;">
                         <input type="text" id="chatInput" placeholder="Ketik pesan..." autocomplete="off">
                         <button class="btn-primary" id="sendChatBtn">Kirim</button>
                     </div>
                 </div>
-                
             </div>
         </section>
-
 
         <!-- ═══════════════════════════════════════════════════════════════════════
              BLOK 21: BODY — SECTION MENU USER (KHUSUS ADMIN)
              ═══════════════════════════════════════════════════════════════════════ -->
-
         <section id="userMenu">
             <h2>👑 Menu Pengaturan User</h2>
             <p class="text-muted mb-10" style="font-size:13px;">
                 Kelola data penyewa, perpanjangan langganan, dan harga sewa aplikasi.
             </p>
             
-            <!-- TAB MENU USER -->
             <div class="tab-user-menu" id="userMenuTabs">
                 <button data-utab="utab-daftar" class="active">Daftar User & Tambah</button>
                 <button data-utab="utab-harga">Pengaturan Harga</button>
                 <button data-utab="utab-konfirmasi">Konfirmasi Perpanjangan (<span id="badgeKonfirmasi">0</span>)</button>
             </div>
 
-            <!-- TAB 1: DAFTAR USER -->
             <div id="utab-daftar" class="subpanel active">
                 <div class="card">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                         <h3>Data User Terdaftar</h3>
                         <button class="btn-warn" id="btnAddUser" style="padding:8px 12px; font-size:12px;">➕ Tambah User Baru</button>
                     </div>
-                    
                     <div class="user-table-container">
                         <table class="user-table">
                             <thead>
@@ -1781,92 +1757,53 @@ tr:hover {
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody id="userTableBody">
-                                <!-- Render via JS -->
-                            </tbody>
+                            <tbody id="userTableBody"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- TAB 2: PENGATURAN HARGA -->
             <div id="utab-harga" class="subpanel">
                 <div class="card">
                     <h3 style="margin-bottom:12px; color:var(--accent);">Pengaturan Harga Sewa (Rp)</h3>
                     <div class="grid-2">
-                        <div class="field">
-                            <label for="harga1Bulan">Harga 1 Bulan</label>
-                            <input type="number" id="harga1Bulan" placeholder="50000">
-                        </div>
-                        <div class="field">
-                            <label for="harga3Bulan">Harga 3 Bulan</label>
-                            <input type="number" id="harga3Bulan" placeholder="120000">
-                        </div>
-                        <div class="field">
-                            <label for="harga6Bulan">Harga 6 Bulan</label>
-                            <input type="number" id="harga6Bulan" placeholder="200000">
-                        </div>
-                        <div class="field">
-                            <label for="harga1Tahun">Harga 1 Tahun</label>
-                            <input type="number" id="harga1Tahun" placeholder="350000">
-                        </div>
+                        <div class="field"><label>Harga 1 Bulan</label><input type="number" id="harga1Bulan" placeholder="50000"></div>
+                        <div class="field"><label>Harga 3 Bulan</label><input type="number" id="harga3Bulan" placeholder="120000"></div>
+                        <div class="field"><label>Harga 6 Bulan</label><input type="number" id="harga6Bulan" placeholder="200000"></div>
+                        <div class="field"><label>Harga 1 Tahun</label><input type="number" id="harga1Tahun" placeholder="350000"></div>
                     </div>
                     <button class="btn-primary" id="savePricingBtn" style="margin-top:10px;">💾 Simpan Pengaturan Harga</button>
                 </div>
             </div>
 
-            <!-- TAB 3: KONFIRMASI PERPANJANGAN -->
             <div id="utab-konfirmasi" class="subpanel">
                 <div class="card">
                     <h3 style="margin-bottom:12px; color:var(--warn);">Menunggu Konfirmasi Perpanjangan</h3>
-                    <div class="list" id="konfirmasiList">
-                        <!-- Render via JS -->
-                    </div>
+                    <div class="list" id="konfirmasiList"></div>
                 </div>
             </div>
         </section>
 
-        <!-- ⬇️⬇️⬇️ TARUH BLOK 23 SAMPAI BLOK 29 (DARI PESAN 3) TEPAT DI BAWAH SINI ⬇️⬇️⬇️ -->
-        <!-- Yaitu: Section inputMaster, input4Angka, dataGrup, konversiManual, tabelResult, dataPasar, rumusSyair -->
-
-    </main>
-
-</div>
-
-        <!-- ═══════════════════════════════════════════════════════════════
+        <!-- ═══════════════════════════════════════════════════════════════════════
              BLOK 23: SECTION — MASTER NOMOR
-             ═══════════════════════════════════════════════════════════════ -->
-        
+             ═══════════════════════════════════════════════════════════════════════ -->
         <section id="inputMaster" class="active">
             <h2>📋 Master Nomor</h2>
-            <p class="text-muted mb-10" style="font-size:13px;">
-                Data master <b>100 nomor (00–99) tertanam</b>.
-                Bisa <b>Edit</b> atau <b>Hapus</b> per baris.
-            </p>
-            
+            <p class="text-muted mb-10" style="font-size:13px;">Data master <b>100 nomor (00–99) tertanam</b>.</p>
             <div class="card">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
                     <h3>Data Master (<span id="masterCount">0</span>)</h3>
-                    <button
-                        class="btn-warn"
-                        id="resetMasterBtn"
-                        style="padding:6px 10px; font-size:12px;"
-                    >
-                        🔄 Reset ke Data Bawaan
-                    </button>
+                    <button class="btn-warn" id="resetMasterBtn" style="padding:6px 10px; font-size:12px;">🔄 Reset ke Data Bawaan</button>
                 </div>
                 <div class="list" id="masterList"></div>
             </div>
         </section>
-        
-        
-        <!-- ═══════════════════════════════════════════════════════════════
+
+        <!-- ═══════════════════════════════════════════════════════════════════════
              BLOK 24: SECTION — INPUT 4 ANGKA
-             ═══════════════════════════════════════════════════════════════ -->
-        
+             ═══════════════════════════════════════════════════════════════════════ -->
         <section id="input4Angka">
             <h2>🔢 Input 4 Angka</h2>
-            
             <div class="subtabs" id="subTabs4Angka">
                 <button data-subpanel="subpanel-manual" class="active">Input Manual</button>
                 <button data-subpanel="subpanel-bbfs">BBFS</button>
@@ -1875,444 +1812,156 @@ tr:hover {
                 <button data-subpanel="subpanel-gabungGrup">Gabung Grup</button>
                 <button data-subpanel="subpanel-grupCB">Grup + CB</button>
             </div>
-            
-            
-            <!-- SUBPANEL: INPUT MANUAL -->
+
+            <!-- Subpanel Manual -->
             <div id="subpanel-manual" class="subpanel active">
                 <div class="card">
-                    <h3 style="margin-bottom:6px;">Input Manual Kombinasi 4 Angka</h3>
-                    <p class="text-muted" style="font-size:12.5px; margin-bottom:12px;">
-                        Kombinasi <b>2 depan × 2 belakang</b>.
-                        Grup hanya <b>menseleksi angka</b> yang sesuai
-                        (input teks tidak diubah).
-                    </p>
-                    
+                    <h3>Input Manual Kombinasi 4 Angka</h3>
+                    <div class="field"><label>Input 2 Angka Depan</label><input type="text" id="manualDepan" placeholder="20 21 22"></div>
+                    <div class="field"><label>Input 2 Angka Belakang</label><input type="text" id="manualBelakang" placeholder="01 02 03"></div>
                     <div class="field">
-                        <label for="manualDepan">Input 2 Angka Depan (pisah spasi / koma)</label>
-                        <input
-                            type="text"
-                            id="manualDepan"
-                            placeholder="20 21 22 23 24"
-                            autocomplete="off"
-                        >
-                    </div>
-                    
-                    <div class="field">
-                        <label for="manualBelakang">Input 2 Angka Belakang (pisah spasi / koma)</label>
-                        <input
-                            type="text"
-                            id="manualBelakang"
-                            placeholder="01 02 03 04 05"
-                            autocomplete="off"
-                        >
-                    </div>
-                    
-                    <div class="field">
-                        <label for="manualGrup">Pilih Grup (Seleksi Angka)</label>
-                        <select id="manualGrup">
-                            <option value="">— Manual (tanpa grup) —</option>
-                        </select>
+                        <label>Pilih Grup (Seleksi Angka)</label>
+                        <select id="manualGrup"><option value="">— Manual (tanpa grup) —</option></select>
                         <div id="manualPreview" class="group-preview"></div>
                     </div>
-                    
                     <div class="field" id="manualFilterModeWrapper" style="display:none;">
-                        <label for="manualFilterMode">Mode Seleksi Grup</label>
+                        <label>Mode Seleksi Grup</label>
                         <select id="manualFilterMode">
-                            <option value="depan" selected>🟡 Filter 2D DEPAN (seleksi angka depan)</option>
-                            <option value="belakang">🔵 Filter 2D BELAKANG (seleksi angka belakang)</option>
-                            <option value="keduanya">🟣 Filter DEPAN & BELAKANG (seleksi keduanya)</option>
-                        </select>
-                        <p style="color:var(--muted); font-size:11.5px; margin-top:6px;">
-                            Hanya angka yang ada di grup yang akan di-generate.
-                            Input teks tetap utuh.
-                        </p>
-                    </div>
-                    
-                    <div class="field">
-                        <label for="manualCB">Input CB (opsional)</label>
-                        <input
-                            type="text"
-                            id="manualCB"
-                            placeholder="0 1 2 3 5"
-                            autocomplete="off"
-                        >
-                    </div>
-                    
-                    <div class="field">
-                        <label for="manualCBMode">Mode Filter CB</label>
-                        <select id="manualCBMode">
-                            <option value="or" selected>Salah Satu Digit Muncul (OR)</option>
-                            <option value="and">Semua Digit Harus Muncul (AND)</option>
+                            <option value="depan">🟡 Filter 2D DEPAN</option>
+                            <option value="belakang">🔵 Filter 2D BELAKANG</option>
+                            <option value="keduanya">🟣 Filter DEPAN & BELAKANG</option>
                         </select>
                     </div>
-                    
-                    <p id="manualInfo" class="text-accent" style="font-size:13px; margin-bottom:12px;">
-                        Total kombinasi: — • Halaman: —
-                    </p>
-                    
-                    <button class="btn-primary" id="manualGenerateBtn">
-                        ⚡ Generate Kombinasi
-                    </button>
-                </div>
-                
-                <div class="card">
-                    <div id="manualResult"></div>
-                </div>
-            </div>
-            
-            
-            <!-- SUBPANEL: BBFS -->
-            <div id="subpanel-bbfs" class="subpanel">
-                <div class="card">
-                    <h3 style="margin-bottom:6px;">BBFS — Bolak-Balik (Max 16 Angka)</h3>
-                    <p class="text-muted" style="font-size:12.5px; margin-bottom:12px;">
-                        Input 4–16 digit → permutasi 4-digit.
-                        Grup sebagai FILTER.
-                    </p>
-                    
+                    <div class="field"><label>Input CB (opsional)</label><input type="text" id="manualCB" placeholder="0 1 2 3 5"></div>
                     <div class="field">
-                        <label for="bbfsInput">Input BBFS (4–16 digit)</label>
-                        <input
-                            type="text"
-                            id="bbfsInput"
-                            placeholder="0123456789"
-                            maxlength="16"
-                            inputmode="numeric"
-                        >
+                        <label>Mode Filter CB</label>
+                        <select id="manualCBMode"><option value="or">OR</option><option value="and">AND</option></select>
                     </div>
-                    
-                    <div class="field">
-                        <label for="bbfsGrup">Pilih Grup → FILTER berdasarkan 2D grup</label>
-                        <select id="bbfsGrup">
-                            <option value="">— Manual (tanpa grup) —</option>
-                        </select>
-                        <div id="bbfsPreview" class="group-preview"></div>
-                    </div>
-                    
-                    <div class="field" id="bbfsModeWrapper" style="display:none;">
-                        <label for="bbfsMode">Mode Filter 2D</label>
-                        <select id="bbfsMode">
-                            <option value="belakang" selected>🔵 Filter 2D BELAKANG (2 digit terakhir ∈ grup)</option>
-                            <option value="depan">🟡 Filter 2D DEPAN (2 digit pertama ∈ grup)</option>
-                            <option value="keduanya">🟣 Filter DEPAN & BELAKANG (keduanya harus cocok)</option>
-                        </select>
-                    </div>
-                    
-                    <div class="field">
-                        <label for="bbfsCB">Input CB (opsional)</label>
-                        <input
-                            type="text"
-                            id="bbfsCB"
-                            placeholder="0 1 2 3 5"
-                            autocomplete="off"
-                        >
-                    </div>
-                    
-                    <div class="field">
-                        <label for="bbfsCBMode">Mode Filter CB</label>
-                        <select id="bbfsCBMode">
-                            <option value="or" selected>Salah Satu Digit Muncul (OR)</option>
-                            <option value="and">Semua Digit Harus Muncul (AND)</option>
-                        </select>
-                    </div>
-                    
-                    <p id="bbfsInfo" class="text-accent" style="font-size:13px; margin-bottom:12px;">
-                        Total kombinasi: — • Halaman: —
-                    </p>
-                    
-                    <button class="btn-primary" id="bbfsGenerateBtn">
-                        ⚡ Generate BBFS
-                    </button>
+                    <p id="manualInfo" class="text-accent">Total kombinasi: —</p>
+                    <button class="btn-primary" id="manualGenerateBtn">⚡ Generate Kombinasi</button>
                 </div>
-                
-                <div class="card">
-                    <div id="bbfsResult"></div>
-                </div>
-            </div>
-            
-            
-            <!-- SUBPANEL: ANGKA TARUNG (AK) -->
-            <div id="subpanel-angkaTarung" class="subpanel">
-                <div class="card">
-                    <h3 style="margin-bottom:6px;">Angka Tarung (AK) — 4 Posisi Digit</h3>
-                    <p class="text-muted" style="font-size:12.5px; margin-bottom:12px;">
-                        Cross product P1 × P2 × P3 × P4.
-                        Grup sebagai FILTER.
-                    </p>
-                    
-                    <div class="grid-2">
-                        <div class="field">
-                            <label for="atDigit1">Digit 1 (Posisi Pertama)</label>
-                            <input
-                                type="text"
-                                id="atDigit1"
-                                placeholder="0123456789"
-                                maxlength="10"
-                                inputmode="numeric"
-                            >
-                        </div>
-                        
-                        <div class="field">
-                            <label for="atDigit2">Digit 2 (Posisi Kedua)</label>
-                            <input
-                                type="text"
-                                id="atDigit2"
-                                placeholder="0123456789"
-                                maxlength="10"
-                                inputmode="numeric"
-                            >
-                        </div>
-                        
-                        <div class="field">
-                            <label for="atDigit3">Digit 3 (Posisi Ketiga)</label>
-                            <input
-                                type="text"
-                                id="atDigit3"
-                                placeholder="0123456789"
-                                maxlength="10"
-                                inputmode="numeric"
-                            >
-                        </div>
-                        
-                        <div class="field">
-                            <label for="atDigit4">Digit 4 (Posisi Keempat)</label>
-                            <input
-                                type="text"
-                                id="atDigit4"
-                                placeholder="0123456789"
-                                maxlength="10"
-                                inputmode="numeric"
-                            >
-                        </div>
-                    </div>
-                    
-                    <div class="field">
-                        <label for="atGrup">Pilih Grup → FILTER berdasarkan 2D grup</label>
-                        <select id="atGrup">
-                            <option value="">— Manual (tanpa grup) —</option>
-                        </select>
-                        <div id="atPreview" class="group-preview"></div>
-                    </div>
-                    
-                    <div class="field" id="atModeWrapper" style="display:none;">
-                        <label for="atMode">Mode Filter 2D</label>
-                        <select id="atMode">
-                            <option value="belakang" selected>🔵 Filter 2D BELAKANG (2 digit terakhir ∈ grup)</option>
-                            <option value="depan">🟡 Filter 2D DEPAN (2 digit pertama ∈ grup)</option>
-                            <option value="keduanya">🟣 Filter DEPAN & BELAKANG (keduanya harus cocok)</option>
-                        </select>
-                    </div>
-                    
-                    <div class="field">
-                        <label for="atCB">Input CB (opsional)</label>
-                        <input
-                            type="text"
-                            id="atCB"
-                            placeholder="0 1 2 3 5"
-                            autocomplete="off"
-                        >
-                    </div>
-                    
-                    <div class="field">
-                        <label for="atCBMode">Mode Filter CB</label>
-                        <select id="atCBMode">
-                            <option value="or" selected>Salah Satu Digit Muncul (OR)</option>
-                            <option value="and">Semua Digit Harus Muncul (AND)</option>
-                        </select>
-                    </div>
-                    
-                    <p id="atInfo" class="text-accent" style="font-size:13px; margin-bottom:12px;">
-                        Total kombinasi: — • Halaman: —
-                    </p>
-                    
-                    <button class="btn-primary" id="atGenerateBtn">
-                        ⚡ Generate Angka Tarung
-                    </button>
-                </div>
-                
-                <div class="card">
-                    <div id="atResult"></div>
-                </div>
-            </div>
-            
-            
-            <!-- SUBPANEL: CB BBFS -->
-            <div id="subpanel-cbBBFS" class="subpanel">
-                <div class="card">
-                    <h3 style="margin-bottom:6px;">CB BBFS — Filter BBFS dengan CB</h3>
-                    <p class="text-muted" style="font-size:12.5px; margin-bottom:12px;">
-                        Generate BBFS, lalu filter hanya yang mengandung digit CB.
-                    </p>
-                    
-                    <div class="field">
-                        <label for="cbBBFSInput">Input BBFS (4–16 digit)</label>
-                        <input
-                            type="text"
-                            id="cbBBFSInput"
-                            placeholder="0123456789"
-                            maxlength="16"
-                            inputmode="numeric"
-                        >
-                    </div>
-                    
-                    <div class="field">
-                        <label for="cbBBFSDigits">Input CB (dipisah spasi)</label>
-                        <input
-                            type="text"
-                            id="cbBBFSDigits"
-                            placeholder="0 1 2 3 5"
-                        >
-                    </div>
-                    
-                    <div class="field">
-                        <label for="cbBBFSMode">Mode Filter CB</label>
-                        <select id="cbBBFSMode">
-                            <option value="or" selected>Salah Satu Digit Muncul (OR)</option>
-                            <option value="and">Semua Digit Harus Muncul (AND)</option>
-                        </select>
-                    </div>
-                    
-                    <p id="cbBBFSInfo" class="text-accent" style="font-size:13px; margin-bottom:12px;">
-                        Info: —
-                    </p>
-                    
-                    <button class="btn-primary" id="cbBBFSGenerateBtn">
-                        ⚡ Generate CB BBFS
-                    </button>
-                </div>
-                
-                <div class="card">
-                    <div id="cbBBFSResult"></div>
-                </div>
-            </div>
-            
-            
-            <!-- SUBPANEL: GABUNG GRUP -->
-            <div id="subpanel-gabungGrup" class="subpanel">
-                <div class="card">
-                    <h3 style="margin-bottom:6px;">Gabung Grup (Hasil 4 Angka)</h3>
-                    <p class="text-muted" style="font-size:12.5px; margin-bottom:12px;">
-                        <b>Grup 1 = 2D DEPAN</b>, <b>Grup 2 = 2D BELAKANG</b>
-                        → cross product 4-digit.
-                    </p>
-                    
-                    <div class="grid-2">
-                        <div class="field">
-                            <label for="gabungGrup1">Grup 1 (2D Depan)</label>
-                            <select id="gabungGrup1"></select>
-                            <div id="gabungPreviewDepan" class="group-preview"></div>
-                        </div>
-                        
-                        <div class="field">
-                            <label for="gabungGrup2">Grup 2 (2D Belakang)</label>
-                            <select id="gabungGrup2"></select>
-                            <div id="gabungPreviewBelakang" class="group-preview"></div>
-                        </div>
-                    </div>
-                    
-                    <div class="field" style="display:flex; align-items:center; gap:8px;">
-                        <input type="checkbox" id="gabungPermutasi">
-                        <label for="gabungPermutasi" style="margin:0; cursor:pointer; font-size:13px;">
-                            Aktifkan permutasi bolak-balik tiap hasil 4-digit
-                        </label>
-                    </div>
-                    
-                    <p id="gabungInfo" class="text-accent" style="font-size:13px; margin-bottom:12px;">
-                        Info: —
-                    </p>
-                    
-                    <button class="btn-primary" id="gabungGenerateBtn">
-                        ⚡ Gabung
-                    </button>
-                </div>
-                
-                <div class="card">
-                    <div id="gabungResult"></div>
-                </div>
-            </div>
-            
-            
-            <!-- SUBPANEL: GRUP + CB -->
-            <div id="subpanel-grupCB" class="subpanel">
-                <div class="card">
-                    <h3 style="margin-bottom:6px;">Grup + CB (Hasil 4 Angka)</h3>
-                    <p class="text-muted" style="font-size:12.5px; margin-bottom:12px;">
-                        <b>Grup 1 = 2D DEPAN</b>, <b>Grup 2 = 2D BELAKANG</b>
-                        → 4 digit, lalu filter <b>CB</b>.
-                    </p>
-                    
-                    <div class="grid-2">
-                        <div class="field">
-                            <label for="grupCB1">Grup 1 (2D Depan)</label>
-                            <select id="grupCB1"></select>
-                            <div id="grupCBPreviewDepan" class="group-preview"></div>
-                        </div>
-                        
-                        <div class="field">
-                            <label for="grupCB2">Grup 2 (2D Belakang)</label>
-                            <select id="grupCB2"></select>
-                            <div id="grupCBPreviewBelakang" class="group-preview"></div>
-                        </div>
-                    </div>
-                    
-                    <div class="field">
-                        <label for="grupCBDigits">Input CB</label>
-                        <input
-                            type="text"
-                            id="grupCBDigits"
-                            placeholder="0 1 2 3 5"
-                        >
-                    </div>
-                    
-                    <div class="field">
-                        <label for="grupCBMode">Mode Filter CB</label>
-                        <select id="grupCBMode">
-                            <option value="or" selected>Salah Satu Digit Muncul (OR)</option>
-                            <option value="and">Semua Digit Harus Muncul (AND)</option>
-                        </select>
-                    </div>
-                    
-                    <div class="field" style="display:flex; align-items:center; gap:8px;">
-                        <input type="checkbox" id="grupCBPermutasi">
-                        <label for="grupCBPermutasi" style="margin:0; cursor:pointer; font-size:13px;">
-                            Aktifkan permutasi bolak-balik tiap hasil 4-digit
-                        </label>
-                    </div>
-                    
-                    <p id="grupCBInfo" class="text-accent" style="font-size:13px; margin-bottom:12px;">
-                        Info: —
-                    </p>
-                    
-                    <button class="btn-primary" id="grupCBGenerateBtn">
-                        ⚡ Generate Grup + CB
-                    </button>
-                </div>
-                
-                <div class="card">
-                    <div id="grupCBResult"></div>
-                </div>
+                <div class="card"><div id="manualResult"></div></div>
             </div>
 
+            <!-- Subpanel BBFS -->
+            <div id="subpanel-bbfs" class="subpanel">
+                <div class="card">
+                    <h3>BBFS — Bolak-Balik</h3>
+                    <div class="field"><label>Input BBFS (4–16 digit)</label><input type="text" id="bbfsInput" placeholder="0123456789" maxlength="16"></div>
+                    <div class="field">
+                        <label>Pilih Grup → FILTER 2D</label>
+                        <select id="bbfsGrup"><option value="">— Manual —</option></select>
+                        <div id="bbfsPreview" class="group-preview"></div>
+                    </div>
+                    <div class="field" id="bbfsModeWrapper" style="display:none;">
+                        <label>Mode Filter</label>
+                        <select id="bbfsMode">
+                            <option value="belakang">🔵 BELAKANG</option>
+                            <option value="depan">🟡 DEPAN</option>
+                            <option value="keduanya">🟣 KEDUANYA</option>
+                        </select>
+                    </div>
+                    <div class="field"><label>Input CB</label><input type="text" id="bbfsCB" placeholder="0 1 2 3 5"></div>
+                    <div class="field"><label>Mode CB</label><select id="bbfsCBMode"><option value="or">OR</option><option value="and">AND</option></select></div>
+                    <p id="bbfsInfo" class="text-accent">Total: —</p>
+                    <button class="btn-primary" id="bbfsGenerateBtn">⚡ Generate BBFS</button>
+                </div>
+                <div class="card"><div id="bbfsResult"></div></div>
+            </div>
+
+            <!-- Subpanel AK -->
+            <div id="subpanel-angkaTarung" class="subpanel">
+                <div class="card">
+                    <h3>Angka Tarung (AK)</h3>
+                    <div class="grid-2">
+                        <div class="field"><label>Posisi 1</label><input type="text" id="atDigit1" placeholder="0123456789"></div>
+                        <div class="field"><label>Posisi 2</label><input type="text" id="atDigit2" placeholder="0123456789"></div>
+                        <div class="field"><label>Posisi 3</label><input type="text" id="atDigit3" placeholder="0123456789"></div>
+                        <div class="field"><label>Posisi 4</label><input type="text" id="atDigit4" placeholder="0123456789"></div>
+                    </div>
+                    <div class="field">
+                        <label>Pilih Grup → FILTER 2D</label>
+                        <select id="atGrup"><option value="">— Manual —</option></select>
+                        <div id="atPreview" class="group-preview"></div>
+                    </div>
+                    <div class="field" id="atModeWrapper" style="display:none;">
+                        <label>Mode Filter</label>
+                        <select id="atMode">
+                            <option value="belakang">🔵 BELAKANG</option>
+                            <option value="depan">🟡 DEPAN</option>
+                            <option value="keduanya">🟣 KEDUANYA</option>
+                        </select>
+                    </div>
+                    <div class="field"><label>Input CB</label><input type="text" id="atCB" placeholder="0 1 2 3 5"></div>
+                    <div class="field"><label>Mode CB</label><select id="atCBMode"><option value="or">OR</option><option value="and">AND</option></select></div>
+                    <p id="atInfo" class="text-accent">Total: —</p>
+                    <button class="btn-primary" id="atGenerateBtn">⚡ Generate AK</button>
+                </div>
+                <div class="card"><div id="atResult"></div></div>
+            </div>
+
+            <!-- Subpanel CB BBFS -->
+            <div id="subpanel-cbBBFS" class="subpanel">
+                <div class="card">
+                    <h3>CB BBFS</h3>
+                    <div class="field"><label>Input BBFS</label><input type="text" id="cbBBFSInput" maxlength="16"></div>
+                    <div class="field"><label>Input CB</label><input type="text" id="cbBBFSDigits"></div>
+                    <div class="field"><label>Mode</label><select id="cbBBFSMode"><option value="or">OR</option><option value="and">AND</option></select></div>
+                    <p id="cbBBFSInfo" class="text-accent">Info: —</p>
+                    <button class="btn-primary" id="cbBBFSGenerateBtn">⚡ Generate CB BBFS</button>
+                </div>
+                <div class="card"><div id="cbBBFSResult"></div></div>
+            </div>
+
+            <!-- Subpanel Gabung Grup -->
+            <div id="subpanel-gabungGrup" class="subpanel">
+                <div class="card">
+                    <h3>Gabung Grup</h3>
+                    <div class="grid-2">
+                        <div class="field"><label>Grup 1 (2D Depan)</label><select id="gabungGrup1"></select><div id="gabungPreviewDepan" class="group-preview"></div></div>
+                        <div class="field"><label>Grup 2 (2D Belakang)</label><select id="gabungGrup2"></select><div id="gabungPreviewBelakang" class="group-preview"></div></div>
+                    </div>
+                    <div class="field" style="display:flex; gap:8px; align-items:center;">
+                        <input type="checkbox" id="gabungPermutasi"> <label for="gabungPermutasi" style="margin:0;">Permutasi</label>
+                    </div>
+                    <p id="gabungInfo" class="text-accent">Info: —</p>
+                    <button class="btn-primary" id="gabungGenerateBtn">⚡ Gabung</button>
+                </div>
+                <div class="card"><div id="gabungResult"></div></div>
+            </div>
+
+            <!-- Subpanel Grup + CB -->
+            <div id="subpanel-grupCB" class="subpanel">
+                <div class="card">
+                    <h3>Grup + CB</h3>
+                    <div class="grid-2">
+                        <div class="field"><label>Grup 1 (2D Depan)</label><select id="grupCB1"></select><div id="grupCBPreviewDepan" class="group-preview"></div></div>
+                        <div class="field"><label>Grup 2 (2D Belakang)</label><select id="grupCB2"></select><div id="grupCBPreviewBelakang" class="group-preview"></div></div>
+                    </div>
+                    <div class="field"><label>Input CB</label><input type="text" id="grupCBDigits"></div>
+                    <div class="field"><label>Mode</label><select id="grupCBMode"><option value="or">OR</option><option value="and">AND</option></select></div>
+                    <div class="field" style="display:flex; gap:8px; align-items:center;">
+                        <input type="checkbox" id="grupCBPermutasi"> <label for="grupCBPermutasi" style="margin:0;">Permutasi</label>
+                    </div>
+                    <p id="grupCBInfo" class="text-accent">Info: —</p>
+                    <button class="btn-primary" id="grupCBGenerateBtn">⚡ Generate Grup + CB</button>
+                </div>
+                <div class="card"><div id="grupCBResult"></div></div>
+            </div>
         </section>
-        
-        
-        <!-- ═══════════════════════════════════════════════════════════════
+
+        <!-- ═══════════════════════════════════════════════════════════════════════
              BLOK 25: SECTION — DATA GRUP
-             ═══════════════════════════════════════════════════════════════ -->
-        
+             ═══════════════════════════════════════════════════════════════════════ -->
         <section id="dataGrup">
             <h2>🗂️ Data Grup</h2>
-            <p class="text-muted mb-10" style="font-size:13px;">
-                Diambil otomatis dari data Master Nomor
-            </p>
+            <p class="text-muted mb-10" style="font-size:13px;">Diambil otomatis dari data Master Nomor</p>
             <div id="grupList"></div>
         </section>
-        
-        
-        <!-- ═══════════════════════════════════════════════════════════════
-             BLOK 26: SECTION — KONVERSI (Manual, Grup, CB, AK)
-             ═══════════════════════════════════════════════════════════════ -->
-        
+
+        <!-- ═══════════════════════════════════════════════════════════════════════
+             BLOK 26: SECTION — KONVERSI
+             ═══════════════════════════════════════════════════════════════════════ -->
         <section id="konversiManual">
             <h2>🔄 Konversi</h2>
             <div class="card">
@@ -2322,568 +1971,198 @@ tr:hover {
                     <button onclick="showKonversi('kCB')">CB</button>
                     <button onclick="showKonversi('kAK')">AK</button>
                 </div>
-                
-                <!-- SUBTAB: KONVERSI MANUAL -->
                 <div id="kManual" class="subpanel active">
-                    <div class="field">
-                        <label for="manualInput">Masukkan Nomor</label>
-                        <input
-                            type="text"
-                            id="manualInput"
-                            placeholder="1234"
-                            inputmode="numeric"
-                        >
-                    </div>
+                    <div class="field"><label>Nomor</label><input type="text" id="manualInput"></div>
                     <button class="btn-primary" id="convertManualBtn">Konversi</button>
-                    <div class="result-box" id="manualResultBox">Hasil akan muncul di sini...</div>
+                    <div class="result-box" id="manualResultBox">—</div>
                 </div>
-                
-                <!-- SUBTAB: KONVERSI GRUP -->
                 <div id="kGrup" class="subpanel">
-                    <div class="field">
-                        <label for="grupInput">Masukkan Nomor</label>
-                        <input
-                            type="text"
-                            id="grupInput"
-                            placeholder="1234"
-                            inputmode="numeric"
-                        >
-                    </div>
-                    <button class="btn-primary" id="convertGrupBtn">Cari Grup</button>
-                    <div class="result-box" id="grupResult">Hasil akan muncul di sini...</div>
+                    <div class="field"><label>Nomor</label><input type="text" id="grupInput"></div>
+                    <button class="btn-primary" id="convertGrupBtn">Cari</button>
+                    <div class="result-box" id="grupResult">—</div>
                 </div>
-                
-                <!-- SUBTAB: KONVERSI CB -->
                 <div id="kCB" class="subpanel">
-                    <div class="field">
-                        <label for="cbInput">Masukkan Nomor</label>
-                        <input
-                            type="text"
-                            id="cbInput"
-                            placeholder="1234"
-                            inputmode="numeric"
-                        >
-                    </div>
-                    <button class="btn-primary" id="convertCBBtn">Konversi CB</button>
-                    <div class="result-box" id="cbResult">Hasil akan muncul di sini...</div>
+                    <div class="field"><label>Nomor</label><input type="text" id="cbInput"></div>
+                    <button class="btn-primary" id="convertCBBtn">Cari</button>
+                    <div class="result-box" id="cbResult">—</div>
                 </div>
-                
-                <!-- SUBTAB: KONVERSI AK -->
                 <div id="kAK" class="subpanel">
-                    <div class="field">
-                        <label for="akInput">Masukkan Nomor</label>
-                        <input
-                            type="text"
-                            id="akInput"
-                            placeholder="1122"
-                            inputmode="numeric"
-                        >
-                    </div>
-                    <button class="btn-primary" id="convertAKBtn">Konversi AK</button>
-                    <div class="result-box" id="akResult">Hasil akan muncul di sini...</div>
+                    <div class="field"><label>Nomor</label><input type="text" id="akInput"></div>
+                    <button class="btn-primary" id="convertAKBtn">Cari</button>
+                    <div class="result-box" id="akResult">—</div>
                 </div>
             </div>
         </section>
-        
-        
-        <!-- ═══════════════════════════════════════════════════════════════
+
+        <!-- ═══════════════════════════════════════════════════════════════════════
              BLOK 27: SECTION — MULTI-TABLE RESULT
-             ═══════════════════════════════════════════════════════════════ -->
-        
+             ═══════════════════════════════════════════════════════════════════════ -->
         <section id="tabelResult">
             <div class="table-header-actions">
                 <div class="table-controls">
                     <select id="tableSelector"></select>
-                    <button
-                        class="btn-warn"
-                        id="addNewTableBtn"
-                        style="padding:8px 12px; font-size:12px;"
-                    >
-                        ➕ Tabel Baru
-                    </button>
-                    <button
-                        class="btn-danger"
-                        id="deleteTableBtn"
-                        style="padding:8px 12px; font-size:12px;"
-                    >
-                        🗑 Hapus Tabel
-                    </button>
+                    <button class="btn-warn" id="addNewTableBtn" style="padding:8px 12px; font-size:12px;">➕ Tabel Baru</button>
+                    <button class="btn-danger" id="deleteTableBtn" style="padding:8px 12px; font-size:12px;">🗑 Hapus</button>
                 </div>
-                
-                <h2 style="margin:0;">
-                    <span
-                        id="tableTitleDisplay"
-                        contenteditable="true"
-                        spellcheck="false"
-                        title="Klik untuk mengubah nama tabel"
-                    >Tabel Result</span>
-                </h2>
-                
+                <h2 style="margin:0;"><span id="tableTitleDisplay" contenteditable="true">Tabel Result</span></h2>
                 <div style="display:flex; gap:8px;">
-                    <button
-                        class="btn-warn"
-                        id="exportJsonBtn"
-                        style="padding:8px 12px; font-size:12px;"
-                    >
-                        ⬇ Export JSON
-                    </button>
-                    <button
-                        class="btn-warn"
-                        id="importJsonBtn"
-                        style="padding:8px 12px; font-size:12px;"
-                    >
-                        ⬆ Import JSON
-                    </button>
-                    <input
-                        type="file"
-                        id="importJsonFile"
-                        accept=".json"
-                        style="display:none;"
-                    >
-                    <button
-                        class="btn-primary"
-                        id="addResultBtn"
-                        style="padding:8px 16px; font-size:13px; width:auto;"
-                    >
-                        ➕ Tambah Result
-                    </button>
+                    <button class="btn-warn" id="exportJsonBtn" style="padding:8px 12px; font-size:12px;">⬇ JSON</button>
+                    <button class="btn-warn" id="importJsonBtn" style="padding:8px 12px; font-size:12px;">⬆ JSON</button>
+                    <input type="file" id="importJsonFile" accept=".json" style="display:none;">
+                    <button class="btn-primary" id="addResultBtn" style="padding:8px 16px; font-size:13px; width:auto;">➕ Result</button>
                 </div>
             </div>
-            
             <div class="search-container">
-                <input
-                    type="text"
-                    id="patternSearchInput"
-                    placeholder="Ketik 2 digit (cth: 01)"
-                    maxlength="2"
-                    autocomplete="off"
-                >
-                <button
-                    class="btn-primary"
-                    id="searchPatternBtn"
-                    style="width:auto; padding:0 16px;"
-                >
-                    🔍 Analisa
-                </button>
+                <input type="text" id="patternSearchInput" placeholder="2 digit" maxlength="2">
+                <button class="btn-primary" id="searchPatternBtn" style="width:auto; padding:0 16px;">🔍 Analisa</button>
             </div>
-            
             <div id="patternResultBox" class="pattern-result-box">
-                <h4 id="patternTitle">Hasil Analisa</h4>
+                <h4 id="patternTitle">Hasil</h4>
                 <div id="patternList"></div>
             </div>
-            
             <div class="table-container">
                 <table>
-                    <thead>
-                        <tr>
-                            <th>Periode</th>
-                            <th>Tanggal</th>
-                            <th>Result</th>
-                            <th>Syair</th>
-                            <th>Grup</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>Periode</th><th>Tanggal</th><th>Result</th><th>Syair</th><th>Grup</th><th>Aksi</th></tr></thead>
                     <tbody id="resultTableBody"></tbody>
                 </table>
             </div>
         </section>
-        
-        
-        <!-- ═══════════════════════════════════════════════════════════════
-             BLOK 28: SECTION — DATA PASAR (BARU)
-             ═══════════════════════════════════════════════════════════════ -->
-        
+
+        <!-- ═══════════════════════════════════════════════════════════════════════
+             BLOK 28: SECTION — DATA PASAR
+             ═══════════════════════════════════════════════════════════════════════ -->
         <section id="dataPasar">
-            <h2>📚 Data Pasar & Result</h2>
-            <p class="text-muted mb-10" style="font-size:13px;">
-                Input history result di sini.
-                Gunakan <b>Pasar Global</b> untuk mengumpulkan semua data
-                guna dianalisa oleh <b>Mode 1 (Bawaan)</b>.
-            </p>
-            
+            <h2>📚 Data Pasar</h2>
             <div class="card">
                 <div class="grid-2">
-                    <div class="field">
-                        <label for="marketSelector">Pilih Pasar</label>
-                        <select id="marketSelector"></select>
-                    </div>
+                    <div class="field"><label>Pilih Pasar</label><select id="marketSelector"></select></div>
                     <div class="field" style="display:flex; gap:8px; align-items:flex-end;">
-                        <button
-                            class="btn-warn"
-                            id="addMarketBtn"
-                            style="padding:10px; font-size:12px;"
-                        >
-                            ➕ Pasar Baru
-                        </button>
-                        <button
-                            class="btn-danger"
-                            id="deleteMarketBtn"
-                            style="padding:10px; font-size:12px;"
-                        >
-                            🗑 Hapus Pasar
-                        </button>
+                        <button class="btn-warn" id="addMarketBtn" style="padding:10px; font-size:12px;">➕ Pasar</button>
+                        <button class="btn-danger" id="deleteMarketBtn" style="padding:10px; font-size:12px;">🗑 Hapus</button>
                     </div>
                 </div>
-                
                 <hr style="border:0; border-top:1px dashed var(--border-2); margin:14px 0;">
-                
                 <div class="grid-2">
-                    <div class="field">
-                        <label for="marketDate">Tanggal</label>
-                        <input type="date" id="marketDate">
-                    </div>
-                    <div class="field">
-                        <label for="marketResult">Result (4 Digit)</label>
-                        <input
-                            type="text"
-                            id="marketResult"
-                            placeholder="0478"
-                            maxlength="4"
-                            inputmode="numeric"
-                        >
-                    </div>
+                    <div class="field"><label>Tanggal</label><input type="date" id="marketDate"></div>
+                    <div class="field"><label>Result (4 Digit)</label><input type="text" id="marketResult" maxlength="4"></div>
                 </div>
-                <button class="btn-primary" id="addMarketResultBtn">
-                    💾 Simpan Result ke Pasar Ini
-                </button>
+                <button class="btn-primary" id="addMarketResultBtn">💾 Simpan ke Pasar Ini</button>
             </div>
-            
-            <!-- BULK INPUT KHUSUS PASAR GLOBAL -->
             <div class="card" id="bulkInputContainer" style="display:none;">
-                <h3 style="color:var(--accent); margin-bottom:8px;">
-                    Input Massal (Khusus Pasar Global)
-                </h3>
-                <p class="text-muted" style="font-size:12px; margin-bottom:8px;">
-                    Format: <code>Tanggal|Result</code> (Satu baris satu data). Contoh:<br>
-                    2026-11-01|0478<br>
-                    2026-11-02|1290
-                </p>
-                <div class="field">
-                    <textarea
-                        id="bulkInputArea"
-                        rows="5"
-                        placeholder="2026-11-01|0478&#10;2026-11-02|1290"
-                    ></textarea>
-                </div>
-                <button
-                    class="btn-primary"
-                    id="bulkSubmitBtn"
-                    style="background:var(--success); color:#000;"
-                >
-                    🚀 Proses & Simpan Massal
-                </button>
+                <h3 style="color:var(--accent); margin-bottom:8px;">Input Massal (Global)</h3>
+                <div class="field"><textarea id="bulkInputArea" rows="4" placeholder="2026-11-01|0478"></textarea></div>
+                <button class="btn-primary" id="bulkSubmitBtn" style="background:var(--success); color:#000;">🚀 Proses Massal</button>
             </div>
-            
             <div class="card">
-                <h3 id="marketTableTitle">History Result</h3>
+                <h3 id="marketTableTitle">History</h3>
                 <div class="table-container" style="max-height:300px; overflow-y:auto;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Tanggal</th>
-                                <th>Result</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="marketResultBody"></tbody>
-                    </table>
+                    <table><thead><tr><th>Tanggal</th><th>Result</th><th>Aksi</th></tr></thead><tbody id="marketResultBody"></tbody></table>
                 </div>
             </div>
         </section>
-        
-        
-        <!-- ═══════════════════════════════════════════════════════════════
+
+        <!-- ═══════════════════════════════════════════════════════════════════════
              BLOK 29: SECTION — RUMUS SYAIR
-             ═══════════════════════════════════════════════════════════════ -->
-        
+             ═══════════════════════════════════════════════════════════════════════ -->
         <section id="rumusSyair">
             <h2>🔮 Rumus Syair & Prediksi</h2>
-            <p class="text-muted mb-10" style="font-size:13px;">
-                Pilih mode analisa, lalu generate prediksi 4D dan 2D Master.
-            </p>
-            
             <div class="card">
-                <div
-                    class="field"
-                    style="background-color:var(--card-2); padding:12px; border-radius:8px; border:1px solid var(--border); margin-bottom:12px;"
-                >
-                    <label style="margin-bottom:8px; color:var(--text);">
-                        Pilih Mode Analisa:
-                    </label>
+                <div class="field" style="background:var(--card-2); padding:12px; border-radius:8px; margin-bottom:12px;">
+                    <label style="margin-bottom:8px; color:var(--text);">Pilih Mode Analisa:</label>
                     <div style="display:flex; flex-direction:column; gap:8px;">
-                        <label style="display:flex; align-items:center; gap:8px; cursor:pointer; margin:0; text-transform:none; letter-spacing:0;">
-                            <input
-                                type="radio"
-                                name="modeSyair"
-                                value="aturan"
-                                checked
-                                style="width:auto; margin:0; transform:scale(1.2); accent-color:var(--accent);"
-                            >
-                            <span>
-                                1. Analisa Bawaan
-                                (Master Syair + Semua History Pasar Global)
-                            </span>
+                        <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                            <input type="radio" name="modeSyair" value="aturan" checked>
+                            <span>1. Bawaan (Master Syair + Global History)</span>
                         </label>
-                        <label style="display:flex; align-items:center; gap:8px; cursor:pointer; margin:0; text-transform:none; letter-spacing:0;">
-                            <input
-                                type="radio"
-                                name="modeSyair"
-                                value="history"
-                                style="width:auto; margin:0; transform:scale(1.2); accent-color:var(--accent);"
-                            >
-                            <span>
-                                2. Analisa Spesifik (Hanya Pasar yang Dipilih)
-                            </span>
+                        <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                            <input type="radio" name="modeSyair" value="history">
+                            <span>2. Spesifik (History Pasar Terpilih)</span>
                         </label>
                     </div>
                 </div>
-                
-                <div
-                    class="field"
-                    id="syairMarketWrapper"
-                    style="display:none; background:var(--card-2); padding:10px; border-radius:8px; border:1px solid var(--border);"
-                >
-                    <label for="syairMarketSelect">Pilih Pasar untuk Dianalisa:</label>
+                <div class="field" id="syairMarketWrapper" style="display:none;">
+                    <label>Pilih Pasar:</label>
                     <select id="syairMarketSelect"></select>
                 </div>
-                
                 <div class="field">
-                    <label for="syairTargetInput">
-                        Masukkan 2 atau 4 Angka (Contoh: 01 atau 0151)
-                    </label>
-                    <input
-                        type="text"
-                        id="syairTargetInput"
-                        placeholder="0151"
-                        maxlength="4"
-                        inputmode="numeric"
-                        autocomplete="off"
-                    >
+                    <label>Masukkan 2 atau 4 Angka</label>
+                    <input type="text" id="syairTargetInput" placeholder="0151" maxlength="4">
                 </div>
-                
-                <button class="btn-primary" id="analyzeSyairBtn">
-                    🔍 Analisa & Generate Prediksi 4D
-                </button>
+                <button class="btn-primary" id="analyzeSyairBtn">🔍 Analisa & Prediksi 4D</button>
             </div>
             
             <div id="syairResultContainer" class="syair-result-card">
                 <div class="syair-header" id="syairMainTitle">—</div>
                 <div class="syair-group" id="syairMainGroup">—</div>
-                
-                <div class="syair-relation-title" id="syairRelationTitle">
-                    Angka Berelasi (Berdasarkan Tema/Grup):
-                </div>
+                <div class="syair-relation-title">Angka Berelasi:</div>
                 <div class="syair-relation-list" id="syairRelationList"></div>
-                
-                <div class="syair-relation-title" id="syairHistoryTitle">
-                    Jawaban Sering Muncul:
-                </div>
+                <div class="syair-relation-title">Jawaban Sering Muncul:</div>
                 <div class="syair-relation-list" id="syairHistoryList"></div>
-                
-                <div
-                    style="background:var(--card-2); border:1px solid var(--border); padding:12px; border-radius:8px; margin-bottom:16px;"
-                >
-                    <div
-                        style="font-size:12px; font-weight:bold; color:var(--warn); margin-bottom:8px;"
-                    >
-                        📖 Logika & Preview:
-                    </div>
-                    <div
-                        id="syairReadPreview"
-                        style="font-size:13px; font-family:monospace; color:var(--text-dim); line-height:1.6;"
-                    ></div>
+                <div style="background:var(--card-2); border:1px solid var(--border); padding:12px; border-radius:8px; margin-bottom:16px;">
+                    <div style="font-size:12px; color:var(--warn); margin-bottom:8px;">📖 Logika Preview:</div>
+                    <div id="syairReadPreview" style="font-size:13px; font-family:monospace;"></div>
                 </div>
-                
                 <hr style="border:0; border-top:1px dashed var(--border-2); margin:16px 0;">
-                
                 <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;">
-                    <button
-                        class="btn-warn"
-                        id="btnCopy4D"
-                        style="padding:8px 12px; font-size:12px;"
-                    >
-                        📋 Copy 350/25 Angka
-                    </button>
-                    <button
-                        class="btn-warn"
-                        id="btnCopy2D"
-                        style="padding:8px 12px; font-size:12px;"
-                    >
-                        📋 Copy 2D Master
-                    </button>
-                    <button
-                        class="btn-primary"
-                        id="btnSendManual"
-                        style="padding:8px 12px; font-size:12px; width:auto;"
-                    >
-                        ➡ Kirim 2D ke Input Manual
-                    </button>
+                    <button class="btn-warn" id="btnCopy4D" style="padding:8px 12px; font-size:12px;">📋 Copy 350/25</button>
+                    <button class="btn-warn" id="btnCopy2D" style="padding:8px 12px; font-size:12px;">📋 Copy 2D</button>
+                    <button class="btn-primary" id="btnSendManual" style="padding:8px 12px; font-size:12px; width:auto;">➡ Kirim ke Manual</button>
                 </div>
-                
-                <div class="syair-relation-title">
-                    350 Angka Prediksi (Format 4D):
-                </div>
-                <div
-                    class="page-content"
-                    id="prediksi350"
-                    style="max-height:150px;"
-                ></div>
-                
-                <div class="syair-relation-title">
-                    25 Angka Master (Format 4D):
-                </div>
-                <div
-                    class="page-content"
-                    id="prediksi25"
-                    style="max-height:100px; color:var(--success); font-weight:bold;"
-                ></div>
-                
-                <div class="syair-relation-title">
-                    2D Master (Depan & Belakang):
-                </div>
-                <div
-                    class="page-content"
-                    id="prediksi2D"
-                    style="max-height:100px; color:var(--warn);"
-                ></div>
+                <div class="syair-relation-title">350 Angka:</div>
+                <div class="page-content" id="prediksi350" style="max-height:150px;"></div>
+                <div class="syair-relation-title">25 Angka Master:</div>
+                <div class="page-content" id="prediksi25" style="max-height:100px; color:var(--success);"></div>
+                <div class="syair-relation-title">2D Master:</div>
+                <div class="page-content" id="prediksi2D" style="max-height:100px; color:var(--warn);"></div>
             </div>
         </section>
 
     </main>
-
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════════════
-     BLOK 21: BODY — SECTION MENU USER (KHUSUS ADMIN)
+     BLOK 30: MODALS & PROMPTS
      ═══════════════════════════════════════════════════════════════════════ -->
 
-<section id="userMenu">
-    <h2>👑 Menu Pengaturan User</h2>
-    <p class="text-muted mb-10" style="font-size:13px;">
-        Kelola data penyewa, perpanjangan langganan, dan harga sewa aplikasi.
-    </p>
-    
-    <!-- TAB MENU USER -->
-    <div class="tab-user-menu" id="userMenuTabs">
-        <button data-utab="utab-daftar" class="active">Daftar User & Tambah</button>
-        <button data-utab="utab-harga">Pengaturan Harga</button>
-        <button data-utab="utab-konfirmasi">Konfirmasi Perpanjangan (<span id="badgeKonfirmasi">0</span>)</button>
-    </div>
-
-    <!-- TAB 1: DAFTAR USER -->
-    <div id="utab-daftar" class="subpanel active">
-        <div class="card">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                <h3>Data User Terdaftar</h3>
-                <button class="btn-warn" id="btnAddUser" style="padding:8px 12px; font-size:12px;">➕ Tambah User Baru</button>
-            </div>
-            
-            <div class="user-table-container">
-                <table class="user-table">
-                    <thead>
-                        <tr>
-                            <th>ID User</th>
-                            <th>Nama / Kontak</th>
-                            <th>Paket</th>
-                            <th>Berakhir</th>
-                            <th>Status</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="userTableBody">
-                        <!-- Render via JS -->
-                    </tbody>
-                </table>
-            </div>
+<!-- Modal Add/Edit Result -->
+<div class="modal" id="resultModal">
+    <div class="modal-content">
+        <h3 id="modalTitle">Tambah Result</h3>
+        <input type="hidden" id="editResultId">
+        <div class="field"><label>Tanggal</label><input type="date" id="inputTanggal"></div>
+        <div class="field"><label>Periode</label><input type="text" id="inputPeriode" placeholder="001"></div>
+        <div class="field"><label>Result (4 Digit)</label><input type="text" id="inputResult" maxlength="4"></div>
+        <div class="field" style="background:var(--card-2); padding:10px; border-radius:8px;">
+            <label>Preview Syair & Grup</label>
+            <div style="font-size:13px;">Syair: <span id="previewSyair" style="color:var(--accent);">-</span></div>
+            <div style="font-size:13px;">Grup: <span id="previewGrup" style="color:var(--warn);">-</span></div>
+        </div>
+        <div style="display:flex; gap:10px; margin-top:20px;">
+            <button class="btn-primary" id="saveResultBtn">Simpan</button>
+            <button class="btn-danger" id="cancelModalBtn" style="width:40%;">Batal</button>
         </div>
     </div>
+</div>
 
-    <!-- TAB 2: PENGATURAN HARGA -->
-    <div id="utab-harga" class="subpanel">
-        <div class="card">
-            <h3 style="margin-bottom:12px; color:var(--accent);">Pengaturan Harga Sewa (Rp)</h3>
-            <div class="grid-2">
-                <div class="field">
-                    <label for="harga1Bulan">Harga 1 Bulan</label>
-                    <input type="number" id="harga1Bulan" placeholder="50000">
-                </div>
-                <div class="field">
-                    <label for="harga3Bulan">Harga 3 Bulan</label>
-                    <input type="number" id="harga3Bulan" placeholder="120000">
-                </div>
-                <div class="field">
-                    <label for="harga6Bulan">Harga 6 Bulan</label>
-                    <input type="number" id="harga6Bulan" placeholder="200000">
-                </div>
-                <div class="field">
-                    <label for="harga1Tahun">Harga 1 Tahun</label>
-                    <input type="number" id="harga1Tahun" placeholder="350000">
-                </div>
-            </div>
-            <button class="btn-primary" id="savePricingBtn" style="margin-top:10px;">💾 Simpan Pengaturan Harga</button>
-        </div>
-    </div>
-
-    <!-- TAB 3: KONFIRMASI PERPANJANGAN -->
-    <div id="utab-konfirmasi" class="subpanel">
-        <div class="card">
-            <h3 style="margin-bottom:12px; color:var(--warn);">Menunggu Konfirmasi Perpanjangan</h3>
-            <div class="list" id="konfirmasiList">
-                <!-- Render via JS -->
-            </div>
-        </div>
-    </div>
-</section>
-
-
-<!-- ═══════════════════════════════════════════════════════════════════════
-     BLOK 22: BODY — MODAL FORM TAMBAH/EDIT USER
-     ═══════════════════════════════════════════════════════════════════════ -->
-
+<!-- Modal Add/Edit User -->
 <div class="modal" id="userFormModal">
     <div class="modal-content" style="max-width:500px;">
         <h3 id="userModalTitle">Tambah User Baru</h3>
-        
         <input type="hidden" id="editUserId">
-        
         <div class="grid-2">
-            <div class="field">
-                <label for="userNama">Nama Lengkap</label>
-                <input type="text" id="userNama" placeholder="Budi Santoso">
-            </div>
-            <div class="field">
-                <label for="userNoHp">No HP / WA</label>
-                <input type="text" id="userNoHp" placeholder="08123456789" inputmode="numeric">
-            </div>
+            <div class="field"><label>Nama</label><input type="text" id="userNama"></div>
+            <div class="field"><label>No HP</label><input type="text" id="userNoHp"></div>
         </div>
-        
-        <div class="field">
-            <label for="userEmail">Email</label>
-            <input type="email" id="userEmail" placeholder="budi@mail.com">
-        </div>
-        
-        <div class="field">
-            <label for="userAlamat">Alamat</label>
-            <input type="text" id="userAlamat" placeholder="Jl. Merdeka No. 1">
-        </div>
-        
+        <div class="field"><label>Email</label><input type="email" id="userEmail"></div>
+        <div class="field"><label>Alamat</label><input type="text" id="userAlamat"></div>
         <hr style="border:0; border-top:1px dashed var(--border-2); margin:14px 0;">
-        
         <div class="grid-2">
-            <div class="field">
-                <label for="userUsername">Username Login</label>
-                <input type="text" id="userUsername" placeholder="budi123">
-            </div>
-            <div class="field">
-                <label for="userPassword">Password</label>
-                <input type="text" id="userPassword" placeholder="password123">
-            </div>
+            <div class="field"><label>Username</label><input type="text" id="userUsername"></div>
+            <div class="field"><label>Password</label><input type="text" id="userPassword"></div>
         </div>
-        
         <div class="grid-2">
             <div class="field">
-                <label for="userPaket">Pilih Paket Langganan</label>
+                <label>Paket</label>
                 <select id="userPaket">
                     <option value="1 Bulan">1 Bulan</option>
                     <option value="3 Bulan">3 Bulan</option>
@@ -2891,12 +2170,8 @@ tr:hover {
                     <option value="1 Tahun">1 Tahun</option>
                 </select>
             </div>
-            <div class="field">
-                <label for="userHarga">Harga (Rp)</label>
-                <input type="number" id="userHarga" readonly style="background:#111; opacity:0.7;">
-            </div>
+            <div class="field"><label>Harga</label><input type="number" id="userHarga" readonly style="opacity:0.7;"></div>
         </div>
-        
         <div style="display:flex; gap:10px; margin-top:20px;">
             <button class="btn-primary" id="saveUserBtn">Simpan Data</button>
             <button class="btn-danger" id="cancelUserBtn" style="width:40%;">Batal</button>
@@ -2904,67 +2179,18 @@ tr:hover {
     </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════════════
-     BLOK 30: BODY — MODAL ADD/EDIT RESULT
-     ═══════════════════════════════════════════════════════════════════════ -->
-
-<div class="modal" id="resultModal">
-    <div class="modal-content">
-        <h3 id="modalTitle">Tambah Result</h3>
-        
-        <input type="hidden" id="editResultId">
-        
-        <div class="field">
-            <label for="inputTanggal">Tanggal (YYYY-MM-DD)</label>
-            <input type="date" id="inputTanggal" required>
-        </div>
-        
-        <div class="field">
-            <label for="inputPeriode">Periode (Auto if empty)</label>
-            <input type="text" id="inputPeriode" placeholder="001">
-        </div>
-        
-        <div class="field">
-            <label for="inputResult">Result (4 Digit)</label>
-            <input
-                type="text"
-                id="inputResult"
-                placeholder="0151"
-                maxlength="4"
-                inputmode="numeric"
-                autocomplete="off"
-            >
-        </div>
-        
-        <div
-            class="field"
-            style="background-color:var(--card-2); padding:10px; border-radius:8px; border:1px solid var(--border);"
-        >
-            <label>Preview Syair & Grup</label>
-            <div style="font-size:13px; margin-bottom:4px;">
-                Syair:
-                <span
-                    id="previewSyair"
-                    style="color:var(--accent); font-weight:bold;"
-                >-</span>
-            </div>
-            <div style="font-size:13px;">
-                Grup:
-                <span
-                    id="previewGrup"
-                    style="color:var(--warn); font-weight:bold;"
-                >-</span>
-            </div>
-        </div>
-        
-        <div style="display:flex; gap:10px; margin-top:20px;">
-            <button class="btn-primary" id="saveResultBtn">Simpan</button>
-            <button class="btn-danger" id="cancelModalBtn" style="width:40%;">
-                Batal
-            </button>
-        </div>
+<!-- Install Prompt -->
+<div id="installPrompt">
+    <div class="icon">📲</div>
+    <div class="text"><b>Install Aplikasi</b><span>Bisa diakses offline</span></div>
+    <div class="actions">
+        <button class="btn-primary" id="installBtn" style="padding:8px 14px; font-size:12px;">Install</button>
+        <button class="close-btn" id="dismissInstall">✕</button>
     </div>
 </div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
 
 
 <!-- ═══════════════════════════════════════════════════════════════════════
