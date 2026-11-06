@@ -3786,37 +3786,73 @@ window.rejectRenewal = function(id) {
 
 
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 34D (BARU): JS — CHAT SYSTEM
+   BLOK 34D (FIXED): JS — CHAT SYSTEM
+   TargetId rules:
+     • Admin  → User  : targetId = userId
+     • User   → Admin : targetId = userId (ID user pengirim)
+     • Group          : targetId = 'group'
    ═══════════════════════════════════════════════════════════════════════ */
 
+/* ── Helper: cek apakah pesan ditujukan untuk saya ─────────────────── */
+function _isMsgForMe(m) {
+    if (!currentUser) return false;
+    if (m.to === 'group') {
+        return m.from !== currentUser.role;  // group: semua kecuali milik sendiri
+    }
+    if (currentUser.role === 'admin') {
+        return m.from === 'user' && m.to === 'admin';
+    }
+    return m.from === 'admin' && m.to === 'user' && m.targetId === currentUser.data.id;
+}
+
+/* ── Helper: cek apakah pesan bagian dari thread kontak tertentu ──── */
+function _isMsgInThread(m, contactId) {
+    if (!currentUser) return false;
+    if (contactId === 'group') return m.to === 'group';
+    if (currentUser.role === 'admin') {
+        return m.targetId === contactId && m.to !== 'group';
+    }
+    return m.targetId === currentUser.data.id && m.to !== 'group';
+}
+
+/* ── Render sidebar ─────────────────────────────────────────────────── */
 function renderChatSidebar() {
     const sidebar = $('chatSidebar');
     if (!sidebar || !currentUser) return;
-    
+
     let contacts = [];
     if (currentUser.role === 'admin') {
         contacts.push({ id: 'group', name: '👥 Grup Semua User' });
-        userList.forEach(function(u) { contacts.push({ id: u.id, name: '👤 ' + u.nama }); });
+        userList.forEach(function(u) {
+            contacts.push({ id: u.id, name: '👤 ' + u.nama });
+        });
     } else {
         contacts.push({ id: 'group', name: '👥 Grup Semua User' });
         contacts.push({ id: 'admin', name: '👑 Admin SA_HARD' });
     }
-    
+
     let html = '<div class="chat-sidebar-header">Ruang Obrolan</div>';
     for (let i = 0; i < contacts.length; i++) {
         const c = contacts[i];
-        let unread = chatHistory.filter(function(m) {
-            return m.targetId === c.id && m.from !== currentUser.role && !m.read;
-        }).length;
-        let activeClass = (activeChatTarget === c.id) ? 'active' : '';
-        
+
+        // Hitung unread
+        let unread = 0;
+        for (let j = 0; j < chatHistory.length; j++) {
+            const m = chatHistory[j];
+            if (!m.read && _isMsgForMe(m) && _isMsgInThread(m, c.id)) unread++;
+        }
+
+        // Preview pesan terakhir
         let previewText = 'Belum ada pesan';
-        const msgs = chatHistory.filter(function(m) {
-            return m.targetId === c.id || (c.id === 'group' && m.to === 'group');
-        });
-        const lastMsg = msgs[msgs.length - 1];
-        if (lastMsg) previewText = lastMsg.message;
-        
+        for (let j = chatHistory.length - 1; j >= 0; j--) {
+            if (_isMsgInThread(chatHistory[j], c.id)) {
+                const txt = String(chatHistory[j].message || '');
+                previewText = txt.length > 32 ? txt.slice(0, 32) + '…' : txt;
+                break;
+            }
+        }
+
+        const activeClass = (activeChatTarget === c.id) ? 'active' : '';
         html += `
             <div class="chat-contact ${activeClass}" onclick="selectChatTarget('${c.id}')">
                 <span class="contact-name">${esc(c.name)}</span>
@@ -3828,69 +3864,95 @@ function renderChatSidebar() {
     sidebar.innerHTML = html;
 }
 
+/* ── Pilih kontak & tandai pesan sudah dibaca ──────────────────────── */
 window.selectChatTarget = function(id) {
+    if (!currentUser) return;
     activeChatTarget = id;
-    renderChatSidebar();
-    renderChatMessages();
-    
-    const title = $('chatHeaderTitle');
-    if (!title) return;
-    
-    if (currentUser.role === 'admin') {
-        const u = userList.find(function(usr) { return usr.id === id; });
-        title.textContent = u ? u.nama : (id === 'group' ? 'Grup Semua User' : 'Chat');
-    } else {
-        title.textContent = id === 'admin' ? 'Admin SA_HARD' : 'Grup Semua User';
+
+    // Tandai pesan masuk sebagai sudah dibaca
+    let changed = false;
+    for (let i = 0; i < chatHistory.length; i++) {
+        const m = chatHistory[i];
+        if (!m.read && _isMsgForMe(m) && _isMsgInThread(m, id)) {
+            m.read = true;
+            changed = true;
+        }
     }
-    
+    if (changed) saveChats();
+
+    // Update header judul
+    const title = $('chatHeaderTitle');
+    if (title) {
+        if (currentUser.role === 'admin') {
+            if (id === 'group') {
+                title.textContent = 'Grup Semua User';
+            } else {
+                const u = userList.find(function(usr) { return usr.id === id; });
+                title.textContent = u ? u.nama : 'Chat';
+            }
+        } else {
+            title.textContent = (id === 'admin') ? 'Admin SA_HARD' : 'Grup Semua User';
+        }
+    }
+
     const inputArea = $('chatInputArea');
     if (inputArea) inputArea.style.display = 'flex';
+
+    renderChatSidebar();
+    renderChatMessages();
+
+    const inp = $('chatInput');
+    if (inp) setTimeout(function() { inp.focus(); }, 80);
 };
 
+/* ── Render bubble pesan ───────────────────────────────────────────── */
 function renderChatMessages() {
     const container = $('chatMessages');
     if (!container || !activeChatTarget || !currentUser) return;
-    
-    let msgs = [];
-    if (activeChatTarget === 'group') {
-        msgs = chatHistory.filter(function(m) { return m.to === 'group'; });
-    } else if (currentUser.role === 'admin') {
-        msgs = chatHistory.filter(function(m) { return m.targetId === activeChatTarget && m.to !== 'group'; });
-    } else {
-        msgs = chatHistory.filter(function(m) {
-            return m.to !== 'group' && (
-                (m.from === 'user' && m.targetId === currentUser.data.id && activeChatTarget === 'admin') ||
-                (m.from === 'admin' && m.to === 'user' && m.targetId === currentUser.data.id && activeChatTarget === 'admin')
-            );
-        });
-    }
-    
+
+    // Ambil & urutkan pesan
+    const msgs = chatHistory
+        .filter(function(m) { return _isMsgInThread(m, activeChatTarget); })
+        .sort(function(a, b) { return (a.timestamp || 0) - (b.timestamp || 0); });
+
     if (msgs.length === 0) {
         container.innerHTML = '<div class="empty" style="margin:auto;">Belum ada pesan.</div>';
         return;
     }
-    
+
+    // Tandai read untuk pesan yang sedang dibuka
+    let changed = false;
+    for (let i = 0; i < msgs.length; i++) {
+        if (!msgs[i].read && _isMsgForMe(msgs[i])) {
+            msgs[i].read = true;
+            changed = true;
+        }
+    }
+    if (changed) saveChats();
+
     let html = '';
     for (let i = 0; i < msgs.length; i++) {
         const m = msgs[i];
         const isMine = (m.from === currentUser.role);
-        
+
+        // Sender name hanya tampil di grup untuk pesan orang lain
         let senderName = '';
-        if (currentUser.role === 'admin' && m.from === 'user') {
-            const u = userList.find(function(usr) { return usr.id === m.targetId; });
-            senderName = u ? u.nama : 'User';
-        } else if (m.from === 'admin') {
-            senderName = 'Admin';
-        } else if (currentUser.role === 'user' && m.from === 'user') {
-            const u = userList.find(function(usr) { return usr.id === m.targetId; });
-            senderName = u ? u.nama : 'User';
+        if (activeChatTarget === 'group' && !isMine) {
+            if (m.from === 'admin') {
+                senderName = 'Admin';
+            } else {
+                const u = userList.find(function(usr) { return usr.id === m.targetId; });
+                senderName = u ? u.nama : 'User';
+            }
         }
-        
-        const timeStr = new Date(m.timestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-        
+
+        const timeStr = new Date(m.timestamp).toLocaleTimeString('id-ID', {
+            hour: '2-digit', minute: '2-digit'
+        });
+
         html += `
         <div class="chat-bubble ${isMine ? 'mine' : 'theirs'}">
-            ${(activeChatTarget === 'group' && !isMine) ? '<span class="sender-name">' + esc(senderName) + '</span>' : ''}
+            ${senderName ? '<span class="sender-name">' + esc(senderName) + '</span>' : ''}
             ${esc(m.message)}
             <span class="chat-time">${timeStr}</span>
         </div>
@@ -3899,7 +3961,6 @@ function renderChatMessages() {
     container.innerHTML = html;
     container.scrollTop = container.scrollHeight;
 }
-
 
 /* ═══════════════════════════════════════════════════════════════════════
    BLOK 35 (MODIFIED): JS — LOGIN MULTI-USER
@@ -6124,26 +6185,28 @@ $('savePricingBtn').addEventListener('click', function() {
     toast('Pengaturan harga disimpan', 'success');
 });
 
-// Chat: send message
+// Chat: send message (FIXED)
 $('sendChatBtn').addEventListener('click', function() {
     if (!currentUser || !activeChatTarget) return;
     const text = $('chatInput').value.trim();
     if (!text) return;
-    
-    const from = currentUser.role;
-    let to, targetId = activeChatTarget;
-    
+
+    let to, targetId;
+
     if (activeChatTarget === 'group') {
         to = 'group';
+        targetId = 'group';
     } else if (currentUser.role === 'admin') {
         to = 'user';
+        targetId = activeChatTarget;              // userId tujuan
     } else {
         to = 'admin';
+        targetId = currentUser.data.id;           // ✅ FIX: ID user sendiri
     }
-    
+
     chatHistory.push({
-        id: 'MSG-' + Date.now(),
-        from: from,
+        id: 'MSG-' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+        from: currentUser.role,
         to: to,
         targetId: targetId,
         message: text,
@@ -6151,12 +6214,14 @@ $('sendChatBtn').addEventListener('click', function() {
         read: false
     });
     saveChats();
+
     $('chatInput').value = '';
     renderChatMessages();
+    renderChatSidebar();
 });
 
 $('chatInput').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') $('sendChatBtn').click();
+    if (e.key === 'Enter') { e.preventDefault(); $('sendChatBtn').click(); }
 });
 
 
