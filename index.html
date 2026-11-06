@@ -3600,7 +3600,11 @@ function loadMarketData() {
             togelAdded = true;
         }
     });
-    if (togelAdded) saveMarketData();
+        if (togelAdded) saveMarketData();
+
+    refreshMarketSelectors();
+    renderMarketResultTable();
+}
 
 function saveMarketData() {
     try {
@@ -4308,7 +4312,7 @@ document.querySelectorAll('nav button').forEach(function(btn) {
         if (btn.dataset.section === 'tabelResult') renderResultTable();
         if (btn.dataset.section === 'dataPasar') renderMarketResultTable();
         if (btn.dataset.section === 'menuTogel') renderMenuTogel();
-        if (btn.dataset.section === 'chatMenu') renderChatSidebar();;
+        if (btn.dataset.section === 'chatMenu') renderChatSidebar();
         if (btn.dataset.section === 'userMenu') renderUserMenu();
     });
 });
