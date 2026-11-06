@@ -1702,203 +1702,135 @@ tr:hover {
     </nav>
     
     <main>
-        
-        <!-- Section lainnya (Master, Input, dll) akan dimasukkan di PESAN 3 -->
-        
+
+        <!-- ═══════════════════════════════════════════════════════════════════════
+             BLOK 20: BODY — SECTION CHAT (ADMIN & USER)
+             ═══════════════════════════════════════════════════════════════════════ -->
+
+        <section id="chatMenu">
+            <h2>💬 Pusat Chat</h2>
+            <p class="text-muted mb-10" style="font-size:13px;">
+                Gunakan fitur ini untuk berkomunikasi dengan Admin atau sesama pengguna.
+            </p>
+            
+            <div class="chat-container">
+                
+                <!-- SIDEBAR CHAT -->
+                <div class="chat-sidebar" id="chatSidebar">
+                    <div class="chat-sidebar-header">
+                        Ruang Obrolan
+                    </div>
+                    <!-- Item kontak akan digenerate via JS -->
+                </div>
+                
+                <!-- AREA CHAT UTAMA -->
+                <div class="chat-main">
+                    <div class="chat-main-header" id="chatHeaderTitle">
+                        Pilih Obrolan
+                    </div>
+                    
+                    <div class="chat-messages" id="chatMessages">
+                        <!-- Balon chat akan digenerate via JS -->
+                        <div class="empty" style="margin:auto;">Belum ada pesan. Pilih kontak di samping.</div>
+                    </div>
+                    
+                    <div class="chat-input-area" id="chatInputArea" style="display:none;">
+                        <input type="text" id="chatInput" placeholder="Ketik pesan..." autocomplete="off">
+                        <button class="btn-primary" id="sendChatBtn">Kirim</button>
+                    </div>
+                </div>
+                
+            </div>
+        </section>
+
+
+        <!-- ═══════════════════════════════════════════════════════════════════════
+             BLOK 21: BODY — SECTION MENU USER (KHUSUS ADMIN)
+             ═══════════════════════════════════════════════════════════════════════ -->
+
+        <section id="userMenu">
+            <h2>👑 Menu Pengaturan User</h2>
+            <p class="text-muted mb-10" style="font-size:13px;">
+                Kelola data penyewa, perpanjangan langganan, dan harga sewa aplikasi.
+            </p>
+            
+            <!-- TAB MENU USER -->
+            <div class="tab-user-menu" id="userMenuTabs">
+                <button data-utab="utab-daftar" class="active">Daftar User & Tambah</button>
+                <button data-utab="utab-harga">Pengaturan Harga</button>
+                <button data-utab="utab-konfirmasi">Konfirmasi Perpanjangan (<span id="badgeKonfirmasi">0</span>)</button>
+            </div>
+
+            <!-- TAB 1: DAFTAR USER -->
+            <div id="utab-daftar" class="subpanel active">
+                <div class="card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <h3>Data User Terdaftar</h3>
+                        <button class="btn-warn" id="btnAddUser" style="padding:8px 12px; font-size:12px;">➕ Tambah User Baru</button>
+                    </div>
+                    
+                    <div class="user-table-container">
+                        <table class="user-table">
+                            <thead>
+                                <tr>
+                                    <th>ID User</th>
+                                    <th>Nama / Kontak</th>
+                                    <th>Paket</th>
+                                    <th>Berakhir</th>
+                                    <th>Status</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userTableBody">
+                                <!-- Render via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: PENGATURAN HARGA -->
+            <div id="utab-harga" class="subpanel">
+                <div class="card">
+                    <h3 style="margin-bottom:12px; color:var(--accent);">Pengaturan Harga Sewa (Rp)</h3>
+                    <div class="grid-2">
+                        <div class="field">
+                            <label for="harga1Bulan">Harga 1 Bulan</label>
+                            <input type="number" id="harga1Bulan" placeholder="50000">
+                        </div>
+                        <div class="field">
+                            <label for="harga3Bulan">Harga 3 Bulan</label>
+                            <input type="number" id="harga3Bulan" placeholder="120000">
+                        </div>
+                        <div class="field">
+                            <label for="harga6Bulan">Harga 6 Bulan</label>
+                            <input type="number" id="harga6Bulan" placeholder="200000">
+                        </div>
+                        <div class="field">
+                            <label for="harga1Tahun">Harga 1 Tahun</label>
+                            <input type="number" id="harga1Tahun" placeholder="350000">
+                        </div>
+                    </div>
+                    <button class="btn-primary" id="savePricingBtn" style="margin-top:10px;">💾 Simpan Pengaturan Harga</button>
+                </div>
+            </div>
+
+            <!-- TAB 3: KONFIRMASI PERPANJANGAN -->
+            <div id="utab-konfirmasi" class="subpanel">
+                <div class="card">
+                    <h3 style="margin-bottom:12px; color:var(--warn);">Menunggu Konfirmasi Perpanjangan</h3>
+                    <div class="list" id="konfirmasiList">
+                        <!-- Render via JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ⬇️⬇️⬇️ TARUH BLOK 23 SAMPAI BLOK 29 (DARI PESAN 3) TEPAT DI BAWAH SINI ⬇️⬇️⬇️ -->
+        <!-- Yaitu: Section inputMaster, input4Angka, dataGrup, konversiManual, tabelResult, dataPasar, rumusSyair -->
+
     </main>
 
-</div>
-
-
-<!-- ═══════════════════════════════════════════════════════════════════════
-     BLOK 20: BODY — SECTION CHAT (ADMIN & USER)
-     ═══════════════════════════════════════════════════════════════════════ -->
-
-<section id="chatMenu">
-    <h2>💬 Pusat Chat</h2>
-    <p class="text-muted mb-10" style="font-size:13px;">
-        Gunakan fitur ini untuk berkomunikasi dengan Admin atau sesama pengguna.
-    </p>
-    
-    <div class="chat-container">
-        
-        <!-- SIDEBAR CHAT -->
-        <div class="chat-sidebar" id="chatSidebar">
-            <div class="chat-sidebar-header">
-                Ruang Obrolan
-            </div>
-            <!-- Item kontak akan digenerate via JS -->
-        </div>
-        
-        <!-- AREA CHAT UTAMA -->
-        <div class="chat-main">
-            <div class="chat-main-header" id="chatHeaderTitle">
-                Pilih Obrolan
-            </div>
-            
-            <div class="chat-messages" id="chatMessages">
-                <!-- Balon chat akan digenerate via JS -->
-                <div class="empty" style="margin:auto;">Belum ada pesan. Pilih kontak di samping.</div>
-            </div>
-            
-            <div class="chat-input-area" id="chatInputArea" style="display:none;">
-                <input type="text" id="chatInput" placeholder="Ketik pesan..." autocomplete="off">
-                <button class="btn-primary" id="sendChatBtn">Kirim</button>
-            </div>
-        </div>
-        
-    </div>
-</section>
-
-
-<!-- ═══════════════════════════════════════════════════════════════════════
-     BLOK 21: BODY — SECTION MENU USER (KHUSUS ADMIN)
-     ═══════════════════════════════════════════════════════════════════════ -->
-
-<section id="userMenu">
-    <h2>👑 Menu Pengaturan User</h2>
-    <p class="text-muted mb-10" style="font-size:13px;">
-        Kelola data penyewa, perpanjangan langganan, dan harga sewa aplikasi.
-    </p>
-    
-    <!-- TAB MENU USER -->
-    <div class="tab-user-menu" id="userMenuTabs">
-        <button data-utab="utab-daftar" class="active">Daftar User & Tambah</button>
-        <button data-utab="utab-harga">Pengaturan Harga</button>
-        <button data-utab="utab-konfirmasi">Konfirmasi Perpanjangan (<span id="badgeKonfirmasi">0</span>)</button>
-    </div>
-
-    <!-- TAB 1: DAFTAR USER -->
-    <div id="utab-daftar" class="subpanel active">
-        <div class="card">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                <h3>Data User Terdaftar</h3>
-                <button class="btn-warn" id="btnAddUser" style="padding:8px 12px; font-size:12px;">➕ Tambah User Baru</button>
-            </div>
-            
-            <div class="user-table-container">
-                <table class="user-table">
-                    <thead>
-                        <tr>
-                            <th>ID User</th>
-                            <th>Nama / Kontak</th>
-                            <th>Paket</th>
-                            <th>Berakhir</th>
-                            <th>Status</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="userTableBody">
-                        <!-- Render via JS -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- TAB 2: PENGATURAN HARGA -->
-    <div id="utab-harga" class="subpanel">
-        <div class="card">
-            <h3 style="margin-bottom:12px; color:var(--accent);">Pengaturan Harga Sewa (Rp)</h3>
-            <div class="grid-2">
-                <div class="field">
-                    <label for="harga1Bulan">Harga 1 Bulan</label>
-                    <input type="number" id="harga1Bulan" placeholder="50000">
-                </div>
-                <div class="field">
-                    <label for="harga3Bulan">Harga 3 Bulan</label>
-                    <input type="number" id="harga3Bulan" placeholder="120000">
-                </div>
-                <div class="field">
-                    <label for="harga6Bulan">Harga 6 Bulan</label>
-                    <input type="number" id="harga6Bulan" placeholder="200000">
-                </div>
-                <div class="field">
-                    <label for="harga1Tahun">Harga 1 Tahun</label>
-                    <input type="number" id="harga1Tahun" placeholder="350000">
-                </div>
-            </div>
-            <button class="btn-primary" id="savePricingBtn" style="margin-top:10px;">💾 Simpan Pengaturan Harga</button>
-        </div>
-    </div>
-
-    <!-- TAB 3: KONFIRMASI PERPANJANGAN -->
-    <div id="utab-konfirmasi" class="subpanel">
-        <div class="card">
-            <h3 style="margin-bottom:12px; color:var(--warn);">Menunggu Konfirmasi Perpanjangan</h3>
-            <div class="list" id="konfirmasiList">
-                <!-- Render via JS -->
-            </div>
-        </div>
-    </div>
-</section>
-
-
-<!-- ═══════════════════════════════════════════════════════════════════════
-     BLOK 22: BODY — MODAL FORM TAMBAH/EDIT USER
-     ═══════════════════════════════════════════════════════════════════════ -->
-
-<div class="modal" id="userFormModal">
-    <div class="modal-content" style="max-width:500px;">
-        <h3 id="userModalTitle">Tambah User Baru</h3>
-        
-        <input type="hidden" id="editUserId">
-        
-        <div class="grid-2">
-            <div class="field">
-                <label for="userNama">Nama Lengkap</label>
-                <input type="text" id="userNama" placeholder="Budi Santoso">
-            </div>
-            <div class="field">
-                <label for="userNoHp">No HP / WA</label>
-                <input type="text" id="userNoHp" placeholder="08123456789" inputmode="numeric">
-            </div>
-        </div>
-        
-        <div class="field">
-            <label for="userEmail">Email</label>
-            <input type="email" id="userEmail" placeholder="budi@mail.com">
-        </div>
-        
-        <div class="field">
-            <label for="userAlamat">Alamat</label>
-            <input type="text" id="userAlamat" placeholder="Jl. Merdeka No. 1">
-        </div>
-        
-        <hr style="border:0; border-top:1px dashed var(--border-2); margin:14px 0;">
-        
-        <div class="grid-2">
-            <div class="field">
-                <label for="userUsername">Username Login</label>
-                <input type="text" id="userUsername" placeholder="budi123">
-            </div>
-            <div class="field">
-                <label for="userPassword">Password</label>
-                <input type="text" id="userPassword" placeholder="password123">
-            </div>
-        </div>
-        
-        <div class="grid-2">
-            <div class="field">
-                <label for="userPaket">Pilih Paket Langganan</label>
-                <select id="userPaket">
-                    <option value="1 Bulan">1 Bulan</option>
-                    <option value="3 Bulan">3 Bulan</option>
-                    <option value="6 Bulan">6 Bulan</option>
-                    <option value="1 Tahun">1 Tahun</option>
-                </select>
-            </div>
-            <div class="field">
-                <label for="userHarga">Harga (Rp)</label>
-                <input type="number" id="userHarga" readonly style="background:#111; opacity:0.7;">
-            </div>
-        </div>
-        
-        <div style="display:flex; gap:10px; margin-top:20px;">
-            <button class="btn-primary" id="saveUserBtn">Simpan Data</button>
-            <button class="btn-danger" id="cancelUserBtn" style="width:40%;">Batal</button>
-        </div>
-    </div>
 </div>
 
         <!-- ═══════════════════════════════════════════════════════════════
@@ -2822,6 +2754,155 @@ tr:hover {
 
 </div>
 
+<!-- ═══════════════════════════════════════════════════════════════════════
+     BLOK 21: BODY — SECTION MENU USER (KHUSUS ADMIN)
+     ═══════════════════════════════════════════════════════════════════════ -->
+
+<section id="userMenu">
+    <h2>👑 Menu Pengaturan User</h2>
+    <p class="text-muted mb-10" style="font-size:13px;">
+        Kelola data penyewa, perpanjangan langganan, dan harga sewa aplikasi.
+    </p>
+    
+    <!-- TAB MENU USER -->
+    <div class="tab-user-menu" id="userMenuTabs">
+        <button data-utab="utab-daftar" class="active">Daftar User & Tambah</button>
+        <button data-utab="utab-harga">Pengaturan Harga</button>
+        <button data-utab="utab-konfirmasi">Konfirmasi Perpanjangan (<span id="badgeKonfirmasi">0</span>)</button>
+    </div>
+
+    <!-- TAB 1: DAFTAR USER -->
+    <div id="utab-daftar" class="subpanel active">
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <h3>Data User Terdaftar</h3>
+                <button class="btn-warn" id="btnAddUser" style="padding:8px 12px; font-size:12px;">➕ Tambah User Baru</button>
+            </div>
+            
+            <div class="user-table-container">
+                <table class="user-table">
+                    <thead>
+                        <tr>
+                            <th>ID User</th>
+                            <th>Nama / Kontak</th>
+                            <th>Paket</th>
+                            <th>Berakhir</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                        <!-- Render via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 2: PENGATURAN HARGA -->
+    <div id="utab-harga" class="subpanel">
+        <div class="card">
+            <h3 style="margin-bottom:12px; color:var(--accent);">Pengaturan Harga Sewa (Rp)</h3>
+            <div class="grid-2">
+                <div class="field">
+                    <label for="harga1Bulan">Harga 1 Bulan</label>
+                    <input type="number" id="harga1Bulan" placeholder="50000">
+                </div>
+                <div class="field">
+                    <label for="harga3Bulan">Harga 3 Bulan</label>
+                    <input type="number" id="harga3Bulan" placeholder="120000">
+                </div>
+                <div class="field">
+                    <label for="harga6Bulan">Harga 6 Bulan</label>
+                    <input type="number" id="harga6Bulan" placeholder="200000">
+                </div>
+                <div class="field">
+                    <label for="harga1Tahun">Harga 1 Tahun</label>
+                    <input type="number" id="harga1Tahun" placeholder="350000">
+                </div>
+            </div>
+            <button class="btn-primary" id="savePricingBtn" style="margin-top:10px;">💾 Simpan Pengaturan Harga</button>
+        </div>
+    </div>
+
+    <!-- TAB 3: KONFIRMASI PERPANJANGAN -->
+    <div id="utab-konfirmasi" class="subpanel">
+        <div class="card">
+            <h3 style="margin-bottom:12px; color:var(--warn);">Menunggu Konfirmasi Perpanjangan</h3>
+            <div class="list" id="konfirmasiList">
+                <!-- Render via JS -->
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     BLOK 22: BODY — MODAL FORM TAMBAH/EDIT USER
+     ═══════════════════════════════════════════════════════════════════════ -->
+
+<div class="modal" id="userFormModal">
+    <div class="modal-content" style="max-width:500px;">
+        <h3 id="userModalTitle">Tambah User Baru</h3>
+        
+        <input type="hidden" id="editUserId">
+        
+        <div class="grid-2">
+            <div class="field">
+                <label for="userNama">Nama Lengkap</label>
+                <input type="text" id="userNama" placeholder="Budi Santoso">
+            </div>
+            <div class="field">
+                <label for="userNoHp">No HP / WA</label>
+                <input type="text" id="userNoHp" placeholder="08123456789" inputmode="numeric">
+            </div>
+        </div>
+        
+        <div class="field">
+            <label for="userEmail">Email</label>
+            <input type="email" id="userEmail" placeholder="budi@mail.com">
+        </div>
+        
+        <div class="field">
+            <label for="userAlamat">Alamat</label>
+            <input type="text" id="userAlamat" placeholder="Jl. Merdeka No. 1">
+        </div>
+        
+        <hr style="border:0; border-top:1px dashed var(--border-2); margin:14px 0;">
+        
+        <div class="grid-2">
+            <div class="field">
+                <label for="userUsername">Username Login</label>
+                <input type="text" id="userUsername" placeholder="budi123">
+            </div>
+            <div class="field">
+                <label for="userPassword">Password</label>
+                <input type="text" id="userPassword" placeholder="password123">
+            </div>
+        </div>
+        
+        <div class="grid-2">
+            <div class="field">
+                <label for="userPaket">Pilih Paket Langganan</label>
+                <select id="userPaket">
+                    <option value="1 Bulan">1 Bulan</option>
+                    <option value="3 Bulan">3 Bulan</option>
+                    <option value="6 Bulan">6 Bulan</option>
+                    <option value="1 Tahun">1 Tahun</option>
+                </select>
+            </div>
+            <div class="field">
+                <label for="userHarga">Harga (Rp)</label>
+                <input type="number" id="userHarga" readonly style="background:#111; opacity:0.7;">
+            </div>
+        </div>
+        
+        <div style="display:flex; gap:10px; margin-top:20px;">
+            <button class="btn-primary" id="saveUserBtn">Simpan Data</button>
+            <button class="btn-danger" id="cancelUserBtn" style="width:40%;">Batal</button>
+        </div>
+    </div>
+</div>
 
 <!-- ═══════════════════════════════════════════════════════════════════════
      BLOK 30: BODY — MODAL ADD/EDIT RESULT
