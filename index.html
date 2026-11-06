@@ -6506,6 +6506,157 @@ window.renderTogelLatest = function() { if (activeTogelMarketId) renderTogelDeta
 console.log('[Menu Togel v3] Ready. Pasar:', getTogelMarkets().length);
 
 /* ═══════════════════════════════════════════════════════════════════════
+   BLOK 50C (RE-PASTE): JS — EDIT PREDIKSI (ADMIN)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+function renderEditPrediksi() {
+    if (!currentUser || currentUser.role !== 'admin') return;
+
+    const sel = $('prediksiMarketSelect');
+    if (!sel) { console.warn('[Edit Prediksi] #prediksiMarketSelect tidak ada'); return; }
+
+    const prev = sel.value;
+    let html = '';
+    getTogelMarkets().forEach(function(m) {
+        const hasPred = togelPredictions[m.id] && togelPredictions[m.id].publishedAt;
+        html += '<option value="' + m.id + '">' + esc(m.name) + (hasPred ? ' ✓' : '') + '</option>';
+    });
+    sel.innerHTML = html;
+
+    if (prev && Array.from(sel.options).some(function(o) { return o.value === prev; })) {
+        sel.value = prev;
+    }
+
+    _loadPrediksiForm();
+    _renderPredStatus();
+}
+
+function _loadPrediksiForm() {
+    const sel = $('prediksiMarketSelect');
+    if (!sel) return;
+    const mid = sel.value;
+    if (!mid) return;
+    const p = togelPredictions[mid];
+
+    $('predTarget').value    = p ? (p.target || '') : '';
+    $('predAngka350').value  = p ? (p.angka350 || []).join(' ') : '';
+    $('predAngka25').value   = p ? (p.angka25 || []).join(' ') : '';
+    $('predDepan2D').value   = p ? (p.depan2D || []).join(' ') : '';
+    $('predBelakang2D').value = p ? (p.belakang2D || []).join(' ') : '';
+    $('predNote').value      = p ? (p.note || '') : '';
+}
+
+function _renderPredStatus() {
+    const sel = $('prediksiMarketSelect');
+    if (!sel) return;
+    const mid = sel.value;
+    const card = $('predStatusCard');
+    const info = $('predStatusInfo');
+    if (!card || !info) return;
+
+    const p = togelPredictions[mid];
+    if (!p || !p.publishedAt) { card.style.display = 'none'; return; }
+
+    card.style.display = 'block';
+    const pubDate = new Date(p.publishedAt).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+    info.innerHTML =
+        '<div>📅 <b>Dipublish:</b> ' + pubDate + '</div>' +
+        '<div>🎯 <b>Target:</b> ' + esc(p.target || '—') + '</div>' +
+        '<div>🔢 <b>350 angka:</b> ' + (p.angka350 || []).length + ' · <b>25 master:</b> ' + (p.angka25 || []).length + '</div>' +
+        '<div>🟡 <b>2D Depan:</b> ' + (p.depan2D || []).length + ' · <b>2D Belakang:</b> ' + (p.belakang2D || []).length + '</div>' +
+        (p.note ? '<div>📝 <b>Catatan:</b> ' + esc(p.note) + '</div>' : '');
+}
+
+function _autoFillPrediksi() {
+    if (!currentPrediksiData || currentPrediksiData.angka350.length === 0) {
+        toast('Buat prediksi di menu Rumus Syair dulu', 'error');
+        return;
+    }
+    const sel = $('prediksiMarketSelect');
+    if (marketData.activeMarketId && getTogelMarkets().some(function(m) { return m.id === marketData.activeMarketId; })) {
+        sel.value = marketData.activeMarketId;
+    }
+    $('predTarget').value = ($('syairTargetInput').value || '').trim();
+    $('predAngka350').value = currentPrediksiData.angka350.join(' ');
+    $('predAngka25').value = currentPrediksiData.angka25.join(' ');
+    $('predDepan2D').value = currentPrediksiData.depan2D.join(' ');
+    $('predBelakang2D').value = currentPrediksiData.belakang2D.join(' ');
+    $('predNote').value = (($('syairReadPreview') && $('syairReadPreview').textContent) || '').trim();
+    toast('Terisi dari prediksi Rumus Syair terakhir', 'success');
+}
+
+function _savePrediksi() {
+    if (!currentUser || currentUser.role !== 'admin') return;
+    const mid = $('prediksiMarketSelect').value;
+    if (!mid) { toast('Pilih pasar dulu', 'error'); return; }
+
+    const parseArr = function(s, len) {
+        return String(s || '').split(/[\s,]+/).map(function(x) { return x.trim(); })
+            .filter(function(x) { return x.length === len && /^\d+$/.test(x); });
+    };
+
+    const angka350 = parseArr($('predAngka350').value, 4);
+    const angka25 = parseArr($('predAngka25').value, 4);
+    const depan2D = parseArr($('predDepan2D').value, 2);
+    const belakang2D = parseArr($('predBelakang2D').value, 2);
+
+    if (angka350.length === 0 && depan2D.length === 0 && belakang2D.length === 0) {
+        toast('Isi minimal 350 angka atau 2D', 'error');
+        return;
+    }
+
+    togelPredictions[mid] = {
+        target: $('predTarget').value.trim(),
+        angka350: angka350,
+        angka25: angka25,
+        depan2D: depan2D,
+        belakang2D: belakang2D,
+        note: $('predNote').value.trim(),
+        publishedAt: Date.now()
+    };
+    saveTogelPredictions();
+    _renderPredStatus();
+
+    const sel = $('prediksiMarketSelect');
+    const curVal = sel.value;
+    renderEditPrediksi();
+    sel.value = curVal;
+    _loadPrediksiForm();
+
+    toast('Prediksi dipublish & tampil ke user', 'success');
+}
+
+function _deletePrediksi() {
+    if (!currentUser || currentUser.role !== 'admin') return;
+    const mid = $('prediksiMarketSelect').value;
+    if (!mid) return;
+    if (!togelPredictions[mid]) { toast('Tidak ada prediksi untuk dihapus', 'error'); return; }
+    if (!confirm('Hapus prediksi untuk pasar ini?')) return;
+    delete togelPredictions[mid];
+    saveTogelPredictions();
+    _loadPrediksiForm();
+    _renderPredStatus();
+    toast('Prediksi dihapus', 'success');
+}
+
+/* ── Bind events Edit Prediksi ────────────────────────────────────── */
+(function bindEditPrediksiEvents() {
+    const sel = $('prediksiMarketSelect');
+    if (sel) sel.addEventListener('change', function() {
+        _loadPrediksiForm();
+        _renderPredStatus();
+    });
+    const saveBtn = $('savePrediksiBtn');
+    if (saveBtn) saveBtn.addEventListener('click', _savePrediksi);
+    const autoBtn = $('autoFillPrediksiBtn');
+    if (autoBtn) autoBtn.addEventListener('click', _autoFillPrediksi);
+    const delBtn = $('deletePrediksiBtn');
+    if (delBtn) delBtn.addEventListener('click', _deletePrediksi);
+})();
+
+console.log('[Edit Prediksi] Ready');
+
+/* ═══════════════════════════════════════════════════════════════════════
    BLOK 50B: OTOMATISASI SINGAPORE (4dlivetoday + CORS proxy)
    Versi: SAFE — tidak akan mematikan login meski 50A belum ada.
    
