@@ -3602,38 +3602,6 @@ function loadMarketData() {
     });
     if (togelAdded) saveMarketData();
 
-    // ── Seed preset pasar togel (idempotent) ──────────────────────────
-        // ── Seed preset pasar togel (idempotent) ──────────────────────────
-    const TOGEL_PRESETS = [
-        { id: 'macau4d',   name: '🎰 Macau 4D',   schedule: '6×/hari',   autoFetch: false },
-        { id: 'hongkong',  name: '🇭🇰 Hongkong',  schedule: '23:00 WIB', autoFetch: false },
-        { id: 'singapore', name: '🇸🇬 Singapore', schedule: '17:45 WIB', autoFetch: true,
-          api: { type: '4dlivetoday', operator: 'sg' } },
-        { id: 'sydney',    name: '🇦🇺 Sydney',    schedule: '13:50 WIB', autoFetch: false }
-    ];
-    let togelAdded = false;
-    TOGEL_PRESETS.forEach(function(p) {
-        const exists = marketData.markets.some(function(m) { return m.id === p.id; });
-        if (!exists) {
-            marketData.markets.push({
-                id: p.id,
-                name: p.name,
-                schedule: p.schedule,
-                isTogel: true,
-                autoFetch: p.autoFetch === true,
-                api: p.api || null,
-                history: []
-            });
-            togelAdded = true;
-        }
-    });
-    if (togelAdded) saveMarketData();
-    // ──────────────────────────────────────────────────────────────────
-
-    refreshMarketSelectors();
-    renderMarketResultTable();
-}
-
 function saveMarketData() {
     try {
         localStorage.setItem(LS_MARKET_DATA, JSON.stringify(marketData));
