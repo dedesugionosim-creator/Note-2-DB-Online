@@ -4788,123 +4788,167 @@ $('searchPatternBtn').addEventListener('click', function() {
 });
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 54: FITUR UTAMA - RUMUS SYAIR ANALYZER & PREDIKSI (v2.0)
+   BLOK 54: FITUR UTAMA - RUMUS SYAIR ANALYZER (v2.2 - 4D Structured)
    ═══════════════════════════════════════════════════════════════════════════════ */
 
-let currentPrediksiData = {
-    angka350: [],
-    angka25: [],
-    depan2D: [],
-    belakang2D: []
-};
+let currentPrediksiData = { angka350: [], angka25: [], depan2D: [], belakang2D: [] };
 
-// Kamus Tema Bawaan (Intelligence)
 const THEME_MAP = {
     gelap: ['setan', 'iblis', 'penggoda', 'binasa', 'perkosa', 'biadab', 'kejam', 'neraka', 'hukuman', 'kematian', 'mati', 'siksa', 'ngeri', 'maut', 'gantung', 'terbunuh', 'mampus', 'bunuh'],
     nakal: ['nakal', 'sundal', 'zina', 'cabul', 'payudara', 'birahi', 'ciuman', 'perkosa', 'hamil', 'telanjang', 'serakah', 'durhaka', 'rusak'],
     cinta: ['cinta', 'kasih', 'indah', 'pasangan', 'bahagia', 'cantik', 'pujaan', 'dambaan', 'cium'],
-    kerja: ['dokter', 'gol', 'draw', 'imbalan', 'kaya', 'cari', 'usaha', 'berani']
+    kerja: ['dokter', 'gol', 'draw', 'imbalan', 'kaya', 'cari', 'usaha', 'berani'],
+    risau: ['risau', 'kecewa', 'celaka', 'sial', 'sengsara', 'tangis', 'marah', 'bantah', 'bosen', 'pusing', 'kalah']
 };
 
 function getTargetTheme(syair) {
-    const s = syair.toLowerCase();
+    const s = (syair || '').toLowerCase();
     for (const [theme, keywords] of Object.entries(THEME_MAP)) {
         if (keywords.some(k => s.includes(k))) return theme;
     }
     return 'umum';
 }
 
+// Cari angka berelasi untuk satu target (tanpa menyertakan angka lain di grup)
+function findRelatedForTarget(tgtNum, excludeList) {
+    const tm = master.find(m => m.nomor === tgtNum);
+    if (!tm) return [];
+    
+    const targetTheme = getTargetTheme(tm.syair);
+    const targetGrup = tm.grup;
+    const related = [];
+    
+    master.forEach(m => {
+        if (excludeList.includes(m.nomor)) return;
+        let isMatch = false;
+        if (m.grup === targetGrup) isMatch = true;
+        if (targetTheme !== 'umum' && getTargetTheme(m.syair) === targetTheme) isMatch = true;
+        if (isMatch) related.push(m.nomor);
+    });
+    return related;
+}
+
+// Baca 4D jadi teks 2-syair
+function read4D(num) {
+    const p1 = num.slice(0, 2);
+    const p2 = num.slice(2, 4);
+    const m1 = master.find(m => m.nomor === p1);
+    const m2 = master.find(m => m.nomor === p2);
+    return (m1 ? m1.syair : '?') + ' ' + (m2 ? m2.syair : '?');
+}
+
 $('analyzeSyairBtn').addEventListener('click', function() {
-    const target = onlyDigits($('syairTargetInput').value).slice(0, 2);
-    if (target.length !== 2) { toast('Masukkan tepat 2 angka', 'error'); return; }
+    const raw = onlyDigits($('syairTargetInput').value);
+    if (raw.length !== 2 && raw.length !== 4) {
+        toast('Masukkan 2 atau 4 angka (contoh: 01 atau 0151)', 'error');
+        return;
+    }
     
     const mode = document.querySelector('input[name="modeSyair"]:checked').value;
+    const is4D = (raw.length === 4);
+    const pair1 = raw.slice(0, 2);
+    const pair2 = is4D ? raw.slice(2, 4) : null;
     
-    let targetMaster = null;
-    for (let i = 0; i < master.length; i++) {
-        if (master[i].nomor === target) { targetMaster = master[i]; break; }
+    const master1 = master.find(m => m.nomor === pair1);
+    if (!master1) { toast(`Angka ${pair1} tidak ada di Master`, 'error'); return; }
+    
+    let master2 = null;
+    if (is4D) {
+        master2 = master.find(m => m.nomor === pair2);
+        if (!master2) { toast(`Angka ${pair2} tidak ada di Master`, 'error'); return; }
     }
     
-    if (!targetMaster) { toast('Angka tidak ada di Master', 'error'); return; }
-    
-    $('syairMainTitle').textContent = target + ' - ' + targetMaster.syair;
-    $('syairMainGroup').textContent = 'Grup: ' + targetMaster.grup;
-    
-    // --- CARI ANGKA BERELASI (KECERDASAN BAWAAN) ---
-    const relatedNumbers = [];
-    const targetGrup = targetMaster.grup;
-    const targetTheme = getTargetTheme(targetMaster.syair);
-    
-    for (let i = 0; i < master.length; i++) {
-        const m = master[i];
-        if (m.nomor === target) continue;
-        
-        let isRelated = false;
-        if (m.grup === targetGrup) isRelated = true;
-        
-        const mTheme = getTargetTheme(m.syair);
-        if (targetTheme !== 'umum' && mTheme === targetTheme) isRelated = true;
-        
-        if (isRelated) relatedNumbers.push(m.nomor);
+    // Header
+    if (is4D) {
+        $('syairMainTitle').textContent = `${raw} = ${master1.syair} ${master2.syair}`;
+        $('syairMainGroup').textContent = `Grup: ${master1.grup} + ${master2.grup}`;
+    } else {
+        $('syairMainTitle').textContent = `${pair1} - ${master1.syair}`;
+        $('syairMainGroup').textContent = `Grup: ${master1.grup}`;
     }
     
-    relatedNumbers.sort();
-    const displayRelated = relatedNumbers.slice(0, 15);
+    // Cari pool relasi (dipisah per pair)
+    const exclude = is4D ? [pair1, pair2] : [pair1];
+    const poolA = findRelatedForTarget(pair1, exclude);
+    const poolB = is4D ? findRelatedForTarget(pair2, exclude) : [];
     
+    // Tampilkan angka berelasi (gabungan untuk display)
+    const allRel = [...new Set([...poolA, ...poolB])].sort();
     let relHtml = '';
-    displayRelated.forEach(num => {
-        relHtml += `<div class="syair-badge"><span class="badge-num">${num}</span></div>`;
-    });
+    allRel.slice(0, 20).forEach(n => { relHtml += `<div class="syair-badge"><span class="badge-num">${n}</span></div>`; });
     $('syairRelationList').innerHTML = relHtml || '<div style="font-size:12px;">Tidak ada angka berelasi.</div>';
     
-    // --- LOGIKA PREDIKSI 4D ---
+    // Bangun prediksi
     let finalPool4D = [];
-    let previewText = "";
+    let previewText = '';
     
     if (mode === 'aturan') {
-        $('syairHistoryTitle').textContent = 'Jawaban Sering Muncul (Mode Aturan Bawaan):';
+        $('syairHistoryTitle').textContent = 'Jawaban (Mode Aturan - Struktur Tema):';
         
-        // Cerdas: Buat kombinasi 4D dari target + angka relasi
-        let pool2D = [target, ...displayRelated];
-        
-        // Ambil sampel untuk preview pembacaan 2 syair
-        for(let i=1; i<=3; i++) {
-            if(pool2D[i]) {
-                let m1 = master.find(x => x.nomor === target);
-                let m2 = master.find(x => x.nomor === pool2D[i]);
-                if(m1 && m2) previewText += `${target}${pool2D[i]} = ${m1.syair} ${m2.syair}\n`;
-            }
+        if (is4D) {
+            // STRUKTUR: [tema1] × [tema2] dan sebaliknya
+            const setA = [pair1, ...poolA];
+            const setB = [pair2, ...poolB];
+            for (const a of setA) for (const b of setB) finalPool4D.push(a + b);
+            for (const b of setB) for (const a of setA) finalPool4D.push(b + a);
+            
+            previewText = `📖 Input ${raw} dibaca: ${master1.syair} (${master1.grup}) + ${master2.syair} (${master2.grup})\n\n`;
+            previewText += `🧠 Strategi: Depan dari [${master1.syair}-related], Belakang dari [${master2.syair}-related] (dan sebaliknya)\n\n`;
+        } else {
+            const pool = [pair1, ...poolA];
+            for (const a of pool) for (const b of pool) finalPool4D.push(a + b);
+            previewText = `📖 Input ${pair1} dibaca: ${master1.syair} (${master1.grup})\n\n`;
+            previewText += `🧠 Strategi: Cross-product angka relasi tema "${master1.syair}"\n\n`;
         }
-
-        // Buat 350 kombinasi 4D
-        for(let i=0; i<pool2D.length; i++) {
-            for(let j=0; j<pool2D.length; j++) {
-                finalPool4D.push(pool2D[i] + pool2D[j]);
-            }
-        }
-        
-        $('syairHistoryList').innerHTML = '<div style="font-size:12px; color:var(--muted);">Sistem memprediksi berdasarkan asosiasi tema syair.</div>';
         
     } else {
-        $('syairHistoryTitle').textContent = 'Jawaban Sering Muncul (Mode History Tabel):';
+        $('syairHistoryTitle').textContent = 'Jawaban (Mode History Tabel):';
         const entries = getActiveTable().entries;
         
         if (entries.length < 2) {
-            $('syairHistoryList').innerHTML = '<div style="font-size:12px; color:var(--danger);">Tabel Result kosong (min 2 data).</div>';
-            let pool2D = [target, ...displayRelated];
-            for(let i=0; i<pool2D.length; i++) for(let j=0; j<pool2D.length; j++) finalPool4D.push(pool2D[i] + pool2D[j]);
-        } else {
-            const sortedEntries = entries.slice().sort((a, b) => a.periode.localeCompare(b.periode, undefined, { numeric: true }));
-            const freqMap = {};
+            $('syairHistoryList').innerHTML = '<div style="font-size:12px; color:var(--danger);">⚠ Tabel Result kosong (min 2 data). Menggunakan Mode Aturan sebagai fallback.</div>';
             
-            for (let i = 0; i < sortedEntries.length - 1; i++) {
-                const r = sortedEntries[i].result;
-                const pairs = [r.slice(0, 2), r.slice(2, 4)];
+            // Fallback ke aturan
+            if (is4D) {
+                const setA = [pair1, ...poolA];
+                const setB = [pair2, ...poolB];
+                for (const a of setA) for (const b of setB) finalPool4D.push(a + b);
+                for (const b of setB) for (const a of setA) finalPool4D.push(b + a);
+            } else {
+                const pool = [pair1, ...poolA];
+                for (const a of pool) for (const b of pool) finalPool4D.push(a + b);
+            }
+        } else {
+            const sorted = entries.slice().sort((a, b) => a.periode.localeCompare(b.periode, undefined, { numeric: true }));
+            const freqMap = {};
+            let matchCount = 0;
+            
+            for (let i = 0; i < sorted.length - 1; i++) {
+                const r = sorted[i].result;
+                const r1 = r.slice(0, 2);
+                const r2 = r.slice(2, 4);
                 
-                let isMatch = pairs.includes(target) || displayRelated.some(n => pairs.includes(n));
+                let isMatch = false;
+                
+                if (is4D) {
+                    // 4D: HARUS kedua sisi match dengan pool masing-masing
+                    const frontMatch = (r1 === pair1 || poolA.includes(r1));
+                    const backMatch  = (r2 === pair2 || poolB.includes(r2));
+                    if (frontMatch && backMatch) isMatch = true;
+                    
+                    // Struktur terbalik (tema2 di depan, tema1 di belakang)
+                    const revFront = (r1 === pair2 || poolB.includes(r1));
+                    const revBack  = (r2 === pair1 || poolA.includes(r2));
+                    if (revFront && revBack) isMatch = true;
+                } else {
+                    // 2D: match salah satu sisi atau relasi
+                    if (r1 === pair1 || r2 === pair1) isMatch = true;
+                    else if (poolA.includes(r1) || poolA.includes(r2)) isMatch = true;
+                }
                 
                 if (isMatch) {
-                    const nextResult = sortedEntries[i + 1].result;
+                    matchCount++;
+                    const nextResult = sorted[i + 1].result;
                     const nextPairs = [nextResult.slice(0, 2), nextResult.slice(2, 4)];
                     nextPairs.forEach(p => { freqMap[p] = (freqMap[p] || 0) + 1; });
                 }
@@ -4913,38 +4957,65 @@ $('analyzeSyairBtn').addEventListener('click', function() {
             const entriesArr = Object.entries(freqMap).sort((a, b) => b[1] - a[1]);
             
             if (entriesArr.length === 0) {
-                 $('syairHistoryList').innerHTML = '<div style="font-size:12px; color:var(--muted);">Belum ada history yang cocok.</div>';
-                 let pool2D = [target, ...displayRelated];
-                 for(let i=0; i<pool2D.length; i++) for(let j=0; j<pool2D.length; j++) finalPool4D.push(pool2D[i] + pool2D[j]);
+                $('syairHistoryList').innerHTML = `<div style="font-size:12px; color:var(--muted);">Tidak ada ${matchCount} history yang sesuai struktur. Fallback ke aturan.</div>`;
+                // Fallback
+                if (is4D) {
+                    const setA = [pair1, ...poolA];
+                    const setB = [pair2, ...poolB];
+                    for (const a of setA) for (const b of setB) finalPool4D.push(a + b);
+                    for (const b of setB) for (const a of setA) finalPool4D.push(b + a);
+                } else {
+                    const pool = [pair1, ...poolA];
+                    for (const a of pool) for (const b of pool) finalPool4D.push(a + b);
+                }
             } else {
-                let histHtml = '';
+                let histHtml = `<div style="font-size:11px; color:var(--success); margin-bottom:6px;">✓ ${matchCount} history match struktur ${raw}</div>`;
                 entriesArr.slice(0, 8).forEach((item, i) => {
                     histHtml += `<div class="syair-badge ${i===0?'hot':''}"><span class="badge-num">${item[0]}</span><span class="badge-freq">${item[1]}x</span></div>`;
                 });
                 $('syairHistoryList').innerHTML = histHtml;
                 
-                // Gunakan top 2D dari history untuk pool
-                const top2D = entriesArr.slice(0, 10).map(item => item[0]);
-                for(let i=0; i<top2D.length; i++) for(let j=0; j<top2D.length; j++) finalPool4D.push(top2D[i] + top2D[j]);
+                // Build prediksi dari history
+                const top10 = entriesArr.slice(0, 10).map(x => x[0]);
+                
+                if (is4D) {
+                    // Struktur tetap terjaga: front dari pool A + history, back dari pool B + history
+                    const setA = [...new Set([pair1, ...poolA, ...top10])];
+                    const setB = [...new Set([pair2, ...poolB, ...top10])];
+                    for (const a of setA) for (const b of setB) finalPool4D.push(a + b);
+                    for (const b of setB) for (const a of setA) finalPool4D.push(b + a);
+                } else {
+                    const pool = [...new Set([pair1, ...poolA, ...top10])];
+                    for (const a of pool) for (const b of pool) finalPool4D.push(a + b);
+                }
+                
+                previewText = `📖 Input ${raw} → ${matchCount} history match\n\n🧠 Prediksi tetap terstruktur: [front pool] × [back pool]\n\n`;
             }
         }
     }
     
-    // --- FINALISASI 350, 25, & 2D ---
-    finalPool4D = [...new Set(finalPool4D)].sort();
+    // Finalisasi
+    finalPool4D = [...new Set(finalPool4D)].filter(n => n.length === 4).sort();
     currentPrediksiData.angka350 = finalPool4D.slice(0, 350);
     currentPrediksiData.angka25 = currentPrediksiData.angka350.slice(0, 25);
     
     let depanSet = new Set(), belakangSet = new Set();
     currentPrediksiData.angka350.forEach(num => {
-        depanSet.add(num.slice(0,2));
-        belakangSet.add(num.slice(2,4));
+        depanSet.add(num.slice(0, 2));
+        belakangSet.add(num.slice(2, 4));
     });
     currentPrediksiData.depan2D = Array.from(depanSet).sort();
     currentPrediksiData.belakang2D = Array.from(belakangSet).sort();
     
-    // Tampilkan
-    $('syairReadPreview').innerText = previewText || "Sistem membaca 4D sebagai gabungan 2 Syair (Contoh: 0194 = Setan Perkosa).";
+    // Preview pembacaan + sampel
+    if (is4D && currentPrediksiData.angka350.length > 0) {
+        previewText += `\n📋 Sampel Prediksi (dengan makna 2-syair):\n`;
+        currentPrediksiData.angka350.slice(0, 5).forEach(pred => {
+            previewText += `  • ${pred} = ${read4D(pred)}\n`;
+        });
+    }
+    
+    $('syairReadPreview').innerText = previewText;
     $('prediksi350').textContent = currentPrediksiData.angka350.join('*') + (currentPrediksiData.angka350.length ? '*' : '');
     $('prediksi25').textContent = currentPrediksiData.angka25.join('*') + (currentPrediksiData.angka25.length ? '*' : '');
     $('prediksi2D').textContent = `DEPAN: ${currentPrediksiData.depan2D.join(' ')}\nBELAKANG: ${currentPrediksiData.belakang2D.join(' ')}`;
@@ -4952,22 +5023,86 @@ $('analyzeSyairBtn').addEventListener('click', function() {
     $('syairResultContainer').classList.add('show');
 });
 
-// Tombol Copy
-$('btnCopy4D').addEventListener('click', () => { if(currentPrediksiData.angka350.length) copyTextToClipboard(currentPrediksiData.angka350.join('*') + '*'); });
-$('btnCopy2D').addEventListener('click', () => { if(currentPrediksiData.depan2D.length) copyTextToClipboard(`DEPAN: ${currentPrediksiData.depan2D.join(' ')}\nBELAKANG: ${currentPrediksiData.belakang2D.join(' ')}`); });
+$('btnCopy4D').addEventListener('click', function() {
+    if (!currentPrediksiData.angka350.length) { toast('Belum ada data', 'error'); return; }
+    copyTextToClipboard(currentPrediksiData.angka350.join('*') + '*');
+});
 
-// Tombol Kirim ke Input Manual
+$('btnCopy2D').addEventListener('click', function() {
+    if (!currentPrediksiData.depan2D.length) { toast('Belum ada data', 'error'); return; }
+    copyTextToClipboard(`DEPAN: ${currentPrediksiData.depan2D.join(' ')}\nBELAKANG: ${currentPrediksiData.belakang2D.join(' ')}`);
+});
+
 $('btnSendManual').addEventListener('click', function() {
-    if (currentPrediksiData.depan2D.length === 0) { toast('Belum ada data', 'error'); return; }
-    
+    if (!currentPrediksiData.depan2D.length) { toast('Belum ada data', 'error'); return; }
     $('manualDepan').value = currentPrediksiData.depan2D.join(' ');
     $('manualBelakang').value = currentPrediksiData.belakang2D.join(' ');
     updateManualInfo();
-    
     document.querySelector('nav button[data-section="input4Angka"]').click();
     document.querySelector('#subTabs4Angka button[data-subpanel="subpanel-manual"]').click();
-    
     toast('2D Master berhasil dikirim ke Input Manual!', 'success');
+});
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   BLOK 55: MULTI-TABEL RESULT - EXPORT / IMPORT JSON
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+$('exportJsonBtn').addEventListener('click', function() {
+    if (tableData.tables.length === 0) {
+        toast('Tidak ada data untuk diexport', 'error');
+        return;
+    }
+    
+    const dataStr = JSON.stringify(tableData, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const a = document.createElement('a');
+    
+    a.href = URL.createObjectURL(blob);
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+    a.download = 'sahard-multitable-' + stamp + '.json';
+    
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast('Berhasil export JSON', 'success');
+});
+
+$('importJsonBtn').addEventListener('click', function() {
+    $('importJsonFile').click();
+});
+
+$('importJsonFile').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) {
+        return;
+    }
+    
+    const reader = new FileReader();
+    
+    reader.onload = function(evt) {
+        try {
+            const parsed = JSON.parse(evt.target.result);
+            
+            if (parsed && parsed.tables && Array.isArray(parsed.tables)) {
+                tableData = parsed;
+                
+                if (!tableData.activeTableId || tableData.tables.length === 0) {
+                    tableData.activeTableId = tableData.tables[0].id;
+                }
+                
+                saveTableData();
+                refreshTableSelector();
+                renderResultTable();
+                toast('Import berhasil', 'success');
+            } else {
+                throw new Error('Format JSON tidak valid');
+            }
+        } catch (err) {
+            toast('Gagal import: file tidak valid', 'error');
+        }
+    };
+    
+    reader.readAsText(file);
+    e.target.value = '';
 });
 
 /* ═══════════════════════════════════════════════════════════════════════════════
@@ -5159,6 +5294,7 @@ console.log('%c SA_HARD v7.0 ', 'background:#22d3ee;color:#04101c;font-weight:bo
 console.log('Ready • Master:', master.length, 'records');
 console.log('Ready • Multi-Tables:', tableData.tables.length, 'tables');
 console.log('Ready • Rumus Syair Analyzer: Aktif');
+
 </script>
 </body>
 </html>
