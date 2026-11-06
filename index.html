@@ -3,9 +3,10 @@
 <head>
 <!--
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║  SA_HARD SYSTEM — v6.5 FINAL (MULTI-TABLE EDITION)                           ║
+║  SA_HARD SYSTEM — v7.0 FINAL (RUMUS SYAIR EDITION)                           ║
 ║  Deskripsi : Aplikasi generator 4 angka, BBFS, AK, Konversi, dan Tabel Result║
-║  Fitur Baru: Multi-Tabel (Tambah/Hapus), Auto-Sort Periode, Analisa Pola     ║
+║  Fitur Baru: Multi-Tabel (Tambah/Hapus), Auto-Sort Periode, Analisa Pola,    ║
+║              Rumus Syair Analyzer (Pencarian Makna & Asosiasi Kata)          ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
 ║  BLOK 01: HEAD & META                                                        ║
 ║  BLOK 02: CSS ROOT & RESET                                                   ║
@@ -21,14 +22,15 @@
 ║  BLOK 12: CSS RESULT BREAKDOWN                                               ║
 ║  BLOK 13: CSS PAGINATION                                                     ║
 ║  BLOK 14: CSS MULTI-TABLE RESULT                                             ║
-║  BLOK 15: CSS MODAL                                                          ║
+║  BLOK 15: CSS MODAL & RUMUS SYAIR UI                                         ║
 ║  BLOK 16: BODY - LOGIN & APP SHELL                                           ║
 ║  BLOK 17: BODY - SECTION MASTER                                              ║
 ║  BLOK 18: BODY - SECTION INPUT 4 ANGKA                                       ║
 ║  BLOK 19: BODY - SECTION DATA GRUP                                           ║
 ║  BLOK 20: BODY - SECTION KONVERSI                                            ║
 ║  BLOK 21: BODY - SECTION MULTI-TABLE RESULT                                  ║
-║  BLOK 22: BODY - MODAL & TOAST                                               ║
+║  BLOK 22: BODY - SECTION RUMUS SYAIR (BARU)                                  ║
+║  BLOK 23: BODY - MODAL & TOAST                                               ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 -->
 
@@ -42,8 +44,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="SA_HARD">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="description" content="SA_HARD System v6.5 - Generator & Multi-Table Result Tracker">
-<title>SA_HARD System v6.5</title>
+<meta name="description" content="SA_HARD System v7.0 - Generator & Multi-Table Result Tracker">
+<title>SA_HARD System v7.0</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon.svg">
@@ -1135,7 +1137,7 @@ tr:hover {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   BLOK 15: CSS MODAL
+   BLOK 15: CSS MODAL & RUMUS SYAIR UI
    ═══════════════════════════════════════════════════════════════════ */
 .modal {
     position: fixed;
@@ -1170,6 +1172,85 @@ tr:hover {
     border-bottom: 1px solid var(--border);
     padding-bottom: 10px;
 }
+
+/* Rumus Syair Result Card */
+.syair-result-card {
+    background-color: var(--card-3);
+    border: 1px solid var(--border-2);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin-top: 16px;
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.syair-result-card.show {
+    display: block;
+}
+
+.syair-header {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--accent);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.syair-group {
+    display: inline-block;
+    background-color: var(--card-2);
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    color: var(--warn);
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+}
+
+.syair-relation-title {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-weight: bold;
+}
+
+.syair-relation-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.syair-badge {
+    padding: 6px 12px;
+    background-color: var(--card-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: monospace;
+    font-size: 14px;
+    color: var(--text-dim);
+    text-align: center;
+    min-width: 60px;
+}
+
+.syair-badge.hot {
+    border-color: var(--success);
+    color: var(--success);
+    background-color: rgba(34, 197, 94, 0.1);
+    font-weight: bold;
+}
+
+.syair-badge .badge-num {
+    display: block;
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+
+.syair-badge .badge-freq {
+    font-size: 10px;
+    opacity: 0.8;
+}
 </style>
 </head>
 
@@ -1188,7 +1269,7 @@ tr:hover {
 <div id="loginScreen">
     <form class="login-card" id="loginForm" autocomplete="off">
         <div class="brand-title">SA_HARD</div>
-        <div class="brand-sub">SYSTEM v6.5</div>
+        <div class="brand-sub">SYSTEM v7.0</div>
         
         <div class="field">
             <label for="username">Username</label>
@@ -1223,6 +1304,7 @@ tr:hover {
         <button data-section="konversiCB">🔄 Konversi CB</button>
         <button data-section="konversiAK">🔄 Konversi AK</button>
         <button data-section="tabelResult" style="color:var(--warn); border-color:var(--warn);">📊 Tabel Result</button>
+        <button data-section="rumusSyair" style="color:var(--success); border-color:var(--success);">🔮 Rumus Syair</button>
     </nav>
 
     <main>
@@ -1700,11 +1782,40 @@ tr:hover {
             </div>
         </section>
 
+        <!-- ═══════════════════════════════════════════════════════════════════
+             BLOK 22: BODY - SECTION RUMUS SYAIR (BARU)
+             ═══════════════════════════════════════════════════════════════════ -->
+        <section id="rumusSyair">
+            <h2>🔮 Rumus Syair Analyzer</h2>
+            <p class="text-muted mb-10" style="font-size:13px;">
+                Masukkan 2 angka (misal: 01). Sistem akan mencari angka yang memiliki <b>hubungan makna Syair/Grup</b> dan menganalisa <b>history</b> untuk melihat jawaban yang sering muncul.
+            </p>
+            
+            <div class="card">
+                <div class="field">
+                    <label for="syairTargetInput">Masukkan 2 Angka Target</label>
+                    <input type="text" id="syairTargetInput" placeholder="01" maxlength="2" inputmode="numeric" autocomplete="off">
+                </div>
+                <button class="btn-primary" id="analyzeSyairBtn">Analisa Jawaban</button>
+            </div>
+
+            <div id="syairResultContainer" class="syair-result-card">
+                <div class="syair-header" id="syairMainTitle">—</div>
+                <div class="syair-group" id="syairMainGroup">—</div>
+                
+                <div class="syair-relation-title">Angka Berelasi (Berdasarkan Syair/Grup):</div>
+                <div class="syair-relation-list" id="syairRelationList"></div>
+                
+                <div class="syair-relation-title">Jawaban Sering Muncul (Berdasarkan History Tabel):</div>
+                <div class="syair-relation-list" id="syairHistoryList"></div>
+            </div>
+        </section>
+
     </main>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════════
-     BLOK 22: BODY - MODAL & TOAST
+     BLOK 23: BODY - MODAL & TOAST
      ═══════════════════════════════════════════════════════════════════ -->
 
 <!-- Modal Add/Edit Result -->
@@ -1765,7 +1876,7 @@ tr:hover {
 "use strict";
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 23: CREDENTIALS & KONFIGURASI GLOBAL
+   BLOK 24: CREDENTIALS & KONFIGURASI GLOBAL
    ═══════════════════════════════════════════════════════════════════════════════ */
 const CREDENTIALS = {
     username: 'SA_HARD',
@@ -1775,14 +1886,14 @@ const CREDENTIALS = {
 const LS_MASTER_KEY      = 'sa_master';
 const LS_SEED_VER        = 'sa_seed_version';
 const LS_INSTALL_DISMISS = 'sa_install_dismissed';
-const LS_TABLE_DATA      = 'sa_table_data_v65'; // Key baru untuk Multi-Tabel
+const LS_TABLE_DATA      = 'sa_table_data_v70'; // Key baru untuk Multi-Tabel v7.0
 const SEED_VERSION       = 1;
 const PER_PAGE           = 350;
 const MAX_BBFS_DIGITS    = 16;
 const MAX_AK_DIGITS      = 10;
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 24: STATE APLIKASI (GLOBAL VARIABLES)
+   BLOK 25: STATE APLIKASI (GLOBAL VARIABLES)
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 // State untuk Master Nomor
@@ -1792,7 +1903,7 @@ let editingIndex = -1;
 // State untuk PWA
 let deferredPrompt = null;
 
-// State untuk Multi-Tabel Result (Struktur baru v6.5)
+// State untuk Multi-Tabel Result (Struktur baru v7.0)
 let tableData = {
     tables: [
         {
@@ -1858,7 +1969,7 @@ const PAGE_MAP = {
 const $ = (id) => document.getElementById(id);
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 25: SEED MASTER 100 NOMOR (DIPERLUAS)
+   BLOK 26: SEED MASTER 100 NOMOR (DIPERLUAS)
    ═══════════════════════════════════════════════════════════════════════════════ */
 const SEED_MASTER = [
     ["00", "Mati Melahirkan", "Kematian"],
@@ -1964,7 +2075,7 @@ const SEED_MASTER = [
 ];
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 26: FUNGSI HELPER UMUM
+   BLOK 27: FUNGSI HELPER UMUM
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 /**
@@ -2227,7 +2338,7 @@ function to2DigitBelakang(n) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 27: MANAJEMEN MASTER NOMOR (CRUD & STORAGE)
+   BLOK 28: MANAJEMEN MASTER NOMOR (CRUD & STORAGE)
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 function seedToObjects() {
@@ -2295,7 +2406,7 @@ function resetToSeed() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 28: MANAJEMEN MULTI-TABEL RESULT (STORAGE v6.5)
+   BLOK 29: MANAJEMEN MULTI-TABEL RESULT (STORAGE)
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 function loadTableData() {
@@ -2374,7 +2485,7 @@ function refreshTableSelector() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 29: LOGIN & NAVIGATION
+   BLOK 30: LOGIN & NAVIGATION
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 $('loginForm').addEventListener('submit', function(e) {
@@ -2468,7 +2579,7 @@ for (let i = 0; i < subTabButtons.length; i++) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 30: RENDER & CRUD MASTER NOMOR
+   BLOK 31: RENDER & CRUD MASTER NOMOR
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 function renderMaster() {
@@ -2613,7 +2724,7 @@ $('resetMasterBtn').addEventListener('click', function() {
 });
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 31: RENDER DATA GRUP
+   BLOK 32: RENDER DATA GRUP
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 function renderGrup() {
@@ -2707,7 +2818,7 @@ function renderGrup() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 32: FUNGSI BANTUAN GRUP
+   BLOK 33: FUNGSI BANTUAN GRUP
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 function getGroupNumbers(grupName) {
@@ -2766,7 +2877,7 @@ function getGroupAs2DigitBelakang(grupName) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 33: RENDER GROUP PREVIEW
+   BLOK 34: RENDER GROUP PREVIEW
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 function renderGroupPreview(grupName, containerEl, activeSide, hint) {
@@ -2880,7 +2991,7 @@ function renderGroupPreview(grupName, containerEl, activeSide, hint) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 34: INPUT MANUAL GENERATOR
+   BLOK 35: INPUT MANUAL GENERATOR
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 function _refreshManualPreview() {
@@ -3050,7 +3161,7 @@ $('manualGenerateBtn').addEventListener('click', function() {
 });
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 35: BBFS GENERATOR
+   BLOK 36: BBFS GENERATOR
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 $('bbfsInput').addEventListener('input', function(e) {
@@ -3232,8 +3343,9 @@ $('bbfsGenerateBtn').addEventListener('click', function() {
     renderPagination('bbfsResult', 'bbfs', 'Hasil', breakdown);
     toast('Berhasil: ' + all.length.toLocaleString('id-ID') + ' dari ' + totalAwal.toLocaleString('id-ID'), 'success');
 });
+
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 36: ANGKA TARUNG (AK) GENERATOR
+   BLOK 37: ANGKA TARUNG (AK) GENERATOR
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 // Event listener untuk input digit AK
@@ -3438,7 +3550,7 @@ $('atGenerateBtn').addEventListener('click', function() {
 });
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 37: CB BBFS GENERATOR
+   BLOK 38: CB BBFS GENERATOR
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 $('cbBBFSInput').addEventListener('input', function(e) {
@@ -3503,7 +3615,7 @@ $('cbBBFSGenerateBtn').addEventListener('click', function() {
 });
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 38: GABUNG GRUP GENERATOR
+   BLOK 39: GABUNG GRUP GENERATOR
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 function crossProduct4Digit(depans, belakangs, withPerm) {
@@ -3617,7 +3729,7 @@ $('gabungGenerateBtn').addEventListener('click', function() {
 });
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 39: GRUP + CB GENERATOR
+   BLOK 40: GRUP + CB GENERATOR
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 $('grupCB1').addEventListener('change', updateGrupCBInfo);
@@ -3727,7 +3839,7 @@ $('grupCBGenerateBtn').addEventListener('click', function() {
 });
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 40: FUNGSI BUILDER BREAKDOWN UI
+   BLOK 41: FUNGSI BUILDER BREAKDOWN UI
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 function buildGabungBreakdown(g1, g2, depans, belakangs, totalCombo, permutasi, cb) {
@@ -3854,7 +3966,7 @@ function buildManualBreakdown(grup, mode, depans, belakangs, totalCombo, cb) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 41: FUNGSI RENDER PAGINATION
+   BLOK 42: FUNGSI RENDER PAGINATION
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 function renderPagination(containerId, stateKey, labelPrefix, breakdownHTML) {
@@ -3921,7 +4033,7 @@ function renderPagination(containerId, stateKey, labelPrefix, breakdownHTML) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 42: NAVIGASI PAGINATION (GLOBAL FUNCTIONS)
+   BLOK 43: NAVIGASI PAGINATION (GLOBAL FUNCTIONS)
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 window.goPage = function(stateKey, delta) {
@@ -3963,7 +4075,7 @@ window.jumpPage = function(stateKey) {
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 43: COPY & EXPORT
+   BLOK 44: COPY & EXPORT
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 async function copyTextToClipboard(text) {
@@ -4054,7 +4166,7 @@ window.exportPages = function(stateKey) {
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 44: KONVERSI MANUAL
+   BLOK 45: KONVERSI MANUAL
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 $('convertManualBtn').addEventListener('click', function() {
@@ -4083,7 +4195,7 @@ $('convertManualBtn').addEventListener('click', function() {
 });
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 45: KONVERSI GRUP
+   BLOK 46: KONVERSI GRUP
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 $('convertGrupBtn').addEventListener('click', function() {
@@ -4128,7 +4240,7 @@ $('convertGrupBtn').addEventListener('click', function() {
 });
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 46: KONVERSI CB
+   BLOK 47: KONVERSI CB
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 $('convertCBBtn').addEventListener('click', function() {
@@ -4159,7 +4271,7 @@ $('convertCBBtn').addEventListener('click', function() {
 });
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 47: KONVERSI AK
+   BLOK 48: KONVERSI AK
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 $('convertAKBtn').addEventListener('click', function() {
@@ -4212,7 +4324,7 @@ $('convertAKBtn').addEventListener('click', function() {
 });
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 48: MULTI-TABEL RESULT - MANAJEMEN TABEL (SWITCH, ADD, DELETE)
+   BLOK 49: MULTI-TABEL RESULT - MANAJEMEN TABEL (SWITCH, ADD, DELETE)
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 // Ganti tabel aktif
@@ -4298,7 +4410,7 @@ $('tableTitleDisplay').addEventListener('keypress', function(e) {
 });
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 49: MULTI-TABEL RESULT - AUTO GENERATE SYAIR & GRUP
+   BLOK 50: MULTI-TABEL RESULT - AUTO GENERATE SYAIR & GRUP
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 function generateSyairAndGrup(result) {
@@ -4337,7 +4449,7 @@ function generateSyairAndGrup(result) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 50: MULTI-TABEL RESULT - RENDER TABEL & AUTO SORT PERIODE
+   BLOK 51: MULTI-TABEL RESULT - RENDER TABEL & AUTO SORT PERIODE
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 function renderResultTable() {
@@ -4383,7 +4495,7 @@ function renderResultTable() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 51: MULTI-TABEL RESULT - CRUD (TAMBAH, EDIT, SIMPAN, HAPUS)
+   BLOK 52: MULTI-TABEL RESULT - CRUD (TAMBAH, EDIT, SIMPAN, HAPUS)
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 $('addResultBtn').addEventListener('click', function() {
@@ -4540,7 +4652,7 @@ window.deleteResult = function(id) {
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 52: MULTI-TABEL RESULT - ANALISA POLA (PATTERN)
+   BLOK 53: MULTI-TABEL RESULT - ANALISA POLA (PATTERN)
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 $('searchPatternBtn').addEventListener('click', function() {
@@ -4614,7 +4726,173 @@ $('searchPatternBtn').addEventListener('click', function() {
 });
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 53: MULTI-TABEL RESULT - EXPORT / IMPORT JSON
+   BLOK 54: FITUR UTAMA - RUMUS SYAIR ANALYZER
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+$('analyzeSyairBtn').addEventListener('click', function() {
+    const target = onlyDigits($('syairTargetInput').value).slice(0, 2);
+    
+    if (target.length !== 2) {
+        toast('Masukkan tepat 2 angka (contoh: 01)', 'error');
+        return;
+    }
+    
+    // 1. Cari data master untuk target
+    let targetMaster = null;
+    for (let i = 0; i < master.length; i++) {
+        if (master[i].nomor === target) {
+            targetMaster = master[i];
+            break;
+        }
+    }
+    
+    if (!targetMaster) {
+        toast('Angka ' + target + ' tidak ada di Master', 'error');
+        return;
+    }
+    
+    // 2. Tampilkan Header
+    $('syairMainTitle').textContent = target + ' - ' + targetMaster.syair;
+    $('syairMainGroup').textContent = 'Grup: ' + targetMaster.grup;
+    
+    // 3. Cari Angka Berelasi (Berdasarkan Grup yang sama & Tema)
+    const relatedNumbers = [];
+    const targetGrup = targetMaster.grup;
+    const keywords = targetMaster.syair.toLowerCase().split(' ');
+    
+    for (let i = 0; i < master.length; i++) {
+        const m = master[i];
+        if (m.nomor === target) {
+            continue;
+        }
+        
+        let isRelated = false;
+        
+        // Cek grup sama
+        if (m.grup === targetGrup) {
+            isRelated = true;
+        }
+        
+        // Cek kecocokan keyword syair (misal kata "Setan" ada di syair lain)
+        const mSyair = (m.syair || '').toLowerCase();
+        for (let k = 0; k < keywords.length; k++) {
+            if (keywords[k].length > 3 && mSyair.includes(keywords[k])) {
+                isRelated = true;
+                break;
+            }
+        }
+        
+        // Aturan spesifik tema gelap (Asosiasi bebas)
+        const darkThemes = ['setan', 'iblis', 'penggoda', 'binasa', 'perkosa', 'biadab', 'kejam', 'neraka', 'hukuman', 'kematian'];
+        let targetIsDark = false;
+        for (let d = 0; d < darkThemes.length; d++) {
+            if (mSyair.includes(darkThemes[d]) || targetMaster.syair.toLowerCase().includes(darkThemes[d])) {
+                targetIsDark = true;
+                break;
+            }
+        }
+        
+        if (targetIsDark && (m.grup === 'Figur 2' || m.grup === 'Hukuman' || m.grup === 'Kematian' || m.grup === 'Nakal')) {
+            isRelated = true;
+        }
+        
+        if (isRelated) {
+            relatedNumbers.push(m.nomor);
+        }
+    }
+    
+    // Urutkan dan batasi maksimal 12 angka berelasi
+    relatedNumbers.sort();
+    const displayRelated = relatedNumbers.slice(0, 12);
+    
+    let relHtml = '';
+    if (displayRelated.length === 0) {
+        relHtml = '<div style="font-size:12px; color:var(--muted);">Tidak ada angka dengan tema/Grup yang sama.</div>';
+    } else {
+        for (let i = 0; i < displayRelated.length; i++) {
+            relHtml += `<div class="syair-badge"><span class="badge-num">${displayRelated[i]}</span></div>`;
+        }
+    }
+    $('syairRelationList').innerHTML = relHtml;
+    
+    // 4. Analisa History dari Tabel Result
+    const activeTable = getActiveTable();
+    const entries = activeTable.entries;
+    
+    if (entries.length < 2) {
+        $('syairHistoryList').innerHTML = '<div style="font-size:12px; color:var(--muted);">Belum cukup data history (butuh min 2 result) untuk analisa frekuensi.</div>';
+        $('syairResultContainer').classList.add('show');
+        return;
+    }
+    
+    const sortedEntries = entries.slice().sort(function(a, b) {
+        return a.periode.localeCompare(b.periode, undefined, { numeric: true, sensitivity: 'base' });
+    });
+    
+    const freqMap = {};
+    
+    for (let i = 0; i < sortedEntries.length - 1; i++) {
+        const r = sortedEntries[i].result;
+        const pairs = [r.slice(0, 2), r.slice(2, 4)];
+        
+        let isMatch = false;
+        
+        if (pairs.includes(target)) {
+            isMatch = true;
+        }
+        
+        if (!isMatch) {
+            for (let j = 0; j < displayRelated.length; j++) {
+                if (pairs.includes(displayRelated[j])) {
+                    isMatch = true;
+                    break;
+                }
+            }
+        }
+        
+        if (isMatch) {
+            const nextResult = sortedEntries[i + 1].result;
+            const nextPairs = [nextResult.slice(0, 2), nextResult.slice(2, 4)];
+            
+            for (let j = 0; j < nextPairs.length; j++) {
+                const p = nextPairs[j];
+                if (!freqMap[p]) {
+                    freqMap[p] = 0;
+                }
+                freqMap[p]++;
+            }
+        }
+    }
+    
+    const entriesArr = Object.entries(freqMap);
+    
+    if (entriesArr.length === 0) {
+        $('syairHistoryList').innerHTML = '<div style="font-size:12px; color:var(--muted);">Belum ada pola history yang cocok dengan tema/grup ini.</div>';
+    } else {
+        entriesArr.sort(function(a, b) {
+            return b[1] - a[1];
+        });
+        
+        let histHtml = '';
+        const limit = Math.min(8, entriesArr.length);
+        
+        for (let i = 0; i < limit; i++) {
+            const isTop = (i === 0) ? 'hot' : '';
+            histHtml += `
+            <div class="syair-badge ${isTop}">
+                <span class="badge-num">${entriesArr[i][0]}</span>
+                <span class="badge-freq">${entriesArr[i][1]}x</span>
+            </div>
+            `;
+        }
+        $('syairHistoryList').innerHTML = histHtml;
+    }
+    
+    $('syairResultContainer').classList.add('show');
+});
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   BLOK 55: MULTI-TABEL RESULT - EXPORT / IMPORT JSON
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 $('exportJsonBtn').addEventListener('click', function() {
@@ -4676,7 +4954,7 @@ $('importJsonFile').addEventListener('change', function(e) {
 });
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 54: PWA INSTALL & OFFLINE DETECT
+   BLOK 56: PWA INSTALL & OFFLINE DETECT
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 const installPromptEl = $('installPrompt');
@@ -4740,7 +5018,7 @@ window.addEventListener('offline', updateOnlineStatus);
 updateOnlineStatus();
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 55: REFRESH DROPDOWN GRUP
+   BLOK 57: REFRESH DROPDOWN GRUP
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 function grupMapWithCount() {
@@ -4804,7 +5082,7 @@ function refreshGrupDropdowns() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 56: REFRESH ALL (GLOBAL UPDATE)
+   BLOK 58: REFRESH ALL (GLOBAL UPDATE)
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 function refreshAll() {
@@ -4825,7 +5103,7 @@ function refreshAll() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 57: ENTER KEY HANDLERS
+   BLOK 59: ENTER KEY HANDLERS
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 const enterMap = {
@@ -4847,7 +5125,7 @@ Object.keys(enterMap).forEach(function(id) {
 });
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 58: SESSION RESTORE & BOOT
+   BLOK 60: SESSION RESTORE & BOOT
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 if (sessionStorage.getItem('sa_logged_in') === '1') {
@@ -4860,9 +5138,10 @@ if (sessionStorage.getItem('sa_logged_in') === '1') {
     renderResultTable();
 }
 
-console.log('%c SA_HARD v6.5 ', 'background:#22d3ee;color:#04101c;font-weight:bold;padding:4px 8px;border-radius:4px;');
+console.log('%c SA_HARD v7.0 ', 'background:#22d3ee;color:#04101c;font-weight:bold;padding:4px 8px;border-radius:4px;');
 console.log('Ready • Master:', master.length, 'records');
 console.log('Ready • Multi-Tables:', tableData.tables.length, 'tables');
+console.log('Ready • Rumus Syair Analyzer: Aktif');
 </script>
 </body>
 </html>
