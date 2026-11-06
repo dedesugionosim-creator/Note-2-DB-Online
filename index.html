@@ -4788,12 +4788,11 @@ $('searchPatternBtn').addEventListener('click', function() {
 });
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   BLOK 54: RUMUS SYAIR ANALYZER (v2.4 - Global vs Local Analysis)
+   BLOK 54: FITUR UTAMA - RUMUS SYAIR ANALYZER (v2.2 - 4D Structured)
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 let currentPrediksiData = { angka350: [], angka25: [], depan2D: [], belakang2D: [] };
 
-// Kamus Tema (Fallback jika history benar-benar kosong)
 const THEME_MAP = {
     gelap: ['setan', 'iblis', 'penggoda', 'binasa', 'perkosa', 'biadab', 'kejam', 'neraka', 'hukuman', 'kematian', 'mati', 'siksa', 'ngeri', 'maut', 'gantung', 'terbunuh', 'mampus', 'bunuh'],
     nakal: ['nakal', 'sundal', 'zina', 'cabul', 'payudara', 'birahi', 'ciuman', 'perkosa', 'hamil', 'telanjang', 'serakah', 'durhaka', 'rusak'],
@@ -4810,9 +4809,40 @@ function getTargetTheme(syair) {
     return 'umum';
 }
 
+// Cari angka berelasi untuk satu target (tanpa menyertakan angka lain di grup)
+function findRelatedForTarget(tgtNum, excludeList) {
+    const tm = master.find(m => m.nomor === tgtNum);
+    if (!tm) return [];
+    
+    const targetTheme = getTargetTheme(tm.syair);
+    const targetGrup = tm.grup;
+    const related = [];
+    
+    master.forEach(m => {
+        if (excludeList.includes(m.nomor)) return;
+        let isMatch = false;
+        if (m.grup === targetGrup) isMatch = true;
+        if (targetTheme !== 'umum' && getTargetTheme(m.syair) === targetTheme) isMatch = true;
+        if (isMatch) related.push(m.nomor);
+    });
+    return related;
+}
+
+// Baca 4D jadi teks 2-syair
+function read4D(num) {
+    const p1 = num.slice(0, 2);
+    const p2 = num.slice(2, 4);
+    const m1 = master.find(m => m.nomor === p1);
+    const m2 = master.find(m => m.nomor === p2);
+    return (m1 ? m1.syair : '?') + ' ' + (m2 ? m2.syair : '?');
+}
+
 $('analyzeSyairBtn').addEventListener('click', function() {
     const raw = onlyDigits($('syairTargetInput').value);
-    if (raw.length !== 2 && raw.length !== 4) { toast('Masukkan 2 atau 4 angka', 'error'); return; }
+    if (raw.length !== 2 && raw.length !== 4) {
+        toast('Masukkan 2 atau 4 angka (contoh: 01 atau 0151)', 'error');
+        return;
+    }
     
     const mode = document.querySelector('input[name="modeSyair"]:checked').value;
     const is4D = (raw.length === 4);
@@ -4820,10 +4850,15 @@ $('analyzeSyairBtn').addEventListener('click', function() {
     const pair2 = is4D ? raw.slice(2, 4) : null;
     
     const master1 = master.find(m => m.nomor === pair1);
-    if (!master1) { toast(`Angka ${pair1} tidak ada`, 'error'); return; }
-    let master2 = null;
-    if (is4D) { master2 = master.find(m => m.nomor === pair2); if (!master2) return; }
+    if (!master1) { toast(`Angka ${pair1} tidak ada di Master`, 'error'); return; }
     
+    let master2 = null;
+    if (is4D) {
+        master2 = master.find(m => m.nomor === pair2);
+        if (!master2) { toast(`Angka ${pair2} tidak ada di Master`, 'error'); return; }
+    }
+    
+    // Header
     if (is4D) {
         $('syairMainTitle').textContent = `${raw} = ${master1.syair} ${master2.syair}`;
         $('syairMainGroup').textContent = `Grup: ${master1.grup} + ${master2.grup}`;
@@ -4832,113 +4867,48 @@ $('analyzeSyairBtn').addEventListener('click', function() {
         $('syairMainGroup').textContent = `Grup: ${master1.grup}`;
     }
     
-    // 1. CARI POOL RELASI TEKS (UNTUK FALLBACK & PENAMBAH PELUANG)
+    // Cari pool relasi (dipisah per pair)
     const exclude = is4D ? [pair1, pair2] : [pair1];
-    const findRel = (tgt) => {
-        const tm = master.find(m => m.nomor === tgt);
-        const theme = getTargetTheme(tm.syair);
-        const res = [];
-        master.forEach(m => {
-            if (exclude.includes(m.nomor)) return;
-            if (m.grup === tm.grup || (theme !== 'umum' && getTargetTheme(m.syair) === theme)) res.push(m.nomor);
-        });
-        return res;
-    };
+    const poolA = findRelatedForTarget(pair1, exclude);
+    const poolB = is4D ? findRelatedForTarget(pair2, exclude) : [];
     
-    const poolA = findRel(pair1);
-    const poolB = is4D ? findRel(pair2) : [];
+    // Tampilkan angka berelasi (gabungan untuk display)
     const allRel = [...new Set([...poolA, ...poolB])].sort();
-    
     let relHtml = '';
     allRel.slice(0, 20).forEach(n => { relHtml += `<div class="syair-badge"><span class="badge-num">${n}</span></div>`; });
-    $('syairRelationList').innerHTML = relHtml || 'Tidak ada relasi tema.';
-
-    // 2. KUMPULKAN DATA HISTORY BERDASARKAN MODE
-    let normalizedEntries = [];
+    $('syairRelationList').innerHTML = relHtml || '<div style="font-size:12px;">Tidak ada angka berelasi.</div>';
+    
+    // Bangun prediksi
+    let finalPool4D = [];
+    let previewText = '';
     
     if (mode === 'aturan') {
-        // MODE 1: BAWAAN (GABUNGKAN SEMUA PASAR & SEMUA TABEL)
-        $('syairHistoryTitle').textContent = 'Pola Global (Dari Semua Pasar):';
+        $('syairHistoryTitle').textContent = 'Jawaban (Mode Aturan - Struktur Tema):';
         
-        if (typeof tableData !== 'undefined') {
-            tableData.tables.forEach(t => {
-                t.entries.forEach(e => normalizedEntries.push({ p: e.periode || e.tanggal, r: e.result }));
-            });
-        }
-        if (typeof marketData !== 'undefined') {
-            marketData.markets.forEach(m => {
-                m.history.forEach(h => normalizedEntries.push({ p: h.date, r: h.result }));
-            });
-        }
-    } else {
-        // MODE 2: SPESIFIK (HANYA PASAR YANG DIPILIH)
-        const activeMarket = getActiveMarket();
-        $('syairHistoryTitle').textContent = `Pola History Khusus (Pasar: ${activeMarket.name}):`;
-        
-        activeMarket.history.forEach(h => {
-            normalizedEntries.push({ p: h.date, r: h.result });
-        });
-    }
-
-    // Urutkan data berdasarkan tanggal/periode
-    normalizedEntries.sort((a, b) => a.p.localeCompare(b.p));
-
-    let finalPool4D = [];
-    let previewText = "";
-    
-    // 3. ANALISA FREKUENSI (MESIN PEMBELAJARAN)
-    if (normalizedEntries.length < 2) {
-        $('syairHistoryList').innerHTML = `<div style="font-size:12px; color:var(--danger);">⚠ Data history tidak cukup (minimal 2).</div>`;
-        
-        // FALLBACK KE TEKS (Jika data sangat minim)
         if (is4D) {
+            // STRUKTUR: [tema1] × [tema2] dan sebaliknya
             const setA = [pair1, ...poolA];
             const setB = [pair2, ...poolB];
             for (const a of setA) for (const b of setB) finalPool4D.push(a + b);
             for (const b of setB) for (const a of setA) finalPool4D.push(b + a);
+            
+            previewText = `📖 Input ${raw} dibaca: ${master1.syair} (${master1.grup}) + ${master2.syair} (${master2.grup})\n\n`;
+            previewText += `🧠 Strategi: Depan dari [${master1.syair}-related], Belakang dari [${master2.syair}-related] (dan sebaliknya)\n\n`;
         } else {
             const pool = [pair1, ...poolA];
             for (const a of pool) for (const b of pool) finalPool4D.push(a + b);
+            previewText = `📖 Input ${pair1} dibaca: ${master1.syair} (${master1.grup})\n\n`;
+            previewText += `🧠 Strategi: Cross-product angka relasi tema "${master1.syair}"\n\n`;
         }
-        previewText = `⚠ Belum ada data history. Menggunakan Prediksi Tema Teks (Fallback).`;
+        
     } else {
-        const freqMap = {};
-        let matchCount = 0;
+        $('syairHistoryTitle').textContent = 'Jawaban (Mode History Tabel):';
+        const entries = getActiveTable().entries;
         
-        for (let i = 0; i < normalizedEntries.length - 1; i++) {
-            const r = normalizedEntries[i].r;
-            const r1 = r.slice(0, 2);
-            const r2 = r.slice(2, 4);
-            let isMatch = false;
+        if (entries.length < 2) {
+            $('syairHistoryList').innerHTML = '<div style="font-size:12px; color:var(--danger);">⚠ Tabel Result kosong (min 2 data). Menggunakan Mode Aturan sebagai fallback.</div>';
             
-            if (is4D) {
-                // Cocokkan jika [01]...[51] atau [51]...[01] muncul
-                const fMatch = (r1 === pair1 || poolA.includes(r1));
-                const bMatch = (r2 === pair2 || poolB.includes(r2));
-                if (fMatch && bMatch) isMatch = true;
-                const revF = (r1 === pair2 || poolB.includes(r1));
-                const revB = (r2 === pair1 || poolA.includes(r2));
-                if (revF && revB) isMatch = true;
-            } else {
-                // Cocokkan jika [01] muncul di depan atau belakang
-                if (r1 === pair1 || r2 === pair1 || poolA.includes(r1) || poolA.includes(r2)) isMatch = true;
-            }
-            
-            if (isMatch) {
-                matchCount++;
-                // Ambil angka apa yang KELUAR SETELAHNYA
-                const nextResult = normalizedEntries[i + 1].r;
-                const nextPairs = [nextResult.slice(0, 2), nextResult.slice(2, 4)];
-                nextPairs.forEach(p => { freqMap[p] = (freqMap[p] || 0) + 1; });
-            }
-        }
-        
-        const entriesArr = Object.entries(freqMap).sort((a, b) => b[1] - a[1]);
-        
-        if (entriesArr.length === 0) {
-            $('syairHistoryList').innerHTML = `<div style="font-size:12px; color:var(--muted);">Belum ada history yang persis cocok dengan pola ini.</div>`;
-            
-            // Fallback jika history tidak ada yang cocok
+            // Fallback ke aturan
             if (is4D) {
                 const setA = [pair1, ...poolA];
                 const setB = [pair2, ...poolB];
@@ -4948,34 +4918,84 @@ $('analyzeSyairBtn').addEventListener('click', function() {
                 const pool = [pair1, ...poolA];
                 for (const a of pool) for (const b of pool) finalPool4D.push(a + b);
             }
-            previewText = `⚠ History tidak cocok. Menggunakan Prediksi Tema Teks (Fallback).`;
         } else {
-            // TAMPILKAN HASIL PEMBELAJARAN HISTORY
-            let histHtml = `<div style="font-size:11px; color:var(--success); margin-bottom:6px;">✓ AI menemukan ${matchCount} pola history dari total ${normalizedEntries.length} data.</div>`;
-            entriesArr.slice(0, 8).forEach((item, i) => {
-                histHtml += `<div class="syair-badge ${i===0?'hot':''}"><span class="badge-num">${item[0]}</span><span class="badge-freq">${item[1]}x</span></div>`;
-            });
-            $('syairHistoryList').innerHTML = histHtml;
+            const sorted = entries.slice().sort((a, b) => a.periode.localeCompare(b.periode, undefined, { numeric: true }));
+            const freqMap = {};
+            let matchCount = 0;
             
-            // JADIKAN ANGKA PALING SERING MUNCUL SEBAGAI PREDIKSI UTAMA
-            const top10 = entriesArr.slice(0, 10).map(x => x[0]);
-            
-            if (is4D) {
-                const setA = [...new Set([...top10, ...poolA, pair1])];
-                const setB = [...new Set([...top10, ...poolB, pair2])];
-                for (const a of setA) for (const b of setB) finalPool4D.push(a + b);
-                for (const b of setB) for (const a of setA) finalPool4D.push(b + a);
-            } else {
-                const pool = [...new Set([...top10, ...poolA, pair1])];
-                for (const a of pool) for (const b of pool) finalPool4D.push(a + b);
+            for (let i = 0; i < sorted.length - 1; i++) {
+                const r = sorted[i].result;
+                const r1 = r.slice(0, 2);
+                const r2 = r.slice(2, 4);
+                
+                let isMatch = false;
+                
+                if (is4D) {
+                    // 4D: HARUS kedua sisi match dengan pool masing-masing
+                    const frontMatch = (r1 === pair1 || poolA.includes(r1));
+                    const backMatch  = (r2 === pair2 || poolB.includes(r2));
+                    if (frontMatch && backMatch) isMatch = true;
+                    
+                    // Struktur terbalik (tema2 di depan, tema1 di belakang)
+                    const revFront = (r1 === pair2 || poolB.includes(r1));
+                    const revBack  = (r2 === pair1 || poolA.includes(r2));
+                    if (revFront && revBack) isMatch = true;
+                } else {
+                    // 2D: match salah satu sisi atau relasi
+                    if (r1 === pair1 || r2 === pair1) isMatch = true;
+                    else if (poolA.includes(r1) || poolA.includes(r2)) isMatch = true;
+                }
+                
+                if (isMatch) {
+                    matchCount++;
+                    const nextResult = sorted[i + 1].result;
+                    const nextPairs = [nextResult.slice(0, 2), nextResult.slice(2, 4)];
+                    nextPairs.forEach(p => { freqMap[p] = (freqMap[p] || 0) + 1; });
+                }
             }
-            previewText = `🧠 AI berhasil belajar dari ${matchCount} history. Memprioritaskan pola yang sering muncul.`;
+            
+            const entriesArr = Object.entries(freqMap).sort((a, b) => b[1] - a[1]);
+            
+            if (entriesArr.length === 0) {
+                $('syairHistoryList').innerHTML = `<div style="font-size:12px; color:var(--muted);">Tidak ada ${matchCount} history yang sesuai struktur. Fallback ke aturan.</div>`;
+                // Fallback
+                if (is4D) {
+                    const setA = [pair1, ...poolA];
+                    const setB = [pair2, ...poolB];
+                    for (const a of setA) for (const b of setB) finalPool4D.push(a + b);
+                    for (const b of setB) for (const a of setA) finalPool4D.push(b + a);
+                } else {
+                    const pool = [pair1, ...poolA];
+                    for (const a of pool) for (const b of pool) finalPool4D.push(a + b);
+                }
+            } else {
+                let histHtml = `<div style="font-size:11px; color:var(--success); margin-bottom:6px;">✓ ${matchCount} history match struktur ${raw}</div>`;
+                entriesArr.slice(0, 8).forEach((item, i) => {
+                    histHtml += `<div class="syair-badge ${i===0?'hot':''}"><span class="badge-num">${item[0]}</span><span class="badge-freq">${item[1]}x</span></div>`;
+                });
+                $('syairHistoryList').innerHTML = histHtml;
+                
+                // Build prediksi dari history
+                const top10 = entriesArr.slice(0, 10).map(x => x[0]);
+                
+                if (is4D) {
+                    // Struktur tetap terjaga: front dari pool A + history, back dari pool B + history
+                    const setA = [...new Set([pair1, ...poolA, ...top10])];
+                    const setB = [...new Set([pair2, ...poolB, ...top10])];
+                    for (const a of setA) for (const b of setB) finalPool4D.push(a + b);
+                    for (const b of setB) for (const a of setA) finalPool4D.push(b + a);
+                } else {
+                    const pool = [...new Set([pair1, ...poolA, ...top10])];
+                    for (const a of pool) for (const b of pool) finalPool4D.push(a + b);
+                }
+                
+                previewText = `📖 Input ${raw} → ${matchCount} history match\n\n🧠 Prediksi tetap terstruktur: [front pool] × [back pool]\n\n`;
+            }
         }
     }
     
-    // 4. FINALISASI OUTPUT 350 & 25
+    // Finalisasi
     finalPool4D = [...new Set(finalPool4D)].filter(n => n.length === 4).sort();
-    
     currentPrediksiData.angka350 = finalPool4D.slice(0, 350);
     currentPrediksiData.angka25 = currentPrediksiData.angka350.slice(0, 25);
     
@@ -4987,7 +5007,15 @@ $('analyzeSyairBtn').addEventListener('click', function() {
     currentPrediksiData.depan2D = Array.from(depanSet).sort();
     currentPrediksiData.belakang2D = Array.from(belakangSet).sort();
     
-    $('syairReadPreview').innerText = previewText + `\nTotal Prediksi Terbentuk: ${currentPrediksiData.angka350.length} (4 Digit)`;
+    // Preview pembacaan + sampel
+    if (is4D && currentPrediksiData.angka350.length > 0) {
+        previewText += `\n📋 Sampel Prediksi (dengan makna 2-syair):\n`;
+        currentPrediksiData.angka350.slice(0, 5).forEach(pred => {
+            previewText += `  • ${pred} = ${read4D(pred)}\n`;
+        });
+    }
+    
+    $('syairReadPreview').innerText = previewText;
     $('prediksi350').textContent = currentPrediksiData.angka350.join('*') + (currentPrediksiData.angka350.length ? '*' : '');
     $('prediksi25').textContent = currentPrediksiData.angka25.join('*') + (currentPrediksiData.angka25.length ? '*' : '');
     $('prediksi2D').textContent = `DEPAN: ${currentPrediksiData.depan2D.join(' ')}\nBELAKANG: ${currentPrediksiData.belakang2D.join(' ')}`;
@@ -4999,10 +5027,12 @@ $('btnCopy4D').addEventListener('click', function() {
     if (!currentPrediksiData.angka350.length) { toast('Belum ada data', 'error'); return; }
     copyTextToClipboard(currentPrediksiData.angka350.join('*') + '*');
 });
+
 $('btnCopy2D').addEventListener('click', function() {
     if (!currentPrediksiData.depan2D.length) { toast('Belum ada data', 'error'); return; }
     copyTextToClipboard(`DEPAN: ${currentPrediksiData.depan2D.join(' ')}\nBELAKANG: ${currentPrediksiData.belakang2D.join(' ')}`);
 });
+
 $('btnSendManual').addEventListener('click', function() {
     if (!currentPrediksiData.depan2D.length) { toast('Belum ada data', 'error'); return; }
     $('manualDepan').value = currentPrediksiData.depan2D.join(' ');
@@ -5010,7 +5040,7 @@ $('btnSendManual').addEventListener('click', function() {
     updateManualInfo();
     document.querySelector('nav button[data-section="input4Angka"]').click();
     document.querySelector('#subTabs4Angka button[data-subpanel="subpanel-manual"]').click();
-    toast('2D Master dikirim!', 'success');
+    toast('2D Master berhasil dikirim ke Input Manual!', 'success');
 });
 
 /* ═══════════════════════════════════════════════════════════════════════════════
