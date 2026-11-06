@@ -3602,6 +3602,33 @@ function loadMarketData() {
     });
     if (togelAdded) saveMarketData();
 
+    // ── Seed preset pasar togel (idempotent) ──────────────────────────
+    const TOGEL_PRESETS = [
+        { id: 'macau4d',   name: '🎰 Macau 4D',   schedule: '6×/hari',   autoFetch: false },
+        { id: 'hongkong',  name: '🇭🇰 Hongkong',  schedule: '23:00 WIB', autoFetch: false },
+        { id: 'singapore', name: '🇸🇬 Singapore', schedule: '17:45 WIB', autoFetch: true,
+          api: { type: '4dlivetoday', operator: 'sg' } },
+        { id: 'sydney',    name: '🇦🇺 Sydney',    schedule: '13:50 WIB', autoFetch: false }
+    ];
+    let togelAdded = false;
+    TOGEL_PRESETS.forEach(function(p) {
+        const exists = marketData.markets.some(function(m) { return m.id === p.id; });
+        if (!exists) {
+            marketData.markets.push({
+                id: p.id,
+                name: p.name,
+                schedule: p.schedule,
+                isTogel: true,
+                autoFetch: p.autoFetch === true,
+                api: p.api || null,
+                history: []
+            });
+            togelAdded = true;
+        }
+    });
+    if (togelAdded) saveMarketData();
+    // ──────────────────────────────────────────────────────────────────
+
     refreshMarketSelectors();
     renderMarketResultTable();
 }
@@ -5988,6 +6015,84 @@ function _handleTogelSend2D() {
 })();
 
 console.log('[Menu Togel v1.0] Aktif — Pasar:', getTogelMarkets().length);
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BLOK 50B: OTOMATISASI SINGAPORE (4dlivetoday + CORS proxy)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+const CORS_PROXY = 'https://corsproxy.io/?';
+const API_SG = 'https://4dlivetoday.com/api/v1/operators/sg/latest';
+
+async function fetchSingaporeResult() {
+    const url = CORS_PROXY + encodeURIComponent(API_SG);
+    try {
+        const resp = await fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } });
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        const data = await resp.json();
+
+        // Struktur response 4dlivetoday: { draws: [ { date: "YYYY-MM-DD", numbers: ["1234", ...] } ] }
+        const draw = data.draws && data.draws[0];
+        if (!draw || !draw.numbers || !draw.numbers[0]) throw new Error('Format response tidak dikenali');
+
+        const result4D = onlyDigits(draw.numbers[0]).slice(0, 4); // 1st prize
+        const date = draw.date; // YYYY-MM-DD
+
+        if (!/^\d{4}$/.test(result4D) || !date) throw new Error('Data tidak valid');
+
+        return { date: date, result: result4D };
+    } catch (err) {
+        console.error('[AutoSync SG]', err);
+        return null;
+    }
+}
+
+async function autoSyncSingapore() {
+    if (!_togelIsAdmin()) return; // hanya admin
+    const m = marketData.markets.find(function(x) { return x.id === 'singapore'; });
+    if (!m) return;
+
+    const fresh = await fetchSingaporeResult();
+    if (!fresh) {
+        const el = $('togelSyncStatus');
+        if (el) el.textContent = '❌ Sync gagal — coba lagi nanti';
+        return;
+    }
+
+    // Cek duplikat tanggal
+    const exists = m.history.some(function(r) { return r.date === fresh.date; });
+    if (!exists) {
+        m.history.push({
+            id: 'r_' + Date.now() + '_auto',
+            date: fresh.date,
+            result: fresh.result,
+            auto: true
+        });
+        m.history.sort(function(a, b) { return a.date.localeCompare(b.date); });
+        saveMarketData();
+        toast('Result Singapore ' + fresh.result + ' (' + fresh.date + ') tersinkron', 'success');
+    }
+
+    // Update UI jika sedang di menu Togel
+    if ($('menuTogel') && $('menuTogel').classList.contains('active')) {
+        if (activeTogelMarketId === 'singapore') {
+            renderTogelLatest();
+            renderTogelHistory();
+        }
+        renderTogelMarketTabs();
+    }
+}
+
+// Panggil di renderMenuTogel()
+const _origRenderMenuTogel = renderMenuTogel;
+renderMenuTogel = function() {
+    _origRenderMenuTogel();
+    // Sync otomatis saat buka menu (debounce: hanya sekali per 5 menit)
+    const now = Date.now();
+    if (!window._lastSGSync || now - window._lastSGSync > 5 * 60 * 1000) {
+        window._lastSGSync = now;
+        autoSyncSingapore();
+    }
+};
 
 /* ═══════════════════════════════════════════════════════════════════════
    BLOK 51: JS — MULTI-TABLE RESULT CRUD
