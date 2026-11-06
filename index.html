@@ -5990,6 +5990,253 @@ function _handleTogelSend2D() {
 console.log('[Menu Togel v1.0] Aktif — Pasar:', getTogelMarkets().length);
 
 /* ═══════════════════════════════════════════════════════════════════════
+   BLOK 50B: OTOMATISASI SINGAPORE (4dlivetoday + CORS proxy)
+   Versi: SAFE — tidak akan mematikan login meski 50A belum ada.
+   
+   • Auto-sync saat menu Togel dibuka (max 1× per 5 menit)
+   • Manual sync: window.syncSingaporeNow()
+   • Idempotent: tidak duplikasi data tanggal yang sama
+   • Defensif: semua dependensi dicek dengan typeof
+   ═══════════════════════════════════════════════════════════════════════ */
+
+(function() {
+    'use strict';
+
+    // ── Konstanta ─────────────────────────────────────────────────────
+    const CORS_PROXY       = 'https://corsproxy.io/?';
+    const SG_MARKET_ID     = 'singapore';
+    const SYNC_COOLDOWN_MS = 5 * 60 * 1000; // 5 menit
+
+    // Beberapa bentuk endpoint (API bisa berubah)
+    const API_ENDPOINTS = [
+        'https://4dlivetoday.com/api/v1/operators/sg/latest',
+        'https://4dlivetoday.com/api/v1/latest?operator=sg',
+        'https://4dlivetoday.com/api/v1/results/latest?code=sg'
+    ];
+
+    // ── Helper: cek admin (defensif) ──────────────────────────────────
+    function _isAdmin() {
+        try {
+            return typeof currentUser !== 'undefined'
+                && currentUser
+                && currentUser.role === 'admin';
+        } catch (e) { return false; }
+    }
+
+    // ── Helper: update status UI (opsional) ───────────────────────────
+    function _setSyncStatus(text, color) {
+        try {
+            const el = document.getElementById('togelSyncStatus');
+            if (el) {
+                el.textContent = text;
+                if (color) el.style.color = color;
+            }
+        } catch (e) { /* noop */ }
+    }
+
+    // ── Parser fleksibel (menangani berbagai bentuk respons) ──────────
+    function _parseAPIResponse(data) {
+        if (!data || typeof data !== 'object') return null;
+
+        let candidates = [];
+
+        if (Array.isArray(data.draws) && data.draws.length > 0) {
+            candidates = data.draws;
+        } else if (Array.isArray(data.data) && data.data.length > 0) {
+            candidates = data.data;
+        } else if (Array.isArray(data.results) && data.results.length > 0) {
+            candidates = data.results;
+        } else if (data.date && (data.numbers || data.result || data.first)) {
+            candidates = [data];
+        }
+
+        if (candidates.length === 0) return null;
+
+        const draw = candidates[0];
+
+        // Tanggal
+        let date =
+            draw.date ||
+            draw.draw_date ||
+            draw.drawDate ||
+            (draw.timestamp ? new Date(draw.timestamp).toISOString().slice(0, 10) : null);
+
+        // Result 4D
+        let result = null;
+        if (Array.isArray(draw.numbers) && draw.numbers[0]) {
+            result = String(draw.numbers[0]).replace(/\D/g, '').slice(0, 4);
+        } else if (draw.first) {
+            result = String(draw.first).replace(/\D/g, '').slice(0, 4);
+        } else if (draw.result) {
+            result = String(draw.result).replace(/\D/g, '').slice(0, 4);
+        }
+
+        if (!date || !result || result.length !== 4) return null;
+
+        return { date: date, result: result };
+    }
+
+    // ── Fetch Singapore result (coba beberapa endpoint) ───────────────
+    async function fetchSingaporeResult() {
+        for (let i = 0; i < API_ENDPOINTS.length; i++) {
+            const target = API_ENDPOINTS[i];
+            const url = CORS_PROXY + encodeURIComponent(target);
+            try {
+                const resp = await fetch(url, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' },
+                    cache: 'no-store'
+                });
+                if (!resp.ok) throw new Error('HTTP ' + resp.status);
+
+                const data = await resp.json();
+                const parsed = _parseAPIResponse(data);
+                if (parsed) return parsed;
+            } catch (err) {
+                console.warn('[SG Auto] Endpoint gagal:', target, err.message);
+            }
+        }
+        return null;
+    }
+
+    // ── Simpan hasil ke marketData (idempotent) ───────────────────────
+    function _saveSingaporeResult(fresh) {
+        if (typeof marketData === 'undefined' || !marketData || !Array.isArray(marketData.markets)) {
+            return false;
+        }
+
+        const m = marketData.markets.find(function(x) { return x.id === SG_MARKET_ID; });
+        if (!m) {
+            console.warn('[SG Auto] Market Singapore tidak ditemukan di marketData');
+            return false;
+        }
+
+        if (!Array.isArray(m.history)) m.history = [];
+
+        const exists = m.history.some(function(r) { return r.date === fresh.date; });
+        if (exists) return false;
+
+        m.history.push({
+            id: 'r_sg_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+            date: fresh.date,
+            result: fresh.result,
+            auto: true
+        });
+        m.history.sort(function(a, b) { return a.date.localeCompare(b.date); });
+
+        try {
+            if (typeof saveMarketData === 'function') saveMarketData();
+        } catch (e) {
+            console.error('[SG Auto] Gagal saveMarketData:', e);
+        }
+        return true;
+    }
+
+    // ── Refresh UI jika sedang di menu Togel ──────────────────────────
+    function _refreshTogelUI() {
+        try {
+            const section = document.getElementById('menuTogel');
+            if (!section || !section.classList.contains('active')) return;
+
+            if (typeof renderTogelMarketTabs === 'function') renderTogelMarketTabs();
+            if (typeof activeTogelMarketId !== 'undefined' && activeTogelMarketId === SG_MARKET_ID) {
+                if (typeof renderTogelLatest === 'function') renderTogelLatest();
+                if (typeof renderTogelHistory === 'function') renderTogelHistory();
+            }
+        } catch (e) {
+            console.warn('[SG Auto] Refresh UI gagal:', e);
+        }
+    }
+
+    // ── Fungsi utama: sync Singapore ──────────────────────────────────
+    async function autoSyncSingapore(force) {
+        if (!_isAdmin()) return;
+
+        if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+            _setSyncStatus('⚠️ Offline — tidak bisa sync', '#fbbf24');
+            return;
+        }
+
+        const now = Date.now();
+        if (!force && window._lastSGSync && (now - window._lastSGSync) < SYNC_COOLDOWN_MS) {
+            return;
+        }
+        window._lastSGSync = now;
+
+        _setSyncStatus('🔄 Menyinkronkan Singapore…', '#22d3ee');
+
+        let fresh = null;
+        try {
+            fresh = await fetchSingaporeResult();
+        } catch (err) {
+            console.error('[SG Auto] Fetch error:', err);
+        }
+
+        if (!fresh) {
+            _setSyncStatus('❌ Sync gagal — input manual tetap tersedia', '#ef4444');
+            return;
+        }
+
+        const saved = _saveSingaporeResult(fresh);
+
+        if (saved) {
+            _setSyncStatus(
+                '✅ Sync terakhir: ' + fresh.result + ' (' + fresh.date + ')',
+                '#22c55e'
+            );
+            try {
+                if (typeof toast === 'function') {
+                    toast('Result Singapore ' + fresh.result + ' (' + fresh.date + ') tersinkron', 'success');
+                }
+            } catch (e) { /* noop */ }
+        } else {
+            _setSyncStatus('✅ Data sudah up-to-date', '#22c55e');
+        }
+
+        _refreshTogelUI();
+    }
+
+    // ── Expose ke global ──────────────────────────────────────────────
+    window.syncSingaporeNow = function() { return autoSyncSingapore(true); };
+    window.autoSyncSingapore = autoSyncSingapore;
+
+    // ── Hook ke renderMenuTogel (guarded, retry-safe) ────────────────
+    let _hooked = false;
+    function _tryHook() {
+        if (_hooked) return;
+        if (typeof window.renderMenuTogel !== 'function') return;
+        _hooked = true;
+
+        const _orig = window.renderMenuTogel;
+        window.renderMenuTogel = function() {
+            try {
+                _orig.apply(this, arguments);
+            } catch (e) {
+                console.error('[SG Auto] renderMenuTogel asli error:', e);
+            }
+            try {
+                autoSyncSingapore(false);
+            } catch (e) {
+                console.warn('[SG Auto] Hook error:', e);
+            }
+        };
+        console.log('[SG Auto] Hook terpasang ke renderMenuTogel');
+    }
+
+    _tryHook();
+    if (!_hooked) {
+        let attempts = 0;
+        const timer = setInterval(function() {
+            _tryHook();
+            attempts++;
+            if (_hooked || attempts >= 20) clearInterval(timer);
+        }, 250);
+    }
+
+    console.log('[BLOK 50B] Auto-sync Singapore siap. Manual: window.syncSingaporeNow()');
+})();
+
+/* ═══════════════════════════════════════════════════════════════════════
    BLOK 51: JS — MULTI-TABLE RESULT CRUD
    ═══════════════════════════════════════════════════════════════════════ */
 
