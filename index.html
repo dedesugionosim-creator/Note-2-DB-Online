@@ -3,16 +3,13 @@
 <head>
 <!--
 ╔══════════════════════════════════════════════════════════════════╗
-║  SA_HARD SYSTEM — v5.3 FINAL                                     ║
+║  SA_HARD SYSTEM — v5.4 FINAL (Fix Login Overlap)                 ║
 ╠══════════════════════════════════════════════════════════════════╣
-║  PERUBAHAN v5.3:                                                 ║
-║  • INPUT MANUAL: Dropdown grup HANYA menseleksi angka.           ║
-║    - Input teks TIDAK diubah/ditimpa (tetap dari user)           ║
-║    - Mode filter: Depan / Belakang / Keduanya                    ║
-║    - Hanya angka yang match dgn 2D Grup yang diproses            ║
-║  • BBFS: Mode filter Depan / Belakang / Keduanya                 ║
-║  • AK: Mode filter Depan / Belakang / Keduanya                   ║
-║  • Gabung Grup & Grup+CB: Tetap (G1=Depan, G2=Belakang)          ║
+║  PERBAIKAN v5.4:                                                 ║
+║  • Menambahkan [hidden] { display: none !important; }            ║
+║    untuk memperbaiki bug halaman utama yang tembus pandang       ║
+║    di halaman login.                                             ║
+║  • Memastikan alur login/logout berjalan sempurna.               ║
 ╚══════════════════════════════════════════════════════════════════╝
 -->
 <meta charset="UTF-8">
@@ -21,7 +18,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="SA_HARD">
-<title>SA_HARD System v5.3</title>
+<title>SA_HARD System v5.4</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon.svg">
@@ -31,6 +28,9 @@
    ROOT & RESET
    ═══════════════════════════════════════════════════════════════════ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* KUNCI PERBAIKAN: Pastikan atribut hidden selalu menyembunyikan elemen */
+[hidden] { display: none !important; }
 
 :root {
   --bg:        #0b1220;
@@ -679,10 +679,11 @@ body.offline .offline-badge { display: block; }
   ⚠️ Mode Offline — data tersimpan di perangkat
 </div>
 
+<!-- LOGIN SCREEN -->
 <div id="loginScreen">
   <form class="login-card" id="loginForm" autocomplete="off">
     <div class="brand-title">SA_HARD</div>
-    <div class="brand-sub">SYSTEM v5.3</div>
+    <div class="brand-sub">SYSTEM v5.4</div>
     <div class="field">
       <label for="username">Username</label>
       <input type="text" id="username" autocomplete="off" autocapitalize="off" spellcheck="false" required>
@@ -696,6 +697,7 @@ body.offline .offline-badge { display: block; }
   </form>
 </div>
 
+<!-- MAIN APP (hidden secara default) -->
 <div id="app" hidden>
   <header>
     <div class="brand">SA_HARD</div>
@@ -740,9 +742,7 @@ body.offline .offline-badge { display: block; }
         <button data-subpanel="subpanel-grupCB">Grup + CB</button>
       </div>
 
-      <!-- ═══════════════════════════════════════════════════════
-           SUBPANEL INPUT MANUAL (v5.3 — Seleksi Tanpa Merubah Input)
-           ═══════════════════════════════════════════════════════ -->
+      <!-- SUBPANEL INPUT MANUAL -->
       <div id="subpanel-manual" class="subpanel active">
         <div class="card">
           <h3 style="margin-bottom:6px;">Input Manual Kombinasi 4 Angka</h3>
@@ -1076,6 +1076,7 @@ body.offline .offline-badge { display: block; }
   </main>
 </div>
 
+<!-- INSTALL PROMPT -->
 <div id="installPrompt">
   <div class="icon">📲</div>
   <div class="text">
@@ -1682,7 +1683,7 @@ function buildManualBreakdown(grup, mode, depans, belakangs, totalCombo, cb) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   INPUT MANUAL GENERATOR (v5.3 — murni seleksi, tidak mengubah input)
+   INPUT MANUAL GENERATOR
    ═══════════════════════════════════════════════════════════════════ */
 function _refreshManualPreview() {
   const g = $('manualGrup').value;
@@ -1790,7 +1791,7 @@ $('manualGenerateBtn').addEventListener('click', () => {
 });
 
 /* ═══════════════════════════════════════════════════════════════════
-   BBFS GENERATOR (v5.3 — mode filter Depan/Belakang/Keduanya)
+   BBFS GENERATOR
    ═══════════════════════════════════════════════════════════════════ */
 $('bbfsInput').addEventListener('input', (e) => {
   e.target.value = onlyDigits(e.target.value).slice(0, MAX_BBFS_DIGITS);
@@ -1910,7 +1911,7 @@ $('bbfsGenerateBtn').addEventListener('click', () => {
 });
 
 /* ═══════════════════════════════════════════════════════════════════
-   ANGKA TARUNG GENERATOR (v5.3 — mode filter Depan/Belakang/Keduanya)
+   ANGKA TARUNG GENERATOR
    ═══════════════════════════════════════════════════════════════════ */
 ['atDigit1', 'atDigit2', 'atDigit3', 'atDigit4'].forEach(id => {
   $(id).addEventListener('input', (e) => {
@@ -2627,7 +2628,7 @@ if (sessionStorage.getItem('sa_logged_in') === '1') {
    BOOT
    ═══════════════════════════════════════════════════════════════════ */
 console.log(
-  '%c SA_HARD v5.3 ',
+  '%c SA_HARD v5.4 ',
   'background:#22d3ee;color:#04101c;font-weight:bold;padding:4px 8px;border-radius:4px;'
 );
 console.log('Ready • Master:', master.length, 'records');
