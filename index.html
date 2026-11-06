@@ -3667,83 +3667,95 @@ function renderResultTable() {
 
 
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 41: JS — KONVERSI (MANUAL, GRUP, CB, AK)
+   BLOK 41: JS — KONVERSI (MANUAL, GRUP, CB, AK) - IMPROVED
    ═══════════════════════════════════════════════════════════════════════ */
 
+// 1. KONVERSI MANUAL
 $('convertManualBtn').addEventListener('click', function() {
     const n = $('manualInput').value.trim();
-    if (!/^\d+$/.test(n)) {
-        toast('Masukkan angka valid', 'error');
-        return;
-    }
-    
+    if (!/^\d+$/.test(n)) { toast('Masukkan angka valid', 'error'); return; }
+
     const digits = n.split('').map(Number);
-    const sum = digits.reduce(function(a, b) { return a + b; }, 0);
-    const sumRepeat = String(sum).split('').reduce(function(a, b) { return a + Number(b); }, 0);
+    const sum = digits.reduce((a, b) => a + b, 0);
+    const sumRepeat = String(sum).split('').reduce((a, b) => a + Number(b), 0);
     const reversed = n.split('').reverse().join('');
     const mod10 = sum % 10;
     const bbfs = [...new Set(n.split(''))].sort().join('');
+
+    // Pisahkan 4 digit jika panjangnya 4
+    let askop = '-';
+    let kepalaekor = '-';
+    let as = '-', kop = '-', kepala = '-', ekor = '-';
     
+    if (n.length === 4) {
+        askop = n.slice(0, 2);
+        kepalaekor = n.slice(2, 4);
+        as = n[0];
+        kop = n[1];
+        kepala = n[2];
+        ekor = n[3];
+    }
+
     $('manualResultBox').textContent =
-        '📌 Nomor        : ' + n + '\n' +
-        '🔄 Dibalik      : ' + reversed + '\n' +
-        '➕ Jumlah Digit : ' + sum + '\n' +
-        '🔁 Jumlah Total : ' + sumRepeat + '\n' +
-        '🎯 Mod 10       : ' + mod10 + '\n' +
-        '🔢 BBFS         : ' + bbfs + '\n' +
-        '🎲 2D           : ' + n.slice(-2);
+        `📌 NOMOR ASLI : ${n}\n` +
+        `🔄 DIBALIK   : ${reversed}\n` +
+        `🔢 BBFS UNIK : ${bbfs}\n` +
+        `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+        `🧮 RUMUS MATEMATIKA:\n` +
+        `➕ Jumlah Digit : ${sum}\n` +
+        `🔁 Jumlah Total : ${sumRepeat}\n` +
+        `🎯 Mod 10       : ${mod10}\n` +
+        `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+        `✂️ PECAHAN POSISI (AS, KOP, KEPALA, EKOR):\n` +
+        `   • AS (Depan)    : ${as}\n` +
+        `   • KOP (Tengah 1): ${kop}\n` +
+        `   • KEPALA (Tengah 2): ${kepala}\n` +
+        `   • EKOR (Belakang): ${ekor}\n` +
+        `   ---------------------------------\n` +
+        `   • 2D Depan (AsKop) : ${askop}\n` +
+        `   • 2D Belakang (KepEkor) : ${kepalaekor}`;
 });
 
+// 2. KONVERSI GRUP (Sama seperti sebelumnya)
 $('convertGrupBtn').addEventListener('click', function() {
     const n = $('grupInput').value.trim();
-    if (!n) {
-        toast('Masukkan nomor', 'error');
-        return;
-    }
-    
+    if (!n) { toast('Masukkan nomor', 'error'); return; }
+
     let found = null;
     for (let i = 0; i < master.length; i++) {
-        if (master[i].nomor === n) {
-            found = master[i];
-            break;
-        }
+        if (master[i].nomor === n) { found = master[i]; break; }
     }
-    
+
     if (found) {
         $('grupResult').textContent =
-            '✅ Nomor ' + n + ' ditemukan\n' +
-            '🗂️ Grup  : ' + (found.grup || '-') + '\n' +
-            '📝 Syair : ' + (found.syair || '-');
+            `✅ Nomor ${n} ditemukan\n\n` +
+            `🗂️ Grup  : ${found.grup || '-'}\n` +
+            `📝 Syair : ${found.syair || '-'}`;
         return;
     }
-    
+
     const digits = n.split('');
-    const matches = master.filter(function(m) {
-        return digits.some(function(d) { return m.nomor.includes(d); });
-    });
-    
+    const matches = master.filter(m => digits.some(d => m.nomor.includes(d)));
+
     if (matches.length > 0) {
-        let out = '❌ Nomor ' + n + ' tidak ada di master\n\n🔍 Nomor dengan digit mirip:\n';
-        const limit = Math.min(10, matches.length);
-        for (let i = 0; i < limit; i++) {
-            out += '• ' + matches[i].nomor + ' → Grup ' + (matches[i].grup || '-') + '\n';
-        }
+        let out = `❌ Nomor ${n} tidak ada di master\n\n🔍 Nomor dengan digit mirip:\n`;
+        matches.slice(0, 10).forEach(m => {
+            out += `• ${m.nomor} → ${m.syair} (Grup ${m.grup || '-'})\n`;
+        });
         $('grupResult').textContent = out;
     } else {
-        $('grupResult').textContent = '❌ Nomor ' + n + ' tidak ditemukan';
+        $('grupResult').textContent = `❌ Nomor ${n} tidak ditemukan`;
     }
 });
 
+// 3. KONVERSI CB (Sama seperti sebelumnya)
 $('convertCBBtn').addEventListener('click', function() {
     const n = $('cbInput').value.trim();
-    if (!/^\d+$/.test(n)) {
-        toast('Masukkan angka valid', 'error');
-        return;
-    }
-    
+    if (!/^\d+$/.test(n)) { toast('Masukkan angka valid', 'error'); return; }
+
     const unique = [...new Set(n.split(''))].sort();
-    const cbLines = unique.map(function(d) { return '• CB ' + d; }).join('\n');
-    
+    const cbLines = unique.map(d => `• CB ${d}`).join('\n');
+
     const pairs = [];
     for (let i = 0; i < unique.length; i++) {
         for (let j = i + 1; j < unique.length; j++) {
@@ -3751,58 +3763,53 @@ $('convertCBBtn').addEventListener('click', function() {
             pairs.push(unique[j] + unique[i]);
         }
     }
-    
-    const previewPairs = pairs.slice(0, 12).join(', ');
-    
+
     $('cbResult').textContent =
-        '📌 Nomor Input : ' + n + '\n\n' +
-        '🎯 Colok Bebas :\n' + cbLines + '\n\n' +
-        '🔗 Kombinasi 2D:\n' + (previewPairs || '-');
+        `📌 Nomor Input : ${n}\n\n` +
+        `🎯 Colok Bebas :\n${cbLines}\n\n` +
+        `🔗 Kombinasi 2D:\n${pairs.slice(0, 12).join(', ') || '-'}`;
 });
 
+// 4. KONVERSI AK (ANGKA KEMBAR) - IMPROVED
 $('convertAKBtn').addEventListener('click', function() {
     const n = $('akInput').value.trim();
-    if (!/^\d+$/.test(n)) {
-        toast('Masukkan angka valid', 'error');
-        return;
-    }
-    
+    if (!/^\d+$/.test(n)) { toast('Masukkan angka valid', 'error'); return; }
+
     const counts = {};
-    for (let i = 0; i < n.length; i++) {
-        const d = n[i];
-        if (!counts[d]) counts[d] = 0;
-        counts[d]++;
-    }
-    
-    const kembar = Object.entries(counts).filter(function(entry) {
-        return entry[1] > 1;
-    });
-    
+    n.split('').forEach(d => counts[d] = (counts[d] || 0) + 1);
+
+    const kembar = Object.entries(counts).filter(([, c]) => c > 1);
     const allDigits = Object.keys(counts).sort();
-    
-    let out = '📌 Nomor Input : ' + n + '\n\n';
-    out += '🔢 Digit Unik  : ' + allDigits.join(', ') + '\n\n';
-    
+
+    let out = `📌 Nomor Input : ${n}\n`;
+    out += `🔢 Digit Unik  : ${allDigits.join(', ')}\n`;
+    out += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+
     if (kembar.length > 0) {
-        out += '✅ Angka Kembar Ditemukan:\n';
-        for (let i = 0; i < kembar.length; i++) {
-            out += '   • Angka ' + kembar[i][0] + ' muncul ' + kembar[i][1] + 'x\n';
+        out += `✅ ANGKA KEMBAR DITEMUKAN:\n`;
+        kembar.forEach(([d, c]) => out += `   • Angka ${d} muncul ${c}x\n`);
+        out += `\n`;
+    } else {
+        out += `❌ Tidak ada angka kembar (semua unik)\n\n`;
+    }
+
+    // Pencarian Master Relevan + Syair
+    const matches = master.filter(m => allDigits.some(d => m.nomor.includes(d)));
+    if (matches.length > 0) {
+        out += `📋 ANGKA BERELASI DI MASTER (Total ${matches.length}):\n`;
+        
+        // Tampilkan maksimal 20 agar tidak terlalu panjang
+        matches.slice(0, 20).forEach(m => {
+            out += `   • ${m.nomor} : ${m.syair} (${m.grup})\n`;
+        });
+        
+        if (matches.length > 20) {
+            out += `   ... dan ${matches.length - 20} angka lainnya.\n`;
         }
     } else {
-        out += '❌ Tidak ada angka kembar\n';
+        out += `📋 Tidak ada angka yang berelasi di Master.\n`;
     }
-    
-    const matches = master.filter(function(m) {
-        return allDigits.some(function(d) { return m.nomor.includes(d); });
-    });
-    
-    if (matches.length > 0) {
-        out += '\n📋 Relevan di Master (Total ' + matches.length + '):\n';
-        for (let i = 0; i < matches.length; i++) {
-            out += '   • ' + matches[i].nomor + ' (Grup ' + (matches[i].grup || '-') + ')\n';
-        }
-    }
-    
+
     $('akResult').textContent = out;
 });
 
