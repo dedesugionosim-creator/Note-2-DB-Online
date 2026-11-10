@@ -3281,13 +3281,14 @@ function renderResultTable() {
    BLOK 41: KONVERSI (MANUAL, GRUP, CB, AK) - VERSI DIPERBAIKI
    ═══════════════════════════════════════════════════════════════════════ */
 
-// Fungsi Kombinasi 2D (Tanpa Bolak-Balik)
+// Fungsi Kombinasi 2D (Bolak-Balik / Permutasi = 12 hasil)
 function getAllCombinations2D(str) {
     const digits = onlyDigits(str).split('');
     if (digits.length < 2) return [];
     const result = new Set();
     for (let i = 0; i < digits.length; i++) {
-        for (let j = i + 1; j < digits.length; j++) {
+        for (let j = 0; j < digits.length; j++) {
+            if (i === j) continue; // Mencegah angka dobel (misal: 11, 22)
             result.add(digits[i] + digits[j]);
         }
     }
