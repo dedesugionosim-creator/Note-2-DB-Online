@@ -1634,13 +1634,13 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
         <!-- ═══════════════════════════════════════════════════════════════
              SECTION: TABEL RESULT (MULTI-TABLE)
              ═══════════════════════════════════════════════════════════════ -->
-                <section id="tabelResult">
+            <section id="tabelResult">
             <div class="table-header-actions">
                 <div class="table-controls">
                     <select id="tableSelector"></select>
                 </div>
                 <h2 style="margin:0;">
-                    <span id="tableTitleDisplay" contenteditable="false" spellcheck="false" style="cursor:default;">Tabel Result</span>
+                    <span id="tableTitleDisplay" contenteditable="false" style="cursor:default; border-bottom:none;">Tabel Result</span>
                 </h2>
                 <div style="display:flex; gap:8px;">
                     <button class="btn-warn" id="exportJsonBtn" style="padding:8px 12px; font-size:12px;">
@@ -1687,7 +1687,7 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
         <!-- ═══════════════════════════════════════════════════════════════
              SECTION: DATA PASAR
              ═══════════════════════════════════════════════════════════════ -->
-            <section id="dataPasar">
+                    <section id="dataPasar">
             <h2>📚 Data Pasar Global</h2>
             <p class="text-muted mb-10" style="font-size:13px;">
                 Pilih pasar di bawah ini untuk dianalisa oleh <b>Rumus Syair (Mode Global)</b>.
@@ -3189,7 +3189,7 @@ function renderGroupPreview(grupName, containerEl, activeSide, hint) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 40: MULTI-TABLE RESULT CRUD (SINKRONISASI PASAR TOGEL)
+   BLOK 40: MULTI-TABLE RESULT CRUD (OTOMATIS DARI TOGEL)
    ═══════════════════════════════════════════════════════════════════════ */
 
 function loadTableData() {
@@ -3201,16 +3201,6 @@ function loadTableData() {
         tableData = saved;
     } else {
         tableData = { tables: [], activeTableId: '' };
-    }
-
-    // Panggil fungsi sinkronisasi (pastikan pasar togel masuk ke tableData)
-    if (typeof syncTogelWithTable === 'function') syncTogelWithTable();
-
-    if (tableData.tables.length > 0) {
-        const hasActive = tableData.tables.some(function(t) { return t.id === tableData.activeTableId; });
-        if (!hasActive) tableData.activeTableId = tableData.tables[0].id;
-    } else {
-        tableData.activeTableId = '';
     }
     refreshTableSelector();
 }
@@ -3233,7 +3223,7 @@ function refreshTableSelector() {
     const sel = $('tableSelector');
     if (!sel) return;
 
-    // 1. Paksa sinkronisasi: Pastikan semua Pasar Togel ada di tableData
+    // SINKRONISASI: Pastikan tabel mengikuti daftar Pasar Togel
     if (typeof marketData !== 'undefined' && marketData.markets) {
         marketData.markets.forEach(function(m) {
             if (m.isTogel) {
@@ -3241,14 +3231,14 @@ function refreshTableSelector() {
                 if (!tbl) {
                     tableData.tables.push({ id: m.id, name: m.name, entries: [] });
                 } else {
-                    tbl.name = m.name; // Sinkronkan nama jika diubah di Togel
+                    tbl.name = m.name; // Update nama jika diganti di Togel
                 }
             }
         });
         saveTableData();
     }
 
-    // 2. Filter: Hanya tampilkan tabel yang terdaftar sebagai Pasar Togel
+    // Filter hanya yang terdaftar di Togel
     const validTables = tableData.tables.filter(function(t) {
         if (typeof marketData === 'undefined') return true;
         return marketData.markets.some(function(m) { return m.id === t.id && m.isTogel; });
@@ -4067,7 +4057,7 @@ $('grupCBGenerateBtn').addEventListener('click', function() {
 });
 
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 49: DATA PASAR (VERSI BERSIH)
+   BLOK 49: DATA PASAR SELECTOR
    ═══════════════════════════════════════════════════════════════════════ */
 
 const elMarketSelector = $('marketSelector');
@@ -4076,7 +4066,6 @@ if (elMarketSelector) {
         marketData.activeMarketId = e.target.value;
         const syairMarketSelect = $('syairMarketSelect');
         if (syairMarketSelect) syairMarketSelect.value = e.target.value;
-        // renderMarketResultTable tidak dipakai lagi karena history sudah pindah ke Tabel Result
     });
 }
 
@@ -4253,6 +4242,7 @@ $('saveResultBtn').addEventListener('click', function() {
     const result = $('inputResult').value.trim();
     if (!tanggal) { toast('Tanggal wajib', 'error'); return; }
     if (result.length !== 4) { toast('Result harus 4 digit', 'error'); return; }
+    
     const entries = getActiveTable().entries;
     if (!periode) {
         let nextNum = 1;
@@ -4266,6 +4256,7 @@ $('saveResultBtn').addEventListener('click', function() {
         }
         periode = String(nextNum).padStart(3, '0');
     }
+    
     if (id) {
         for (let i = 0; i < entries.length; i++) {
             if (entries[i].id === id) {
@@ -4285,35 +4276,20 @@ $('saveResultBtn').addEventListener('click', function() {
         });
         toast('Data ditambahkan', 'success');
     }
+    
     saveTableData();
+    
+    // SINKRONISASI KE MENU TOGEL
+    const m = marketData.markets.find(function(mk) { return mk.id === tableData.activeTableId; });
+    if (m) {
+        m.history = entries.map(function(e) { return { id: e.id, date: e.tanggal, result: e.result }; });
+        saveMarketData();
+    }
+    
     refreshTableSelector();
     renderResultTable();
     $('resultModal').classList.remove('show');
 });
-
-window.editResult = function(id) {
-    const entry = getActiveTable().entries.find(function(e) { return e.id === id; });
-    if (!entry) return;
-    $('modalTitle').textContent = 'Edit Result';
-    $('editResultId').value = entry.id;
-    $('inputTanggal').value = entry.tanggal;
-    $('inputPeriode').value = entry.periode;
-    $('inputResult').value = entry.result;
-    const gen = generateSyairAndGrup(entry.result);
-    $('previewSyair').textContent = gen.syair;
-    $('previewGrup').textContent = gen.grup;
-    $('resultModal').classList.add('show');
-};
-
-window.deleteResult = function(id) {
-    if (!confirm('Hapus data ini?')) return;
-    const active = getActiveTable();
-    active.entries = active.entries.filter(function(r) { return r.id !== id; });
-    saveTableData();
-    refreshTableSelector();
-    renderResultTable();
-    toast('Data dihapus', 'success');
-};
 
 /* ═══════════════════════════════════════════════════════════════════════
    BLOK 52: ANALISA POLA
