@@ -3278,9 +3278,10 @@ function renderResultTable() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 41: KONVERSI (MANUAL, GRUP, CB, AK)
+   BLOK 41: KONVERSI (MANUAL, GRUP, CB, AK) - VERSI DIPERBAIKI
    ═══════════════════════════════════════════════════════════════════════ */
 
+// Fungsi Kombinasi 2D (Tanpa Bolak-Balik)
 function getAllCombinations2D(str) {
     const digits = onlyDigits(str).split('');
     if (digits.length < 2) return [];
@@ -3311,10 +3312,13 @@ function findPredictionForPair(pair, grupTarget, inputDigits) {
 $('convertManualBtn').addEventListener('click', function() {
     const raw = $('manualInput').value.trim();
     if (!/^\d+$/.test(raw) || raw.length < 2) { toast('Masukkan minimal 2 angka valid', 'error'); return; }
+    
     const combos = getAllCombinations2D(raw);
     let out = '📌 NOMOR INPUT : ' + raw + '\n🔢 KOMBINASI 2D (' + combos.length + '):\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+    
     const grupCount = {};
     let foundCount = 0;
+    
     combos.forEach(function(pair) {
         let m = null;
         for (let i = 0; i < master.length; i++) {
@@ -3328,6 +3332,7 @@ $('convertManualBtn').addEventListener('click', function() {
             out += pair + ' → (Tidak ada di Master)\n';
         }
     });
+    
     out += '\n📊 GRUP PALING DOMINAN:\n';
     if (foundCount === 0) {
         out += '- Tidak ada kombinasi yang cocok di Master.';
@@ -3384,9 +3389,13 @@ $('convertCBBtn').addEventListener('click', function() {
 $('convertAKBtn').addEventListener('click', function() {
     const raw = $('akInput').value.trim();
     if (!/^\d+$/.test(raw) || raw.length < 2) { toast('Masukkan minimal 2 angka valid', 'error'); return; }
+    
+    // Menggunakan fungsi kombinasi yang sama (tanpa bolak-balik)
     const combos = getAllCombinations2D(raw);
     const inputDigits = onlyDigits(raw).split('');
+    
     let out = '📌 NOMOR INPUT : ' + raw + '\n🔢 KOMBINASI 2D (' + combos.length + '):\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+    
     combos.forEach(function(pair) {
         let m = null;
         for (let i = 0; i < master.length; i++) {
