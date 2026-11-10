@@ -1906,85 +1906,123 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
             </div>
         </section>
 
-        <!-- ═══════════════════════════════════════════════════════════════
+                <!-- ═══════════════════════════════════════════════════════════════
              SECTION: RUMUS SYAIR
              ═══════════════════════════════════════════════════════════════ -->
         <section id="rumusSyair">
             <h2>🔮 Rumus Syair &amp; Prediksi</h2>
             <p class="text-muted mb-10" style="font-size:13px;">
-                Pilih mode analisa, lalu generate prediksi 4D dan 2D Master.
+                Pilih metode analisa: berdasarkan angka target, atau berdasarkan alur cerita 10 result terakhir.
             </p>
-            <div class="card">
-                <div class="field"
-                     style="background-color:var(--card-2); padding:12px; border-radius:8px; border:1px solid var(--border); margin-bottom:12px;">
-                    <label style="margin-bottom:8px; color:var(--text);">Pilih Mode Analisa:</label>
-                    <div style="display:flex; flex-direction:column; gap:8px;">
-                        <label style="display:flex; align-items:center; gap:8px; cursor:pointer; margin:0;">
-                            <input type="radio" name="modeSyair" value="aturan" checked
-                                   style="width:auto; margin:0; transform:scale(1.2); accent-color:var(--accent);">
-                            <span>1. Analisa Bawaan (Master Syair + Semua History Pasar Global)</span>
-                        </label>
-                        <label style="display:flex; align-items:center; gap:8px; cursor:pointer; margin:0;">
-                            <input type="radio" name="modeSyair" value="history"
-                                   style="width:auto; margin:0; transform:scale(1.2); accent-color:var(--accent);">
-                            <span>2. Analisa Spesifik (Hanya Pasar yang Dipilih)</span>
-                        </label>
-                    </div>
-                </div>
-                <div class="field" id="syairMarketWrapper"
-                     style="display:none; background:var(--card-2); padding:10px; border-radius:8px; border:1px solid var(--border);">
-                    <label for="syairMarketSelect">Pilih Pasar untuk Dianalisa:</label>
-                    <select id="syairMarketSelect"></select>
-                </div>
-                <div class="field">
-                    <label for="syairTargetInput">Masukkan 2 atau 4 Angka (Contoh: 01 atau 0151)</label>
-                    <input type="text" id="syairTargetInput" placeholder="0151" maxlength="4"
-                           inputmode="numeric" autocomplete="off">
-                </div>
-                <button class="btn-primary" id="analyzeSyairBtn">
-                    🔍 Analisa &amp; Generate Prediksi 4D
-                </button>
+
+            <!-- NAVIGASI TAB RUMUS SYAIR -->
+            <div class="subtabs" id="subTabsSyair">
+                <button class="active" onclick="switchSyairTab('subpanel-syair-biasa', this)">🔮 Analisa Biasa</button>
+                <button onclick="switchSyairTab('subpanel-alurCerita', this)" style="color:var(--warn); border-color:var(--warn);">📖 Alur Cerita (10 Result)</button>
             </div>
-            <div id="syairResultContainer" class="syair-result-card">
-                <div class="syair-header" id="syairMainTitle">—</div>
-                <div class="syair-group" id="syairMainGroup">—</div>
-                <div class="syair-relation-title" id="syairRelationTitle">
-                    Angka Berelasi (Berdasarkan Tema/Grup):
-                </div>
-                <div class="syair-relation-list" id="syairRelationList"></div>
-                <div class="syair-relation-title" id="syairHistoryTitle">
-                    Jawaban Sering Muncul:
-                </div>
-                <div class="syair-relation-list" id="syairHistoryList"></div>
-                <div style="background:var(--card-2); border:1px solid var(--border); padding:12px; border-radius:8px; margin-bottom:16px;">
-                    <div style="font-size:12px; font-weight:bold; color:var(--warn); margin-bottom:8px;">
-                        📖 Logika &amp; Preview:
+
+            <!-- SUBPANEL 1: ANALISA BIASA (KODE LAMA) -->
+            <div id="subpanel-syair-biasa" class="subpanel active">
+                <div class="card">
+                    <div class="field"
+                         style="background-color:var(--card-2); padding:12px; border-radius:8px; border:1px solid var(--border); margin-bottom:12px;">
+                        <label style="margin-bottom:8px; color:var(--text);">Pilih Mode Analisa:</label>
+                        <div style="display:flex; flex-direction:column; gap:8px;">
+                            <label style="display:flex; align-items:center; gap:8px; cursor:pointer; margin:0;">
+                                <input type="radio" name="modeSyair" value="aturan" checked
+                                       style="width:auto; margin:0; transform:scale(1.2); accent-color:var(--accent);">
+                                <span>1. Analisa Bawaan (Master Syair + Semua History Pasar Global)</span>
+                            </label>
+                            <label style="display:flex; align-items:center; gap:8px; cursor:pointer; margin:0;">
+                                <input type="radio" name="modeSyair" value="history"
+                                       style="width:auto; margin:0; transform:scale(1.2); accent-color:var(--accent);">
+                                <span>2. Analisa Spesifik (Hanya Pasar yang Dipilih)</span>
+                            </label>
+                        </div>
                     </div>
-                    <div id="syairReadPreview"
-                         style="font-size:13px; font-family:monospace; color:var(--text-dim); line-height:1.6;"></div>
-                </div>
-                <hr style="border:0; border-top:1px dashed var(--border-2); margin:16px 0;">
-                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;">
-                    <button class="btn-warn" id="btnCopy4D" style="padding:8px 12px; font-size:12px;">
-                        📋 Copy 350/25 Angka
-                    </button>
-                    <button class="btn-warn" id="btnCopy2D" style="padding:8px 12px; font-size:12px;">
-                        📋 Copy 2D Master
-                    </button>
-                    <button class="btn-primary" id="btnSendManual"
-                            style="padding:8px 12px; font-size:12px; width:auto;">
-                        ➡ Kirim 2D ke Input Manual
+                    <div class="field" id="syairMarketWrapper"
+                         style="display:none; background:var(--card-2); padding:10px; border-radius:8px; border:1px solid var(--border);">
+                        <label for="syairMarketSelect">Pilih Pasar untuk Dianalisa:</label>
+                        <select id="syairMarketSelect"></select>
+                    </div>
+                    <div class="field">
+                        <label for="syairTargetInput">Masukkan 2 atau 4 Angka (Contoh: 01 atau 0151)</label>
+                        <input type="text" id="syairTargetInput" placeholder="0151" maxlength="4"
+                               inputmode="numeric" autocomplete="off">
+                    </div>
+                    <button class="btn-primary" id="analyzeSyairBtn">
+                        🔍 Analisa &amp; Generate Prediksi 4D
                     </button>
                 </div>
-                <div class="syair-relation-title">350 Angka Prediksi (Format 4D):</div>
-                <div class="page-content" id="prediksi350" style="max-height:150px;"></div>
-                <div class="syair-relation-title">25 Angka Master (Format 4D):</div>
-                <div class="page-content" id="prediksi25"
-                     style="max-height:100px; color:var(--success); font-weight:bold;"></div>
-                <div class="syair-relation-title">2D Master (Depan &amp; Belakang):</div>
-                <div class="page-content" id="prediksi2D"
-                     style="max-height:100px; color:var(--warn);"></div>
+                <div id="syairResultContainer" class="syair-result-card">
+                    <div class="syair-header" id="syairMainTitle">—</div>
+                    <div class="syair-group" id="syairMainGroup">—</div>
+                    <div class="syair-relation-title" id="syairRelationTitle">
+                        Angka Berelasi (Berdasarkan Tema/Grup):
+                    </div>
+                    <div class="syair-relation-list" id="syairRelationList"></div>
+                    <div class="syair-relation-title" id="syairHistoryTitle">
+                        Jawaban Sering Muncul:
+                    </div>
+                    <div class="syair-relation-list" id="syairHistoryList"></div>
+                    <div style="background:var(--card-2); border:1px solid var(--border); padding:12px; border-radius:8px; margin-bottom:16px;">
+                        <div style="font-size:12px; font-weight:bold; color:var(--warn); margin-bottom:8px;">
+                            📖 Logika &amp; Preview:
+                        </div>
+                        <div id="syairReadPreview"
+                             style="font-size:13px; font-family:monospace; color:var(--text-dim); line-height:1.6;"></div>
+                    </div>
+                    <hr style="border:0; border-top:1px dashed var(--border-2); margin:16px 0;">
+                    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;">
+                        <button class="btn-warn" id="btnCopy4D" style="padding:8px 12px; font-size:12px;">
+                            📋 Copy 350/25 Angka
+                        </button>
+                        <button class="btn-warn" id="btnCopy2D" style="padding:8px 12px; font-size:12px;">
+                            📋 Copy 2D Master
+                        </button>
+                        <button class="btn-primary" id="btnSendManual"
+                                style="padding:8px 12px; font-size:12px; width:auto;">
+                            ➡ Kirim 2D ke Input Manual
+                        </button>
+                    </div>
+                    <div class="syair-relation-title">350 Angka Prediksi (Format 4D):</div>
+                    <div class="page-content" id="prediksi350" style="max-height:150px;"></div>
+                    <div class="syair-relation-title">25 Angka Master (Format 4D):</div>
+                    <div class="page-content" id="prediksi25"
+                         style="max-height:100px; color:var(--success); font-weight:bold;"></div>
+                    <div class="syair-relation-title">2D Master (Depan &amp; Belakang):</div>
+                    <div class="page-content" id="prediksi2D"
+                         style="max-height:100px; color:var(--warn);"></div>
+                </div>
             </div>
+
+            <!-- SUBPANEL 2: ALUR CERITA (FITUR BARU) -->
+            <div id="subpanel-alurCerita" class="subpanel">
+                <div class="card">
+                    <h3 style="margin-bottom:6px; color:var(--warn);">📖 Analisa Perjalanan Syair</h3>
+                    <p class="text-muted" style="font-size:12.5px; margin-bottom:12px;">
+                        Masukkan 10 Result terakhir (Result 1 = Paling Lama, Result 10 = Paling Baru). Sistem akan membaca alur ceritanya dan memprediksi berdasarkan tema Result ke-10.
+                    </p>
+                    
+                    <div class="grid-2">
+                        <div class="field"><label>Result 1 (Lama)</label><input type="text" id="storyRes1" maxlength="4" inputmode="numeric" placeholder="2356"></div>
+                        <div class="field"><label>Result 2</label><input type="text" id="storyRes2" maxlength="4" inputmode="numeric" placeholder="2565"></div>
+                        <div class="field"><label>Result 3</label><input type="text" id="storyRes3" maxlength="4" inputmode="numeric" placeholder="2568"></div>
+                        <div class="field"><label>Result 4</label><input type="text" id="storyRes4" maxlength="4" inputmode="numeric" placeholder="..."></div>
+                        <div class="field"><label>Result 5</label><input type="text" id="storyRes5" maxlength="4" inputmode="numeric" placeholder="..."></div>
+                        <div class="field"><label>Result 6</label><input type="text" id="storyRes6" maxlength="4" inputmode="numeric" placeholder="..."></div>
+                        <div class="field"><label>Result 7</label><input type="text" id="storyRes7" maxlength="4" inputmode="numeric" placeholder="..."></div>
+                        <div class="field"><label>Result 8</label><input type="text" id="storyRes8" maxlength="4" inputmode="numeric" placeholder="..."></div>
+                        <div class="field"><label>Result 9</label><input type="text" id="storyRes9" maxlength="4" inputmode="numeric" placeholder="..."></div>
+                        <div class="field"><label>Result 10 (Terbaru)</label><input type="text" id="storyRes10" maxlength="4" inputmode="numeric" placeholder="..."></div>
+                    </div>
+                    
+                    <button class="btn-primary" id="analyzeStoryBtn" style="background:var(--warn); color:#000;">⚡ Analisa Alur Cerita</button>
+                </div>
+                
+                <div id="storyResultContainer" style="display:none;"></div>
+            </div>
+
         </section>
 
         <!-- ═══════════════════════════════════════════════════════════════
@@ -4368,9 +4406,19 @@ $('searchPatternBtn').addEventListener('click', function() {
 });
 
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 53: RUMUS SYAIR ANALYZER v2.5
+   BLOK 53: RUMUS SYAIR ANALYZER (TAB & ALUR CERITA)
    ═══════════════════════════════════════════════════════════════════════ */
 
+// 1. Fungsi Pindah Tab
+window.switchSyairTab = function(panelId, btn) {
+    document.querySelectorAll('#subTabsSyair button').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('#rumusSyair .subpanel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    const target = document.getElementById(panelId);
+    if (target) target.classList.add('active');
+};
+
+// 2. Analisa Biasa (Logika Lama Anda)
 const THEME_MAP = {
     gelap: ['setan', 'iblis', 'penggoda', 'binasa', 'perkosa', 'biadab', 'kejam', 'neraka', 'hukuman', 'kematian', 'mati', 'siksa', 'ngeri', 'maut', 'gantung', 'terbunuh', 'mampus', 'bunuh'],
     nakal: ['nakal', 'sundal', 'zina', 'cabul', 'payudara', 'birahi', 'ciuman', 'perkosa', 'hamil', 'telanjang', 'serakah', 'durhaka', 'rusak'],
@@ -4544,6 +4592,114 @@ $('btnSendManual').addEventListener('click', function() {
     const btn = document.querySelector('#subTabs4Angka button[data-subpanel="subpanel-manual"]');
     if (btn) btn.click();
     toast('2D Master berhasil dikirim ke Input Manual!', 'success');
+});
+
+// 3. FITUR BARU: ANALISA ALUR CERITA (10 RESULT)
+document.getElementById('analyzeStoryBtn').addEventListener('click', function() {
+    let results = [];
+    for (let i = 1; i <= 10; i++) {
+        const val = onlyDigits(document.getElementById('storyRes' + i).value);
+        if (val.length === 4) results.push(val);
+    }
+
+    if (results.length === 0) {
+        toast('Isi minimal 1 Result 4 digit', 'error');
+        return;
+    }
+
+    const container = document.getElementById('storyResultContainer');
+    let html = '';
+
+    let processed = [];
+    let grupCount = {};
+    
+    results.forEach((res, idx) => {
+        const depan = res.slice(0, 2);
+        const belakang = res.slice(2, 4);
+        const mD = getMaster2D(depan);
+        const mB = getMaster2D(belakang);
+
+        const grupD = mD ? mD.grup : '?';
+        const grupB = mB ? mB.grup : '?';
+
+        grupCount[grupD] = (grupCount[grupD] || 0) + 1;
+        grupCount[grupB] = (grupCount[grupB] || 0) + 1;
+
+        processed.push({
+            res: res,
+            depan: depan, syairD: mD ? mD.syair : '?', grupD: grupD,
+            belakang: belakang, syairB: mB ? mB.syair : '?', grupB: grupB
+        });
+    });
+
+    // LOGIKA PREDIKSI: Mengambil Tema dari Result ke-10 (Terbaru)
+    const latest = processed[processed.length - 1];
+    const themeD = getTargetTheme(latest.syairD);
+    const themeB = getTargetTheme(latest.syairB);
+    
+    let prediksi2D = new Set();
+    master.forEach(m => {
+        const mTheme = getTargetTheme(m.syair);
+        // Cocokkan dengan tema depan, tema belakang, atau grup
+        if (mTheme === themeD || mTheme === themeB || m.grup === latest.grupD || m.grup === latest.grupB) {
+            prediksi2D.add(m.nomor);
+        }
+    });
+
+    let arrPrediksi = Array.from(prediksi2D).sort();
+    let teks25Angka = arrPrediksi.slice(0, 25).join(' ');
+    let teksSyair = arrPrediksi.slice(0, 10).join(',');
+
+    // SUSUN TAMPILAN
+    html += `<div class="card" style="border-color:var(--warn);">`;
+    html += `<h3 style="color:var(--warn); margin-bottom:10px;">📖 Hasil Analisa Perjalanan Cerita</h3>`;
+    
+    html += `<div class="table-container" style="margin-bottom:14px; max-height:300px;">
+        <table style="min-width:100%;">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Result</th>
+                    <th>2D Depan (Syair)</th>
+                    <th>2D Belakang (Syair)</th>
+                </tr>
+            </thead>
+            <tbody>`;
+    processed.forEach((p, i) => {
+        html += `<tr>
+            <td>${i+1}</td>
+            <td class="td-pair">${p.res}</td>
+            <td><span style="color:var(--accent)">${p.depan}</span> - ${p.syairD} <span style="font-size:10px; color:var(--muted);">(${p.grupD})</span></td>
+            <td><span style="color:var(--warn)">${p.belakang}</span> - ${p.syairB} <span style="font-size:10px; color:var(--muted);">(${p.grupB})</span></td>
+        </tr>`;
+    });
+    html += `</tbody></table></div>`;
+
+    html += `<div style="background:var(--card-2); padding:10px; border-radius:8px; border:1px solid var(--border); margin-bottom:14px;">
+        <div style="font-size:12px; margin-bottom:5px;">
+            <b style="color:var(--accent);">Tema Result ke-${processed.length} (Terbaru):</b> ${themeD.toUpperCase()} & ${themeB.toUpperCase()}
+        </div>
+        <div style="font-size:12px; color:var(--text-dim);">
+            Angka prediksi disaring dari Master Syair yang memiliki <b>tema atau grup yang sama</b> dengan Result terakhir.
+        </div>
+    </div>`;
+
+    html += `<div class="pred-section">
+        <div class="pred-label">25 Angka 2D Depan (Siap Copy)</div>
+        <div class="pred-values primary" id="storyPred25">${teks25Angka || 'Tidak ada angka cocok'}</div>
+        <button class="btn-warn" style="margin-top:8px; padding:6px 12px; font-size:11px;" onclick="copyTextToClipboard('${teks25Angka}')">📋 Copy 25 Angka</button>
+    </div>`;
+
+    html += `<div class="pred-section">
+        <div class="pred-label">2D Syair Prediksi (Siap Copy)</div>
+        <div class="pred-values" id="storyPredSyair">${teksSyair || 'Tidak ada angka cocok'}</div>
+        <button class="btn-warn" style="margin-top:8px; padding:6px 12px; font-size:11px;" onclick="copyTextToClipboard('${teksSyair}')">📋 Copy Syair</button>
+    </div>`;
+
+    html += `</div>`;
+
+    container.innerHTML = html;
+    container.style.display = 'block';
 });
 
 /* ═══════════════════════════════════════════════════════════════════════
