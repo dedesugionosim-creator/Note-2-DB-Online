@@ -3183,61 +3183,134 @@ function renderGroupPreview(grupName, containerEl, activeSide, hint) {
    BLOK 40: MULTI-TABLE RESULT CRUD (OTOMATIS DARI TOGEL)
    ═══════════════════════════════════════════════════════════════════════ */
 
+function loadTableData() {
+    let saved = null;
+    try { saved = JSON.parse(localStorage.getItem(LS_TABLE_DATA) || '[]'); }
+    catch (e) { saved = null; }
+    
+    if (saved && Array.isArray(saved.tables)) {
+        tableData = saved;
+    } else {
+        tableData = { tables: [], activeTableId: '' };
+    }
+    refreshTableSelector();
+}
+
+function saveTableData() {
+    try { localStorage.setItem(LS_TABLE_DATA, JSON.stringify(tableData)); }
+    catch (e) { toast('Gagal menyimpan tabel result', 'error'); }
+}
+
+function getActiveTable() {
+    let found = tableData.tables.find(function(t) { return t.id === tableData.activeTableId; });
+    if (!found && tableData.tables.length > 0) {
+        found = tableData.tables[0];
+        tableData.activeTableId = found.id;
+    }
+    return found || { id: '', name: 'Tabel Result', entries: [] };
+}
+
 function refreshTableSelector() {
     const sel = $('tableSelector');
     if (!sel) return;
 
-    // 1. Ambil data Pasar langsung dari Menu Togel
+    // SINKRONISASI: Pastikan tabel mengikuti daftar Pasar Togel
     if (typeof marketData !== 'undefined' && marketData.markets) {
-        const togelMarkets = marketData.markets.filter(function(m) { return m.isTogel === true; });
-        
-        // 2. Sinkronkan ke tableData (Tabel Result)
-        togelMarkets.forEach(function(m) {
-            let tbl = tableData.tables.find(function(t) { return t.id === m.id; });
-            if (!tbl) {
-                // Jika belum ada, buatkan tabel baru
-                tableData.tables.push({ id: m.id, name: m.name, entries: [] });
-            } else {
-                // Jika sudah ada, pastikan namanya sama dengan di Togel
-                tbl.name = m.name;
+        marketData.markets.forEach(function(m) {
+            if (m.isTogel) {
+                let tbl = tableData.tables.find(function(t) { return t.id === m.id; });
+                if (!tbl) {
+                    tableData.tables.push({ id: m.id, name: m.name, entries: [] });
+                } else {
+                    tbl.name = m.name; // Update nama jika diganti di Togel
+                }
             }
         });
-        
-        // 3. Hapus tabel lama yang bukan dari Menu Togel (kecuali jika itu Pasar Global)
-        tableData.tables = tableData.tables.filter(function(t) {
-            return togelMarkets.some(function(m) { return m.id === t.id; });
-        });
-        
         saveTableData();
     }
 
-    // 4. Tampilkan ke Dropdown HTML
+    // Filter hanya yang terdaftar di Togel
+    const validTables = tableData.tables.filter(function(t) {
+        if (typeof marketData === 'undefined') return true;
+        return marketData.markets.some(function(m) { return m.id === t.id && m.isTogel; });
+    });
+
     let html = '';
-    if (tableData.tables.length === 0) {
+    if (validTables.length === 0) {
         sel.innerHTML = '<option value="">— Belum ada Pasar Togel —</option>';
         const titleEl = $('tableTitleDisplay');
         if (titleEl) titleEl.textContent = 'Tabel Result';
         return;
     }
 
-    // Pastikan ada tabel yang terpilih
-    const isCurrentValid = tableData.tables.some(function(t) { return t.id === tableData.activeTableId; });
-    if (!tableData.activeTableId || !isCurrentValid) {
-        tableData.activeTableId = tableData.tables[0].id;
+    if (!tableData.activeTableId || !validTables.some(function(t) { return t.id === tableData.activeTableId; })) {
+        tableData.activeTableId = validTables[0].id;
     }
 
-    // Render opsi ke dropdown
-    for (let i = 0; i < tableData.tables.length; i++) {
-        const t = tableData.tables[i];
+    for (let i = 0; i < validTables.length; i++) {
+        const t = validTables[i];
         const selected = (t.id === tableData.activeTableId) ? 'selected' : '';
         html += `<option value="${t.id}" ${selected}>${esc(t.name)} (${t.entries.length})</option>`;
     }
     sel.innerHTML = html;
     
-    // Update Judul di Tabel Result
     const activeTable = getActiveTable();
     const titleEl = $('tableTitleDisplay');
     if (titleEl) titleEl.textContent = activeTable.name;
+}
+
+function generateSyairAndGrup(result) {
+    if (!/^\d{4}$/.test(result)) return { syair: '-', grup: '-' };
+    const pair1 = result.slice(0, 2);
+    const pair2 = result.slice(2, 4);
+    let m1 = null, m2 = null;
+    for (let i = 0; i < master.length; i++) {
+        if (master[i].nomor === pair1) m1 = master[i];
+        if (master[i].nomor === pair2) m2 = master[i];
+    }
+    const syair1 = m1 ? (m1.syair || '?') : '?';
+    const syair2 = m2 ? (m2.syair || '?') : '?';
+    const grup1 = m1 ? (m1.grup || '?') : '?';
+    const grup2 = m2 ? (m2.grup || '?') : '?';
+    let syair = syair1 + ' ' + syair2;
+    let grup = grup1;
+    if (grup2 !== grup1) grup += ' ' + grup2;
+    return { syair, grup };
+}
+
+function renderResultTable() {
+    const tbody = $('resultTableBody');
+    const activeTable = getActiveTable();
+    const entries = activeTable.entries || [];
+    
+    if (entries.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">Belum ada data. Klik "Tambah Result".</td></tr>';
+        return;
+    }
+    
+    const sorted = entries.slice().sort(function(a, b) {
+        return (a.periode || '').localeCompare(b.periode || '', undefined, { numeric: true, sensitivity: 'base' });
+    });
+    
+    let html = '';
+    for (let i = 0; i < sorted.length; i++) {
+        const r = sorted[i];
+        const gen = generateSyairAndGrup(r.result);
+        const pair1 = r.result.slice(0, 2);
+        const pair2 = r.result.slice(2, 4);
+        html += `<tr>
+            <td>${esc(r.periode)}</td>
+            <td>${esc(r.tanggal)}</td>
+            <td class="td-pair">${pair1} | ${pair2}</td>
+            <td>${gen.syair}</td>
+            <td style="color:var(--warn);">${gen.grup}</td>
+            <td>
+                <button class="btn-action btn-edit" onclick="editResult('${r.id}')">✏️ Edit</button>
+                <button class="btn-action btn-danger" onclick="deleteResult('${r.id}')">🗑 Hapus</button>
+            </td>
+        </tr>`;
+    }
+    tbody.innerHTML = html;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
