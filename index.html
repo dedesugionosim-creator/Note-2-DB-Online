@@ -4672,7 +4672,7 @@ function renderTogelGrid() {
 
     const list = getTogelMarkets();
     if (list.length === 0) {
-        grid.innerHTML = '<div class="empty" style="grid-column:1/-1;">Belum ada pasar togel.</div>';
+        grid.innerHTML = '<div class="empty" style="grid-column:1/-1;">Belum ada pasar togel. Silakan tambah pasar baru.</div>';
         return;
     }
     
@@ -4680,16 +4680,11 @@ function renderTogelGrid() {
     list.forEach(function(m) {
         const sorted = (m.history || []).slice().sort(function(a, b) { return b.date.localeCompare(a.date); });
         const latest = sorted[0];
-        const cd = _getNextDrawInfo(m.drawTimes);
-        
-        const countdownHtml = cd
-            ? `<div class="market-countdown${cd.urgent ? ' urgent' : ''}" data-countdown-market="${m.id}">⏱️ ${cd.remaining} (${cd.label})</div>`
-            : '';
             
         html += `
         <div class="togel-market-card" style="position: relative;" onclick="openTogelDetail('${m.id}')">
             
-            <!-- TOMBOL HAPUS DI SUDUT KANAN ATAS KARTU -->
+            <!-- TOMBOL HAPUS -->
             <button class="btn-danger" 
                     style="position:absolute; top:10px; right:10px; padding:4px 8px; font-size:10px; z-index:10; border-radius:6px;" 
                     onclick="hapusPasarTogel(event, '${m.id}')"
@@ -4698,9 +4693,9 @@ function renderTogelGrid() {
             <div class="market-name" style="padding-right: 25px;">${esc(m.name)}</div>
             <div class="market-result ${latest ? '' : 'empty'}">${latest ? esc(latest.result) : '----'}</div>
             <div class="market-date">${latest ? _formatTanggalShort(latest.date) : 'Belum ada data'}</div>
-            ${countdownHtml}
+            
             <div class="market-footer">
-                <span class="schedule">${esc(m.schedule || '—')}</span>
+                <span class="schedule">Data Prediksi</span>
                 <span>${(m.history || []).length} data</span>
             </div>
         </div>`;
@@ -4708,28 +4703,25 @@ function renderTogelGrid() {
     grid.innerHTML = html;
 }
 
-// --- FUNGSI TAMBAH PASAR ---
+// --- FUNGSI TAMBAH PASAR (SIMPEL - KHUSUS PREDIKSI) ---
 const addBtn = document.getElementById('addNewTogelMarketBtn');
 if (addBtn) {
     addBtn.onclick = function() {
-        const name = prompt('Masukkan Nama Pasar (contoh: Oregon 4D):');
+        // Hanya minta nama pasar
+        const name = prompt('Masukkan Nama Pasar (contoh: Oregon, Texas, dll):');
         if (!name) return;
 
-        const schedule = prompt('Masukkan Label Jadwal (contoh: 13:00 WIB / P1-P6):', '23:00 WIB');
-        if (!schedule) return;
-
-        const drawTimeStr = prompt('Masukkan Jam Undian (Format 24 Jam).\n\nJika lebih dari satu, pisahkan dengan koma.\nContoh: 13:00\nContoh 2: 00:01, 12:01, 20:01', '13:00');
-        if (!drawTimeStr) return;
-
-        const drawTimes = drawTimeStr.split(',').map(s => s.trim()).filter(s => /^\d{2}:\d{2}$/.test(s));
-        if (drawTimes.length === 0) {
-            toast('Format jam salah. Gunakan format HH:MM (contoh: 13:00)', 'error');
-            return;
-        }
-
+        // Buat ID unik
         const newId = 'm_' + Date.now();
+        
+        // Tambahkan ke daftar pasar
         marketData.markets.push({
-            id: newId, name: name, schedule: schedule, drawTimes: drawTimes, isTogel: true, history: []
+            id: newId, 
+            name: name, 
+            schedule: 'Manual', 
+            drawTimes: [], // Kosongkan jam karena fokus ke prediksi
+            isTogel: true, 
+            history: []
         });
         saveMarketData();
 
@@ -4739,7 +4731,7 @@ if (addBtn) {
             if (typeof saveTableData === 'function') saveTableData();
         }
 
-        toast('Pasar "' + name + '" berhasil ditambahkan', 'success');
+        toast('Pasar "' + name + '" siap digunakan', 'success');
         renderTogelGrid();
     };
 }
