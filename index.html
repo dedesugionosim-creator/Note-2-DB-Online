@@ -6642,7 +6642,7 @@ console.log('Semua fitur siap. Selamat menggunakan SA_HARD!');
      ═══════════════════════════════════════════════════════════════════════ -->
 <script>
 (function() {
-    var KEY = 'sa_input4_backup_v2';
+    var KEY = 'sa_input4_backup_v3';
     
     function save() {
         try {
@@ -6688,10 +6688,8 @@ console.log('Semua fitur siap. Selamat menggunakan SA_HARD!');
         } catch (e) {}
     }
     
-    // Simpan otomatis setiap 2 detik (backup terakhir)
     setInterval(save, 2000);
     
-    // Simpan saat user mengetik / ubah dropdown
     document.addEventListener('input', function(e) {
         if (e.target && e.target.closest && e.target.closest('#input4Angka')) save();
     });
@@ -6699,7 +6697,6 @@ console.log('Semua fitur siap. Selamat menggunakan SA_HARD!');
         if (e.target && e.target.closest && e.target.closest('#input4Angka')) save();
     });
     
-    // Muat data saat halaman siap
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function() { setTimeout(load, 1500); });
     } else {
