@@ -2811,6 +2811,9 @@ function masukAplikasi() {
     }
 }
 
+	if (typeof loadInput4State === 'function') loadInput4State();
+}
+
 $('loginForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const u = $('username').value.trim();
@@ -6660,6 +6663,218 @@ console.log('Rumus Syair v2.5: Aktif');
 console.log('BBFS Lengkap 20: Aktif | BBFS Murni 20: Aktif | 33 Input 3 Angka: Aktif');
 console.log('Gabung 3 Grup: Aktif | Cara Baca 4D: Aktif');
 console.log('Semua fitur siap. Selamat menggunakan SA_HARD!');
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BLOK 76: PERSISTENSI STATE INPUT 4 ANGKA (VERSI AMAN)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+const LS_INPUT4_STATE = 'sa_input4_state_v1';
+
+const input4Fields = [
+    'manualDepan', 'manualBelakang', 'manualGrup', 'manualFilterMode', 'manualCB', 'manualCBMode',
+    'bbfsInput', 'bbfsGrup', 'bbfsMode', 'bbfsCB', 'bbfsCBMode',
+    'atDigit1', 'atDigit2', 'atDigit3', 'atDigit4', 'atGrup', 'atMode', 'atCB', 'atCBMode',
+    'cbBBFSInput', 'cbBBFSDigits', 'cbBBFSMode',
+    'gabungGrup1', 'gabungGrup2', 'gabungGrup3', 'gabungPermutasi',
+    'grupCB1', 'grupCB2', 'grupCBDigits', 'grupCBMode', 'grupCBPermutasi',
+    'blResultAcuan', 'blBBFS', 'blCB', 'blMati', 'blDepan', 'blGrup', 'blGrupMode',
+    'bmInput',
+    'c33BBFS', 'c33CB', 'c33Mati', 'c33Depan', 'c33Grup', 'c33GrupMode', 'c33ShowCaraBaca'
+];
+
+function saveInput4State() {
+    try {
+        if (typeof currentUser === 'undefined' || !currentUser) return;
+
+        const state = { fields: {} };
+
+        input4Fields.forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            state.fields[id] = (el.type === 'checkbox') ? el.checked : el.value;
+        });
+
+        const activeBtn = document.querySelector('#subTabs4Angka button.active');
+        if (activeBtn) state.activeTab = activeBtn.getAttribute('data-subpanel');
+
+        // Salin data generator (tanpa mengubah variabel aslinya)
+        if (typeof pageState !== 'undefined') {
+            state.pageState = {};
+            for (const k in pageState) {
+                state.pageState[k] = {
+                    pages: pageState[k].pages,
+                    current: pageState[k].current,
+                    meta: pageState[k].meta,
+                    _breakdown: pageState[k]._breakdown
+                };
+            }
+        }
+
+        if (typeof bmState !== 'undefined') {
+            state.bmState = { items: bmState.items, page: bmState.page };
+        }
+
+        if (typeof c33State !== 'undefined' && c33State.rows) {
+            state.c33State = {
+                rows: c33State.rows.map(r => ({
+                    idx: r.idx, digits: r.digits, pasar: r.pasar,
+                    results: r.results, page: r.page, generated: r.generated
+                }))
+            };
+        }
+
+        if (typeof c33MasterState !== 'undefined') {
+            state.c33MasterState = {
+                items: c33MasterState.items,
+                page: c33MasterState.page
+            };
+        }
+
+        if (typeof blSections !== 'undefined') {
+            state.blSections = {};
+            for (const k in blSections) {
+                state.blSections[k] = {
+                    items: blSections[k].items,
+                    page: blSections[k].page,
+                    label: blSections[k].label,
+                    combo: blSections[k].combo
+                };
+            }
+        }
+
+        try {
+            localStorage.setItem(LS_INPUT4_STATE, JSON.stringify(state));
+        } catch (e) {
+            delete state.pageState;
+            delete state.blSections;
+            delete state.bmState;
+            delete state.c33State;
+            delete state.c33MasterState;
+            try { localStorage.setItem(LS_INPUT4_STATE, JSON.stringify(state)); } catch (e2) {}
+        }
+    } catch (e) {
+        console.warn('[AutoSave]', e);
+    }
+}
+
+function loadInput4State() {
+    try {
+        if (typeof currentUser === 'undefined' || !currentUser) return;
+        let saved = null;
+        try { saved = JSON.parse(localStorage.getItem(LS_INPUT4_STATE) || 'null'); } catch (e) { return; }
+        if (!saved) return;
+
+        // 1. Restore Input Teks
+        if (saved.fields) {
+            for (const id in saved.fields) {
+                const el = document.getElementById(id);
+                if (!el) continue;
+                if (el.type === 'checkbox') el.checked = saved.fields[id];
+                else el.value = saved.fields[id];
+            }
+        }
+
+        // 2. Restore Data Generator
+        if (saved.pageState && typeof pageState !== 'undefined') {
+            for (const k in saved.pageState) {
+                if (pageState[k] && saved.pageState[k]) {
+                    pageState[k].pages = saved.pageState[k].pages || [];
+                    pageState[k].current = saved.pageState[k].current || 0;
+                    pageState[k].meta = saved.pageState[k].meta || '';
+                    pageState[k]._breakdown = saved.pageState[k]._breakdown || '';
+                }
+            }
+            for (const k in pageState) {
+                if (pageState[k].pages.length > 0 && typeof renderPagination === 'function') {
+                    renderPagination(PAGE_MAP[k][0], k, PAGE_MAP[k][1]);
+                }
+            }
+        }
+
+        if (saved.bmState && typeof bmState !== 'undefined') {
+            bmState.items = saved.bmState.items || [];
+            bmState.page = saved.bmState.page || 0;
+            if (bmState.items.length > 0 && typeof renderBM === 'function') renderBM();
+        }
+
+        if (saved.c33State && saved.c33State.rows && typeof c33State !== 'undefined' && c33State.rows) {
+            saved.c33State.rows.forEach((sr, i) => {
+                if (c33State.rows[i]) {
+                    c33State.rows[i].digits = sr.digits || '';
+                    c33State.rows[i].pasar = sr.pasar || '';
+                    c33State.rows[i].results = sr.results || [];
+                    c33State.rows[i].page = sr.page || 0;
+                    c33State.rows[i].generated = sr.generated || false;
+                }
+            });
+        }
+
+        if (saved.c33MasterState && typeof c33MasterState !== 'undefined') {
+            c33MasterState.items = saved.c33MasterState.items || [];
+            c33MasterState.page = saved.c33MasterState.page || 0;
+        }
+
+        if (saved.blSections && typeof blSections !== 'undefined') {
+            for (const k in blSections) delete blSections[k];
+            for (const k in saved.blSections) blSections[k] = saved.blSections[k];
+            let html = '';
+            for (const k in blSections) {
+                if (typeof blBuildSection === 'function') {
+                    html += blBuildSection(k, blSections[k].label, blSections[k].items, blSections[k].combo);
+                }
+            }
+            const container = document.getElementById('blResultsContainer');
+            if (container) container.innerHTML = html;
+            for (const k in blSections) {
+                if (typeof blRenderSection === 'function') blRenderSection(k);
+            }
+        }
+
+        if (typeof renderC33Rows === 'function') renderC33Rows();
+        if (typeof renderC33Results === 'function') renderC33Results();
+
+        // 3. Restore Tab Aktif
+        if (saved.activeTab) {
+            const btn = document.querySelector(`#subTabs4Angka button[data-subpanel="${saved.activeTab}"]`);
+            if (btn) {
+                document.querySelectorAll('#subTabs4Angka button').forEach(b => b.classList.remove('active'));
+                const section = document.getElementById('input4Angka');
+                if (section) section.querySelectorAll('.subpanel').forEach(p => p.classList.remove('active'));
+                btn.classList.add('active');
+                const target = document.getElementById(saved.activeTab);
+                if (target) target.classList.add('active');
+            }
+        }
+    } catch (e) {
+        console.warn('[AutoLoad]', e);
+    }
+}
+
+// Event listener untuk menyimpan otomatis saat mengetik
+document.addEventListener('input', function(e) {
+    if (e.target && e.target.closest && e.target.closest('#input4Angka')) saveInput4State();
+});
+document.addEventListener('change', function(e) {
+    if (e.target && e.target.closest && e.target.closest('#input4Angka')) saveInput4State();
+});
+
+// Event listener untuk menyimpan saat tombol Generate diklik
+['manualGenerateBtn', 'bbfsGenerateBtn', 'atGenerateBtn', 'cbBBFSGenerateBtn',
+ 'gabungGenerateBtn', 'grupCBGenerateBtn', 'blGenerateBtn', 'bmGenerateBtn', 'c33GenerateAllBtn'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.addEventListener('click', function() { setTimeout(saveInput4State, 150); });
+});
+
+// Override switchSubTab agar menyimpan saat pindah tab
+if (typeof window.switchSubTab === 'function') {
+    const _origSwitchSubTab = window.switchSubTab;
+    window.switchSubTab = function(btn) {
+        try { _origSwitchSubTab(btn); } catch (e) { console.warn(e); }
+        saveInput4State();
+    };
+}
+
+console.log('[AutoSave] Input 4 Angka aman & aktif');
 
 </script>
 </body>
