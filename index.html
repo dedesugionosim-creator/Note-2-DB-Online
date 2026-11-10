@@ -2811,6 +2811,11 @@ function masukAplikasi() {
     }
 }
 
+	setTimeout(function() {
+        if (typeof loadInput4State === 'function') loadInput4State();
+    }, 300);
+}
+
 	if (typeof loadInput4State === 'function') loadInput4State();
 }
 
@@ -6664,21 +6669,200 @@ console.log('BBFS Lengkap 20: Aktif | BBFS Murni 20: Aktif | 33 Input 3 Angka: A
 console.log('Gabung 3 Grup: Aktif | Cara Baca 4D: Aktif');
 console.log('Semua fitur siap. Selamat menggunakan SA_HARD!');
 
-    // ... (kode asli masukAplikasi) ...
+/* ═══════════════════════════════════════════════════════════════════════
+   BLOK 76: AUTO-SAVE INPUT 4 ANGKA (VERSI ANTI-CRASH)
+   ═══════════════════════════════════════════════════════════════════════ */
 
-    if (currentUser.role === 'user' && isUserExpired(currentUser.data)) {
-        showExpiredModal(currentUser.data);
-        switchSection('chatMenu');
-        renderChatSidebar();
-    } else {
-        refreshAll();
-        switchSection('inputMaster');
+const LS_INPUT4_STATE = 'sa_input4_state_v1';
+
+const input4Fields = [
+    'manualDepan', 'manualBelakang', 'manualGrup', 'manualFilterMode', 'manualCB', 'manualCBMode',
+    'bbfsInput', 'bbfsGrup', 'bbfsMode', 'bbfsCB', 'bbfsCBMode',
+    'atDigit1', 'atDigit2', 'atDigit3', 'atDigit4', 'atGrup', 'atMode', 'atCB', 'atCBMode',
+    'cbBBFSInput', 'cbBBFSDigits', 'cbBBFSMode',
+    'gabungGrup1', 'gabungGrup2', 'gabungGrup3', 'gabungPermutasi',
+    'grupCB1', 'grupCB2', 'grupCBDigits', 'grupCBMode', 'grupCBPermutasi',
+    'blResultAcuan', 'blBBFS', 'blCB', 'blMati', 'blDepan', 'blGrup', 'blGrupMode',
+    'bmInput',
+    'c33BBFS', 'c33CB', 'c33Mati', 'c33Depan', 'c33Grup', 'c33GrupMode', 'c33ShowCaraBaca'
+];
+
+// Fungsi Simpan (Dibungkus try-catch agar tidak pernah bikin crash)
+function saveInput4State() {
+    try {
+        if (typeof currentUser === 'undefined' || !currentUser) return;
+
+        const state = { fields: {} };
+
+        input4Fields.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                state.fields[id] = (el.type === 'checkbox') ? el.checked : el.value;
+            }
+        });
+
+        const activeBtn = document.querySelector('#subTabs4Angka button.active');
+        if (activeBtn) state.activeTab = activeBtn.getAttribute('data-subpanel');
+
+        // Simpan hasil generator
+        if (typeof pageState !== 'undefined') {
+            state.pageState = {};
+            for (const k in pageState) {
+                state.pageState[k] = {
+                    pages: pageState[k].pages,
+                    current: pageState[k].current,
+                    meta: pageState[k].meta,
+                    _breakdown: pageState[k]._breakdown
+                };
+            }
+        }
+        if (typeof bmState !== 'undefined') {
+            state.bmState = { items: bmState.items, page: bmState.page };
+        }
+        if (typeof c33State !== 'undefined' && c33State.rows) {
+            state.c33State = {
+                rows: c33State.rows.map(r => ({
+                    digits: r.digits, pasar: r.pasar,
+                    results: r.results, page: r.page, generated: r.generated
+                }))
+            };
+        }
+        if (typeof c33MasterState !== 'undefined') {
+            state.c33MasterState = { items: c33MasterState.items, page: c33MasterState.page };
+        }
+        if (typeof blSections !== 'undefined') {
+            state.blSections = {};
+            for (const k in blSections) {
+                state.blSections[k] = {
+                    items: blSections[k].items, page: blSections[k].page,
+                    label: blSections[k].label, combo: blSections[k].combo
+                };
+            }
+        }
+
+        localStorage.setItem(LS_INPUT4_STATE, JSON.stringify(state));
+    } catch (e) {
+        console.warn('[AutoSave] Gagal menyimpan (mungkin memori penuh):', e);
     }
+}
 
-    // ⬇️ TAMBAHKAN DENGAN setTimeout INI ⬇️
-    setTimeout(function() {
-        if (typeof loadInput4State === 'function') loadInput4State();
-    }, 300);
+// Fungsi Load (Dibungkus try-catch)
+function loadInput4State() {
+    try {
+        if (typeof currentUser === 'undefined' || !currentUser) return;
+        let saved = null;
+        try { saved = JSON.parse(localStorage.getItem(LS_INPUT4_STATE) || 'null'); } catch (e) { return; }
+        if (!saved) return;
+
+        // 1. Restore Input Teks
+        if (saved.fields) {
+            for (const id in saved.fields) {
+                const el = document.getElementById(id);
+                if (!el) continue;
+                if (el.type === 'checkbox') el.checked = saved.fields[id];
+                else el.value = saved.fields[id];
+            }
+        }
+
+        // 2. Restore Generator Biasa
+        if (saved.pageState && typeof pageState !== 'undefined') {
+            for (const k in saved.pageState) {
+                if (pageState[k] && saved.pageState[k]) {
+                    pageState[k].pages = saved.pageState[k].pages || [];
+                    pageState[k].current = saved.pageState[k].current || 0;
+                    pageState[k].meta = saved.pageState[k].meta || '';
+                    pageState[k]._breakdown = saved.pageState[k]._breakdown || '';
+                }
+            }
+            for (const k in pageState) {
+                if (pageState[k].pages.length > 0 && typeof renderPagination === 'function' && typeof PAGE_MAP !== 'undefined') {
+                    renderPagination(PAGE_MAP[k][0], k, PAGE_MAP[k][1]);
+                }
+            }
+        }
+
+        // 3. Restore BBFS Murni
+        if (saved.bmState && typeof bmState !== 'undefined') {
+            bmState.items = saved.bmState.items || [];
+            bmState.page = saved.bmState.page || 0;
+            if (bmState.items.length > 0 && typeof renderBM === 'function') renderBM();
+        }
+
+        // 4. Restore 33 Input
+        if (saved.c33State && saved.c33State.rows && typeof c33State !== 'undefined' && c33State.rows) {
+            saved.c33State.rows.forEach((sr, i) => {
+                if (c33State.rows[i]) {
+                    c33State.rows[i].digits = sr.digits || '';
+                    c33State.rows[i].pasar = sr.pasar || '';
+                    c33State.rows[i].results = sr.results || [];
+                    c33State.rows[i].page = sr.page || 0;
+                    c33State.rows[i].generated = sr.generated || false;
+                }
+            });
+        }
+        if (saved.c33MasterState && typeof c33MasterState !== 'undefined') {
+            c33MasterState.items = saved.c33MasterState.items || [];
+            c33MasterState.page = saved.c33MasterState.page || 0;
+        }
+        if (typeof renderC33Rows === 'function') renderC33Rows();
+        if (typeof renderC33Results === 'function') renderC33Results();
+
+        // 5. Restore BBFS Lengkap
+        if (saved.blSections && typeof blSections !== 'undefined') {
+            for (const k in blSections) delete blSections[k];
+            for (const k in saved.blSections) blSections[k] = saved.blSections[k];
+            let html = '';
+            for (const k in blSections) {
+                if (typeof blBuildSection === 'function') {
+                    html += blBuildSection(k, blSections[k].label, blSections[k].items, blSections[k].combo);
+                }
+            }
+            const container = document.getElementById('blResultsContainer');
+            if (container) container.innerHTML = html;
+            for (const k in blSections) {
+                if (typeof blRenderSection === 'function') blRenderSection(k);
+            }
+        }
+
+        // 6. Restore Tab Aktif
+        if (saved.activeTab) {
+            const btn = document.querySelector(`#subTabs4Angka button[data-subpanel="${saved.activeTab}"]`);
+            if (btn) {
+                document.querySelectorAll('#subTabs4Angka button').forEach(b => b.classList.remove('active'));
+                const section = document.getElementById('input4Angka');
+                if (section) section.querySelectorAll('.subpanel').forEach(p => p.classList.remove('active'));
+                btn.classList.add('active');
+                const target = document.getElementById(saved.activeTab);
+                if (target) target.classList.add('active');
+            }
+        }
+    } catch (e) {
+        console.warn('[AutoLoad] Gagal memuat state:', e);
+    }
+}
+
+// Event Listener Simpan Otomatis
+document.addEventListener('input', function(e) {
+    if (e.target && e.target.closest && e.target.closest('#input4Angka')) saveInput4State();
+});
+document.addEventListener('change', function(e) {
+    if (e.target && e.target.closest && e.target.closest('#input4Angka')) saveInput4State();
+});
+
+// Simpan saat tombol Generate diklik
+['manualGenerateBtn', 'bbfsGenerateBtn', 'atGenerateBtn', 'cbBBFSGenerateBtn',
+ 'gabungGenerateBtn', 'grupCBGenerateBtn', 'blGenerateBtn', 'bmGenerateBtn', 'c33GenerateAllBtn'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.addEventListener('click', function() { setTimeout(saveInput4State, 200); });
+});
+
+// Override switchSubTab agar menyimpan saat pindah tab
+if (typeof window.switchSubTab === 'function') {
+    const _origSwitchSubTab = window.switchSubTab;
+    window.switchSubTab = function(btn) {
+        try { _origSwitchSubTab(btn); } catch (e) { console.warn(e); }
+        saveInput4State();
+    };
 }
 
 </script>
