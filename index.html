@@ -2869,23 +2869,34 @@ document.querySelectorAll('nav button').forEach(function(btn) {
     });
 });
 
+/* Pindah Tab Input 4 Angka (Versi Diperbaiki) */
 document.querySelectorAll('#subTabs4Angka button').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-        document.querySelectorAll('#subTabs4Angka button').forEach(function(b) { b.classList.remove('active'); });
-        document.querySelectorAll('#input4Angka .subpanel').forEach(function(p) { p.classList.remove('active'); });
+    btn.onclick = function(e) {
+        e.preventDefault(); // Mencegah error default
+        
+        // 1. Hilangkan efek aktif dari semua tombol tab
+        document.querySelectorAll('#subTabs4Angka button').forEach(function(b) { 
+            b.classList.remove('active'); 
+        });
+        
+        // 2. Sembunyikan semua subpanel HANYA di dalam menu Input 4 Angka
+        document.querySelectorAll('#input4Angka .subpanel').forEach(function(p) { 
+            p.classList.remove('active'); 
+        });
+        
+        // 3. Aktifkan tombol yang diklik
         btn.classList.add('active');
-        const target = $(btn.dataset.subpanel);
-        if (target) target.classList.add('active');
-    });
+        
+        // 4. Tampilkan panel yang dituju
+        const target = document.getElementById(btn.dataset.subpanel);
+        if (target) {
+            target.classList.add('active');
+        } else {
+            console.error("Panel tidak ditemukan:", btn.dataset.subpanel);
+            alert("Sistem Error: Panel " + btn.dataset.subpanel + " tidak ditemukan di HTML. Pastikan Anda sudah menyalin HTML subpanel-c33 dengan benar.");
+        }
+    };
 });
-
-window.showKonversi = function(id) {
-    document.querySelectorAll('#subTabsKonversi button').forEach(function(t) { t.classList.remove('active'); });
-    document.querySelectorAll('#konversiManual .subpanel').forEach(function(p) { p.classList.remove('active'); });
-    if (window.event && window.event.target) window.event.target.classList.add('active');
-    const target = $(id);
-    if (target) target.classList.add('active');
-};
 
 /* ═══════════════════════════════════════════════════════════════════════
    BLOK 37: RENDER MASTER NOMOR (CRUD)
