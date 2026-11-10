@@ -6660,7 +6660,74 @@ console.log('Rumus Syair v2.5: Aktif');
 console.log('BBFS Lengkap 20: Aktif | BBFS Murni 20: Aktif | 33 Input 3 Angka: Aktif');
 console.log('Gabung 3 Grup: Aktif | Cara Baca 4D: Aktif');
 console.log('Semua fitur siap. Selamat menggunakan SA_HARD!');
-
 </script>
+
+<script>
+// Auto-Save Input 4 Angka
+(function() {
+    var KEY = 'sa_input4_save_final';
+
+    function saveData() {
+        try {
+            var data = {};
+            var inputs = document.querySelectorAll('#input4Angka input[type="text"], #input4Angka input[type="number"], #input4Angka select');
+            for (var i = 0; i < inputs.length; i++) {
+                var el = inputs[i];
+                if (el.id) data[el.id] = el.value;
+            }
+            var checks = document.querySelectorAll('#input4Angka input[type="checkbox"]');
+            for (var j = 0; j < checks.length; j++) {
+                var cb = checks[j];
+                if (cb.id) data[cb.id] = cb.checked;
+            }
+            var activeTab = document.querySelector('#subTabs4Angka button.active');
+            if (activeTab) data['__tab__'] = activeTab.getAttribute('data-subpanel');
+            
+            localStorage.setItem(KEY, JSON.stringify(data));
+        } catch (e) {}
+    }
+
+    function loadData() {
+        try {
+            var raw = localStorage.getItem(KEY);
+            if (!raw) return;
+            var data = JSON.parse(raw);
+            
+            for (var id in data) {
+                if (id === '__tab__') continue;
+                var el = document.getElementById(id);
+                if (!el) continue;
+                if (el.type === 'checkbox') {
+                    el.checked = data[id];
+                } else {
+                    el.value = data[id];
+                }
+            }
+            
+            if (data.__tab__) {
+                var btn = document.querySelector('#subTabs4Angka button[data-subpanel="' + data.__tab__ + '"]');
+                if (btn) {
+                    btn.click();
+                }
+            }
+        } catch (e) {}
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(loadData, 1500);
+    });
+
+    document.addEventListener('input', function(e) {
+        if (e.target && e.target.closest && e.target.closest('#input4Angka')) saveData();
+    });
+    
+    document.addEventListener('change', function(e) {
+        if (e.target && e.target.closest && e.target.closest('#input4Angka')) saveData();
+    });
+
+    setInterval(saveData, 3000);
+})();
+</script>
+
 </body>
 </html>
