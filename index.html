@@ -4912,59 +4912,119 @@ window.renderTogelMarketTabs = function() { if (typeof renderTogelGrid === 'func
 window.renderTogelLatest = function() { if (activeTogelMarketId) renderTogelDetail(); };
 
 // --- FUNGSI TAMBAH, EDIT, HAPUS PASAR ---
-const addBtn = document.getElementById('addNewTogelMarketBtn');
-if (addBtn) {
-    addBtn.onclick = function() {
-        const name = prompt('Masukkan Nama Pasar Baru (contoh: Oregon 4D):');
-        if (!name) return;
-        const schedule = prompt('Masukkan Label Jadwal (contoh: 13:00 WIB):', '23:00 WIB');
-        if (!schedule) return;
-        const drawTimeStr = prompt('Masukkan Jam Undian (Format 24 Jam).\nPisahkan dengan koma jika lebih dari satu.\nContoh: 13:00\nContoh: 00:01, 12:01, 20:01', '13:00');
-        if (!drawTimeStr) return;
-        const drawTimes = drawTimeStr.split(',').map(s => s.trim()).filter(s => /^\d{2}:\d{2}$/.test(s));
-        if (drawTimes.length === 0) { toast('Format jam salah. Gunakan HH:MM', 'error'); return; }
-        
-        const newId = 'm_' + Date.now();
-        marketData.markets.push({ id: newId, name: name, schedule: schedule, drawTimes: drawTimes, isTogel: true, history: [] });
-        saveMarketData();
-        if (typeof tableData !== 'undefined' && tableData.tables) {
-            tableData.tables.push({ id: newId, name: name, entries: [] });
-            if (typeof saveTableData === 'function') saveTableData();
-        }
-        toast('Pasar "' + name + '" berhasil ditambahkan', 'success');
-        renderTogelGrid();
-    };
-}
+
+window.tambahPasarTogel = function() {
+    const name = prompt('Masukkan Nama Pasar Baru (contoh: Oregon, Texas, dll):');
+    if (!name) return;
+
+    const schedule = prompt('Masukkan Label Jadwal (bisa dikosongkan):', '23:00 WIB') || '—';
+    const drawTimeStr = prompt('Masukkan Jam Undian (Format 24 Jam).\nContoh: 13:00\nContoh 2: 00:01, 12:01', '13:00');
+    if (!drawTimeStr) return;
+
+    const drawTimes = drawTimeStr.split(',').map(function(s) { return s.trim(); }).filter(function(s) { return /^\d{2}:\d{2}$/.test(s); });
+    if (drawTimes.length === 0) { toast('Format jam salah. Gunakan HH:MM', 'error'); return; }
+
+    const newId = 'm_' + Date.now();
+    
+    // 1. Simpan ke Data Pasar (Togel)
+    marketData.markets.push({
+        id: newId, 
+        name: name, 
+        schedule: schedule, 
+        drawTimes: drawTimes, 
+        isTogel: true, 
+        history: []
+    });
+    saveMarketData();
+
+    // 2. Otomatis Buatkan Tabel di Tabel Result
+    if (typeof tableData !== 'undefined' && tableData.tables) {
+        tableData.tables.push({ id: newId, name: name, entries: [] });
+        if (typeof saveTableData === 'function') saveTableData();
+    }
+
+    toast('Pasar "' + name + '" berhasil ditambahkan', 'success');
+    
+    // 3. Sinkronisasi Tampilan (Update Dropdown & Grid)
+    if (typeof refreshMarketSelectors === 'function') refreshMarketSelectors();
+    if (typeof refreshTableSelector === 'function') refreshTableSelector();
+    if (typeof renderTogelGrid === 'function') renderTogelGrid();
+};
 
 window.editPasarTogel = function(event, id) {
-    if (event) event.stopPropagation();
-    const m = marketData.markets.find(x => x.id === id);
+    if (event) event.stopPropagation(); // Mencegah menu detail terbuka saat tombol edit diklik
+    
+    const m = marketData.markets.find(function(x) { return x.id === id; });
     if (!m) return;
+
+    // Minta input baru
+    const newName = prompt('Edit Nama Pasar:', m.name);
+    if (newName === null) return;
+
     const newSchedule = prompt('Edit Label Jadwal:', m.schedule || '');
     if (newSchedule === null) return;
-    const newDrawTimes = prompt('Edit Jam Undian (pisah koma):', m.drawTimes.join(', '));
+
+    const newDrawTimes = prompt('Edit Jam Undian (pisah koma):', (m.drawTimes || []).join(', '));
     if (newDrawTimes === null) return;
-    const drawTimes = newDrawTimes.split(',').map(s => s.trim()).filter(s => /^\d{2}:\d{2}$/.test(s));
+
+    const drawTimes = newDrawTimes.split(',').map(function(s) { return s.trim(); }).filter(function(s) { return /^\d{2}:\d{2}$/.test(s); });
     if (drawTimes.length === 0) { toast('Format jam salah', 'error'); return; }
+
+    // Update Data Pasar
+    m.name = newName;
     m.schedule = newSchedule;
     m.drawTimes = drawTimes;
     saveMarketData();
-    toast('Pengaturan jam berhasil diperbarui', 'success');
-    stopTogelCountdown(); renderTogelGrid(); startTogelCountdown();
+
+    // Update Nama di Tabel Result juga agar sinkron
+    if (typeof tableData !== 'undefined' && tableData.tables) {
+        const tbl = tableData.tables.find(function(t) { return t.id === id; });
+        if (tbl) {
+            tbl.name = newName;
+            if (typeof saveTableData === 'function') saveTableData();
+        }
+    }
+
+    toast('Pengaturan pasar berhasil diperbarui', 'success');
+
+    // Sinkronisasi Tampilan & Hitungan Mundur
+    if (typeof refreshMarketSelectors === 'function') refreshMarketSelectors();
+    if (typeof refreshTableSelector === 'function') refreshTableSelector();
+    if (typeof renderTogelGrid === 'function') renderTogelGrid();
+    if (typeof stopTogelCountdown === 'function') stopTogelCountdown();
+    if (typeof startTogelCountdown === 'function') startTogelCountdown();
 };
 
 window.hapusPasarTogel = function(event, id) {
     if (event) event.stopPropagation();
     if (!confirm('Yakin ingin menghapus pasar ini beserta seluruh historynya?')) return;
-    marketData.markets = marketData.markets.filter(m => m.id !== id);
+    
+    // 1. Hapus dari Data Pasar (Togel)
+    marketData.markets = marketData.markets.filter(function(m) { return m.id !== id; });
     saveMarketData();
+    
+    // 2. Hapus dari Tabel Result
     if (typeof tableData !== 'undefined' && tableData.tables) {
-        tableData.tables = tableData.tables.filter(t => t.id !== id);
+        tableData.tables = tableData.tables.filter(function(t) { return t.id !== id; });
         if (typeof saveTableData === 'function') saveTableData();
     }
+    
     toast('Pasar berhasil dihapus', 'success');
-    renderTogelGrid();
+    
+    // 3. Sinkronisasi Tampilan (Update Dropdown & Grid)
+    if (typeof refreshMarketSelectors === 'function') refreshMarketSelectors();
+    if (typeof refreshTableSelector === 'function') refreshTableSelector();
+    if (typeof renderTogelGrid === 'function') renderTogelGrid();
 };
+
+// --- EVENT LISTENER TOMBOL PASAR BARU ---
+const addBtn = document.getElementById('addNewTogelMarketBtn');
+if (addBtn) {
+    addBtn.onclick = function(e) {
+        if (e) e.preventDefault();
+        window.tambahPasarTogel();
+    };
+}
 
 /* ═══════════════════════════════════════════════════════════════════════
    BLOK 56: EDIT PREDIKSI (ADMIN)
