@@ -1769,7 +1769,10 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
              ═══════════════════════════════════════════════════════════════ -->
         <section id="menuTogel">
             <div id="togelGridView">
-                <h2>🎰 Menu Togel — Pasar Resmi</h2>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+                    <h2 style="margin:0;">🎰 Menu Togel — Pasar Resmi</h2>
+                    <button class="btn-primary" id="addNewTogelMarketBtn" style="width:auto; padding:8px 14px; font-size:13px;">➕ Pasar Baru</button>
+                </div>
                 <p class="text-muted mb-10" style="font-size:13px;">
                     Pilih pasar untuk melihat history result dan prediksi.
                 </p>
@@ -4667,24 +4670,6 @@ function renderTogelGrid() {
     const grid = $('togelMarketGrid');
     if (!grid) return;
 
-    // --- 1. TAMBAHKAN TOMBOL PASAR BARU DI HTML ---
-    const gridView = $('togelGridView');
-    if (gridView && !$('addNewTogelMarketBtn')) {
-        const header = gridView.querySelector('h2');
-        if (header) {
-            header.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-                    <span>🎰 Menu Togel — Pasar Resmi</span>
-                    <button class="btn-primary" id="addNewTogelMarketBtn" style="width:auto; padding:6px 12px; font-size:12px;">➕ Pasar Baru</button>
-                </div>
-            `;
-        }
-        // Daftarkan fungsi klik untuk tombol tersebut
-        const addBtn = $('addNewTogelMarketBtn');
-        if (addBtn) addBtn.onclick = tambahPasarTogelBaru;
-    }
-
-    // --- 2. TAMPILKAN DAFTAR PASAR ---
     const list = getTogelMarkets();
     if (list.length === 0) {
         grid.innerHTML = '<div class="empty" style="grid-column:1/-1;">Belum ada pasar togel.</div>';
@@ -4702,8 +4687,15 @@ function renderTogelGrid() {
             : '';
             
         html += `
-        <div class="togel-market-card" onclick="openTogelDetail('${m.id}')">
-            <div class="market-name">${esc(m.name)}</div>
+        <div class="togel-market-card" style="position: relative;" onclick="openTogelDetail('${m.id}')">
+            
+            <!-- TOMBOL HAPUS DI SUDUT KANAN ATAS KARTU -->
+            <button class="btn-danger" 
+                    style="position:absolute; top:10px; right:10px; padding:4px 8px; font-size:10px; z-index:10; border-radius:6px;" 
+                    onclick="hapusPasarTogel(event, '${m.id}')"
+                    title="Hapus Pasar">❌</button>
+
+            <div class="market-name" style="padding-right: 25px;">${esc(m.name)}</div>
             <div class="market-result ${latest ? '' : 'empty'}">${latest ? esc(latest.result) : '----'}</div>
             <div class="market-date">${latest ? _formatTanggalShort(latest.date) : 'Belum ada data'}</div>
             ${countdownHtml}
@@ -4715,6 +4707,61 @@ function renderTogelGrid() {
     });
     grid.innerHTML = html;
 }
+
+// --- FUNGSI TAMBAH PASAR ---
+const addBtn = document.getElementById('addNewTogelMarketBtn');
+if (addBtn) {
+    addBtn.onclick = function() {
+        const name = prompt('Masukkan Nama Pasar (contoh: Oregon 4D):');
+        if (!name) return;
+
+        const schedule = prompt('Masukkan Label Jadwal (contoh: 13:00 WIB / P1-P6):', '23:00 WIB');
+        if (!schedule) return;
+
+        const drawTimeStr = prompt('Masukkan Jam Undian (Format 24 Jam).\n\nJika lebih dari satu, pisahkan dengan koma.\nContoh: 13:00\nContoh 2: 00:01, 12:01, 20:01', '13:00');
+        if (!drawTimeStr) return;
+
+        const drawTimes = drawTimeStr.split(',').map(s => s.trim()).filter(s => /^\d{2}:\d{2}$/.test(s));
+        if (drawTimes.length === 0) {
+            toast('Format jam salah. Gunakan format HH:MM (contoh: 13:00)', 'error');
+            return;
+        }
+
+        const newId = 'm_' + Date.now();
+        marketData.markets.push({
+            id: newId, name: name, schedule: schedule, drawTimes: drawTimes, isTogel: true, history: []
+        });
+        saveMarketData();
+
+        // Otomatis buatkan tabel kosong di menu Tabel Result
+        if (typeof tableData !== 'undefined' && tableData.tables) {
+            tableData.tables.push({ id: newId, name: name, entries: [] });
+            if (typeof saveTableData === 'function') saveTableData();
+        }
+
+        toast('Pasar "' + name + '" berhasil ditambahkan', 'success');
+        renderTogelGrid();
+    };
+}
+
+// --- FUNGSI HAPUS PASAR ---
+window.hapusPasarTogel = function(event, id) {
+    if (event) event.stopPropagation(); // Mencegah detail pasar terbuka saat tombol hapus diklik
+    
+    if (!confirm('Yakin ingin menghapus pasar ini beserta seluruh historynya?')) return;
+    
+    marketData.markets = marketData.markets.filter(m => m.id !== id);
+    saveMarketData();
+    
+    // Hapus juga dari Tabel Result
+    if (typeof tableData !== 'undefined' && tableData.tables) {
+        tableData.tables = tableData.tables.filter(t => t.id !== id);
+        if (typeof saveTableData === 'function') saveTableData();
+    }
+    
+    toast('Pasar berhasil dihapus', 'success');
+    renderTogelGrid();
+};
 
 window.openTogelDetail = function(id) {
     activeTogelMarketId = id;
