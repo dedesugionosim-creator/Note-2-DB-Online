@@ -2208,6 +2208,7 @@ tr:hover {
                 <button data-subpanel="subpanel-cbBBFS">CB BBFS</button>
                 <button data-subpanel="subpanel-gabungGrup">Gabung Grup</button>
                 <button data-subpanel="subpanel-grupCB">Grup + CB</button>
+				<button data-subpanel="subpanel-bbfsLengkap" style="color:#f472b6; border-color:#f472b6;">🎯 BBFS Lengkap 20</button>
             </div>
             
             
@@ -2627,6 +2628,82 @@ tr:hover {
                 </div>
             </div>
 
+		<!-- SUBPANEL BARU: BBFS LENGKAP 20 DIGIT -->
+<div id="subpanel-bbfsLengkap" class="subpanel">
+    <div class="card">
+        <h3 style="margin-bottom:6px;">🎯 BBFS LENGKAP 20 DIGIT</h3>
+        <p class="text-muted" style="font-size:12.5px; margin-bottom:12px;">
+            Input <b>Result Acuan</b> (4 digit) → generate otomatis kombinasi 2D &amp; 3D.
+            Lalu isi <b>BBFS</b> (max 20 digit) sebagai sumber kandidat 4D.
+            Setiap kombinasi menampilkan hasil yang <b>mengandung</b> digit tersebut (bulak-balik lengkap).
+        </p>
+
+        <div class="field">
+            <label for="blResultAcuan">Result Acuan (4 Digit)</label>
+            <input type="text" id="blResultAcuan" maxlength="4" inputmode="numeric"
+                   placeholder="1234 / 1123 / 1113" autocomplete="off">
+            <p style="color:var(--muted); font-size:11px; margin-top:4px;">
+                Auto-handle kembar: <b>1234</b> (beda semua), <b>1123</b> (1 pasang), <b>1113</b> (3 sama).
+            </p>
+        </div>
+
+        <div class="field" id="blPairsWrapper" style="display:none;">
+            <label>Pilih 2D yang Pasti Keluar (auto dari Result Acuan)</label>
+            <div id="blPairsList" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:4px;"></div>
+        </div>
+
+        <div class="field" id="blTriplesWrapper" style="display:none;">
+            <label>Pilih 3D yang Pasti Keluar (auto dari Result Acuan)</label>
+            <div id="blTriplesList" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:4px;"></div>
+        </div>
+
+        <div class="field">
+            <label for="blBBFS">BBFS (Max 20 Digit)</label>
+            <input type="text" id="blBBFS" maxlength="20" inputmode="numeric"
+                   placeholder="01122334456789" autocomplete="off">
+        </div>
+
+        <div class="grid-2">
+            <div class="field">
+                <label for="blCB">CB (opsional)</label>
+                <input type="text" id="blCB" placeholder="0 1 2 3 5" autocomplete="off">
+            </div>
+            <div class="field">
+                <label for="blMati">Angka Mati (opsional)</label>
+                <input type="text" id="blMati" placeholder="0 9" autocomplete="off">
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="field">
+                <label for="blDepan">Angka Depan — digit pertama (opsional)</label>
+                <input type="text" id="blDepan" placeholder="1 2 3" autocomplete="off">
+            </div>
+            <div class="field">
+                <label for="blGrup">Filter Grup (opsional)</label>
+                <select id="blGrup"><option value="">— Tanpa Grup —</option></select>
+            </div>
+        </div>
+
+        <div class="field">
+            <label for="blGrupMode">Posisi Filter Grup</label>
+            <select id="blGrupMode">
+                <option value="depan" selected>2D Depan</option>
+                <option value="tengah">2D Tengah</option>
+                <option value="belakang">2D Belakang</option>
+                <option value="keduanya">Depan &amp; Belakang</option>
+            </select>
+        </div>
+
+        <p id="blInfo" class="text-accent" style="font-size:13px; margin:12px 0;">
+            Info: isi Result Acuan 4 digit.
+        </p>
+
+        <button class="btn-primary" id="blGenerateBtn">⚡ Generate BBFS Lengkap</button>
+    </div>
+
+    <div id="blResultsContainer"></div>
+</div>
         </section>
         
         
@@ -7544,6 +7621,13 @@ function refreshAll() {
     updateCBBFFSInfo();
 }
 
+    // BARU: refresh dropdown BBFS Lengkap
+    const blGrupEl = $('blGrup');
+    if (blGrupEl) {
+        const cur = blGrupEl.value;
+        blGrupEl.innerHTML = buildOptions('— Tanpa Grup —');
+        if (cur && names.includes(cur)) blGrupEl.value = cur;
+    }
 
 /* ═══════════════════════════════════════════════════════════════════════
    BLOK 58: JS — ENTER KEY HANDLERS (KONVERSI)
@@ -7723,6 +7807,322 @@ $('chatInput').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') { e.preventDefault(); $('sendChatBtn').click(); }
 });
 
+/* ═══════════════════════════════════════════════════════════════════════
+   BLOK 60 (BARU): JS — BBFS LENGKAP 20 DIGIT  (FITUR A)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+const blSections = {}; // { key: { items:[], page:0, size:350, label, combo } }
+
+/* ── Multiset helpers ──────────────────────────────────────────────── */
+function blParseMultiset(str) {
+    const m = {};
+    for (const c of String(str)) m[c] = (m[c] || 0) + 1;
+    return m;
+}
+
+function blContainsCombo(numStr, comboMultiset) {
+    const nm = blParseMultiset(numStr);
+    for (const d in comboMultiset) {
+        if ((nm[d] || 0) < comboMultiset[d]) return false;
+    }
+    return true;
+}
+
+/* Generate kombinasi unik (multiset, sorted) ukuran `size` dari string result */
+function blGenerateCombos(result, size) {
+    const n = result.length;
+    if (n < size) return [];
+    const set = new Set();
+    function choose(start, chosen) {
+        if (chosen.length === size) {
+            set.add(chosen.slice().sort().join(''));
+            return;
+        }
+        for (let i = start; i < n; i++) {
+            chosen.push(result[i]);
+            choose(i + 1, chosen);
+            chosen.pop();
+        }
+    }
+    choose(0, []);
+    return Array.from(set).sort();
+}
+
+/* ── Render checkbox combos ────────────────────────────────────────── */
+function blRenderComboCheckboxes(containerId, combos) {
+    const el = $(containerId);
+    if (!el) return;
+    if (combos.length === 0) {
+        el.innerHTML = '<span style="color:var(--muted); font-size:12px;">Tidak ada kombinasi.</span>';
+        return;
+    }
+    let html = '';
+    combos.forEach(function(c) {
+        html += '<label style="display:flex; align-items:center; gap:6px;'
+             + ' background:var(--card-2); border:1px solid var(--border);'
+             + ' padding:6px 10px; border-radius:8px; cursor:pointer; font-size:13px;">'
+             + '<input type="checkbox" value="' + c + '" checked style="width:auto; margin:0;">'
+             + '<span style="font-family:monospace; font-weight:bold; color:var(--accent);">' + c + '</span>'
+             + '</label>';
+    });
+    el.innerHTML = html;
+}
+
+function blRefreshComboCheckboxes() {
+    const result = onlyDigits($('blResultAcuan').value).slice(0, 4);
+    const pairsWrap = $('blPairsWrapper');
+    const triplesWrap = $('blTriplesWrapper');
+    if (!pairsWrap || !triplesWrap) return;
+
+    if (result.length !== 4) {
+        pairsWrap.style.display = 'none';
+        triplesWrap.style.display = 'none';
+        blUpdateInfo();
+        return;
+    }
+    pairsWrap.style.display = 'block';
+    triplesWrap.style.display = 'block';
+    blRenderComboCheckboxes('blPairsList', blGenerateCombos(result, 2));
+    blRenderComboCheckboxes('blTriplesList', blGenerateCombos(result, 3));
+    blUpdateInfo();
+}
+
+function blGetSelectedCombos() {
+    const pairs = [];
+    const triples = [];
+    document.querySelectorAll('#blPairsList input[type="checkbox"]:checked')
+        .forEach(function(el) { pairs.push(el.value); });
+    document.querySelectorAll('#blTriplesList input[type="checkbox"]:checked')
+        .forEach(function(el) { triples.push(el.value); });
+    return { pairs: pairs, triples: triples };
+}
+
+function blUpdateInfo() {
+    const info = $('blInfo');
+    if (!info) return;
+    const result = onlyDigits($('blResultAcuan').value);
+    const bbfs = onlyDigits($('blBBFS').value);
+    if (result.length !== 4) { info.textContent = 'Info: isi Result Acuan 4 digit.'; return; }
+    if (bbfs.length < 4)     { info.textContent = 'Info: isi BBFS minimal 4 digit (max 20).'; return; }
+    if (bbfs.length > 20)    { info.textContent = 'Info: BBFS max 20 digit.'; return; }
+    const n = bbfs.length;
+    const totalPool = n * (n - 1) * (n - 2) * (n - 3);
+    const sel = blGetSelectedCombos();
+    info.textContent = 'BBFS ' + n + ' digit → maks '
+        + totalPool.toLocaleString('id-ID') + ' kombinasi 4D • Dipilih: '
+        + sel.pairs.length + ' 2D + ' + sel.triples.length + ' 3D';
+}
+
+/* ── Build section + pagination ────────────────────────────────────── */
+function blBuildResultSection(key, label, items, combo) {
+    blSections[key] = { items: items, page: 0, size: PER_PAGE, label: label, combo: combo };
+    return ''
+        + '<div class="card" id="bl-sec-' + key + '">'
+        +   '<div style="display:flex; justify-content:space-between; align-items:center;'
+        +        ' flex-wrap:wrap; gap:8px; margin-bottom:10px;">'
+        +     '<h3 style="margin:0; color:var(--accent); font-size:14px;">' + esc(label) + '</h3>'
+        +     '<div style="display:flex; gap:6px; flex-wrap:wrap;">'
+        +       '<button class="btn-warn btn-action" onclick="blCopySection(\'' + key + '\')">📋 Copy Semua</button>'
+        +       '<button class="btn-warn btn-action" onclick="blCopyPage(\'' + key + '\')">📋 Copy Hal. Ini</button>'
+        +       '<button class="btn-warn btn-action" onclick="blExportSection(\'' + key + '\')">⬇ TXT</button>'
+        +     '</div>'
+        +   '</div>'
+        +   '<div id="bl-sec-body-' + key + '"></div>'
+        + '</div>';
+}
+
+function blRenderSection(key) {
+    const sec = blSections[key];
+    const body = $('bl-sec-body-' + key);
+    if (!sec || !body) return;
+
+    if (sec.items.length === 0) {
+        body.innerHTML = '<div class="empty">Tidak ada hasil (cek filter / BBFS).</div>';
+        return;
+    }
+    const totalPages = Math.ceil(sec.items.length / sec.size) || 1;
+    if (sec.page >= totalPages) sec.page = totalPages - 1;
+    if (sec.page < 0) sec.page = 0;
+    const start = sec.page * sec.size;
+    const pageData = sec.items.slice(start, start + sec.size);
+
+    body.innerHTML = ''
+        + '<div class="page-info">'
+        +   'Halaman ' + (sec.page + 1) + ' / ' + totalPages
+        +   ' • ' + pageData.length + ' angka di halaman ini'
+        +   ' • Total ' + sec.items.length.toLocaleString('id-ID')
+        + '</div>'
+        + '<div class="page-content" style="max-height:280px;">'
+        +   pageData.join('*') + (pageData.length ? '*' : '')
+        + '</div>'
+        + '<div class="page-nav">'
+        +   '<button ' + (sec.page === 0 ? 'disabled' : '') + ' onclick="blGoPage(\'' + key + '\',-1)">◀ Prev</button>'
+        +   '<span>' + (sec.page + 1) + ' / ' + totalPages + '</span>'
+        +   '<button ' + (sec.page === totalPages - 1 ? 'disabled' : '') + ' onclick="blGoPage(\'' + key + '\',1)">Next ▶</button>'
+        + '</div>';
+}
+
+window.blGoPage = function(key, delta) {
+    const sec = blSections[key];
+    if (!sec) return;
+    const totalPages = Math.ceil(sec.items.length / sec.size) || 1;
+    const next = sec.page + delta;
+    if (next < 0 || next >= totalPages) return;
+    sec.page = next;
+    blRenderSection(key);
+};
+
+window.blCopySection = function(key) {
+    const sec = blSections[key];
+    if (!sec || sec.items.length === 0) { toast('Tidak ada hasil', 'error'); return; }
+    copyTextToClipboard(sec.items.join('*') + '*');
+};
+
+window.blCopyPage = function(key) {
+    const sec = blSections[key];
+    if (!sec || sec.items.length === 0) { toast('Tidak ada hasil', 'error'); return; }
+    const start = sec.page * sec.size;
+    const pageData = sec.items.slice(start, start + sec.size);
+    copyTextToClipboard(pageData.join('*') + '*');
+};
+
+window.blExportSection = function(key) {
+    const sec = blSections[key];
+    if (!sec || sec.items.length === 0) { toast('Tidak ada hasil', 'error'); return; }
+    const blob = new Blob([sec.items.join('*') + '*'], { type: 'text/plain;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'sahard-bbfs-lengkap-' + (sec.combo || key) + '.txt';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast('File diexport', 'success');
+};
+
+/* ── Event bindings ───────────────────────────────────────────────── */
+if ($('blResultAcuan')) {
+    $('blResultAcuan').addEventListener('input', function(e) {
+        e.target.value = onlyDigits(e.target.value).slice(0, 4);
+        blRefreshComboCheckboxes();
+    });
+    $('blBBFS').addEventListener('input', function(e) {
+        e.target.value = onlyDigits(e.target.value).slice(0, 20);
+        blUpdateInfo();
+    });
+    $('blCB').addEventListener('input', blUpdateInfo);
+    $('blMati').addEventListener('input', blUpdateInfo);
+    $('blDepan').addEventListener('input', blUpdateInfo);
+    $('blPairsList').addEventListener('change', blUpdateInfo);
+    $('blTriplesList').addEventListener('change', blUpdateInfo);
+}
+
+/* ── GENERATE UTAMA ────────────────────────────────────────────────── */
+if ($('blGenerateBtn')) {
+    $('blGenerateBtn').addEventListener('click', function() {
+        const result  = onlyDigits($('blResultAcuan').value);
+        const bbfs    = onlyDigits($('blBBFS').value);
+        const cb      = onlyDigits($('blCB').value);
+        const matiSet = new Set(parseSingleDigitList($('blMati').value));
+        const depanSet = new Set(parseSingleDigitList($('blDepan').value));
+        const grup    = $('blGrup').value;
+        const grupMode = $('blGrupMode').value;
+
+        if (result.length !== 4) { toast('Result Acuan harus 4 digit', 'error'); return; }
+        if (bbfs.length < 4)     { toast('BBFS minimal 4 digit', 'error'); return; }
+        if (bbfs.length > 20)    { toast('BBFS max 20 digit', 'error'); return; }
+
+        const sel = blGetSelectedCombos();
+        if (sel.pairs.length === 0 && sel.triples.length === 0) {
+            toast('Pilih minimal 1 kombinasi', 'error'); return;
+        }
+
+        const pool = permutasi4DariDigit(bbfs);
+        if (pool.length === 0) { toast('BBFS tidak menghasilkan kombinasi', 'error'); return; }
+
+        // Helper filter per-number
+        function passFilters(n) {
+            if (matiSet.size > 0) {
+                for (const d of n) if (matiSet.has(d)) return false;
+            }
+            if (depanSet.size > 0) {
+                if (!depanSet.has(n[0])) return false;
+            }
+            if (cb) {
+                // OR mode
+                let found = false;
+                for (const d of cb) if (n.includes(d)) { found = true; break; }
+                if (!found) return false;
+            }
+            if (grup) {
+                const depans = getGroupAs2DigitDepan(grup);
+                const belakangs = getGroupAs2DigitBelakang(grup);
+                const depan2  = n.slice(0, 2);
+                const tengah2 = n.slice(1, 3);
+                const belakang2 = n.slice(2, 4);
+                const dSet = new Set(depans);
+                const bSet = new Set(belakangs);
+                if (grupMode === 'depan')         { if (!dSet.has(depan2)) return false; }
+                else if (grupMode === 'belakang') { if (!bSet.has(belakang2)) return false; }
+                else if (grupMode === 'tengah')   { if (!dSet.has(tengah2) && !bSet.has(tengah2)) return false; }
+                else if (grupMode === 'keduanya') { if (!dSet.has(depan2) || !bSet.has(belakang2)) return false; }
+            }
+            return true;
+        }
+
+        // Clear state
+        for (const k in blSections) delete blSections[k];
+
+        let html = '';
+        const combinedSet = new Set();
+
+        // Sections 2D
+        sel.pairs.forEach(function(pair, idx) {
+            const ms = blParseMultiset(pair);
+            const filtered = pool.filter(function(n) {
+                return blContainsCombo(n, ms) && passFilters(n);
+            }).sort();
+            filtered.forEach(function(n) { combinedSet.add(n); });
+            html += blBuildResultSection('pair_' + idx, '📊 Hasil 2D — mengandung ' + pair, filtered, pair);
+        });
+
+        // Sections 3D
+        sel.triples.forEach(function(triple, idx) {
+            const ms = blParseMultiset(triple);
+            const filtered = pool.filter(function(n) {
+                return blContainsCombo(n, ms) && passFilters(n);
+            }).sort();
+            filtered.forEach(function(n) { combinedSet.add(n); });
+            html += blBuildResultSection('triple_' + idx, '📊 Hasil 3D — mengandung ' + triple, filtered, triple);
+        });
+
+        // Combined
+        const combined = Array.from(combinedSet).sort();
+        html += blBuildResultSection('combined', '🎯 GABUNGAN SEMUA (' + combined.length.toLocaleString('id-ID') + ')', combined, 'combined');
+
+        $('blResultsContainer').innerHTML = html;
+        for (const k in blSections) blRenderSection(k);
+
+        toast('Berhasil: ' + combined.length.toLocaleString('id-ID') + ' angka gabungan', 'success');
+    });
+}
+
+/* ── Populate grup dropdown ────────────────────────────────────────── */
+(function initBlGrup() {
+    const el = $('blGrup');
+    if (!el) return;
+    const map = {};
+    master.forEach(function(m) {
+        const g = (m.grup || '').trim();
+        if (g) (map[g] = map[g] || []).push(m);
+    });
+    const names = Object.keys(map).sort();
+    let html = '<option value="">— Tanpa Grup —</option>';
+    names.forEach(function(g) {
+        html += '<option value="' + esc(g) + '">' + esc(g) + ' (' + map[g].length + ')</option>';
+    });
+    el.innerHTML = html;
+})();
+
+console.log('[BLOK 60] BBFS Lengkap 20 siap.');
 
 /* ═══════════════════════════════════════════════════════════════════════
    BLOK 59: JS — SESSION RESTORE & BOOT
@@ -7789,6 +8189,7 @@ console.log('%c SA_HARD v7.5 MERGED ', 'background:#22d3ee;color:#04101c;font-we
 console.log('Multi-User, Chat, Sewa Aktif • Master:', master.length, 'records');
 console.log('Users:', userList.length, '| Markets:', marketData.markets.length);
 console.log('Rumus Syair v2.5: Aktif');
+
 
 </script>
 </body>
