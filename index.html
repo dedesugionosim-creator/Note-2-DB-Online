@@ -2856,6 +2856,10 @@ function masukAplikasi() {
     loadMaster();
     loadTableData();
     loadMarketData();
+	syncTogelWithTable();
+
+    loadUsers();
+    loadPricing();
     loadUsers();
     loadPricing();
     loadChats();
@@ -4773,15 +4777,46 @@ $('importJsonFile').addEventListener('change', function(e) {
     e.target.value = '';
 });
 
-// Fungsi untuk menyelaraskan ID Pasar Togel dengan Tabel Result
-function getOrCreateMarketTable(marketId, marketName) {
-    let tbl = tableData.tables.find(function(t) { return t.id === marketId; });
-    if (!tbl) {
-        tbl = { id: marketId, name: marketName, entries: [] };
-        tableData.tables.push(tbl);
-        if (typeof saveTableData === 'function') saveTableData();
-    }
-    return tbl;
+// FUNGSI SINKRONISASI ANTAR TABEL RESULT & MENU TOGEL
+function syncTogelWithTable() {
+    if (typeof tableData === 'undefined' || typeof marketData === 'undefined') return;
+    
+    // 1. Pastikan setiap Pasar Togel punya Tabel di Tabel Result
+    marketData.markets.forEach(function(m) {
+        if (m.isTogel) {
+            // Cari tabel berdasarkan ID atau Nama yang mirip
+            let tbl = tableData.tables.find(function(t) { 
+                return t.id === m.id || t.name.toLowerCase() === m.name.toLowerCase(); 
+            });
+            
+            if (!tbl) {
+                // Jika tidak ada, buatkan tabel baru
+                tbl = { id: m.id, name: m.name, entries: [] };
+                tableData.tables.push(tbl);
+            } else {
+                // Jika ada, samakan ID-nya dengan ID Pasar Togel
+                tbl.id = m.id; 
+                tbl.name = m.name;
+            }
+
+            // Pindahkan data dari m.history (data lama) ke Tabel Result
+            if (m.history && m.history.length > 0) {
+                m.history.forEach(function(h) {
+                    const exists = tbl.entries.some(function(e) { return e.tanggal === h.date; });
+                    if (!exists) {
+                        tbl.entries.push({
+                            id: h.id || 'mig_' + Date.now() + Math.random(),
+                            tanggal: h.date,
+                            result: h.result,
+                            periode: String(tbl.entries.length + 1).padStart(3, '0')
+                        });
+                    }
+                });
+                m.history = []; // Kosongkan data lama agar tidak dobel
+            }
+        }
+    });
+    if (typeof saveTableData === 'function') saveTableData();
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -4864,19 +4899,26 @@ function renderTogelGrid() {
 
     const list = getTogelMarkets();
     if (list.length === 0) {
-        grid.innerHTML = '<div class="empty" style="grid-column:1/-1;">Belum ada pasar togel. Silakan tambah pasar baru.</div>';
+        grid.innerHTML = '<div class="empty" style="grid-column:1/-1;">Belum ada pasar togel.</div>';
         return;
     }
     
     let html = '';
     list.forEach(function(m) {
-        const sorted = (m.history || []).slice().sort(function(a, b) { return b.date.localeCompare(a.date); });
+        // AMBIL DARI TABEL RESULT
+        const tbl = getOrCreateMarketTable(m.id, m.name);
+        const historyData = tbl.entries || [];
+        const sorted = historyData.slice().sort(function(a, b) { return (b.tanggal || '').localeCompare(a.tanggal || ''); });
         const latest = sorted[0];
+        
+        const cd = _getNextDrawInfo(m.drawTimes);
+        const countdownHtml = cd
+            ? `<div class="market-countdown${cd.urgent ? ' urgent' : ''}" data-countdown-market="${m.id}">⏱️ ${cd.remaining} (${cd.label})</div>`
+            : '';
             
         html += `
         <div class="togel-market-card" style="position: relative;" onclick="openTogelDetail('${m.id}')">
             
-            <!-- TOMBOL HAPUS -->
             <button class="btn-danger" 
                     style="position:absolute; top:10px; right:10px; padding:4px 8px; font-size:10px; z-index:10; border-radius:6px;" 
                     onclick="hapusPasarTogel(event, '${m.id}')"
@@ -4884,11 +4926,11 @@ function renderTogelGrid() {
 
             <div class="market-name" style="padding-right: 25px;">${esc(m.name)}</div>
             <div class="market-result ${latest ? '' : 'empty'}">${latest ? esc(latest.result) : '----'}</div>
-            <div class="market-date">${latest ? _formatTanggalShort(latest.date) : 'Belum ada data'}</div>
-            
+            <div class="market-date">${latest ? _formatTanggalShort(latest.tanggal) : 'Belum ada data'}</div>
+            ${countdownHtml}
             <div class="market-footer">
-                <span class="schedule">Data Prediksi</span>
-                <span>${(m.history || []).length} data</span>
+                <span class="schedule">${esc(m.schedule || '—')}</span>
+                <span>${historyData.length} data</span>
             </div>
         </div>`;
     });
@@ -4981,17 +5023,24 @@ function renderTogelDetail() {
     if (!m) return;
     $('togelDetailName').textContent = m.name;
     $('togelDetailSchedule').textContent = m.schedule || '—';
-    const sorted = (m.history || []).slice().sort(function(a, b) { return b.date.localeCompare(a.date); });
+    
+    // AMBIL DARI TABEL RESULT
+    const tbl = getOrCreateMarketTable(m.id, m.name);
+    const historyData = tbl.entries || [];
+    const sorted = historyData.slice().sort(function(a, b) { return (b.tanggal || '').localeCompare(a.tanggal || ''); });
     const latest = sorted[0];
+    
     if (latest) {
         $('togelDetailResult').textContent = latest.result;
-        $('togelDetailDate').textContent = _formatTanggalShort(latest.date);
+        $('togelDetailDate').textContent = _formatTanggalShort(latest.tanggal);
     } else {
         $('togelDetailResult').textContent = '----';
         $('togelDetailDate').textContent = 'Belum ada data';
     }
+    
     renderTogelHistory();
     if (togelDetailTab === 'prediksi') renderTogelPrediksi();
+    
     document.querySelectorAll('#togelDetailTabs button').forEach(function(b) {
         b.classList.toggle('active', b.dataset.ttab === togelDetailTab);
     });
