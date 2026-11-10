@@ -4666,19 +4666,41 @@ function renderMenuTogel() {
 function renderTogelGrid() {
     const grid = $('togelMarketGrid');
     if (!grid) return;
+
+    // --- 1. TAMBAHKAN TOMBOL PASAR BARU DI HTML ---
+    const gridView = $('togelGridView');
+    if (gridView && !$('addNewTogelMarketBtn')) {
+        const header = gridView.querySelector('h2');
+        if (header) {
+            header.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                    <span>🎰 Menu Togel — Pasar Resmi</span>
+                    <button class="btn-primary" id="addNewTogelMarketBtn" style="width:auto; padding:6px 12px; font-size:12px;">➕ Pasar Baru</button>
+                </div>
+            `;
+        }
+        // Daftarkan fungsi klik untuk tombol tersebut
+        const addBtn = $('addNewTogelMarketBtn');
+        if (addBtn) addBtn.onclick = tambahPasarTogelBaru;
+    }
+
+    // --- 2. TAMPILKAN DAFTAR PASAR ---
     const list = getTogelMarkets();
     if (list.length === 0) {
         grid.innerHTML = '<div class="empty" style="grid-column:1/-1;">Belum ada pasar togel.</div>';
         return;
     }
+    
     let html = '';
     list.forEach(function(m) {
         const sorted = (m.history || []).slice().sort(function(a, b) { return b.date.localeCompare(a.date); });
         const latest = sorted[0];
         const cd = _getNextDrawInfo(m.drawTimes);
+        
         const countdownHtml = cd
             ? `<div class="market-countdown${cd.urgent ? ' urgent' : ''}" data-countdown-market="${m.id}">⏱️ ${cd.remaining} (${cd.label})</div>`
             : '';
+            
         html += `
         <div class="togel-market-card" onclick="openTogelDetail('${m.id}')">
             <div class="market-name">${esc(m.name)}</div>
