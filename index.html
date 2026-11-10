@@ -1634,20 +1634,13 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
         <!-- ═══════════════════════════════════════════════════════════════
              SECTION: TABEL RESULT (MULTI-TABLE)
              ═══════════════════════════════════════════════════════════════ -->
-        <section id="tabelResult">
+                <section id="tabelResult">
             <div class="table-header-actions">
                 <div class="table-controls">
                     <select id="tableSelector"></select>
-                    <button class="btn-warn" id="addNewTableBtn" style="padding:8px 12px; font-size:12px;">
-                        ➕ Tabel Baru
-                    </button>
-                    <button class="btn-danger" id="deleteTableBtn" style="padding:8px 12px; font-size:12px;">
-                        🗑 Hapus Tabel
-                    </button>
                 </div>
                 <h2 style="margin:0;">
-                    <span id="tableTitleDisplay" contenteditable="true" spellcheck="false"
-                          title="Klik untuk mengubah nama tabel">Tabel Result</span>
+                    <span id="tableTitleDisplay" contenteditable="false" spellcheck="false" style="cursor:default;">Tabel Result</span>
                 </h2>
                 <div style="display:flex; gap:8px;">
                     <button class="btn-warn" id="exportJsonBtn" style="padding:8px 12px; font-size:12px;">
@@ -1662,6 +1655,7 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
                     </button>
                 </div>
             </div>
+           
             <div class="search-container">
                 <input type="text" id="patternSearchInput" placeholder="Ketik 2 digit (cth: 01)"
                        maxlength="2" autocomplete="off">
@@ -3195,22 +3189,28 @@ function renderGroupPreview(grupName, containerEl, activeSide, hint) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 40: MULTI-TABLE RESULT CRUD
+   BLOK 40: MULTI-TABLE RESULT CRUD (SINKRONISASI PASAR TOGEL)
    ═══════════════════════════════════════════════════════════════════════ */
 
 function loadTableData() {
     let saved = null;
     try { saved = JSON.parse(localStorage.getItem(LS_TABLE_DATA) || '[]'); }
     catch (e) { saved = null; }
-    if (saved && Array.isArray(saved.tables) && saved.tables.length > 0) {
+    
+    if (saved && Array.isArray(saved.tables)) {
         tableData = saved;
     } else {
-        tableData = {
-            tables: [{ id: 'table_default_' + Date.now(), name: 'Tabel Result', entries: [] }],
-            activeTableId: ''
-        };
-        tableData.activeTableId = tableData.tables[0].id;
-        saveTableData();
+        tableData = { tables: [], activeTableId: '' };
+    }
+
+    // Panggil fungsi sinkronisasi (pastikan pasar togel masuk ke tableData)
+    if (typeof syncTogelWithTable === 'function') syncTogelWithTable();
+
+    if (tableData.tables.length > 0) {
+        const hasActive = tableData.tables.some(function(t) { return t.id === tableData.activeTableId; });
+        if (!hasActive) tableData.activeTableId = tableData.tables[0].id;
+    } else {
+        tableData.activeTableId = '';
     }
     refreshTableSelector();
 }
@@ -3221,22 +3221,58 @@ function saveTableData() {
 }
 
 function getActiveTable() {
-    for (let i = 0; i < tableData.tables.length; i++) {
-        if (tableData.tables[i].id === tableData.activeTableId) return tableData.tables[i];
+    let found = tableData.tables.find(function(t) { return t.id === tableData.activeTableId; });
+    if (!found && tableData.tables.length > 0) {
+        found = tableData.tables[0];
+        tableData.activeTableId = found.id;
     }
-    return tableData.tables[0];
+    return found || { id: '', name: 'Tabel Result', entries: [] };
 }
 
 function refreshTableSelector() {
     const sel = $('tableSelector');
     if (!sel) return;
+
+    // 1. Paksa sinkronisasi: Pastikan semua Pasar Togel ada di tableData
+    if (typeof marketData !== 'undefined' && marketData.markets) {
+        marketData.markets.forEach(function(m) {
+            if (m.isTogel) {
+                let tbl = tableData.tables.find(function(t) { return t.id === m.id; });
+                if (!tbl) {
+                    tableData.tables.push({ id: m.id, name: m.name, entries: [] });
+                } else {
+                    tbl.name = m.name; // Sinkronkan nama jika diubah di Togel
+                }
+            }
+        });
+        saveTableData();
+    }
+
+    // 2. Filter: Hanya tampilkan tabel yang terdaftar sebagai Pasar Togel
+    const validTables = tableData.tables.filter(function(t) {
+        if (typeof marketData === 'undefined') return true;
+        return marketData.markets.some(function(m) { return m.id === t.id && m.isTogel; });
+    });
+
     let html = '';
-    for (let i = 0; i < tableData.tables.length; i++) {
-        const t = tableData.tables[i];
+    if (validTables.length === 0) {
+        sel.innerHTML = '<option value="">— Belum ada Pasar Togel —</option>';
+        const titleEl = $('tableTitleDisplay');
+        if (titleEl) titleEl.textContent = 'Tabel Result';
+        return;
+    }
+
+    if (!tableData.activeTableId || !validTables.some(function(t) { return t.id === tableData.activeTableId; })) {
+        tableData.activeTableId = validTables[0].id;
+    }
+
+    for (let i = 0; i < validTables.length; i++) {
+        const t = validTables[i];
         const selected = (t.id === tableData.activeTableId) ? 'selected' : '';
         html += `<option value="${t.id}" ${selected}>${esc(t.name)} (${t.entries.length})</option>`;
     }
     sel.innerHTML = html;
+    
     const activeTable = getActiveTable();
     const titleEl = $('tableTitleDisplay');
     if (titleEl) titleEl.textContent = activeTable.name;
@@ -3264,26 +3300,29 @@ function generateSyairAndGrup(result) {
 function renderResultTable() {
     const tbody = $('resultTableBody');
     const activeTable = getActiveTable();
-    const entries = activeTable.entries;
+    const entries = activeTable.entries || [];
+    
     if (entries.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">Belum ada data. Klik "Tambah Result".</td></tr>';
         return;
     }
+    
     const sorted = entries.slice().sort(function(a, b) {
-        return a.periode.localeCompare(b.periode, undefined, { numeric: true, sensitivity: 'base' });
+        return (a.periode || '').localeCompare(b.periode || '', undefined, { numeric: true, sensitivity: 'base' });
     });
+    
     let html = '';
     for (let i = 0; i < sorted.length; i++) {
         const r = sorted[i];
-        const generated = generateSyairAndGrup(r.result);
+        const gen = generateSyairAndGrup(r.result);
         const pair1 = r.result.slice(0, 2);
         const pair2 = r.result.slice(2, 4);
         html += `<tr>
             <td>${esc(r.periode)}</td>
             <td>${esc(r.tanggal)}</td>
             <td class="td-pair">${pair1} | ${pair2}</td>
-            <td>${generated.syair}</td>
-            <td style="color:var(--warn);">${generated.grup}</td>
+            <td>${gen.syair}</td>
+            <td style="color:var(--warn);">${gen.grup}</td>
             <td>
                 <button class="btn-action btn-edit" onclick="editResult('${r.id}')">✏️ Edit</button>
                 <button class="btn-action btn-danger" onclick="deleteResult('${r.id}')">🗑 Hapus</button>
