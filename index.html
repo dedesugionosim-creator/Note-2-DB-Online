@@ -4773,6 +4773,13 @@ function syncTogelWithTable() {
    BLOK 55: MENU TOGEL v3 (ADMIN & USER VIEW)
    ═══════════════════════════════════════════════════════════════════════ */
 
+// Fungsi Deteksi Admin (Sangat Kuat)
+function _togelIsAdmin() {
+    if (typeof currentUser === 'undefined' || !currentUser) return false;
+    // Jika role admin, ATAU jika usernamenya SA_HARD
+    return currentUser.role === 'admin' || (currentUser.data && currentUser.data.username === 'SA_HARD');
+}
+
 function loadTogelPredictions() {
     try { togelPredictions = JSON.parse(localStorage.getItem(LS_TOGEL_PREDICTIONS) || '{}'); }
     catch (e) { togelPredictions = {}; }
@@ -4789,7 +4796,6 @@ function getActiveTogelMarket() {
     if (!activeTogelMarketId) return null;
     return getTogelMarkets().find(function(m) { return m.id === activeTogelMarketId; }) || null;
 }
-function _togelIsAdmin() { return currentUser && currentUser.role === 'admin'; }
 function _formatTanggalShort(dateString) {
     if (!dateString) return '—';
     const d = new Date(dateString);
@@ -4855,9 +4861,11 @@ function renderTogelGrid() {
     const grid = $('togelMarketGrid');
     if (!grid) return;
 
-    // Tampilkan/Sembunyikan tombol "Pasar Baru"
+    const isAdmin = _togelIsAdmin();
+
+    // Tombol "Pasar Baru" HANYA untuk Admin
     const addBtn = $('addNewTogelMarketBtn');
-    if (addBtn) addBtn.style.display = _togelIsAdmin() ? 'block' : 'none';
+    if (addBtn) addBtn.style.display = isAdmin ? 'inline-block' : 'none';
 
     const list = getTogelMarkets();
     if (list.length === 0) {
@@ -4877,19 +4885,20 @@ function renderTogelGrid() {
             ? `<div class="market-countdown${cd.urgent ? ' urgent' : ''}" data-countdown-market="${m.id}">⏱️ ${cd.remaining} (${cd.label})</div>`
             : `<div class="market-countdown">⏱️ Waktu belum diatur</div>`;
             
+        // Tombol Edit & Hapus HANYA muncul untuk Admin
         let adminButtons = '';
-        if (_togelIsAdmin()) {
+        if (isAdmin) {
             adminButtons = `
             <div style="position:absolute; top:10px; right:10px; z-index:10; display:flex; gap:4px;">
-                <button class="btn-warn" style="padding:4px 8px; font-size:10px; border-radius:6px;" onclick="editPasarTogel(event, '${m.id}')" title="Edit Nama & Jam">✏️ Edit Jam</button>
-                <button class="btn-danger" style="padding:4px 8px; font-size:10px; border-radius:6px;" onclick="hapusPasarTogel(event, '${m.id}')" title="Hapus Pasar">❌</button>
+                <button class="btn-warn" style="padding:4px 8px; font-size:10px; border-radius:6px; font-weight:bold;" onclick="editPasarTogel(event, '${m.id}')" title="Edit Jam Mundur">✏️ Edit</button>
+                <button class="btn-danger" style="padding:4px 8px; font-size:10px; border-radius:6px; font-weight:bold;" onclick="hapusPasarTogel(event, '${m.id}')" title="Hapus Pasar">❌ Hapus</button>
             </div>`;
         }
 
         html += `
         <div class="togel-market-card" style="position: relative;" onclick="openTogelDetail('${m.id}')">
             ${adminButtons}
-            <div class="market-name" style="padding-right: ${_togelIsAdmin() ? '70px' : '0'};">${esc(m.name)}</div>
+            <div class="market-name" style="padding-right: ${isAdmin ? '80px' : '0'};">${esc(m.name)}</div>
             <div class="market-result ${latest ? '' : 'empty'}">${latest ? esc(latest.result) : '----'}</div>
             <div class="market-date">${latest ? _formatTanggalShort(latest.tanggal) : 'Belum ada data'}</div>
             ${countdownHtml}
@@ -4955,7 +4964,7 @@ function renderTogelDetail() {
     $('togelTabHistory').classList.toggle('active', togelDetailTab === 'history');
     $('togelTabPrediksi').classList.toggle('active', togelDetailTab === 'prediksi');
     
-    // Tampilkan form input khusus Admin
+    // Form Input HANYA muncul untuk Admin
     const adminCard = $('togelAdminInputCard');
     if (adminCard) adminCard.hidden = !_togelIsAdmin();
     
@@ -4972,7 +4981,7 @@ function renderTogelHistory() {
     const historyData = tbl.entries || [];
     const isAdmin = _togelIsAdmin();
     
-    // Tampilkan/Sembunyikan kolom Aksi
+    // Kolom Aksi HANYA muncul untuk Admin
     const aksiCol = $('togelHistoryAksiCol');
     if (aksiCol) aksiCol.hidden = !isAdmin;
 
@@ -5011,7 +5020,7 @@ function _handleTogelSave() {
     
     const tbl = getOrCreateMarketTable(m.id, m.name);
     
-    // Logika Edit: Jika tanggal sudah ada, timpa. Jika belum, tambah baru.
+    // Simpan / Edit
     const dupIndex = tbl.entries.findIndex(function(r) { return r.tanggal === date; });
     if (dupIndex !== -1) {
         tbl.entries[dupIndex].result = result;
@@ -5057,7 +5066,7 @@ window.deleteTogelResult = function(id) {
 
 // Edit Pasar (Nama & Jam Mundur)
 window.editPasarTogel = function(event, id) {
-    if (event) event.stopPropagation();
+    if (event) event.stopPropagation(); // Mencegah detail pasar terbuka
     const m = marketData.markets.find(function(x) { return x.id === id; });
     if (!m) return;
 
@@ -5065,7 +5074,7 @@ window.editPasarTogel = function(event, id) {
     if (newName === null) return;
     const newSchedule = prompt('Edit Label Jadwal:', m.schedule || '');
     if (newSchedule === null) return;
-    const newDrawTimesStr = prompt('Edit Jam Mundur (Pisah koma jika banyak):', (m.drawTimes || []).join(', '));
+    const newDrawTimesStr = prompt('Edit Jam Mundur (Pisah koma jika banyak):\nContoh: 13:00, 19:00', (m.drawTimes || []).join(', '));
     if (newDrawTimesStr === null) return;
 
     const drawTimes = newDrawTimesStr.split(',').map(function(s) { return s.trim(); }).filter(function(s) { return /^\d{2}:\d{2}$/.test(s); });
@@ -5101,7 +5110,6 @@ window.hapusPasarTogel = function(event, id) {
     renderTogelGrid();
 };
 
-// Countdown Timer
 function startTogelCountdown() { stopTogelCountdown(); _togelCountdownInterval = setInterval(updateTogelCountdowns, 1000); updateTogelCountdowns(); }
 function stopTogelCountdown() { if (_togelCountdownInterval) { clearInterval(_togelCountdownInterval); _togelCountdownInterval = null; } }
 function updateTogelCountdowns() {
