@@ -1706,24 +1706,25 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
         <!-- ═══════════════════════════════════════════════════════════════
              SECTION: MENU TOGEL (GRID + DETAIL)
              ═══════════════════════════════════════════════════════════════ -->
-        <section id="menuTogel">
-                        <div id="togelGridView">
+                <section id="menuTogel">
+            <div id="togelGridView">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
                     <h2 style="margin:0;">🎰 Menu Togel — Pasar Resmi</h2>
                     <button class="btn-primary" id="addNewTogelMarketBtn" style="width:auto; padding:8px 14px; font-size:13px;" onclick="tambahPasarTogel()">➕ Pasar Baru</button>
                 </div>
-                <!-- ... sisa tulisan "Pilih pasar..." biarkan apa adanya ... -->
                 <p class="text-muted mb-10" style="font-size:13px;">
-                    Pilih pasar untuk melihat history result dan prediksi.
+                    Pilih pasar untuk melihat result terakhir, prediksi, dan hitungan mundur otomatis.
                 </p>
                 <div class="togel-market-grid" id="togelMarketGrid"></div>
                 <div class="togel-disclaimer" style="margin-top:14px;">
                     ⚠️ Hasil togel bersifat acak. Prediksi adalah analisa, bukan jaminan.
-                    Gunakan dengan bijak — jangan gunakan uang kebutuhan pokok.
                 </div>
             </div>
+
             <div id="togelDetailView" style="display:none;">
                 <button class="togel-back-btn" onclick="closeTogelDetail()">← Kembali ke Daftar Pasar</button>
+                
+                <!-- HEADER: Nama Pasar, Result Terakhir, Countdown -->
                 <div class="togel-detail-header">
                     <div class="togel-detail-title">
                         <div>
@@ -1738,44 +1739,25 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
                     </div>
                     <div class="togel-detail-countdown-box" id="togelDetailCountdown">⏱️ —</div>
                 </div>
-                <div class="togel-detail-tabs" id="togelDetailTabs">
-                    <button data-ttab="history" class="active" onclick="switchTogelDetailTab('history')">📜 Lihat History</button>
-                    <button data-ttab="prediksi" onclick="switchTogelDetailTab('prediksi')">🔮 Lihat Prediksi</button>
+
+                <!-- TAB (Hanya Prediksi) -->
+                <div class="togel-detail-tabs" id="togelDetailTabs" style="border-bottom:none; margin-bottom:10px;">
+                    <button class="active" onclick="switchTogelDetailTab('prediksi')">🔮 Lihat Prediksi</button>
                     <button onclick="exportTogelHistoryCSV(activeTogelMarketId)" style="color:var(--success); border-color:var(--success);">⬇ CSV</button>
                     <button onclick="exportTogelHistoryJSON(activeTogelMarketId)" style="color:var(--warn); border-color:var(--warn);">⬇ JSON</button>
                 </div>
-                <div id="togelTabHistory" class="subpanel active">
-                    <div class="card">
-                        <div class="togel-page-size-bar">
-                            <span>Tampilkan <b>per <span id="togelHistoryCount">0</span></b> · Total <b id="togelHistoryTotal">0</b> data</span>
-                            <select id="togelPageSizeSelect" onchange="changeTogelPageSize(this.value)">
-                                <option value="10" selected>10 / halaman</option>
-                                <option value="25">25 / halaman</option>
-                                <option value="50">50 / halaman</option>
-                            </select>
-                        </div>
-                        <div class="table-container" style="max-height:520px; overflow-y:auto;">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Tanggal</th>
-                                        <th>Result</th>
-                                        <th>Syair</th>
-                                        <th>Grup</th>
-                                        <th id="togelHistoryAksiCol" hidden>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="togelHistoryBody"></tbody>
-                            </table>
-                        </div>
-                        <div class="togel-history-nav" id="togelHistoryNav"></div>
-                    </div>
-                </div>
-                <div id="togelTabPrediksi" class="subpanel">
+
+                <!-- PANEL PREDIKSI -->
+                <div id="togelTabPrediksi" class="subpanel active">
                     <div id="togelPrediksiContainer"></div>
                 </div>
-                <div class="card" id="togelAdminInputCard" hidden style="margin-top:14px;">
-                    <h3 style="color:var(--accent); margin-bottom:10px;">➕ Input Result Manual (Admin)</h3>
+
+                <!-- FORM INPUT RESULT TERBARU (KHUSUS ADMIN) -->
+                <div class="card" id="togelAdminInputCard" hidden style="margin-top:14px; border:1px solid var(--accent);">
+                    <h3 style="color:var(--accent); margin-bottom:10px;">➕ Input Result Terbaru (Admin)</h3>
+                    <p class="text-muted" style="font-size:11.5px; margin-bottom:10px;">
+                        *Data yang Anda simpan di sini akan otomatis masuk ke Bank Data (Tabel Result).
+                    </p>
                     <div class="grid-2">
                         <div class="field">
                             <label for="togelInputDate">Tanggal</label>
@@ -3247,8 +3229,9 @@ function renderResultTable() {
         return;
     }
     
+    // URUTKAN BERDASARKAN TANGGAL TERBARU (Descending)
     const sorted = entries.slice().sort(function(a, b) {
-        return (a.periode || '').localeCompare(b.periode || '', undefined, { numeric: true, sensitivity: 'base' });
+        return (b.tanggal || '').localeCompare(a.tanggal || '');
     });
     
     let html = '';
@@ -3306,34 +3289,53 @@ window.saveResultEntry = function() {
     if (result.length !== 4) { toast('Result harus 4 digit', 'error'); return; }
 
     const activeTable = getActiveTable();
+    if (!activeTable || !activeTable.id) { toast('Pilih tabel terlebih dahulu', 'error'); return; }
+
     const entries = activeTable.entries || [];
     
+    // Otomatis buat periode jika kosong
     if (!periode) {
         let nextNum = 1;
         if (entries.length > 0) {
             let max = 0;
-            entries.forEach(function(e) { const num = parseInt(e.periode, 10); if (!isNaN(num) && num > max) max = num; });
+            entries.forEach(function(e) {
+                const num = parseInt(e.periode, 10);
+                if (!isNaN(num) && num > max) max = num;
+            });
             nextNum = max + 1;
         }
         periode = String(nextNum).padStart(3, '0');
     }
 
     if (id) {
+        // Mode Edit
         for (let i = 0; i < entries.length; i++) {
             if (entries[i].id === id) {
-                entries[i].tanggal = tanggal; entries[i].periode = periode; entries[i].result = result;
+                entries[i].tanggal = tanggal;
+                entries[i].periode = periode;
+                entries[i].result = result;
                 break;
             }
         }
-        toast('Data diperbarui', 'success');
+        toast('Data result diperbarui', 'success');
     } else {
-        entries.push({ id: 'r_' + Date.now(), tanggal: tanggal, periode: periode, result: result });
-        toast('Result ditambahkan', 'success');
+        // Mode Tambah Baru Mandiri
+        entries.push({
+            id: 'r_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+            tanggal: tanggal,
+            periode: periode,
+            result: result
+        });
+        toast('Result baru berhasil ditambahkan', 'success');
     }
 
     activeTable.entries = entries;
     saveTableData();
-    syncTogelWithTable(); // Sinkronisasi ke Togel
+
+    // Sinkronisasi ke Menu Togel (Agar tampilan Togel berubah)
+    if (typeof syncTogelWithTable === 'function') syncTogelWithTable();
+    
+    // Refresh Tampilan
     refreshTableSelector();
     renderResultTable();
     $('resultModal').classList.remove('show');
@@ -5018,25 +5020,43 @@ function _handleTogelSave() {
     const m = getActiveTogelMarket();
     if (!m) return;
     
+    // Ambil Tabel Result
     const tbl = getOrCreateMarketTable(m.id, m.name);
     
+    // Cek apakah tanggal sudah ada
     const dupIndex = tbl.entries.findIndex(function(r) { return r.tanggal === date; });
     if (dupIndex !== -1) {
-        if (!confirm('Tanggal ' + date + ' sudah ada. Ganti?')) return;
-        tbl.entries.splice(dupIndex, 1);
+        if (!confirm('Tanggal ' + date + ' sudah ada. Ganti dengan result baru?')) return;
+        tbl.entries.splice(dupIndex, 1); // Hapus data di tanggal yang sama
     }
     
+    // Hitung Periode Otomatis dari yang Terbesar
+    let nextNum = 1;
+    if (tbl.entries.length > 0) {
+        let max = 0;
+        tbl.entries.forEach(function(e) {
+            const num = parseInt(e.periode, 10);
+            if (!isNaN(num) && num > max) max = num;
+        });
+        nextNum = max + 1;
+    }
+    
+    // Tambahkan ke Tabel Result
     tbl.entries.push({
         id: 'r_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
-        tanggal: date, result: result, periode: String(tbl.entries.length + 1).padStart(3, '0')
+        tanggal: date, 
+        result: result, 
+        periode: String(nextNum).padStart(3, '0')
     });
     
-    tbl.entries.sort(function(a, b) { return (a.tanggal || '').localeCompare(b.tanggal || ''); });
-    saveTableData();
+    saveTableData(); // Simpan Database Mandiri
+    
+    // Sinkronisasi & Refresh
+    if (typeof syncTogelWithTable === 'function') syncTogelWithTable();
     $('togelInputResult').value = '';
     renderTogelDetail();
-    toast('Result ' + result + ' masuk ke Tabel Result', 'success');
-    notifyNewResult(m.id, result, date);
+    renderTogelGrid();
+    toast('Result ' + result + ' berhasil masuk ke Tabel Result', 'success');
 }
 
 window.deleteTogelResult = function(id) {
