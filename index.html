@@ -6663,69 +6663,162 @@ console.log('Semua fitur siap. Selamat menggunakan SA_HARD!');
 </script>
 
 <script>
-// Auto-Save Input 4 Angka
 (function() {
-    var KEY = 'sa_input4_save_final';
+    var KEY = 'sa_input4_save_v10';
+    var sudahDimuat = false;
 
-    function saveData() {
+    function simpan() {
         try {
-            var data = {};
-            var inputs = document.querySelectorAll('#input4Angka input[type="text"], #input4Angka input[type="number"], #input4Angka select');
+            if (typeof currentUser === 'undefined' || !currentUser) return;
+            
+            var data = { fields: {} };
+            var inputs = document.querySelectorAll('#input4Angka input, #input4Angka select');
             for (var i = 0; i < inputs.length; i++) {
                 var el = inputs[i];
-                if (el.id) data[el.id] = el.value;
+                if (el.id) data.fields[el.id] = (el.type === 'checkbox') ? el.checked : el.value;
             }
-            var checks = document.querySelectorAll('#input4Angka input[type="checkbox"]');
-            for (var j = 0; j < checks.length; j++) {
-                var cb = checks[j];
-                if (cb.id) data[cb.id] = cb.checked;
-            }
+            
             var activeTab = document.querySelector('#subTabs4Angka button.active');
-            if (activeTab) data['__tab__'] = activeTab.getAttribute('data-subpanel');
+            if (activeTab) data.activeTab = activeTab.getAttribute('data-subpanel');
+            
+            if (typeof pageState !== 'undefined') {
+                data.pageState = {};
+                for (var k in pageState) {
+                    data.pageState[k] = {
+                        pages: pageState[k].pages,
+                        current: pageState[k].current,
+                        meta: pageState[k].meta,
+                        _breakdown: pageState[k]._breakdown
+                    };
+                }
+            }
+            
+            if (typeof bmState !== 'undefined') {
+                data.bmState = { items: bmState.items, page: bmState.page };
+            }
+            
+            if (typeof c33State !== 'undefined' && c33State.rows) {
+                data.c33State = { rows: c33State.rows };
+            }
+            
+            if (typeof c33MasterState !== 'undefined') {
+                data.c33MasterState = { items: c33MasterState.items, page: c33MasterState.page };
+            }
+            
+            if (typeof blSections !== 'undefined') {
+                data.blSections = {};
+                for (var k2 in blSections) {
+                    data.blSections[k2] = {
+                        items: blSections[k2].items,
+                        page: blSections[k2].page,
+                        label: blSections[k2].label,
+                        combo: blSections[k2].combo
+                    };
+                }
+            }
             
             localStorage.setItem(KEY, JSON.stringify(data));
         } catch (e) {}
     }
 
-    function loadData() {
+    function muat() {
+        if (sudahDimuat) return;
         try {
             var raw = localStorage.getItem(KEY);
-            if (!raw) return;
+            if (!raw) { sudahDimuat = true; return; }
             var data = JSON.parse(raw);
-            
-            for (var id in data) {
-                if (id === '__tab__') continue;
-                var el = document.getElementById(id);
-                if (!el) continue;
-                if (el.type === 'checkbox') {
-                    el.checked = data[id];
-                } else {
-                    el.value = data[id];
+
+            if (data.fields) {
+                for (var id in data.fields) {
+                    var el = document.getElementById(id);
+                    if (!el) continue;
+                    if (el.type === 'checkbox') el.checked = data.fields[id];
+                    else el.value = data.fields[id];
                 }
             }
-            
-            if (data.__tab__) {
-                var btn = document.querySelector('#subTabs4Angka button[data-subpanel="' + data.__tab__ + '"]');
-                if (btn) {
-                    btn.click();
+
+            if (data.pageState && typeof pageState !== 'undefined') {
+                for (var k in data.pageState) {
+                    if (!pageState[k]) continue;
+                    pageState[k].pages = data.pageState[k].pages || [];
+                    pageState[k].current = data.pageState[k].current || 0;
+                    pageState[k].meta = data.pageState[k].meta || '';
+                    pageState[k]._breakdown = data.pageState[k]._breakdown || '';
+                    if (pageState[k].pages.length > 0) {
+                        try { renderPagination(PAGE_MAP[k][0], k, PAGE_MAP[k][1]); } catch(er) {}
+                    }
                 }
             }
-        } catch (e) {}
+
+            if (data.bmState && typeof bmState !== 'undefined') {
+                bmState.items = data.bmState.items || [];
+                bmState.page = data.bmState.page || 0;
+                if (bmState.items.length > 0) { try { renderBM(); } catch(er) {} }
+            }
+
+            if (data.c33State && data.c33State.rows && typeof c33State !== 'undefined') {
+                for (var i = 0; i < data.c33State.rows.length; i++) {
+                    if (c33State.rows[i] && data.c33State.rows[i]) {
+                        c33State.rows[i].digits = data.c33State.rows[i].digits || '';
+                        c33State.rows[i].pasar = data.c33State.rows[i].pasar || '';
+                        c33State.rows[i].results = data.c33State.rows[i].results || [];
+                        c33State.rows[i].page = data.c33State.rows[i].page || 0;
+                        c33State.rows[i].generated = data.c33State.rows[i].generated || false;
+                    }
+                }
+                if (data.c33MasterState && typeof c33MasterState !== 'undefined') {
+                    c33MasterState.items = data.c33MasterState.items || [];
+                    c33MasterState.page = data.c33MasterState.page || 0;
+                }
+                try { renderC33Rows(); } catch(er) {}
+                try { renderC33Results(); } catch(er) {}
+            }
+
+            if (data.blSections && typeof blSections !== 'undefined') {
+                for (var k3 in blSections) delete blSections[k3];
+                for (var k4 in data.blSections) blSections[k4] = data.blSections[k4];
+                var html = '';
+                for (var k5 in blSections) {
+                    try { html += blBuildSection(k5, blSections[k5].label, blSections[k5].items, blSections[k5].combo); } catch(er) {}
+                }
+                var container = document.getElementById('blResultsContainer');
+                if (container) container.innerHTML = html;
+                for (var k6 in blSections) { try { blRenderSection(k6); } catch(er) {} }
+            }
+
+            if (data.activeTab) {
+                var btn = document.querySelector('#subTabs4Angka button[data-subpanel="' + data.activeTab + '"]');
+                if (btn) btn.click();
+            }
+
+            sudahDimuat = true;
+        } catch (e) { sudahDimuat = true; }
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(loadData, 1500);
-    });
-
     document.addEventListener('input', function(e) {
-        if (e.target && e.target.closest && e.target.closest('#input4Angka')) saveData();
+        if (e.target && e.target.closest && e.target.closest('#input4Angka')) simpan();
     });
-    
     document.addEventListener('change', function(e) {
-        if (e.target && e.target.closest && e.target.closest('#input4Angka')) saveData();
+        if (e.target && e.target.closest && e.target.closest('#input4Angka')) simpan();
     });
 
-    setInterval(saveData, 3000);
+    var app = document.getElementById('app');
+    if (app) {
+        if (!app.hidden) {
+            setTimeout(muat, 800);
+        } else {
+            var observer = new MutationObserver(function() {
+                if (!app.hidden) {
+                    setTimeout(muat, 800);
+                    observer.disconnect();
+                }
+            });
+            observer.observe(app, { attributes: true, attributeFilter: ['hidden'] });
+        }
+    }
+
+    setInterval(simpan, 2000);
+    window.addEventListener('beforeunload', simpan);
 })();
 </script>
 
