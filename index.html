@@ -975,39 +975,39 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
    FITUR BARU: BBFS LENGKAP / BBFS MURNI / 33 INPUT / CARA BACA
    ═══════════════════════════════════════════════════════════════════════ */
 
+body { overflow-x: hidden; max-width: 100vw; } /* FIX HALAMAN TERPOTONG */
+
 .c33-container {
-    max-height: 620px; overflow-y: auto;
+    /* max-height: 620px; -- DIHAPUS AGAR TIDAK TERPOTONG */
     background: var(--card-2); border: 1px solid var(--border);
     border-radius: var(--radius-md); padding: 10px;
 }
 .c33-row {
-    display: grid; grid-template-columns: 32px 90px 1fr auto;
-    gap: 6px; align-items: center; padding: 6px 8px;
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: var(--radius-sm); margin-bottom: 6px;
+    display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+    padding: 6px 8px; background: var(--card);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    margin-bottom: 6px;
 }
 .c33-row .c33-no {
-    font-family: monospace; font-size: 11px; color: var(--muted);
-    text-align: center; font-weight: 700;
+    width: 28px; flex-shrink: 0; text-align: center;
+    font-family: monospace; font-size: 11px; color: var(--muted); font-weight: 700;
 }
-.c33-row input[type="text"] { padding: 7px 9px; font-size: 13px; width: 100%; }
 .c33-row input.c33-digits {
-    font-family: monospace; font-weight: 700; color: var(--accent);
-    text-align: center; letter-spacing: 2px;
+    width: 70px; flex-shrink: 0; text-align: center;
+    font-family: monospace; font-weight: 700; color: var(--accent); letter-spacing: 2px;
+    padding: 7px 9px; font-size: 13px;
+}
+.c33-row input.c33-pasar {
+    flex: 1; min-width: 120px; padding: 7px 9px; font-size: 13px;
 }
 .c33-row .c33-status {
+    width: 65px; flex-shrink: 0; text-align: center;
     font-size: 10px; font-weight: 700; padding: 3px 6px;
     border-radius: 6px; white-space: nowrap;
 }
 .c33-row .c33-status.empty { color: var(--muted); }
-.c33-row .c33-status.done {
-    color: var(--success); background: rgba(34,197,94,0.15);
-    border: 1px solid var(--success);
-}
-.c33-row .c33-status.none {
-    color: var(--danger); background: rgba(239,68,68,0.15);
-    border: 1px solid var(--danger);
-}
+.c33-row .c33-status.done  { color: var(--success); background: rgba(34,197,94,0.15); border: 1px solid var(--success); }
+.c33-row .c33-status.none  { color: var(--danger); background: rgba(239,68,68,0.15); border: 1px solid var(--danger); }
 
 .c33-result-block {
     margin-top: 8px; padding: 10px; background: var(--card-3);
@@ -1015,34 +1015,10 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
     border-radius: var(--radius-sm);
 }
 .c33-result-block .c33-res-header {
-    font-weight: 700; color: var(--success);
-    font-size: 12.5px; margin-bottom: 6px;
+    font-weight: 700; color: var(--success); font-size: 12.5px; margin-bottom: 6px;
 }
 .c33-result-block .c33-res-header .pasar-tag {
     color: var(--accent); font-size: 11px; font-weight: 400;
-}
-
-.caraBaca-grid {
-    display: grid; grid-template-columns: 60px 1fr 1fr 1fr;
-    gap: 4px; font-size: 10.5px; margin-top: 6px;
-}
-.caraBaca-grid .cb-head {
-    color: var(--muted); font-weight: 700; text-transform: uppercase;
-    font-size: 9.5px; padding: 2px 4px; letter-spacing: 0.5px;
-}
-.caraBaca-grid .cb-cell {
-    padding: 3px 6px; background: rgba(0,0,0,0.2);
-    border-radius: 4px; font-family: monospace; color: var(--text-dim);
-}
-.caraBaca-grid .cb-cell.cb-num { color: var(--warn); font-weight: 700; }
-.caraBaca-grid .cb-cell.cb-pair { color: var(--accent); }
-
-.bbfs-murni-pool {
-    font-family: monospace; font-size: 13px; color: var(--accent);
-    background: var(--card-2); padding: 8px; border-radius: 6px;
-    border: 1px solid var(--border); word-break: break-all;
-    line-height: 1.8; max-height: 400px; overflow-y: auto;
-    white-space: pre-wrap;
 }
 
 /* End of CSS */
@@ -5603,13 +5579,40 @@ window.bmExport = function() {
 };
 
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 63: 33 INPUT 3 ANGKA
+   BLOK 63: 33 INPUT 3 ANGKA (DIPERBARUI)
    ═══════════════════════════════════════════════════════════════════════ */
 
 const c33State = {
     rows: Array(33).fill(null).map(function(_, i) {
         return { idx: i, digits: '', pasar: '', results: [], page: 0, generated: false };
     })
+};
+
+// State untuk menampung TOTAL HASIL GABUNGAN DARI SEMUA KOLOM
+const c33MasterState = { items: [], page: 0, size: PER_PAGE };
+
+window.c33PageMaster = function(d) {
+    const tp = Math.ceil(c33MasterState.items.length / c33MasterState.size);
+    const nx = c33MasterState.page + d;
+    if (nx < 0 || nx >= tp) return;
+    c33MasterState.page = nx;
+    renderC33Results();
+};
+window.c33CopyMasterPage = function() {
+    const st = c33MasterState.page * c33MasterState.size;
+    copyTextToClipboard(c33MasterState.items.slice(st, st + c33MasterState.size).join('*') + '*');
+};
+window.c33CopyMasterAll = function() {
+    copyTextToClipboard(c33MasterState.items.join('*') + '*');
+};
+window.c33ExportMaster = function() {
+    const b = new Blob([c33MasterState.items.join('*') + '*'], { type: 'text/plain;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(b);
+    a.download = 'sahard-c33-master.txt';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast('Diexport', 'success');
 };
 
 function renderC33Rows() {
@@ -5625,7 +5628,7 @@ function renderC33Rows() {
             + '<div class="c33-no">' + (r.idx + 1) + '</div>'
             + '<input type="text" class="c33-digits" maxlength="3" inputmode="numeric"'
             + ' placeholder="123" value="' + esc(r.digits) + '" data-idx="' + r.idx + '" data-field="digits">'
-            + '<input type="text" placeholder="Nama Pasar (Macau4D, Oregon, dst)"'
+            + '<input type="text" class="c33-pasar" placeholder="Nama Pasar (Macau4D, Oregon, dst)"'
             + ' value="' + esc(r.pasar) + '" data-idx="' + r.idx + '" data-field="pasar">'
             + status + '</div>';
     });
@@ -5669,6 +5672,42 @@ function renderC33Results() {
     if (!c) return;
     const showCB = $('c33ShowCaraBaca') && $('c33ShowCaraBaca').checked;
     let html = '';
+
+    // 1. HITUNG TOTAL HASIL GABUNGAN DARI 33 KOLOM
+    const masterSet = new Set();
+    c33State.rows.forEach(r => {
+        if (r.generated && r.digits && r.results) {
+            r.results.forEach(n => masterSet.add(n));
+        }
+    });
+    c33MasterState.items = Array.from(masterSet).sort();
+
+    // 2. TAMPILKAN PANEL TOTAL DI PALING ATAS
+    if (c33MasterState.items.length > 0) {
+        const tp = Math.ceil(c33MasterState.items.length / c33MasterState.size);
+        if (c33MasterState.page >= tp) c33MasterState.page = tp - 1;
+        if (c33MasterState.page < 0) c33MasterState.page = 0;
+        const st = c33MasterState.page * c33MasterState.size;
+        const pd = c33MasterState.items.slice(st, st + c33MasterState.size);
+
+        html += `<div class="card" style="border-color:var(--success); background:rgba(34,197,94,0.05); margin-bottom:14px;">
+            <h3 style="color:var(--success); margin-bottom:8px;">🎯 TOTAL KESELURUHAN DARI 33 KOLOM (UNIK)</h3>
+            <div class="page-info">Halaman ${c33MasterState.page + 1} / ${tp} • ${pd.length} di halaman ini • Total ${c33MasterState.items.length.toLocaleString('id-ID')} angka unik</div>
+            <div class="page-content" style="max-height:200px; border-color:var(--success);">${pd.join('*')}${pd.length ? '*' : ''}</div>
+            <div class="page-nav">
+                <button ${c33MasterState.page === 0 ? 'disabled' : ''} onclick="c33PageMaster(-1)">◀ Prev</button>
+                <span>${c33MasterState.page + 1} / ${tp}</span>
+                <button ${c33MasterState.page === tp - 1 ? 'disabled' : ''} onclick="c33PageMaster(1)">Next ▶</button>
+            </div>
+            <div class="page-actions">
+                <button class="btn-success" onclick="c33CopyMasterPage()">📋 Copy Hal. Ini</button>
+                <button class="btn-success" onclick="c33CopyMasterAll()">📋 Copy Semua Total</button>
+                <button class="btn-warn" onclick="c33ExportMaster()">⬇ Export TXT</button>
+            </div>
+        </div>`;
+    }
+
+    // 3. TAMPILKAN HASIL PER KOLOM
     c33State.rows.forEach(function(r) {
         if (!r.generated || !r.digits || r.results.length === 0) return;
         const tp = Math.ceil(r.results.length / PER_PAGE);
@@ -5700,6 +5739,7 @@ function renderC33Results() {
             + '<button onclick="c33Export(' + r.idx + ')">⬇ TXT</button>'
             + '</div>' + cbHtml + '</div>';
     });
+
     if (!html) {
         html = '<div class="card"><div class="empty">Belum ada hasil. Isi BBFS & minimal 1 baris 3-angka, lalu Generate.</div></div>';
     }
@@ -5763,6 +5803,10 @@ if ($('c33GenerateAllBtn')) {
             totalRows++;
             totalResults += filtered.length;
         });
+        
+        // Reset halaman master saat generate baru
+        c33MasterState.page = 0;
+        
         renderC33Rows();
         renderC33Results();
         toast('Generated ' + totalRows + ' baris • ' + totalResults.toLocaleString('id-ID') + ' total hasil', 'success');
@@ -5775,6 +5819,8 @@ if ($('c33ClearAllBtn')) {
         c33State.rows.forEach(function(r) {
             r.digits = ''; r.pasar = ''; r.results = []; r.page = 0; r.generated = false;
         });
+        c33MasterState.items = [];
+        c33MasterState.page = 0;
         renderC33Rows();
         renderC33Results();
     });
