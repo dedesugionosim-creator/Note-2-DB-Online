@@ -289,16 +289,17 @@ body.offline .offline-badge { display: block; }
 
 .subtabs {
     display: flex;
-    flex-wrap: wrap; /* INI KUNCI UTAMANYA: Membuat tombol turun ke bawah jika penuh */
-    gap: 6px;
+    flex-wrap: wrap; /* Agar tombol turun ke bawah jika layar sempit */
+    gap: 8px;
     margin-bottom: 14px;
     padding-bottom: 4px;
-    overflow-x: visible; /* Hapus scroll ke samping */
+    position: relative;
+    z-index: 10; /* Memastikan tab berada di atas elemen lain */
+    pointer-events: auto;
 }
 
-/* Tombol tab di dalamnya */
 .subtabs button {
-    padding: 7px 13px;
+    padding: 8px 14px;
     font-size: 12.5px;
     white-space: nowrap;
     background-color: var(--card-2);
@@ -307,7 +308,8 @@ body.offline .offline-badge { display: block; }
     border-radius: var(--radius-sm);
     font-weight: 600;
     cursor: pointer;
-    flex: 0 0 auto; /* Mencegah tombol mengecil aneh */
+    pointer-events: auto;
+    transition: all 0.2s ease;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -2869,17 +2871,22 @@ document.querySelectorAll('nav button').forEach(function(btn) {
     });
 });
 
-/* Pindah Tab Input 4 Angka (Versi Diperbaiki) */
-document.querySelectorAll('#subTabs4Angka button').forEach(function(btn) {
-    btn.onclick = function(e) {
-        e.preventDefault(); // Mencegah error default
+/* Pindah Tab Input 4 Angka (EVENT DELEGATION - ANTI GAGAL) */
+const tabContainer = document.getElementById('subTabs4Angka');
+if (tabContainer) {
+    tabContainer.addEventListener('click', function(e) {
+        // Cari tombol yang diklik
+        const btn = e.target.closest('button');
+        if (!btn) return;
+        
+        e.preventDefault();
         
         // 1. Hilangkan efek aktif dari semua tombol tab
-        document.querySelectorAll('#subTabs4Angka button').forEach(function(b) { 
+        tabContainer.querySelectorAll('button').forEach(function(b) { 
             b.classList.remove('active'); 
         });
         
-        // 2. Sembunyikan semua subpanel HANYA di dalam menu Input 4 Angka
+        // 2. Sembunyikan semua subpanel di dalam Input 4 Angka
         document.querySelectorAll('#input4Angka .subpanel').forEach(function(p) { 
             p.classList.remove('active'); 
         });
@@ -2888,15 +2895,17 @@ document.querySelectorAll('#subTabs4Angka button').forEach(function(btn) {
         btn.classList.add('active');
         
         // 4. Tampilkan panel yang dituju
-        const target = document.getElementById(btn.dataset.subpanel);
-        if (target) {
-            target.classList.add('active');
+        const targetId = btn.getAttribute('data-subpanel');
+        const targetPanel = document.getElementById(targetId);
+        
+        if (targetPanel) {
+            targetPanel.classList.add('active');
         } else {
-            console.error("Panel tidak ditemukan:", btn.dataset.subpanel);
-            alert("Sistem Error: Panel " + btn.dataset.subpanel + " tidak ditemukan di HTML. Pastikan Anda sudah menyalin HTML subpanel-c33 dengan benar.");
+            console.error("Panel tidak ditemukan:", targetId);
+            alert("Sistem Error: Panel " + targetId + " tidak ditemukan di HTML.");
         }
-    };
-});
+    });
+}
 
 /* ═══════════════════════════════════════════════════════════════════════
    BLOK 37: RENDER MASTER NOMOR (CRUD)
@@ -5392,12 +5401,8 @@ function blRenderSection(key) {
     const start = sec.page * sec.size;
     const pageData = sec.items.slice(start, start + sec.size);
 
+    // (Opsional) Hapus logika c33ShowCaraBaca agar tidak bentrok
     let cbHtml = '';
-    const chk = $('c33ShowCaraBaca');
-    if (chk && chk.checked) {
-        cbHtml = '<div style="margin-top:8px;"><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">'
-            + 'Cara Baca (5 pertama):</div>' + renderCaraBacaGrid(pageData, 5) + '</div>';
-    }
 
     body.innerHTML = '<div class="page-info">Halaman ' + (sec.page + 1) + ' / ' + totalPages
         + ' • ' + pageData.length + ' angka • Total ' + sec.items.length.toLocaleString('id-ID') + '</div>'
