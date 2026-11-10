@@ -4045,7 +4045,7 @@ $('grupCBGenerateBtn').addEventListener('click', function() {
 });
 
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 49: DATA PASAR SELECTOR
+   BLOK 49: DATA PASAR SELECTOR (AMAN)
    ═══════════════════════════════════════════════════════════════════════ */
 
 const elMarketSelector = $('marketSelector');
@@ -4132,153 +4132,24 @@ function refreshAll() {
    ▼▼▼ LANJUT DI PART 5 ▼▼▼
    ═══════════════════════════════════════════════════════════════════════ */
    
- /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 51: MULTI-TABLE CRUD LENGKAP
+/* ═══════════════════════════════════════════════════════════════════════
+   BLOK 51: MULTI-TABLE CRUD LENGKAP (AMAN)
    ═══════════════════════════════════════════════════════════════════════ */
 
-$('tableSelector').addEventListener('change', function(e) {
-    tableData.activeTableId = e.target.value;
-    saveTableData();
-    refreshTableSelector();
-    renderResultTable();
-    $('patternResultBox').classList.remove('show');
-});
-
-$('addNewTableBtn').addEventListener('click', function() {
-    const name = prompt('Nama Tabel Baru:', 'Tabel Baru');
-    if (name) {
-        const newId = 'table_' + Date.now();
-        tableData.tables.push({ id: newId, name: name, entries: [] });
-        tableData.activeTableId = newId;
+const tableSelectorEl = $('tableSelector');
+if (tableSelectorEl) {
+    tableSelectorEl.addEventListener('change', function(e) {
+        tableData.activeTableId = e.target.value;
         saveTableData();
         refreshTableSelector();
         renderResultTable();
-        toast('Tabel dibuat', 'success');
-    }
-});
-
-$('deleteTableBtn').addEventListener('click', function() {
-    if (tableData.tables.length <= 1) { toast('Minimal 1 tabel', 'error'); return; }
-    const active = getActiveTable();
-    if (!confirm('Hapus tabel "' + active.name + '" beserta isinya?')) return;
-    tableData.tables = tableData.tables.filter(function(t) {
-        return t.id !== tableData.activeTableId;
+        const box = $('patternResultBox');
+        if (box) box.classList.remove('show');
     });
-    tableData.activeTableId = tableData.tables[0].id;
-    saveTableData();
-    refreshTableSelector();
-    renderResultTable();
-    toast('Tabel dihapus', 'success');
-});
+}
 
-$('tableTitleDisplay').addEventListener('blur', function(e) {
-    let newTitle = e.target.textContent.trim();
-    if (!newTitle) newTitle = 'Tabel Result';
-    const active = getActiveTable();
-    active.name = newTitle;
-    saveTableData();
-    refreshTableSelector();
-    toast('Nama tabel diperbarui', 'success');
-});
-
-$('tableTitleDisplay').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); }
-});
-
-$('addResultBtn').addEventListener('click', function() {
-    $('modalTitle').textContent = 'Tambah Result';
-    $('editResultId').value = '';
-    $('inputTanggal').value = new Date().toISOString().split('T')[0];
-    const entries = getActiveTable().entries;
-    let nextNum = 1;
-    if (entries.length > 0) {
-        let max = 0;
-        entries.forEach(function(e) {
-            const num = parseInt(e.periode, 10);
-            if (!isNaN(num) && num > max) max = num;
-        });
-        nextNum = max + 1;
-    }
-    $('inputPeriode').value = String(nextNum).padStart(3, '0');
-    $('inputResult').value = '';
-    $('previewSyair').textContent = '-';
-    $('previewGrup').textContent = '-';
-    $('resultModal').classList.add('show');
-});
-
-$('cancelModalBtn').addEventListener('click', function() {
-    $('resultModal').classList.remove('show');
-});
-
-$('inputResult').addEventListener('input', function(e) {
-    e.target.value = onlyDigits(e.target.value).slice(0, 4);
-    const val = e.target.value;
-    if (val.length === 4) {
-        const gen = generateSyairAndGrup(val);
-        $('previewSyair').textContent = gen.syair;
-        $('previewGrup').textContent = gen.grup;
-    } else {
-        $('previewSyair').textContent = '-';
-        $('previewGrup').textContent = '-';
-    }
-});
-
-$('saveResultBtn').addEventListener('click', function() {
-    const id = $('editResultId').value;
-    const tanggal = $('inputTanggal').value;
-    let periode = $('inputPeriode').value.trim();
-    const result = $('inputResult').value.trim();
-    if (!tanggal) { toast('Tanggal wajib', 'error'); return; }
-    if (result.length !== 4) { toast('Result harus 4 digit', 'error'); return; }
-    
-    const entries = getActiveTable().entries;
-    if (!periode) {
-        let nextNum = 1;
-        if (entries.length > 0) {
-            let max = 0;
-            entries.forEach(function(e) {
-                const num = parseInt(e.periode, 10);
-                if (!isNaN(num) && num > max) max = num;
-            });
-            nextNum = max + 1;
-        }
-        periode = String(nextNum).padStart(3, '0');
-    }
-    
-    if (id) {
-        for (let i = 0; i < entries.length; i++) {
-            if (entries[i].id === id) {
-                entries[i].tanggal = tanggal;
-                entries[i].periode = periode;
-                entries[i].result = result;
-                break;
-            }
-        }
-        toast('Data diperbarui', 'success');
-    } else {
-        entries.push({
-            id: 'r_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
-            tanggal: tanggal,
-            periode: periode,
-            result: result
-        });
-        toast('Data ditambahkan', 'success');
-    }
-    
-    saveTableData();
-    
-    // SINKRONISASI KE MENU TOGEL
-    const m = marketData.markets.find(function(mk) { return mk.id === tableData.activeTableId; });
-    if (m) {
-        m.history = entries.map(function(e) { return { id: e.id, date: e.tanggal, result: e.result }; });
-        saveMarketData();
-    }
-    
-    refreshTableSelector();
-    renderResultTable();
-    $('resultModal').classList.remove('show');
-});
-
+// Catatan: addNewTableBtn & deleteTableBtn sudah dihapus dari HTML,
+// jadi kita tidak boleh memanggil addEventListener untuk mereka.
 /* ═══════════════════════════════════════════════════════════════════════
    BLOK 52: ANALISA POLA
    ═══════════════════════════════════════════════════════════════════════ */
