@@ -4832,38 +4832,49 @@ function renderMenuTogel() {
     renderTogelGrid();
 }
 
+/* ═══════════════════════════════════════════════════════════════════════
+   FUNGSI TAMPILAN MENU TOGEL (GRID) & EDIT PASAR
+   ═══════════════════════════════════════════════════════════════════════ */
+
 function renderTogelGrid() {
     const grid = $('togelMarketGrid');
     if (!grid) return;
 
     const list = getTogelMarkets();
     if (list.length === 0) {
-        grid.innerHTML = '<div class="empty" style="grid-column:1/-1;">Belum ada pasar togel.</div>';
+        grid.innerHTML = '<div class="empty" style="grid-column:1/-1;">Belum ada pasar togel. Klik "+ Pasar Baru".</div>';
         return;
     }
     
     let html = '';
     list.forEach(function(m) {
+        // Ambil data history terbaru dari Tabel Result
         const tbl = getOrCreateMarketTable(m.id, m.name);
         const historyData = tbl.entries || [];
         const sorted = historyData.slice().sort(function(a, b) { return (b.tanggal || '').localeCompare(a.tanggal || ''); });
         const latest = sorted[0];
         
+        // Hitung Mundur Otomatis
         const cd = _getNextDrawInfo(m.drawTimes);
         const countdownHtml = cd
             ? `<div class="market-countdown${cd.urgent ? ' urgent' : ''}" data-countdown-market="${m.id}">⏱️ ${cd.remaining} (${cd.label})</div>`
-            : '';
+            : `<div class="market-countdown">⏱️ Waktu belum diatur</div>`;
             
         html += `
         <div class="togel-market-card" style="position: relative;" onclick="openTogelDetail('${m.id}')">
+            
+            <!-- TOMBOL EDIT & HAPUS PASAR -->
             <div style="position:absolute; top:10px; right:10px; z-index:10; display:flex; gap:4px;">
-                <button class="btn-warn" style="padding:4px 8px; font-size:10px; border-radius:6px;" onclick="editPasarTogel(event, '${m.id}')" title="Edit Jam Mundur">✏️</button>
+                <button class="btn-warn" style="padding:4px 8px; font-size:10px; border-radius:6px;" onclick="editPasarTogel(event, '${m.id}')" title="Edit Nama & Jam Mundur">✏️ Edit</button>
                 <button class="btn-danger" style="padding:4px 8px; font-size:10px; border-radius:6px;" onclick="hapusPasarTogel(event, '${m.id}')" title="Hapus Pasar">❌</button>
             </div>
-            <div class="market-name" style="padding-right: 50px;">${esc(m.name)}</div>
+
+            <div class="market-name" style="padding-right: 70px;">${esc(m.name)}</div>
             <div class="market-result ${latest ? '' : 'empty'}">${latest ? esc(latest.result) : '----'}</div>
             <div class="market-date">${latest ? _formatTanggalShort(latest.tanggal) : 'Belum ada data'}</div>
+            
             ${countdownHtml}
+            
             <div class="market-footer">
                 <span class="schedule">${esc(m.schedule || '—')}</span>
                 <span>${historyData.length} data</span>
@@ -4872,6 +4883,64 @@ function renderTogelGrid() {
     });
     grid.innerHTML = html;
 }
+
+// FUNGSI EDIT PASAR (MENGUBAH NAMA & JAM MUNDUR)
+window.editPasarTogel = function(event, id) {
+    if (event) event.stopPropagation();
+    const m = marketData.markets.find(function(x) { return x.id === id; });
+    if (!m) return;
+
+    // 1. Edit Nama
+    const newName = prompt('Edit Nama Pasar:', m.name);
+    if (newName === null) return;
+
+    // 2. Edit Label Jadwal (Tampilan Bebas)
+    const newSchedule = prompt('Edit Label Jadwal (Tampilan Kartu):', m.schedule || '');
+    if (newSchedule === null) return;
+
+    // 3. Edit Jam Undian (Untuk Hitungan Mundur)
+    const currentTimes = (m.drawTimes || []).join(', ');
+    const newDrawTimesStr = prompt(
+        'Masukkan Jam Mundur (Format 24 Jam).\n' +
+        'Pisahkan dengan koma jika lebih dari satu.\n\n' +
+        'Contoh 1: 13:00\n' +
+        'Contoh 2: 13:00, 19:00, 23:00', 
+        currentTimes || '13:00'
+    );
+    if (newDrawTimesStr === null) return;
+
+    // Validasi Format Jam
+    const drawTimes = newDrawTimesStr.split(',')
+        .map(function(s) { return s.trim(); })
+        .filter(function(s) { return /^\d{2}:\d{2}$/.test(s); });
+
+    if (drawTimes.length === 0) { 
+        toast('Format jam salah. Gunakan format HH:MM (contoh: 13:00)', 'error'); 
+        return; 
+    }
+
+    // 4. Simpan Perubahan
+    m.name = newName;
+    m.schedule = newSchedule || '—';
+    m.drawTimes = drawTimes;
+    saveMarketData();
+
+    // 5. Sinkronisasi Nama ke Tabel Result
+    if (typeof tableData !== 'undefined' && tableData.tables) {
+        const tbl = tableData.tables.find(function(t) { return t.id === id; });
+        if (tbl) {
+            tbl.name = newName;
+            if (typeof saveTableData === 'function') saveTableData();
+        }
+    }
+
+    toast('Data Pasar & Jam Mundur berhasil diperbarui', 'success');
+    
+    // 6. Segarkan Tampilan & Timer
+    renderTogelGrid();
+    stopTogelCountdown();
+    startTogelCountdown();
+};
 
 window.openTogelDetail = function(id) {
     activeTogelMarketId = id;
@@ -5020,17 +5089,17 @@ function _handleTogelSave() {
     const m = getActiveTogelMarket();
     if (!m) return;
     
-    // Ambil Tabel Result
+    // 1. Ambil tabel dari bank data (Tabel Result)
     const tbl = getOrCreateMarketTable(m.id, m.name);
     
-    // Cek apakah tanggal sudah ada
+    // 2. Cek jika tanggal sudah ada, timpa
     const dupIndex = tbl.entries.findIndex(function(r) { return r.tanggal === date; });
     if (dupIndex !== -1) {
         if (!confirm('Tanggal ' + date + ' sudah ada. Ganti dengan result baru?')) return;
-        tbl.entries.splice(dupIndex, 1); // Hapus data di tanggal yang sama
+        tbl.entries.splice(dupIndex, 1); 
     }
     
-    // Hitung Periode Otomatis dari yang Terbesar
+    // 3. Hitung Periode Baru
     let nextNum = 1;
     if (tbl.entries.length > 0) {
         let max = 0;
@@ -5041,21 +5110,19 @@ function _handleTogelSave() {
         nextNum = max + 1;
     }
     
-    // Tambahkan ke Tabel Result
+    // 4. Simpan Data
     tbl.entries.push({
         id: 'r_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
         tanggal: date, 
         result: result, 
         periode: String(nextNum).padStart(3, '0')
     });
+    saveTableData(); // Simpan ke Tabel Result
     
-    saveTableData(); // Simpan Database Mandiri
-    
-    // Sinkronisasi & Refresh
-    if (typeof syncTogelWithTable === 'function') syncTogelWithTable();
+    // 5. Segarkan Tampilan
     $('togelInputResult').value = '';
     renderTogelDetail();
-    renderTogelGrid();
+    renderTogelGrid(); // Grid di belakang juga ikut terupdate
     toast('Result ' + result + ' berhasil masuk ke Tabel Result', 'success');
 }
 
