@@ -6637,69 +6637,6 @@ console.log('BBFS Lengkap 20: Aktif | BBFS Murni 20: Aktif | 33 Input 3 Angka: A
 console.log('Gabung 3 Grup: Aktif | Cara Baca 4D: Aktif');
 console.log('Semua fitur siap. Selamat menggunakan SA_HARD!');
 
-(function() {
-    var KEY = 'sa_input4_backup_v3';
-    
-    function save() {
-        try {
-            var data = {};
-            var inputs = document.querySelectorAll('#input4Angka input, #input4Angka select');
-            for (var i = 0; i < inputs.length; i++) {
-                var el = inputs[i];
-                if (el.id) {
-                    if (el.type === 'checkbox') data[el.id] = el.checked;
-                    else data[el.id] = el.value;
-                }
-            }
-            var activeBtn = document.querySelector('#subTabs4Angka button.active');
-            if (activeBtn) data.__tab = activeBtn.getAttribute('data-subpanel');
-            localStorage.setItem(KEY, JSON.stringify(data));
-        } catch (e) {}
-    }
-    
-    function load() {
-        try {
-            var raw = localStorage.getItem(KEY);
-            if (!raw) return;
-            var data = JSON.parse(raw);
-            for (var id in data) {
-                if (id === '__tab') continue;
-                var el = document.getElementById(id);
-                if (!el) continue;
-                if (el.type === 'checkbox') el.checked = data[id];
-                else el.value = data[id];
-            }
-            if (data.__tab) {
-                var btn = document.querySelector('#subTabs4Angka button[data-subpanel="' + data.__tab + '"]');
-                if (btn) {
-                    var btns = document.querySelectorAll('#subTabs4Angka button');
-                    for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
-                    var panels = document.querySelectorAll('#input4Angka .subpanel');
-                    for (var j = 0; j < panels.length; j++) panels[j].classList.remove('active');
-                    btn.classList.add('active');
-                    var tgt = document.getElementById(data.__tab);
-                    if (tgt) tgt.classList.add('active');
-                }
-            }
-        } catch (e) {}
-    }
-    
-    setInterval(save, 2000);
-    
-    document.addEventListener('input', function(e) {
-        if (e.target && e.target.closest && e.target.closest('#input4Angka')) save();
-    });
-    document.addEventListener('change', function(e) {
-        if (e.target && e.target.closest && e.target.closest('#input4Angka')) save();
-    });
-    
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() { setTimeout(load, 1500); });
-    } else {
-        setTimeout(load, 1500);
-    }
-})();
-
 </script>
 </body>
 </html>
