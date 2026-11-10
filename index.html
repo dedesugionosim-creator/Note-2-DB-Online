@@ -4028,95 +4028,30 @@ $('grupCBGenerateBtn').addEventListener('click', function() {
 });
 
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 49: DATA PASAR CRUD EVENT LISTENERS
+   BLOK 49: DATA PASAR (VERSI BERSIH)
    ═══════════════════════════════════════════════════════════════════════ */
 
-$('marketSelector').addEventListener('change', function(e) {
-    marketData.activeMarketId = e.target.value;
-    const syairMarketSelect = $('syairMarketSelect');
-    if (syairMarketSelect) syairMarketSelect.value = e.target.value;
-    if (e.target.value === 'global') {
-        $('bulkInputContainer').style.display = 'block';
-        $('deleteMarketBtn').style.display = 'none';
-    } else {
-        $('bulkInputContainer').style.display = 'none';
-        $('deleteMarketBtn').style.display = 'block';
-    }
-    renderMarketResultTable();
-});
+const elMarketSelector = $('marketSelector');
+if (elMarketSelector) {
+    elMarketSelector.addEventListener('change', function(e) {
+        marketData.activeMarketId = e.target.value;
+        const syairMarketSelect = $('syairMarketSelect');
+        if (syairMarketSelect) syairMarketSelect.value = e.target.value;
+        // renderMarketResultTable tidak dipakai lagi karena history sudah pindah ke Tabel Result
+    });
+}
 
-$('syairMarketSelect').addEventListener('change', function(e) {
-    marketData.activeMarketId = e.target.value;
-    $('marketSelector').value = e.target.value;
-    $('marketSelector').dispatchEvent(new Event('change'));
-});
-
-$('addMarketBtn').addEventListener('click', function() {
-    const name = prompt('Nama Pasar Baru:', 'Pasar Baru');
-    if (name) {
-        const newId = 'm_' + Date.now();
-        marketData.markets.push({ id: newId, name: name, history: [] });
-        marketData.activeMarketId = newId;
-        saveMarketData();
-        refreshMarketSelectors();
-        $('marketSelector').dispatchEvent(new Event('change'));
-        toast('Pasar ditambahkan', 'success');
-    }
-});
-
-$('deleteMarketBtn').addEventListener('click', function() {
-    if (marketData.activeMarketId === 'global') { toast('Pasar Global tidak bisa dihapus', 'error'); return; }
-    if (marketData.markets.length <= 1) { toast('Minimal 1 pasar', 'error'); return; }
-    if (!confirm('Hapus pasar ini beserta historynya?')) return;
-    marketData.markets = marketData.markets.filter(function(m) { return m.id !== marketData.activeMarketId; });
-    marketData.activeMarketId = 'global';
-    saveMarketData();
-    refreshMarketSelectors();
-    $('marketSelector').dispatchEvent(new Event('change'));
-    toast('Pasar dihapus', 'success');
-});
-
-$('addMarketResultBtn').addEventListener('click', function() {
-    const date = $('marketDate').value;
-    const result = onlyDigits($('marketResult').value);
-    if (!date) { toast('Tanggal wajib', 'error'); return; }
-    if (result.length !== 4) { toast('Result harus 4 digit', 'error'); return; }
-    const am = getActiveMarket();
-    am.history.push({ id: 'r_' + Date.now(), date: date, result: result });
-    am.history.sort(function(a, b) { return a.date.localeCompare(b.date); });
-    saveMarketData();
-    renderMarketResultTable();
-    $('marketResult').value = '';
-    toast('Result disimpan!', 'success');
-});
-
-$('bulkSubmitBtn').addEventListener('click', function() {
-    const text = $('bulkInputArea').value.trim();
-    if (!text) { toast('Area input kosong', 'error'); return; }
-    const lines = text.split('\n');
-    let added = 0;
-    const am = getActiveMarket();
-    lines.forEach(function(line) {
-        const parts = line.split('|');
-        if (parts.length === 2) {
-            const date = parts[0].trim();
-            const result = onlyDigits(parts[1]);
-            if (date && result.length === 4) {
-                am.history.push({ id: 'r_' + Date.now() + Math.random(), date: date, result: result });
-                added++;
-            }
+const elSyairMarketSelect = $('syairMarketSelect');
+if (elSyairMarketSelect) {
+    elSyairMarketSelect.addEventListener('change', function(e) {
+        marketData.activeMarketId = e.target.value;
+        const ms = $('marketSelector');
+        if (ms) {
+            ms.value = e.target.value;
+            ms.dispatchEvent(new Event('change'));
         }
     });
-    if (added > 0) {
-        am.history.sort(function(a, b) { return a.date.localeCompare(b.date); });
-        saveMarketData();
-        renderMarketResultTable();
-        $('bulkInputArea').value = '';
-        toast(added + ' data berhasil diimport!', 'success');
-    } else {
-        toast('Format salah. Gunakan Tanggal|Result', 'error');
-    }
-});
+}
 
 /* ═══════════════════════════════════════════════════════════════════════
    BLOK 50: DROPDOWN REFRESH & REFRESH ALL
