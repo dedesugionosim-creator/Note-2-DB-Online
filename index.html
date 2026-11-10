@@ -6637,94 +6637,76 @@ console.log('BBFS Lengkap 20: Aktif | BBFS Murni 20: Aktif | 33 Input 3 Angka: A
 console.log('Gabung 3 Grup: Aktif | Cara Baca 4D: Aktif');
 console.log('Semua fitur siap. Selamat menggunakan SA_HARD!');
 
-/* ═══════════════════════════════════════════════════════════════════════
-   BLOK 76: AUTO-SAVE INPUT 4 ANGKA (SIMPAN OTOMATIS)
-   ═══════════════════════════════════════════════════════════════════════ */
+<!-- ═══════════════════════════════════════════════════════════════════════
+     AUTO-SAVE INPUT 4 ANGKA (Script Terpisah - 100% Aman)
+     ═══════════════════════════════════════════════════════════════════════ -->
+<script>
 (function() {
-    const LS_KEY = 'sa_input4_autosave_v1';
-
-    // Fungsi untuk menyimpan data
-    function saveInputs() {
+    var KEY = 'sa_input4_backup_v2';
+    
+    function save() {
         try {
-            const data = {};
-            // Ambil semua input teks, angka, dan dropdown di dalam menu Input 4 Angka
-            document.querySelectorAll('#input4Angka input[type="text"], #input4Angka input[type="number"], #input4Angka select').forEach(el => {
-                if (el.id) data[el.id] = el.value;
-            });
-            // Ambil semua checkbox
-            document.querySelectorAll('#input4Angka input[type="checkbox"]').forEach(el => {
-                if (el.id) data[el.id] = el.checked;
-            });
-            // Simpan tab yang sedang aktif
-            const activeTab = document.querySelector('#subTabs4Angka button.active');
-            if (activeTab) data['__activeTab'] = activeTab.getAttribute('data-subpanel');
-
-            localStorage.setItem(LS_KEY, JSON.stringify(data));
-        } catch (e) {
-            console.warn('Gagal auto-save:', e);
-        }
+            var data = {};
+            var inputs = document.querySelectorAll('#input4Angka input, #input4Angka select');
+            for (var i = 0; i < inputs.length; i++) {
+                var el = inputs[i];
+                if (el.id) {
+                    if (el.type === 'checkbox') data[el.id] = el.checked;
+                    else data[el.id] = el.value;
+                }
+            }
+            var activeBtn = document.querySelector('#subTabs4Angka button.active');
+            if (activeBtn) data.__tab = activeBtn.getAttribute('data-subpanel');
+            localStorage.setItem(KEY, JSON.stringify(data));
+        } catch (e) {}
     }
-
-    // Fungsi untuk memuat data saat halaman dibuka/refresh
-    function loadInputs() {
+    
+    function load() {
         try {
-            const raw = localStorage.getItem(LS_KEY);
+            var raw = localStorage.getItem(KEY);
             if (!raw) return;
-            const data = JSON.parse(raw);
-
-            // Kembalikan isi inputan
-            for (const id in data) {
-                if (id === '__activeTab') continue;
-                const el = document.getElementById(id);
+            var data = JSON.parse(raw);
+            for (var id in data) {
+                if (id === '__tab') continue;
+                var el = document.getElementById(id);
                 if (!el) continue;
                 if (el.type === 'checkbox') el.checked = data[id];
                 else el.value = data[id];
             }
-
-            // Kembalikan tab yang terakhir dibuka
-            if (data.__activeTab) {
-                const btn = document.querySelector(`#subTabs4Angka button[data-subpanel="${data.__activeTab}"]`);
+            if (data.__tab) {
+                var btn = document.querySelector('#subTabs4Angka button[data-subpanel="' + data.__tab + '"]');
                 if (btn) {
-                    // Sembunyikan semua tab
-                    document.querySelectorAll('#subTabs4Angka button').forEach(b => b.classList.remove('active'));
-                    document.querySelectorAll('#input4Angka .subpanel').forEach(p => p.classList.remove('active'));
-                    // Buka tab terakhir
+                    var btns = document.querySelectorAll('#subTabs4Angka button');
+                    for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+                    var panels = document.querySelectorAll('#input4Angka .subpanel');
+                    for (var j = 0; j < panels.length; j++) panels[j].classList.remove('active');
                     btn.classList.add('active');
-                    const target = document.getElementById(data.__activeTab);
-                    if (target) target.classList.add('active');
+                    var tgt = document.getElementById(data.__tab);
+                    if (tgt) tgt.classList.add('active');
                 }
             }
-        } catch (e) {
-            console.warn('Gagal load auto-save:', e);
-        }
+        } catch (e) {}
     }
-
-    // 1. Jalankan Load saat halaman selesai dimuat
-    document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(loadInputs, 1000); // Tunggu 1 detik agar sistem login siap
-    });
-
-    // 2. Simpan otomatis setiap kali user mengetik atau mengganti dropdown
+    
+    // Simpan otomatis setiap 2 detik (backup terakhir)
+    setInterval(save, 2000);
+    
+    // Simpan saat user mengetik / ubah dropdown
     document.addEventListener('input', function(e) {
-        if (e.target && e.target.closest && e.target.closest('#input4Angka')) {
-            saveInputs();
-        }
+        if (e.target && e.target.closest && e.target.closest('#input4Angka')) save();
     });
     document.addEventListener('change', function(e) {
-        if (e.target && e.target.closest && e.target.closest('#input4Angka')) {
-            saveInputs();
-        }
+        if (e.target && e.target.closest && e.target.closest('#input4Angka')) save();
     });
-
-    // 3. Simpan saat user pindah Tab
-    const originalSwitchTab = window.switchSubTab;
-    if (typeof originalSwitchTab === 'function') {
-        window.switchSubTab = function(btn) {
-            originalSwitchTab(btn);
-            saveInputs();
-        };
+    
+    // Muat data saat halaman siap
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() { setTimeout(load, 1500); });
+    } else {
+        setTimeout(load, 1500);
     }
 })();
+</script>
 
 </script>
 </body>
