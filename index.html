@@ -2576,29 +2576,17 @@ function loadMarketData() {
         };
     }
 
+    // Pastikan Pasar Global selalu ada
     const hasGlobal = marketData.markets.some(function(m) { return m.id === 'global'; });
     if (!hasGlobal) {
         marketData.markets.unshift({ id: 'global', name: '🌐 Pasar Global', history: [] });
     }
 
-    const TOGEL_PRESETS = [
-        { id: 'macau4d',   name: '🎰 Macau 4D',   schedule: 'P1–P6',     drawTimes: ['00:01','04:01','08:01','12:01','16:01','20:01'] },
-        { id: 'hongkong',  name: '🇭🇰 Hongkong',  schedule: '23:00 WIB', drawTimes: ['23:00'] },
-        { id: 'singapore', name: '🇸🇬 Singapore', schedule: '17:45 WIB', drawTimes: ['17:45'] },
-        { id: 'sydney',    name: '🇦🇺 Sydney',    schedule: '13:50 WIB', drawTimes: ['13:50'] }
-    ];
-    TOGEL_PRESETS.forEach(function(p) {
-        const exists = marketData.markets.some(function(m) { return m.id === p.id; });
-        if (!exists) {
-            marketData.markets.push({
-                id: p.id, name: p.name, schedule: p.schedule,
-                drawTimes: p.drawTimes, isTogel: true, history: []
-            });
-        } else {
-            const m = marketData.markets.find(function(x) { return x.id === p.id; });
-            if (m) { m.schedule = p.schedule; m.drawTimes = p.drawTimes; m.isTogel = true; }
-        }
+    // Pastikan semua pasar yang ada di penyimpanan ditandai sebagai 'isTogel' (agar muncul di menu Togel)
+    marketData.markets.forEach(function(m) {
+        if (m.id !== 'global') m.isTogel = true;
     });
+
     saveMarketData();
 
     refreshMarketSelectors();
