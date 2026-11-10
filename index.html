@@ -2723,6 +2723,31 @@ window.deleteMarketResult = function(id) {
     renderMarketResultTable();
 };
 
+    // SINKRONISASI DATA LAMA PASAR KE TABEL RESULT
+    if (typeof tableData !== 'undefined' && tableData.tables) {
+        marketData.markets.forEach(function(m) {
+            if (m.isTogel) {
+                let tbl = tableData.tables.find(function(t) { return t.id === m.id; });
+                if (!tbl) {
+                    tbl = { id: m.id, name: m.name, entries: [] };
+                    tableData.tables.push(tbl);
+                }
+                // Jika di market ada data tapi di tabel result kosong, pindahkan
+                if (tbl.entries.length === 0 && m.history && m.history.length > 0) {
+                    m.history.forEach(function(h, idx) {
+                        tbl.entries.push({
+                            id: h.id || 'mig_' + Date.now() + idx,
+                            tanggal: h.date,
+                            result: h.result,
+                            periode: String(idx + 1).padStart(3, '0')
+                        });
+                    });
+                }
+            }
+        });
+        if (typeof saveTableData === 'function') saveTableData();
+    }
+
 /* ═══════════════════════════════════════════════════════════════════════
    BLOK 34A: STORAGE USER, PRICING, CHAT
    ═══════════════════════════════════════════════════════════════════════ */
@@ -4748,6 +4773,17 @@ $('importJsonFile').addEventListener('change', function(e) {
     e.target.value = '';
 });
 
+// Fungsi untuk menyelaraskan ID Pasar Togel dengan Tabel Result
+function getOrCreateMarketTable(marketId, marketName) {
+    let tbl = tableData.tables.find(function(t) { return t.id === marketId; });
+    if (!tbl) {
+        tbl = { id: marketId, name: marketName, entries: [] };
+        tableData.tables.push(tbl);
+        if (typeof saveTableData === 'function') saveTableData();
+    }
+    return tbl;
+}
+
 /* ═══════════════════════════════════════════════════════════════════════
    BLOK 55: MENU TOGEL v3 (GRID + DETAIL + COUNTDOWN)
    ═══════════════════════════════════════════════════════════════════════ */
@@ -4968,28 +5004,38 @@ function renderTogelHistory() {
     const tbody = $('togelHistoryBody');
     const nav = $('togelHistoryNav');
     if (!m || !tbody) return;
+    
+    // AMBIL DATA DARI TABEL RESULT (MASTER DATA)
+    const tbl = getOrCreateMarketTable(m.id, m.name);
+    const historyData = tbl.entries || [];
+
     const isAdmin = _togelIsAdmin();
     $('togelHistoryAksiCol').hidden = !isAdmin;
-    const total = (m.history || []).length;
+    const total = historyData.length;
     $('togelHistoryTotal').textContent = total;
     $('togelHistoryCount').textContent = togelHistoryPageSize;
+    
     if (total === 0) {
         tbody.innerHTML = '<tr><td colspan="' + (isAdmin ? 5 : 4)
-            + '" style="text-align:center; padding:20px; color:var(--muted);">Belum ada data.</td></tr>';
+            + '" style="text-align:center; padding:20px; color:var(--muted);">Belum ada data di Tabel Result.</td></tr>';
         if (nav) nav.innerHTML = '';
         return;
     }
-    const sorted = m.history.slice().sort(function(a, b) { return b.date.localeCompare(a.date); });
+    
+    // Urutkan dari yang terbaru
+    const sorted = historyData.slice().sort(function(a, b) { return (b.tanggal || '').localeCompare(a.tanggal || ''); });
     const totalPages = Math.ceil(total / togelHistoryPageSize);
     if (togelHistoryCurrentPage > totalPages) togelHistoryCurrentPage = totalPages;
     if (togelHistoryCurrentPage < 1) togelHistoryCurrentPage = 1;
+    
     const start = (togelHistoryCurrentPage - 1) * togelHistoryPageSize;
     const pageData = sorted.slice(start, start + togelHistoryPageSize);
+    
     let html = '';
     pageData.forEach(function(r) {
         const gen = generateSyairAndGrup(r.result);
         html += '<tr>';
-        html += '<td style="font-size:12px;">' + esc(r.date) + '</td>';
+        html += '<td style="font-size:12px;">' + esc(r.tanggal) + '</td>';
         html += '<td class="td-pair" style="font-size:15px;">' + esc(r.result) + '</td>';
         html += '<td style="font-size:12px;">' + esc(gen.syair || '—') + '</td>';
         html += '<td style="color:var(--warn); font-size:12px;">' + esc(gen.grup || '—') + '</td>';
@@ -4999,6 +5045,7 @@ function renderTogelHistory() {
         html += '</tr>';
     });
     tbody.innerHTML = html;
+    
     if (nav) {
         nav.innerHTML = `
             <button ${togelHistoryCurrentPage === 1 ? 'disabled' : ''} onclick="goTogelPage(-1)">◀ Prev</button>
@@ -5069,23 +5116,38 @@ function _handleTogelSave() {
     const result = onlyDigits($('togelInputResult').value);
     if (!date) { toast('Tanggal wajib diisi', 'error'); return; }
     if (result.length !== 4) { toast('Result harus 4 digit', 'error'); return; }
+    
     const m = getActiveTogelMarket();
     if (!m) return;
-    const dup = m.history.some(function(r) { return r.date === date; });
-    if (dup) {
-        if (!confirm('Tanggal ' + date + ' sudah ada. Ganti?')) return;
-        m.history = m.history.filter(function(r) { return r.date !== date; });
+    
+    // SIMPAN KE TABEL RESULT
+    const tbl = getOrCreateMarketTable(m.id, m.name);
+    
+    const dupIndex = tbl.entries.findIndex(function(r) { return r.tanggal === date; });
+    if (dupIndex !== -1) {
+        if (!confirm('Tanggal ' + date + ' sudah ada. Ganti dengan result baru?')) return;
+        // Hapus data lama di tanggal yang sama
+        tbl.entries.splice(dupIndex, 1);
     }
-    m.history.push({
+    
+    tbl.entries.push({
         id: 'r_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
-        date: date, result: result
+        tanggal: date, 
+        result: result,
+        periode: String(tbl.entries.length + 1).padStart(3, '0')
     });
-    m.history.sort(function(a, b) { return a.date.localeCompare(b.date); });
+    
+    // Urutkan
+    tbl.entries.sort(function(a, b) { return (a.tanggal || '').localeCompare(b.tanggal || ''); });
+    saveTableData(); // Simpan Master Data
+
+    // Sinkronkan juga ke m.history agar tampilan Grid/Countdown update
+    m.history = tbl.entries.map(function(e) { return { date: e.tanggal, result: e.result, id: e.id }; });
     saveMarketData();
+
     $('togelInputResult').value = '';
     renderTogelDetail();
-    if (typeof renderMarketResultTable === 'function') renderMarketResultTable();
-    toast('Result ' + result + ' tersimpan', 'success');
+    toast('Result ' + result + ' masuk ke Tabel Result', 'success');
     notifyNewResult(m.id, result, date);
 }
 
