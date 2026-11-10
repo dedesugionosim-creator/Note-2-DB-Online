@@ -1706,25 +1706,25 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
         <!-- ═══════════════════════════════════════════════════════════════
              SECTION: MENU TOGEL (GRID + DETAIL)
              ═══════════════════════════════════════════════════════════════ -->
-                <section id="menuTogel">
+                    <section id="menuTogel">
+            <!-- VIEW 1: DAFTAR PASAR -->
             <div id="togelGridView">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
                     <h2 style="margin:0;">🎰 Menu Togel — Pasar Resmi</h2>
+                    <!-- Tombol ini hanya muncul untuk Admin -->
                     <button class="btn-primary" id="addNewTogelMarketBtn" style="width:auto; padding:8px 14px; font-size:13px;" onclick="tambahPasarTogel()">➕ Pasar Baru</button>
                 </div>
                 <p class="text-muted mb-10" style="font-size:13px;">
-                    Pilih pasar untuk melihat result terakhir, prediksi, dan hitungan mundur otomatis.
+                    Pilih pasar untuk melihat Result Terakhir, Prediksi, dan Hitungan Mundur.
                 </p>
                 <div class="togel-market-grid" id="togelMarketGrid"></div>
-                <div class="togel-disclaimer" style="margin-top:14px;">
-                    ⚠️ Hasil togel bersifat acak. Prediksi adalah analisa, bukan jaminan.
-                </div>
             </div>
 
+            <!-- VIEW 2: DETAIL PASAR -->
             <div id="togelDetailView" style="display:none;">
                 <button class="togel-back-btn" onclick="closeTogelDetail()">← Kembali ke Daftar Pasar</button>
                 
-                <!-- HEADER: Nama Pasar, Result Terakhir, Countdown -->
+                <!-- HEADER DETAIL (Waktu & Result Terakhir) -->
                 <div class="togel-detail-header">
                     <div class="togel-detail-title">
                         <div>
@@ -1740,23 +1740,43 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
                     <div class="togel-detail-countdown-box" id="togelDetailCountdown">⏱️ —</div>
                 </div>
 
-                <!-- TAB (Hanya Prediksi) -->
-                <div class="togel-detail-tabs" id="togelDetailTabs" style="border-bottom:none; margin-bottom:10px;">
-                    <button class="active" onclick="switchTogelDetailTab('prediksi')">🔮 Lihat Prediksi</button>
-                    <button onclick="exportTogelHistoryCSV(activeTogelMarketId)" style="color:var(--success); border-color:var(--success);">⬇ CSV</button>
-                    <button onclick="exportTogelHistoryJSON(activeTogelMarketId)" style="color:var(--warn); border-color:var(--warn);">⬇ JSON</button>
+                <!-- TAB MENU -->
+                <div class="togel-detail-tabs" id="togelDetailTabs">
+                    <button data-ttab="history" class="active" onclick="switchTogelDetailTab('history')">📜 Lihat Result</button>
+                    <button data-ttab="prediksi" onclick="switchTogelDetailTab('prediksi')">🔮 Lihat Prediksi</button>
                 </div>
 
-                <!-- PANEL PREDIKSI -->
-                <div id="togelTabPrediksi" class="subpanel active">
+                <!-- TAB: LIHAT RESULT (Bisa dilihat User & Admin) -->
+                <div id="togelTabHistory" class="subpanel active">
+                    <div class="card">
+                        <div class="table-container" style="max-height:400px; overflow-y:auto;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Tanggal</th>
+                                        <th>Result</th>
+                                        <th>Syair</th>
+                                        <th>Grup</th>
+                                        <!-- Tombol Hapus hanya muncul jika Admin -->
+                                        <th id="togelHistoryAksiCol" hidden>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="togelHistoryBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: PREDIKSI -->
+                <div id="togelTabPrediksi" class="subpanel">
                     <div id="togelPrediksiContainer"></div>
                 </div>
 
-                <!-- FORM INPUT RESULT TERBARU (KHUSUS ADMIN) -->
+                <!-- FORM INPUT/EDIT RESULT (HANYA UNTUK ADMIN) -->
                 <div class="card" id="togelAdminInputCard" hidden style="margin-top:14px; border:1px solid var(--accent);">
-                    <h3 style="color:var(--accent); margin-bottom:10px;">➕ Input Result Terbaru (Admin)</h3>
+                    <h3 style="color:var(--accent); margin-bottom:10px;">📝 Input / Edit Result (Admin)</h3>
                     <p class="text-muted" style="font-size:11.5px; margin-bottom:10px;">
-                        *Data yang Anda simpan di sini akan otomatis masuk ke Bank Data (Tabel Result).
+                        Input tanggal dan 4 angka. Jika tanggal sudah ada, data akan diperbarui (ditimpa).
                     </p>
                     <div class="grid-2">
                         <div class="field">
@@ -1769,7 +1789,7 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
                                    placeholder="0478" autocomplete="off">
                         </div>
                     </div>
-                    <button class="btn-primary" id="togelSaveResultBtn">💾 Simpan Result</button>
+                    <button class="btn-primary" id="togelSaveResultBtn">💾 Simpan / Edit Result</button>
                 </div>
             </div>
         </section>
@@ -1828,7 +1848,7 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
             </div>
         </section>
 
-                <!-- ═══════════════════════════════════════════════════════════════
+        <!-- ═══════════════════════════════════════════════════════════════
              SECTION: RUMUS SYAIR
              ═══════════════════════════════════════════════════════════════ -->
         <section id="rumusSyair">
