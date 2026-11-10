@@ -1693,73 +1693,19 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
         <!-- ═══════════════════════════════════════════════════════════════
              SECTION: DATA PASAR
              ═══════════════════════════════════════════════════════════════ -->
-        <section id="dataPasar">
-            <h2>📚 Data Pasar &amp; Result</h2>
+                <section id="dataPasar">
+            <h2>📚 Data Pasar Global</h2>
             <p class="text-muted mb-10" style="font-size:13px;">
-                Input history result di sini.
-                Gunakan <b>Pasar Global</b> untuk mengumpulkan semua data
-                guna dianalisa oleh <b>Mode 1 (Bawaan)</b>.
+                Pilih pasar di bawah ini untuk dianalisa oleh <b>Rumus Syair (Mode Global)</b>.
+                Untuk menginput History Result baru, silakan masuk ke menu <b>🎰 Togel</b> atau <b>📊 Tabel Result</b>.
             </p>
             <div class="card">
-                <div class="grid-2">
-                    <div class="field">
-                        <label for="marketSelector">Pilih Pasar</label>
-                        <select id="marketSelector"></select>
-                    </div>
-                    <div class="field" style="display:flex; gap:8px; align-items:flex-end;">
-                        <button class="btn-warn" id="addMarketBtn" style="padding:10px; font-size:12px;">
-                            ➕ Pasar Baru
-                        </button>
-                        <button class="btn-danger" id="deleteMarketBtn" style="padding:10px; font-size:12px;">
-                            🗑 Hapus Pasar
-                        </button>
-                    </div>
-                </div>
-                <hr style="border:0; border-top:1px dashed var(--border-2); margin:14px 0;">
-                <div class="grid-2">
-                    <div class="field">
-                        <label for="marketDate">Tanggal</label>
-                        <input type="date" id="marketDate">
-                    </div>
-                    <div class="field">
-                        <label for="marketResult">Result (4 Digit)</label>
-                        <input type="text" id="marketResult" placeholder="0478" maxlength="4" inputmode="numeric">
-                    </div>
-                </div>
-                <button class="btn-primary" id="addMarketResultBtn">
-                    💾 Simpan Result ke Pasar Ini
-                </button>
-            </div>
-            <div class="card" id="bulkInputContainer" style="display:none;">
-                <h3 style="color:var(--accent); margin-bottom:8px;">
-                    Input Massal (Khusus Pasar Global)
-                </h3>
-                <p class="text-muted" style="font-size:12px; margin-bottom:8px;">
-                    Format: <code>Tanggal|Result</code> (Satu baris satu data). Contoh:<br>
-                    2026-11-01|0478<br>
-                    2026-11-02|1290
-                </p>
                 <div class="field">
-                    <textarea id="bulkInputArea" rows="5"
-                              placeholder="2026-11-01|0478&#10;2026-11-02|1290"></textarea>
+                    <label for="marketSelector">Pilih Pasar</label>
+                    <select id="marketSelector"></select>
                 </div>
-                <button class="btn-primary" id="bulkSubmitBtn" style="background:var(--success); color:#000;">
-                    🚀 Proses &amp; Simpan Massal
-                </button>
-            </div>
-            <div class="card">
-                <h3 id="marketTableTitle">History Result</h3>
-                <div class="table-container" style="max-height:300px; overflow-y:auto;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Tanggal</th>
-                                <th>Result</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="marketResultBody"></tbody>
-                    </table>
+                <div class="togel-disclaimer" style="margin-top:10px;">
+                    ℹ️ Data history dari pasar yang Anda tambahkan di menu Togel akan otomatis masuk ke sini untuk dijadikan bahan analisa.
                 </div>
             </div>
         </section>
@@ -4905,7 +4851,7 @@ function renderTogelGrid() {
     
     let html = '';
     list.forEach(function(m) {
-        // AMBIL DARI TABEL RESULT
+        // AMBIL DARI TABEL RESULT (BANK DATA)
         const tbl = getOrCreateMarketTable(m.id, m.name);
         const historyData = tbl.entries || [];
         const sorted = historyData.slice().sort(function(a, b) { return (b.tanggal || '').localeCompare(a.tanggal || ''); });
@@ -4919,12 +4865,13 @@ function renderTogelGrid() {
         html += `
         <div class="togel-market-card" style="position: relative;" onclick="openTogelDetail('${m.id}')">
             
-            <button class="btn-danger" 
-                    style="position:absolute; top:10px; right:10px; padding:4px 8px; font-size:10px; z-index:10; border-radius:6px;" 
-                    onclick="hapusPasarTogel(event, '${m.id}')"
-                    title="Hapus Pasar">❌</button>
+            <!-- TOMBOL EDIT & HAPUS -->
+            <div style="position:absolute; top:10px; right:10px; z-index:10; display:flex; gap:4px;">
+                <button class="btn-warn" style="padding:4px 8px; font-size:10px; border-radius:6px;" onclick="editPasarTogel(event, '${m.id}')" title="Edit Jam Mundur">✏️</button>
+                <button class="btn-danger" style="padding:4px 8px; font-size:10px; border-radius:6px;" onclick="hapusPasarTogel(event, '${m.id}')" title="Hapus Pasar">❌</button>
+            </div>
 
-            <div class="market-name" style="padding-right: 25px;">${esc(m.name)}</div>
+            <div class="market-name" style="padding-right: 50px;">${esc(m.name)}</div>
             <div class="market-result ${latest ? '' : 'empty'}">${latest ? esc(latest.result) : '----'}</div>
             <div class="market-date">${latest ? _formatTanggalShort(latest.tanggal) : 'Belum ada data'}</div>
             ${countdownHtml}
@@ -4936,6 +4883,85 @@ function renderTogelGrid() {
     });
     grid.innerHTML = html;
 }
+
+// 1. FUNGSI TAMBAH PASAR BARU
+const addBtn = document.getElementById('addNewTogelMarketBtn');
+if (addBtn) {
+    addBtn.onclick = function() {
+        const name = prompt('Masukkan Nama Pasar Baru (contoh: Oregon 4D):');
+        if (!name) return;
+
+        const schedule = prompt('Masukkan Label Jadwal (contoh: 13:00 WIB / P1-P6):', '23:00 WIB');
+        if (!schedule) return;
+
+        const drawTimeStr = prompt('Masukkan Jam Undian (Format 24 Jam).\nPisahkan dengan koma jika lebih dari satu.\nContoh: 13:00\nContoh: 00:01, 12:01, 20:01', '13:00');
+        if (!drawTimeStr) return;
+
+        const drawTimes = drawTimeStr.split(',').map(s => s.trim()).filter(s => /^\d{2}:\d{2}$/.test(s));
+        if (drawTimes.length === 0) { toast('Format jam salah. Gunakan HH:MM', 'error'); return; }
+
+        const newId = 'm_' + Date.now();
+        
+        // Simpan ke Market
+        marketData.markets.push({
+            id: newId, name: name, schedule: schedule, drawTimes: drawTimes, isTogel: true, history: []
+        });
+        saveMarketData();
+
+        // Link Otomatis ke Tabel Result
+        if (typeof tableData !== 'undefined' && tableData.tables) {
+            tableData.tables.push({ id: newId, name: name, entries: [] });
+            if (typeof saveTableData === 'function') saveTableData();
+        }
+
+        toast('Pasar "' + name + '" berhasil ditambahkan', 'success');
+        renderTogelGrid();
+    };
+}
+
+// 2. FUNGSI EDIT JAM MUNDUR
+window.editPasarTogel = function(event, id) {
+    if (event) event.stopPropagation();
+    const m = marketData.markets.find(x => x.id === id);
+    if (!m) return;
+
+    const newSchedule = prompt('Edit Label Jadwal:', m.schedule || '');
+    if (newSchedule === null) return;
+
+    const newDrawTimes = prompt('Edit Jam Undian (pisah koma):', m.drawTimes.join(', '));
+    if (newDrawTimes === null) return;
+
+    const drawTimes = newDrawTimes.split(',').map(s => s.trim()).filter(s => /^\d{2}:\d{2}$/.test(s));
+    if (drawTimes.length === 0) { toast('Format jam salah', 'error'); return; }
+
+    m.schedule = newSchedule;
+    m.drawTimes = drawTimes;
+    saveMarketData();
+    toast('Pengaturan jam berhasil diperbarui', 'success');
+    
+    // Refresh hitungan mundur tanpa perlu reload halaman
+    stopTogelCountdown();
+    renderTogelGrid();
+    startTogelCountdown();
+};
+
+// 3. FUNGSI HAPUS PASAR
+window.hapusPasarTogel = function(event, id) {
+    if (event) event.stopPropagation();
+    if (!confirm('Yakin ingin menghapus pasar ini beserta seluruh historynya?')) return;
+    
+    marketData.markets = marketData.markets.filter(m => m.id !== id);
+    saveMarketData();
+    
+    // Hapus juga dari Tabel Result
+    if (typeof tableData !== 'undefined' && tableData.tables) {
+        tableData.tables = tableData.tables.filter(t => t.id !== id);
+        if (typeof saveTableData === 'function') saveTableData();
+    }
+    
+    toast('Pasar berhasil dihapus', 'success');
+    renderTogelGrid();
+};
 
 // --- FUNGSI TAMBAH PASAR (SIMPEL - KHUSUS PREDIKSI) ---
 const addBtn = document.getElementById('addNewTogelMarketBtn');
@@ -5169,16 +5195,16 @@ function _handleTogelSave() {
     const m = getActiveTogelMarket();
     if (!m) return;
     
-    // SIMPAN KE TABEL RESULT
+    // AMBIL TABEL RESULT PASAR INI
     const tbl = getOrCreateMarketTable(m.id, m.name);
     
     const dupIndex = tbl.entries.findIndex(function(r) { return r.tanggal === date; });
     if (dupIndex !== -1) {
-        if (!confirm('Tanggal ' + date + ' sudah ada. Ganti dengan result baru?')) return;
-        // Hapus data lama di tanggal yang sama
+        if (!confirm('Tanggal ' + date + ' sudah ada. Ganti?')) return;
         tbl.entries.splice(dupIndex, 1);
     }
     
+    // SIMPAN KE TABEL RESULT
     tbl.entries.push({
         id: 'r_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
         tanggal: date, 
@@ -5186,17 +5212,12 @@ function _handleTogelSave() {
         periode: String(tbl.entries.length + 1).padStart(3, '0')
     });
     
-    // Urutkan
     tbl.entries.sort(function(a, b) { return (a.tanggal || '').localeCompare(b.tanggal || ''); });
-    saveTableData(); // Simpan Master Data
-
-    // Sinkronkan juga ke m.history agar tampilan Grid/Countdown update
-    m.history = tbl.entries.map(function(e) { return { date: e.tanggal, result: e.result, id: e.id }; });
-    saveMarketData();
+    saveTableData();
 
     $('togelInputResult').value = '';
     renderTogelDetail();
-    toast('Result ' + result + ' masuk ke Tabel Result', 'success');
+    toast('Result ' + result + ' tersimpan', 'success');
     notifyNewResult(m.id, result, date);
 }
 
