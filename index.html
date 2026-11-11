@@ -4484,6 +4484,54 @@ $('searchPatternBtn').addEventListener('click', function() {
 });
 
 /* ═══════════════════════════════════════════════════════════════════════
+   FIX GUARD: Rumus Syair — pastikan fungsi global ada
+   ═══════════════════════════════════════════════════════════════════════ */
+(function () {
+    'use strict';
+
+    // 1. switchSyairTab — untuk tab Analisa Biasa ↔ Alur Cerita
+    if (typeof window.switchSyairTab !== 'function') {
+        window.switchSyairTab = function (panelId, btn) {
+            document.querySelectorAll('#subTabsSyair button').forEach(function (b) {
+                b.classList.remove('active');
+            });
+            document.querySelectorAll('#rumusSyair .subpanel').forEach(function (p) {
+                p.classList.remove('active');
+            });
+            if (btn && btn.classList) btn.classList.add('active');
+            const target = document.getElementById(panelId);
+            if (target) target.classList.add('active');
+        };
+        console.log('[Guard] switchSyairTab didefinisikan');
+    }
+
+    // 2. THEME_MAP — untuk deteksi tema syair
+    if (typeof window.THEME_MAP === 'undefined') {
+        window.THEME_MAP = {
+            gelap:  ['setan','iblis','penggoda','binasa','perkosa','biadab','kejam','neraka','hukuman','kematian','mati','siksa','ngeri','maut','gantung','terbunuh','mampus','bunuh'],
+            nakal:  ['nakal','sundal','zina','cabul','payudara','birahi','ciuman','perkosa','hamil','telanjang','serakah','durhaka','rusak'],
+            cinta:  ['cinta','kasih','indah','pasangan','bahagia','cantik','pujaan','dambaan','cium'],
+            kerja:  ['dokter','gol','draw','imbalan','kaya','cari','usaha','berani'],
+            risau:  ['risau','kecewa','celaka','sial','sengsara','tangis','marah','bantah','bosen','pusing','kalah']
+        };
+        console.log('[Guard] THEME_MAP didefinisikan');
+    }
+
+    // 3. getTargetTheme — konversi syair → tema
+    if (typeof window.getTargetTheme !== 'function') {
+        window.getTargetTheme = function (syair) {
+            const s = (syair || '').toLowerCase();
+            const map = window.THEME_MAP || {};
+            for (const theme in map) {
+                if (map[theme].some(function (k) { return s.includes(k); })) return theme;
+            }
+            return 'umum';
+        };
+        console.log('[Guard] getTargetTheme didefinisikan');
+    }
+})();
+
+/* ═══════════════════════════════════════════════════════════════════════
    BLOK 53 REWRITE v2: ALUR CERITA + PREDIKSI FILTER
    ⚠ Semua kode DIBUNGKUS IIFE + SAFE ATTACH + POLLING
    ⚠ Tidak ada getElementById(...).addEventListener langsung (anti-crash)
