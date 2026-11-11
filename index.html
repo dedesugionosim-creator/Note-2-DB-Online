@@ -7282,5 +7282,121 @@ console.log('Semua fitur siap. Selamat menggunakan SA_HARD!');
 })();
 </script>
 
+<!-- ═══════════════════════════════════════════════════════════════════════
+     FIX INDEPENDEN: switchSyairTab & friends — Rumus Syair bisa diklik
+     Diletakkan sebagai script terpisah di akhir body agar TIDAK bergantung
+     pada blok mana pun. Kalau ada script lain yang crash, script ini tetap jalan.
+     ═══════════════════════════════════════════════════════════════════════ -->
+<script>
+(function () {
+    'use strict';
+
+    // ─── 1. switchSyairTab — SWITCH TAB "Analisa Biasa" ↔ "Alur Cerita" ───
+    window.switchSyairTab = function (panelId, btn) {
+        try {
+            var tabs = document.querySelectorAll('#subTabsSyair button');
+            for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove('active');
+
+            var panels = document.querySelectorAll('#rumusSyair .subpanel');
+            for (var j = 0; j < panels.length; j++) panels[j].classList.remove('active');
+
+            if (btn && btn.classList) btn.classList.add('active');
+
+            var target = document.getElementById(panelId);
+            if (target) target.classList.add('active');
+            else console.warn('[Fix] Panel "' + panelId + '" tidak ditemukan');
+        } catch (e) {
+            console.error('[Fix] switchSyairTab error:', e);
+        }
+    };
+    console.log('%c[FIX OK] switchSyairTab → window', 'color:#22d3ee;font-weight:bold;');
+
+    // ─── 2. THEME_MAP — wajib ada untuk deteksi tema syair ───
+    if (!window.THEME_MAP) {
+        window.THEME_MAP = {
+            gelap:  ['setan','iblis','penggoda','binasa','perkosa','biadab','kejam','neraka','hukuman','kematian','mati','siksa','ngeri','maut','gantung','terbunuh','mampus','bunuh'],
+            nakal:  ['nakal','sundal','zina','cabul','payudara','birahi','ciuman','perkosa','hamil','telanjang','serakah','durhaka','rusak'],
+            cinta:  ['cinta','kasih','indah','pasangan','bahagia','cantik','pujaan','dambaan','cium'],
+            kerja:  ['dokter','gol','draw','imbalan','kaya','cari','usaha','berani'],
+            risau:  ['risau','kecewa','celaka','sial','sengsara','tangis','marah','bantah','bosen','pusing','kalah']
+        };
+    }
+
+    // ─── 3. getTargetTheme — konversi syair → tema ───
+    if (!window.getTargetTheme) {
+        window.getTargetTheme = function (syair) {
+            var s = (syair || '').toLowerCase();
+            var map = window.THEME_MAP || {};
+            for (var theme in map) {
+                if (map[theme].some(function (k) { return s.includes(k); })) return theme;
+            }
+            return 'umum';
+        };
+    }
+
+    // ─── 4. showKonversi — sub-tab di menu Konversi (kalau belum ada) ───
+    if (!window.showKonversi) {
+        window.showKonversi = function (id, btn) {
+            try {
+                var tabs = document.querySelectorAll('#subTabsKonversi button');
+                for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove('active');
+                var panels = document.querySelectorAll('#konversiManual .subpanel');
+                for (var j = 0; j < panels.length; j++) panels[j].classList.remove('active');
+                if (btn && btn.classList) btn.classList.add('active');
+                var target = document.getElementById(id);
+                if (target) target.classList.add('active');
+            } catch (e) { console.error('[Fix] showKonversi:', e); }
+        };
+    }
+
+    // ─── 5. switchSubTab (Input 4 Angka) — kalau belum ada ───
+    if (!window.switchSubTab) {
+        window.switchSubTab = function (btn) {
+            try {
+                var container = document.getElementById('subTabs4Angka');
+                if (!container) return;
+                var tabs = container.querySelectorAll('button');
+                for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove('active');
+                var section = document.getElementById('input4Angka');
+                if (section) {
+                    var panels = section.querySelectorAll('.subpanel');
+                    for (var j = 0; j < panels.length; j++) panels[j].classList.remove('active');
+                }
+                if (btn && btn.classList) btn.classList.add('active');
+                var targetId = btn && btn.getAttribute('data-subpanel');
+                var target = targetId ? document.getElementById(targetId) : null;
+                if (target) target.classList.add('active');
+            } catch (e) { console.error('[Fix] switchSubTab:', e); }
+        };
+    }
+
+    // ─── 6. Backup: Re-attach onclick via addEventListener ───
+    //     Jaga-jaga kalau ada browser yang block inline onclick karena CSP
+    function reattach() {
+        var btns = document.querySelectorAll('#subTabsSyair button');
+        for (var i = 0; i < btns.length; i++) {
+            if (btns[i]._fixed) continue;
+            btns[i]._fixed = true;
+            (function (b) {
+                b.addEventListener('click', function (e) {
+                    var p = b.getAttribute('data-panel') || 
+                            (b.textContent.indexOf('Biasa') > -1 ? 'subpanel-syair-biasa' : 'subpanel-alurCerita');
+                    window.switchSyairTab(p, b);
+                });
+            })(btns[i]);
+        }
+    }
+    // Coba langsung + polling singkat (untuk SPA)
+    reattach();
+    var tries = 0;
+    var timer = setInterval(function () {
+        reattach();
+        if (++tries >= 20) clearInterval(timer);
+    }, 500);
+
+    console.log('%c[FIX OK] Semua handler Rumus Syair siap.', 'color:#22c55e;font-weight:bold;');
+})();
+</script>
+
 </body>
 </html>
