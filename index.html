@@ -2206,7 +2206,8 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
             <div class="field"><label for="userUsername">Username</label>
                 <input type="text" id="userUsername" autocomplete="off" autocapitalize="off"></div>
             <div class="field"><label for="userPassword">Password</label>
-                <input type="text" id="userPassword" autocomplete="off"></div>
+                <input type="text" id="userPassword" autocomplete="off">
+			</div>
         </div>
         <div class="grid-2">
             <div class="field"><label for="userPaket">Paket</label>
@@ -4697,7 +4698,7 @@ $('searchPatternBtn').addEventListener('click', function() {
     processed.forEach((it, i) => { html += _renderCard(it, i > 0 ? processed[i - 1] : null, i); });
     html += '</div></div>';
 
-    // ── 2. Bangun peta 2D alur ──
+        // ── 2. Bangun peta alur (2D, grup, tema, digit) ──
     const latest = processed[processed.length - 1];
     const temas = new Set();
     [latest.depan, latest.tengah, latest.belakang].forEach(x => {
@@ -4709,6 +4710,10 @@ $('searchPatternBtn').addEventListener('click', function() {
     });
 
     const story2D = {};
+    const allGrups = {};    // grup muncul di alur (dengan count)
+    const allTemas = {};    // tema muncul di alur (dengan count)
+    const storyDigits = {}; // frekuensi digit di seluruh 2D alur
+
     processed.forEach((item, idx) => {
         [['depan', item.depan], ['tengah', item.tengah], ['belakang', item.belakang]].forEach(([side, pos]) => {
             if (!story2D[pos.pair]) {
@@ -4717,9 +4722,72 @@ $('searchPatternBtn').addEventListener('click', function() {
             story2D[pos.pair].count++;
             story2D[pos.pair].sides.push(side);
             story2D[pos.pair].lastIdx = idx;
+
+            if (pos.grup && pos.grup !== '?') allGrups[pos.grup] = (allGrups[pos.grup] || 0) + 1;
+            if (pos.theme && pos.theme !== 'umum') allTemas[pos.theme] = (allTemas[pos.theme] || 0) + 1;
+            if (pos.pair) for (const d of pos.pair) storyDigits[d] = (storyDigits[d] || 0) + 1;
         });
     });
     lastStory2D = story2D;
+
+    // ── 3. Scoring semua master ──
+    const scored = [];
+    master.forEach(m => {
+        const num = m.nomor;
+        const th = _getTargetTheme(m.syair);
+        const gr = (m.grup || '').trim();
+        let score = 0;
+        const reasons = [];
+
+        // A. Prioritas #10
+        if (temas.has(th))       { score += 100; reasons.push('tema#' + processed.length); }
+        if (grupSentuh.has(gr))  { score += 80;  reasons.push('grup#' + processed.length); }
+
+        // B. Bonus grup ALUR (semua story, capped 5)
+        if (!grupSentuh.has(gr) && allGrups[gr]) {
+            const c = Math.min(allGrups[gr], 5);
+            score += 20 * c;
+            reasons.push('grupAlur×' + c);
+        }
+        // C. Bonus tema ALUR
+        if (!temas.has(th) && allTemas[th]) {
+            const c = Math.min(allTemas[th], 5);
+            score += 15 * c;
+            reasons.push('temaAlur×' + c);
+        }
+
+        // D. 2D muncul di alur
+        if (story2D[num]) {
+            const f = story2D[num];
+            score += 100 * f.count;
+            reasons.push('alur×' + f.count);
+            const bel = f.sides.filter(s => s === 'belakang').length;
+            if (bel > 0) {
+                score += 60 * bel;
+                reasons.push('belakang×' + bel);
+            }
+            const rec = processed.length - 1 - f.lastIdx;
+            score += Math.max(0, 30 - rec * 4);
+        } else {
+            // E. Digit share dengan story (untuk non-story)
+            let share = 0;
+            for (const d of num) if (storyDigits[d]) share += Math.min(storyDigits[d], 2);
+            if (share > 0) { score += 8 * share; reasons.push('digit×' + share); }
+        }
+
+        // F. Exact match #10
+        if (num === latest.belakang.pair) { score += 200; reasons.push('BEL#' + processed.length); }
+        if (num === latest.tengah.pair)   { score += 120; reasons.push('TGH#' + processed.length); }
+        if (num === latest.depan.pair)    { score += 80;  reasons.push('DPN#' + processed.length); }
+
+        if (score > 0) scored.push({ nomor: num, score, syair: m.syair, grup: gr, tema: th, reasons });
+    });
+
+    // Sort: score DESC, nomor ASC sebagai tiebreaker
+    scored.sort((a, b) => (b.score - a.score) || a.nomor.localeCompare(b.nomor));
+
+    // Simpan untuk cek-skor
+    window._storyScored = scored;
 
     // ── 3. Scoring semua master ──
     const scored = [];
@@ -4813,6 +4881,14 @@ $('searchPatternBtn').addEventListener('click', function() {
     predHtml += '</div>';
 
     predHtml += '</div>';
+	predHtml += '<div style="margin-top:12px; padding:10px; background:var(--card-2); border:1px solid var(--border); border-radius:6px;">';
+    predHtml += '<div style="font-size:11px; color:var(--muted); font-weight:700; margin-bottom:4px;">🔍 CEK SKOR ANGKA (2D)</div>';
+    predHtml += '<div style="display:flex; gap:6px;">';
+    predHtml += '<input type="text" id="storyCheckNum" maxlength="2" inputmode="numeric" placeholder="70" style="flex:1; padding:6px 8px; font-size:12px; font-family:monospace;">';
+    predHtml += '<button onclick="_storyCheckScore()" class="btn-warn" style="padding:6px 12px; font-size:11px;">Cek</button>';
+    predHtml += '</div>';
+    predHtml += '<div id="storyCheckResult" style="margin-top:6px; font-size:11px;"></div>';
+    predHtml += '</div>';
     html += predHtml;
 
     container.innerHTML = html;
@@ -4825,6 +4901,28 @@ $('searchPatternBtn').addEventListener('click', function() {
 
 // Helper copy
 window._storyCopyStr = function (s) { _copy(s); };
+window._storyCheckScore = function () {
+    const num = _onlyDigits(document.getElementById('storyCheckNum').value);
+    const out = document.getElementById('storyCheckResult');
+    if (!out) return;
+    if (num.length !== 2 || !window._storyScored) {
+        out.innerHTML = '<span style="color:var(--danger);">Masukkan 2 digit</span>';
+        return;
+    }
+    const found = window._storyScored.find(x => x.nomor === num);
+    if (found) {
+        out.innerHTML = '<div style="color:var(--success); font-family:monospace;">'
+            + '<b>' + num + '</b> = ' + _esc(found.syair) + ' (' + _esc(found.grup) + ')<br>'
+            + '<b>Skor: ' + found.score + '</b><br>'
+            + '<span style="color:var(--muted); font-size:10px;">' + _esc(found.reasons.join(' · ')) + '</span>'
+            + '</div>';
+    } else {
+        out.innerHTML = '<div style="color:var(--danger); font-family:monospace;">'
+            + '<b>' + num + '</b> = skor 0 (tidak masuk peringkat)<br>'
+            + '<span style="color:var(--muted); font-size:10px;">Tidak ada match tema/grup/2D/digit alur.</span>'
+            + '</div>';
+    }
+};
 
     // ── HANDLE: GENERATE PREDIKSI ──
     function handleGenerate() {
@@ -4833,12 +4931,13 @@ window._storyCopyStr = function (s) { _copy(s); };
 		const grupTengah   = document.getElementById('storyGrupTengah').value;
 		const grupBelakang = document.getElementById('storyGrupBelakang').value;
         const cb = _onlyDigits(document.getElementById('storyCB').value);
-        const angD = _onlyDigits(document.getElementById('storyAngkaDepan').value).slice(0, 1);
+        const angDRaw = _onlyDigits(document.getElementById('storyAngkaDepan').value);
+		const angDSet = new Set(angDRaw.split(''));   // set digit — bisa banyak
         const ang2 = _onlyDigits(document.getElementById('storyAngka2').value).slice(0, 2);
 
         const _alurChk = document.getElementById('storyUseAlurFilter');
 		const _alurOn = _alurChk && _alurChk.checked && lastStory2D;
-		if (!bbfs && !cb && !angD && !ang2 && !grupDepan && !grupTengah && !grupBelakang) {
+		if (!bbfs && !cb && !angDSet.size && !ang2 && !grupDepan && !grupTengah && !grupBelakang) {
 			_toast('Isi BBFS atau minimal salah satu filter', 'error'); return;
 		}
 
@@ -4893,7 +4992,7 @@ window._storyCopyStr = function (s) { _copy(s); };
         // Filter CB
         if (cb) pool = pool.filter(n => { for (const d of cb) if (n.includes(d)) return true; return false; });
         // Filter 1 Angka Depan
-        if (angD) pool = pool.filter(n => n[0] === angD);
+        if (angDSet.size > 0) pool = pool.filter(n => angDSet.has(n[0]));
         // Filter 2 Angka
         if (ang2 && ang2.length === 2) pool = pool.filter(n => n.includes(ang2[0]) && n.includes(ang2[1]));
 		// Filter: hanya angka yang mengandung 2D dari alur cerita
@@ -4919,7 +5018,7 @@ window._storyCopyStr = function (s) { _copy(s); };
                 bbfs ? `BBFS ${bbfs.length} digit` : 'BBFS kosong (10000)',
                 grupInfo,
                 cb ? `CB ${cb.split('').join(' ')}` : null,
-                angD ? `Depan=${angD}` : null,
+                angDSet.size ? `Depan∈{${[...angDSet].join(',')}}` : null,
                 ang2 ? `2Angka=${ang2}` : null
             ].filter(Boolean).join(' • ')
         };
@@ -5029,7 +5128,7 @@ window._storyCopyStr = function (s) { _copy(s); };
         _bindInput('storyRes10', 4);
         _bindInput('storyBBFS', 20);
         _bindInput('storyCB', 20);
-        _bindInput('storyAngkaDepan', 1);
+        _bindInput('storyAngkaDepan', 20);
         _bindInput('storyAngka2', 2);
         return true;
     }
