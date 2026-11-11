@@ -1058,6 +1058,68 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
     white-space: pre-wrap;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════
+   ALUR CERITA — Story Flow Cards
+   ═══════════════════════════════════════════════════════════════════════ */
+.story-flow-container { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+.story-card {
+    background: var(--card-2); border: 1px solid var(--border);
+    border-radius: var(--radius-md); padding: 12px 14px;
+    border-left: 3px solid var(--accent);
+}
+.story-card-header {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 700; color: var(--accent);
+    margin-bottom: 8px; flex-wrap: wrap;
+}
+.story-card-header .story-res-num {
+    background: var(--accent); color: #04101c;
+    padding: 2px 8px; border-radius: 6px; font-size: 11.5px;
+}
+.story-card-header .story-res-value {
+    font-family: ui-monospace, monospace; font-size: 16px;
+    color: var(--warn); letter-spacing: 2px;
+}
+.story-3row {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 6px; margin-bottom: 8px;
+}
+@media (max-width: 520px) { .story-3row { grid-template-columns: 1fr; } }
+.story-syair-box {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 6px; padding: 6px 8px;
+}
+.story-syair-box .ssb-label {
+    font-size: 9px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.6px; font-weight: 700; margin-bottom: 2px;
+}
+.story-syair-box .ssb-pair {
+    font-family: ui-monospace, monospace; font-size: 13px;
+    font-weight: 700; color: var(--warn);
+}
+.story-syair-box .ssb-syair { font-size: 11px; color: var(--text-dim); margin-top: 1px; }
+.story-syair-box .ssb-grup { font-size: 10px; color: var(--accent); margin-top: 1px; font-weight: 600; }
+.story-note {
+    background: rgba(251,191,36,0.08);
+    border: 1px solid rgba(251,191,36,0.3);
+    border-radius: 6px; padding: 8px 10px;
+    font-size: 11.5px; color: var(--text-dim); line-height: 1.55;
+}
+.story-note .sn-icon { color: var(--warn); font-weight: 700; margin-right: 4px; }
+.story-tag {
+    display: inline-block; padding: 1px 6px; border-radius: 4px;
+    font-size: 9.5px; margin-right: 4px; margin-bottom: 2px;
+    font-weight: 700; letter-spacing: 0.3px;
+}
+.story-tag.pair    { background: rgba(34,211,238,0.18); color: var(--accent); }
+.story-tag.tema    { background: rgba(99,102,241,0.22); color: #a5b4fc; }
+.story-tag.grup    { background: rgba(34,197,94,0.18); color: var(--success); }
+.story-tag.digit   { background: rgba(251,191,36,0.2); color: var(--warn); }
+.story-tag.transisi{ background: rgba(244,114,182,0.2); color: #f9a8d4; }
+.story-tag.new     { background: rgba(148,163,184,0.2); color: var(--muted); }
+.story-pred-card { border-color: var(--success) !important; }
+.story-pred-header { color: var(--success); font-weight: 800; font-size: 14px; margin-bottom: 6px; }
+
 </style>
 </head>
 
@@ -1938,32 +2000,86 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
                 </div>
             </div>
 
-            <!-- SUBPANEL 2: ALUR CERITA (FITUR BARU) -->
-            <div id="subpanel-alurCerita" class="subpanel">
-                <div class="card">
-                    <h3 style="margin-bottom:6px; color:var(--warn);">📖 Analisa Perjalanan Syair</h3>
-                    <p class="text-muted" style="font-size:12.5px; margin-bottom:12px;">
-                        Masukkan 10 Result terakhir (Result 1 = Paling Lama, Result 10 = Paling Baru). Sistem akan membaca alur ceritanya dan memprediksi berdasarkan tema Result ke-10.
-                    </p>
-                    
-                    <div class="grid-2">
-                        <div class="field"><label>Result 1 (Lama)</label><input type="text" id="storyRes1" maxlength="4" inputmode="numeric" placeholder="2356"></div>
-                        <div class="field"><label>Result 2</label><input type="text" id="storyRes2" maxlength="4" inputmode="numeric" placeholder="2565"></div>
-                        <div class="field"><label>Result 3</label><input type="text" id="storyRes3" maxlength="4" inputmode="numeric" placeholder="2568"></div>
-                        <div class="field"><label>Result 4</label><input type="text" id="storyRes4" maxlength="4" inputmode="numeric" placeholder="..."></div>
-                        <div class="field"><label>Result 5</label><input type="text" id="storyRes5" maxlength="4" inputmode="numeric" placeholder="..."></div>
-                        <div class="field"><label>Result 6</label><input type="text" id="storyRes6" maxlength="4" inputmode="numeric" placeholder="..."></div>
-                        <div class="field"><label>Result 7</label><input type="text" id="storyRes7" maxlength="4" inputmode="numeric" placeholder="..."></div>
-                        <div class="field"><label>Result 8</label><input type="text" id="storyRes8" maxlength="4" inputmode="numeric" placeholder="..."></div>
-                        <div class="field"><label>Result 9</label><input type="text" id="storyRes9" maxlength="4" inputmode="numeric" placeholder="..."></div>
-                        <div class="field"><label>Result 10 (Terbaru)</label><input type="text" id="storyRes10" maxlength="4" inputmode="numeric" placeholder="..."></div>
-                    </div>
-                    
-                    <button class="btn-primary" id="analyzeStoryBtn" style="background:var(--warn); color:#000;">⚡ Analisa Alur Cerita</button>
-                </div>
-                
-                <div id="storyResultContainer" style="display:none;"></div>
+            <!-- SUBPANEL 2: ALUR CERITA (REBUILD v2 — Narasi + Catatan + Filter Prediksi) -->
+<div id="subpanel-alurCerita" class="subpanel">
+    <div class="card">
+        <h3 style="margin-bottom:6px; color:var(--warn);">📖 Analisa Perjalanan Syair</h3>
+        <p class="text-muted" style="font-size:12.5px; margin-bottom:12px;">
+            Masukkan 10 Result terakhir (<b>Result 1 = Paling Lama</b>, <b>Result 10 = Paling Baru</b>).
+            Sistem akan membaca alur narasinya dan menjelaskan <b>kenapa syair 2 muncul setelah syair 1</b>, dst.
+            Nama syair & grup diambil dari <b>Master Nomor</b> dan <b>Data Grup</b>.
+        </p>
+
+        <div class="grid-2">
+            <div class="field"><label>Result 1 (Lama)</label><input type="text" id="storyRes1" maxlength="4" inputmode="numeric" placeholder="2356"></div>
+            <div class="field"><label>Result 2</label><input type="text" id="storyRes2" maxlength="4" inputmode="numeric" placeholder="2565"></div>
+            <div class="field"><label>Result 3</label><input type="text" id="storyRes3" maxlength="4" inputmode="numeric" placeholder="2568"></div>
+            <div class="field"><label>Result 4</label><input type="text" id="storyRes4" maxlength="4" inputmode="numeric"></div>
+            <div class="field"><label>Result 5</label><input type="text" id="storyRes5" maxlength="4" inputmode="numeric"></div>
+            <div class="field"><label>Result 6</label><input type="text" id="storyRes6" maxlength="4" inputmode="numeric"></div>
+            <div class="field"><label>Result 7</label><input type="text" id="storyRes7" maxlength="4" inputmode="numeric"></div>
+            <div class="field"><label>Result 8</label><input type="text" id="storyRes8" maxlength="4" inputmode="numeric"></div>
+            <div class="field"><label>Result 9</label><input type="text" id="storyRes9" maxlength="4" inputmode="numeric"></div>
+            <div class="field"><label>Result 10 (Terbaru)</label><input type="text" id="storyRes10" maxlength="4" inputmode="numeric"></div>
+        </div>
+
+        <button class="btn-primary" id="analyzeStoryBtn" style="background:var(--warn); color:#000;">⚡ Analisa Alur Cerita</button>
+    </div>
+
+    <div id="storyResultContainer" style="display:none;"></div>
+
+    <!-- PREDIKSI FILTER (muncul setelah analisa) -->
+    <div class="card story-pred-card" id="storyPredCard" style="display:none; margin-top:14px;">
+        <div class="story-pred-header">🎯 Generate Prediksi 4D dari Alur Cerita</div>
+        <p class="text-muted" style="font-size:12px; margin-bottom:12px;">
+            Semua filter <b>opsional</b>. Isi minimal BBFS atau salah satu filter untuk generate.
+            Contoh: hanya isi CB + Grup tetap bisa generate.
+        </p>
+
+        <div class="field">
+            <label for="storyBBFS">BBFS 20 Angka (4–20 digit) — <span style="color:var(--muted);">kosong = semua 10.000</span></label>
+            <input type="text" id="storyBBFS" maxlength="20" inputmode="numeric" placeholder="0123456789" autocomplete="off">
+        </div>
+
+        <div class="field">
+            <label for="storyGrup">Angka Mengandung GRUP</label>
+            <select id="storyGrup"><option value="">— Tanpa Grup —</option></select>
+            <div style="display:flex; gap:14px; margin-top:8px; flex-wrap:wrap;">
+                <label style="display:flex; align-items:center; gap:6px; font-size:12px; cursor:pointer;">
+                    <input type="checkbox" id="storyGrupDepan" checked> Depan
+                </label>
+                <label style="display:flex; align-items:center; gap:6px; font-size:12px; cursor:pointer;">
+                    <input type="checkbox" id="storyGrupTengah"> Tengah
+                </label>
+                <label style="display:flex; align-items:center; gap:6px; font-size:12px; cursor:pointer;">
+                    <input type="checkbox" id="storyGrupBelakang"> Belakang
+                </label>
             </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="field">
+                <label for="storyCB">Angka Mengandung CB</label>
+                <input type="text" id="storyCB" placeholder="0 1 2 3 5" autocomplete="off">
+            </div>
+            <div class="field">
+                <label for="storyAngkaDepan">Angka Mengandung 1 Angka Awal/Depan</label>
+                <input type="text" id="storyAngkaDepan" maxlength="1" inputmode="numeric" placeholder="1" autocomplete="off">
+            </div>
+        </div>
+
+        <div class="field">
+            <label for="storyAngka2">Angka Mengandung 2 Angka (kedua digit harus muncul)</label>
+            <input type="text" id="storyAngka2" maxlength="2" inputmode="numeric" placeholder="12" autocomplete="off">
+        </div>
+
+        <button class="btn-primary" id="storyGeneratePredBtn" style="background:var(--success); color:#04101c;">⚡ Generate Prediksi (350/Halaman)</button>
+    </div>
+
+    <div class="card" id="storyPredResultCard" style="display:none; margin-top:14px;">
+        <div id="storyPredResult"></div>
+    </div>
+</div>
 
         </section>
 
@@ -4385,301 +4501,377 @@ $('searchPatternBtn').addEventListener('click', function() {
 });
 
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 53: RUMUS SYAIR ANALYZER (TAB & ALUR CERITA)
+   BLOK 53 REWRITE: ALUR CERITA — Narasi + Catatan + Auto Prediksi
    ═══════════════════════════════════════════════════════════════════════ */
 
-// 1. Fungsi Pindah Tab
-window.switchSyairTab = function(panelId, btn) {
-    document.querySelectorAll('#subTabsSyair button').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('#rumusSyair .subpanel').forEach(p => p.classList.remove('active'));
-    btn.classList.add('active');
-    const target = document.getElementById(panelId);
-    if (target) target.classList.add('active');
-};
-
-// 2. Analisa Biasa (Logika Lama Anda)
-const THEME_MAP = {
-    gelap: ['setan', 'iblis', 'penggoda', 'binasa', 'perkosa', 'biadab', 'kejam', 'neraka', 'hukuman', 'kematian', 'mati', 'siksa', 'ngeri', 'maut', 'gantung', 'terbunuh', 'mampus', 'bunuh'],
-    nakal: ['nakal', 'sundal', 'zina', 'cabul', 'payudara', 'birahi', 'ciuman', 'perkosa', 'hamil', 'telanjang', 'serakah', 'durhaka', 'rusak'],
-    cinta: ['cinta', 'kasih', 'indah', 'pasangan', 'bahagia', 'cantik', 'pujaan', 'dambaan', 'cium'],
-    kerja: ['dokter', 'gol', 'draw', 'imbalan', 'kaya', 'cari', 'usaha', 'berani'],
-    risau: ['risau', 'kecewa', 'celaka', 'sial', 'sengsara', 'tangis', 'marah', 'bantah', 'bosen', 'pusing', 'kalah']
-};
-
-function getTargetTheme(syair) {
-    const s = (syair || '').toLowerCase();
-    for (const [theme, keywords] of Object.entries(THEME_MAP)) {
-        if (keywords.some(function(k) { return s.includes(k); })) return theme;
-    }
-    return 'umum';
+// Helper: parse result 4-digit jadi 3 posisi + tema
+function _storyParseOne(res) {
+    const d = res.slice(0, 2), t = res.slice(1, 3), b = res.slice(2, 4);
+    const md = getMaster2D(d), mt = getMaster2D(t), mb = getMaster2D(b);
+    return {
+        res,
+        depan:    { pair: d, syair: md ? md.syair : '?', grup: md ? md.grup : '?', theme: getTargetTheme(md ? md.syair : '') },
+        tengah:   { pair: t, syair: mt ? mt.syair : '?', grup: mt ? mt.grup : '?', theme: getTargetTheme(mt ? mt.syair : '') },
+        belakang: { pair: b, syair: mb ? mb.syair : '?', grup: mb ? mb.grup : '?', theme: getTargetTheme(mb ? mb.syair : '') }
+    };
 }
 
-$('analyzeSyairBtn').addEventListener('click', function() {
-    const raw = onlyDigits($('syairTargetInput').value);
-    if (raw.length !== 2 && raw.length !== 4) { toast('Masukkan 2 atau 4 angka', 'error'); return; }
-    const mode = document.querySelector('input[name="modeSyair"]:checked').value;
-    const is4D = (raw.length === 4);
-    const pair1 = raw.slice(0, 2);
-    const pair2 = is4D ? raw.slice(2, 4) : null;
-    const master1 = master.find(function(m) { return m.nomor === pair1; });
-    if (!master1) { toast('Angka ' + pair1 + ' tidak ada', 'error'); return; }
-    let master2 = null;
-    if (is4D) {
-        master2 = master.find(function(m) { return m.nomor === pair2; });
-        if (!master2) { toast('Angka ' + pair2 + ' tidak ada', 'error'); return; }
+// Helper: bangun narasi koneksi antar result
+function _storyBuildCatatan(prev, curr) {
+    if (!prev) {
+        return {
+            tags: [{ type: 'new', text: 'AWAL ALUR' }],
+            text: `Result ${curr.res} → Depan ${curr.depan.pair} (${curr.depan.syair}), Tengah ${curr.tengah.pair} (${curr.tengah.syair}), Belakang ${curr.belakang.pair} (${curr.belakang.syair}). Ini titik awal alur cerita.`
+        };
     }
-    if (is4D) {
-        $('syairMainTitle').textContent = raw + ' = ' + master1.syair + ' ' + master2.syair;
-        $('syairMainGroup').textContent = 'Grup: ' + master1.grup + ' + ' + master2.grup;
-    } else {
-        $('syairMainTitle').textContent = pair1 + ' - ' + master1.syair;
-        $('syairMainGroup').textContent = 'Grup: ' + master1.grup;
-    }
-    const exclude = is4D ? [pair1, pair2] : [pair1];
-    const findRel = function(tgt) {
-        const tm = master.find(function(m) { return m.nomor === tgt; });
-        const theme = getTargetTheme(tm.syair);
-        const res = [];
-        master.forEach(function(m) {
-            if (exclude.includes(m.nomor)) return;
-            if (m.grup === tm.grup || (theme !== 'umum' && getTargetTheme(m.syair) === theme)) res.push(m.nomor);
-        });
-        return res;
-    };
-    const poolA = findRel(pair1);
-    const poolB = is4D ? findRel(pair2) : [];
-    const allRel = [...new Set([...poolA, ...poolB])].sort();
-    let relHtml = '';
-    allRel.slice(0, 20).forEach(function(n) {
-        relHtml += '<div class="syair-badge"><span class="badge-num">' + n + '</span></div>';
-    });
-    $('syairRelationList').innerHTML = relHtml || 'Tidak ada relasi tema.';
+    const tags = [], parts = [];
+    const prevAll = [prev.depan, prev.tengah, prev.belakang];
+    const currAll = [curr.depan, curr.tengah, curr.belakang];
+    const sideNames = ['Depan', 'Tengah', 'Belakang'];
+    let hasFinding = false;
 
-    let normalizedEntries = [];
-    let historyLabel = '';
-    if (mode === 'aturan') {
-        $('syairHistoryTitle').textContent = 'Pola Global (Dari Semua Pasar):';
-        const globalMarket = marketData.markets.find(function(m) { return m.id === 'global'; });
-        if (globalMarket) {
-            globalMarket.history.forEach(function(h) { normalizedEntries.push({ p: h.date, r: h.result }); });
+    for (let i = 0; i < currAll.length; i++) {
+        const c = currAll[i], side = sideNames[i];
+
+        // Cek 2D SAMA PERSIS
+        let matched = null;
+        for (let j = 0; j < prevAll.length; j++) {
+            if (prevAll[j].pair === c.pair) { matched = { pair: prevAll[j].pair, prevSide: sideNames[j] }; break; }
         }
-        tableData.tables.forEach(function(t) {
-            t.entries.forEach(function(e) { normalizedEntries.push({ p: e.periode || e.tanggal, r: e.result }); });
-        });
-        historyLabel = 'Data Global (' + normalizedEntries.length + ' history)';
-    } else {
-        const activeMarket = getActiveMarket();
-        $('syairHistoryTitle').textContent = 'Pola History Khusus (Pasar: ' + activeMarket.name + '):';
-        activeMarket.history.forEach(function(h) { normalizedEntries.push({ p: h.date, r: h.result }); });
-        historyLabel = 'Pasar ' + activeMarket.name + ' (' + normalizedEntries.length + ' history)';
-    }
-    normalizedEntries.sort(function(a, b) { return a.p.localeCompare(b.p); });
+        if (matched) {
+            tags.push({ type: 'pair', text: '2D SAMA' });
+            parts.push(`2D ${side} ${c.pair} (=${c.syair}) sama persis dengan 2D ${matched.prevSide} result sebelumnya`);
+            hasFinding = true;
+            continue;
+        }
 
-    let finalPool4D = [];
-    let previewText = '';
-    const freqMap = {};
-    let matchCount = 0;
-    if (normalizedEntries.length >= 2) {
-        for (let i = 0; i < normalizedEntries.length - 1; i++) {
-            const r = normalizedEntries[i].r;
-            const r1 = r.slice(0, 2);
-            const r2 = r.slice(2, 4);
-            let isMatch = false;
-            if (is4D) {
-                const fMatch = (r1 === pair1 || poolA.includes(r1));
-                const bMatch = (r2 === pair2 || poolB.includes(r2));
-                if (fMatch && bMatch) isMatch = true;
-                const revF = (r1 === pair2 || poolB.includes(r1));
-                const revB = (r2 === pair1 || poolA.includes(r2));
-                if (revF && revB) isMatch = true;
-            } else {
-                if (r1 === pair1 || r2 === pair1 || poolA.includes(r1) || poolA.includes(r2)) isMatch = true;
+        // Cek TEMA SAMA
+        let sameTheme = null;
+        for (let j = 0; j < prevAll.length; j++) {
+            const pt = getTargetTheme(prevAll[j].syair);
+            if (pt === c.theme && c.theme !== 'umum' && pt !== 'umum') {
+                sameTheme = { tema: c.theme, prevSyair: prevAll[j].syair, prevSide: sideNames[j] }; break;
             }
-            if (isMatch) {
-                matchCount++;
-                const nextResult = normalizedEntries[i + 1].r;
-                const nextPairs = [nextResult.slice(0, 2), nextResult.slice(2, 4)];
-                nextPairs.forEach(function(p) { freqMap[p] = (freqMap[p] || 0) + 1; });
+        }
+        if (sameTheme) {
+            tags.push({ type: 'tema', text: 'TEMA ' + sameTheme.tema.toUpperCase() });
+            parts.push(`Tema ${side} masih ${sameTheme.tema.toUpperCase()} (${sameTheme.prevSyair} → ${c.syair})`);
+            hasFinding = true;
+            continue;
+        }
+
+        // Cek GRUP SAMA
+        let sameGrup = null;
+        for (let j = 0; j < prevAll.length; j++) {
+            if (prevAll[j].grup === c.grup && c.grup !== '?') {
+                sameGrup = { grup: c.grup, prevSide: sideNames[j] }; break;
+            }
+        }
+        if (sameGrup) {
+            tags.push({ type: 'grup', text: 'GRUP ' + sameGrup.grup.toUpperCase() });
+            parts.push(`Grup ${side} tetap ${sameGrup.grup} (mengikuti 2D ${sameGrup.prevSide} sebelumnya)`);
+            hasFinding = true;
+            continue;
+        }
+
+        // Cek TRANSISI TEMA
+        const oppositeMap = {
+            gelap: ['cinta', 'kerja'], cinta: ['gelap', 'nakal'],
+            nakal: ['cinta'], kerja: ['risau'], risau: ['kerja', 'cinta']
+        };
+        for (let j = 0; j < prevAll.length; j++) {
+            const pt = getTargetTheme(prevAll[j].syair);
+            if (oppositeMap[pt] && oppositeMap[pt].includes(c.theme) && pt !== c.theme) {
+                tags.push({ type: 'transisi', text: 'TRANSISI' });
+                parts.push(`Transisi tema ${side}: ${pt.toUpperCase()} → ${c.theme.toUpperCase()} (${prevAll[j].syair} → ${c.syair})`);
+                hasFinding = true;
+                break;
             }
         }
     }
-    const entriesArr = Object.entries(freqMap).sort(function(a, b) { return b[1] - a[1]; });
-    const top10History = entriesArr.slice(0, 10).map(function(x) { return x[0]; });
 
-    if (entriesArr.length > 0) {
-        let histHtml = '<div style="font-size:11px; color:var(--success); margin-bottom:6px;">✓ '
-            + matchCount + ' pola ditemukan di ' + historyLabel + '.</div>';
-        entriesArr.slice(0, 8).forEach(function(item, i) {
-            histHtml += '<div class="syair-badge ' + (i === 0 ? 'hot' : '') + '"><span class="badge-num">'
-                + item[0] + '</span><span class="badge-freq">' + item[1] + 'x</span></div>';
-        });
-        $('syairHistoryList').innerHTML = histHtml;
-        previewText = '🧠 Menggabungkan Aturan Syair Master + Pola History ' + historyLabel + '.';
-    } else {
-        $('syairHistoryList').innerHTML = '<div style="font-size:12px; color:var(--muted);">Tidak ada history cocok. Murni Aturan Syair.</div>';
-        previewText = '🧠 Murni menggunakan Aturan Syair Master.';
+    if (!hasFinding) {
+        const prevDigits = new Set();
+        prevAll.forEach(p => p.pair.split('').forEach(d => prevDigits.add(d)));
+        const currDigits = new Set();
+        currAll.forEach(c => c.pair.split('').forEach(d => currDigits.add(d)));
+        const common = [...prevDigits].filter(d => currDigits.has(d));
+        if (common.length > 0) {
+            tags.push({ type: 'digit', text: 'ANGKA BERULANG' });
+            parts.push(`Angka ${common.join(', ')} berulang dari result sebelumnya`);
+        } else {
+            tags.push({ type: 'new', text: 'POLA BARU' });
+            parts.push(`Tidak ada koneksi 2D/tema/grup langsung — alur berganti total`);
+        }
     }
+    return { tags, text: parts.join(' · ') };
+}
 
-    if (is4D) {
-        const setA = [...new Set([pair1, ...poolA, ...top10History])];
-        const setB = [...new Set([pair2, ...poolB, ...top10History])];
-        for (const a of setA) for (const b of setB) finalPool4D.push(a + b);
-        for (const b of setB) for (const a of setA) finalPool4D.push(b + a);
-    } else {
-        const pool = [...new Set([pair1, ...poolA, ...top10History])];
-        for (const a of pool) for (const b of pool) finalPool4D.push(a + b);
-    }
+// Render satu card result
+function _storyRenderCard(item, prev, idx) {
+    const catatan = _storyBuildCatatan(prev, item);
+    const tagsHtml = catatan.tags.map(t => `<span class="story-tag ${t.type}">${esc(t.text)}</span>`).join('');
+    return `
+    <div class="story-card">
+        <div class="story-card-header">
+            <span class="story-res-num">#${idx + 1}</span>
+            <span class="story-res-value">${esc(item.res)}</span>
+        </div>
+        <div class="story-3row">
+            <div class="story-syair-box">
+                <div class="ssb-label">2D Depan</div>
+                <div class="ssb-pair">${esc(item.depan.pair)}</div>
+                <div class="ssb-syair">${esc(item.depan.syair)}</div>
+                <div class="ssb-grup">📁 ${esc(item.depan.grup)}</div>
+            </div>
+            <div class="story-syair-box">
+                <div class="ssb-label">2D Tengah</div>
+                <div class="ssb-pair">${esc(item.tengah.pair)}</div>
+                <div class="ssb-syair">${esc(item.tengah.syair)}</div>
+                <div class="ssb-grup">📁 ${esc(item.tengah.grup)}</div>
+            </div>
+            <div class="story-syair-box">
+                <div class="ssb-label">2D Belakang</div>
+                <div class="ssb-pair">${esc(item.belakang.pair)}</div>
+                <div class="ssb-syair">${esc(item.belakang.syair)}</div>
+                <div class="ssb-grup">📁 ${esc(item.belakang.grup)}</div>
+            </div>
+        </div>
+        <div class="story-note">
+            <span class="sn-icon">📝 Catatan:</span>${tagsHtml}<br>
+            ${esc(catatan.text)}
+        </div>
+    </div>`;
+}
 
-    finalPool4D = [...new Set(finalPool4D)].filter(function(n) { return n.length === 4; }).sort();
-    currentPrediksiData.angka350 = finalPool4D.slice(0, 350);
-    currentPrediksiData.angka25 = currentPrediksiData.angka350.slice(0, 25);
-
-    let depanSet = new Set();
-    let belakangSet = new Set();
-    currentPrediksiData.angka350.forEach(function(num) {
-        depanSet.add(num.slice(0, 2));
-        belakangSet.add(num.slice(2, 4));
-    });
-    currentPrediksiData.depan2D = Array.from(depanSet).sort();
-    currentPrediksiData.belakang2D = Array.from(belakangSet).sort();
-
-    $('syairReadPreview').innerText = previewText + '\nTotal Prediksi: ' + currentPrediksiData.angka350.length + ' (4 Digit)';
-    $('prediksi350').textContent = currentPrediksiData.angka350.join('*') + (currentPrediksiData.angka350.length ? '*' : '');
-    $('prediksi25').textContent = currentPrediksiData.angka25.join('*') + (currentPrediksiData.angka25.length ? '*' : '');
-    $('prediksi2D').textContent = 'DEPAN: ' + currentPrediksiData.depan2D.join(' ')
-        + '\nBELAKANG: ' + currentPrediksiData.belakang2D.join(' ');
-    $('syairResultContainer').classList.add('show');
-});
-
-$('btnCopy4D').addEventListener('click', function() {
-    if (currentPrediksiData.angka350.length === 0) return;
-    copyTextToClipboard(currentPrediksiData.angka350.join('*') + '*');
-});
-
-$('btnCopy2D').addEventListener('click', function() {
-    if (currentPrediksiData.depan2D.length === 0) return;
-    copyTextToClipboard('DEPAN: ' + currentPrediksiData.depan2D.join(' ')
-        + '\nBELAKANG: ' + currentPrediksiData.belakang2D.join(' '));
-});
-
-$('btnSendManual').addEventListener('click', function() {
-    if (currentPrediksiData.depan2D.length === 0) return;
-    $('manualDepan').value = currentPrediksiData.depan2D.join(' ');
-    $('manualBelakang').value = currentPrediksiData.belakang2D.join(' ');
-    updateManualInfo();
-    switchSection('input4Angka');
-    const btn = document.querySelector('#subTabs4Angka button[data-subpanel="subpanel-manual"]');
-    if (btn) btn.click();
-    toast('2D Master berhasil dikirim ke Input Manual!', 'success');
-});
-
-// 3. FITUR BARU: ANALISA ALUR CERITA (10 RESULT)
-document.getElementById('analyzeStoryBtn').addEventListener('click', function() {
-    let results = [];
+// Handler utama
+document.getElementById('analyzeStoryBtn').addEventListener('click', function () {
+    const results = [];
     for (let i = 1; i <= 10; i++) {
         const val = onlyDigits(document.getElementById('storyRes' + i).value);
         if (val.length === 4) results.push(val);
     }
+    if (results.length === 0) { toast('Isi minimal 1 Result 4 digit', 'error'); return; }
 
-    if (results.length === 0) {
-        toast('Isi minimal 1 Result 4 digit', 'error');
-        return;
-    }
-
+    const processed = results.map(_storyParseOne);
     const container = document.getElementById('storyResultContainer');
-    let html = '';
 
-    let processed = [];
-    let grupCount = {};
-    
-    results.forEach((res, idx) => {
-        const depan = res.slice(0, 2);
-        const belakang = res.slice(2, 4);
-        const mD = getMaster2D(depan);
-        const mB = getMaster2D(belakang);
-
-        const grupD = mD ? mD.grup : '?';
-        const grupB = mB ? mB.grup : '?';
-
-        grupCount[grupD] = (grupCount[grupD] || 0) + 1;
-        grupCount[grupB] = (grupCount[grupB] || 0) + 1;
-
-        processed.push({
-            res: res,
-            depan: depan, syairD: mD ? mD.syair : '?', grupD: grupD,
-            belakang: belakang, syairB: mB ? mB.syair : '?', grupB: grupB
-        });
+    // ─── 1. NARASI ALUR + CATATAN ───
+    let html = '<div class="card" style="border-color:var(--warn);">';
+    html += '<h3 style="color:var(--warn); margin-bottom:10px;">📖 Hasil Analisa Perjalanan Cerita</h3>';
+    html += '<p class="text-muted" style="font-size:12px; margin-bottom:12px;">Setiap result dibaca 3 posisi (Depan | Tengah | Belakang). Catatan menjelaskan <b>kenapa syair ini muncul</b> dibandingkan dengan result sebelumnya.</p>';
+    html += '<div class="story-flow-container">';
+    processed.forEach((item, i) => {
+        html += _storyRenderCard(item, i > 0 ? processed[i - 1] : null, i);
     });
+    html += '</div></div>';
 
-    // LOGIKA PREDIKSI: Mengambil Tema dari Result ke-10 (Terbaru)
+    // ─── 2. AUTO PREDIKSI DARI TEMA (fitur lama tetap ada) ───
     const latest = processed[processed.length - 1];
-    const themeD = getTargetTheme(latest.syairD);
-    const themeB = getTargetTheme(latest.syairB);
-    
-    let prediksi2D = new Set();
+    const temas = new Set();
+    [latest.depan, latest.tengah, latest.belakang].forEach(x => {
+        if (x.theme && x.theme !== 'umum') temas.add(x.theme);
+    });
+    const grupTersentuh = new Set();
+    [latest.depan, latest.tengah, latest.belakang].forEach(x => {
+        if (x.grup && x.grup !== '?') grupTersentuh.add(x.grup);
+    });
+    const autoSet = new Set();
     master.forEach(m => {
-        const mTheme = getTargetTheme(m.syair);
-        // Cocokkan dengan tema depan, tema belakang, atau grup
-        if (mTheme === themeD || mTheme === themeB || m.grup === latest.grupD || m.grup === latest.grupB) {
-            prediksi2D.add(m.nomor);
-        }
+        const th = getTargetTheme(m.syair);
+        if (temas.has(th) || grupTersentuh.has((m.grup || '').trim())) autoSet.add(m.nomor);
     });
+    const autoArr = Array.from(autoSet).sort();
+    const auto25 = autoArr.slice(0, 25).join(' ');
 
-    let arrPrediksi = Array.from(prediksi2D).sort();
-    let teks25Angka = arrPrediksi.slice(0, 25).join(' ');
-    let teksSyair = arrPrediksi.slice(0, 10).join(',');
-
-    // SUSUN TAMPILAN
-    html += `<div class="card" style="border-color:var(--warn);">`;
-    html += `<h3 style="color:var(--warn); margin-bottom:10px;">📖 Hasil Analisa Perjalanan Cerita</h3>`;
-    
-    html += `<div class="table-container" style="margin-bottom:14px; max-height:300px;">
-        <table style="min-width:100%;">
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th>Result</th>
-                    <th>2D Depan (Syair)</th>
-                    <th>2D Belakang (Syair)</th>
-                </tr>
-            </thead>
-            <tbody>`;
-    processed.forEach((p, i) => {
-        html += `<tr>
-            <td>${i+1}</td>
-            <td class="td-pair">${p.res}</td>
-            <td><span style="color:var(--accent)">${p.depan}</span> - ${p.syairD} <span style="font-size:10px; color:var(--muted);">(${p.grupD})</span></td>
-            <td><span style="color:var(--warn)">${p.belakang}</span> - ${p.syairB} <span style="font-size:10px; color:var(--muted);">(${p.grupB})</span></td>
-        </tr>`;
-    });
-    html += `</tbody></table></div>`;
-
-    html += `<div style="background:var(--card-2); padding:10px; border-radius:8px; border:1px solid var(--border); margin-bottom:14px;">
-        <div style="font-size:12px; margin-bottom:5px;">
-            <b style="color:var(--accent);">Tema Result ke-${processed.length} (Terbaru):</b> ${themeD.toUpperCase()} & ${themeB.toUpperCase()}
-        </div>
-        <div style="font-size:12px; color:var(--text-dim);">
-            Angka prediksi disaring dari Master Syair yang memiliki <b>tema atau grup yang sama</b> dengan Result terakhir.
-        </div>
-    </div>`;
-
-    html += `<div class="pred-section">
-        <div class="pred-label">25 Angka 2D Depan (Siap Copy)</div>
-        <div class="pred-values primary" id="storyPred25">${teks25Angka || 'Tidak ada angka cocok'}</div>
-        <button class="btn-warn" style="margin-top:8px; padding:6px 12px; font-size:11px;" onclick="copyTextToClipboard('${teks25Angka}')">📋 Copy 25 Angka</button>
-    </div>`;
-
-    html += `<div class="pred-section">
-        <div class="pred-label">2D Syair Prediksi (Siap Copy)</div>
-        <div class="pred-values" id="storyPredSyair">${teksSyair || 'Tidak ada angka cocok'}</div>
-        <button class="btn-warn" style="margin-top:8px; padding:6px 12px; font-size:11px;" onclick="copyTextToClipboard('${teksSyair}')">📋 Copy Syair</button>
-    </div>`;
-
-    html += `</div>`;
+    html += '<div class="card" style="border-color:var(--accent); margin-top:14px;">';
+    html += '<h3 style="color:var(--accent); margin-bottom:8px;">🎯 Prediksi Otomatis dari Tema Result #' + processed.length + '</h3>';
+    html += '<div style="font-size:12px; color:var(--muted); margin-bottom:8px;">Tema terdeteksi: <b style="color:var(--warn);">' + ([...temas].join(', ').toUpperCase() || '—') + '</b>';
+    if (grupTersentuh.size > 0) html += ' · Grup terlibat: <b style="color:var(--accent);">' + [...grupTersentuh].join(', ') + '</b>';
+    html += '</div>';
+    html += '<div class="pred-label" style="font-size:10.5px; color:var(--muted); text-transform:uppercase; margin-bottom:4px; font-weight:700;">25 Angka 2D Master (Siap Copy)</div>';
+    html += '<div class="pred-values primary" style="font-family:monospace; font-size:13px; color:var(--success); background:rgba(0,0,0,0.25); padding:8px 10px; border-radius:6px; word-break:break-all;">' + (auto25 || 'Tidak ada angka cocok') + '</div>';
+    html += '<button class="btn-warn" style="margin-top:8px; padding:6px 12px; font-size:11px;" onclick="copyTextToClipboard(\'' + auto25.replace(/'/g, "\\'") + '\')">📋 Copy 25 Angka</button>';
+    html += '</div>';
 
     container.innerHTML = html;
     container.style.display = 'block';
+
+    // ─── 3. MUNCULKAN PANEL PREDIKSI FILTER ───
+    document.getElementById('storyPredCard').style.display = 'block';
+    toast('Alur cerita berhasil dianalisa', 'success');
 });
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BLOK 53A (BARU): PREDIKSI FILTER — BBFS + Grup + CB + 1 Depan + 2 Angka
+   ═══════════════════════════════════════════════════════════════════════ */
+
+const storyPredState = { items: [], page: 0, size: PER_PAGE };
+
+function _storyPredGenerate() {
+    const bbfs      = onlyDigits(document.getElementById('storyBBFS').value);
+    const grup      = document.getElementById('storyGrup').value;
+    const gDepan    = document.getElementById('storyGrupDepan').checked;
+    const gTengah   = document.getElementById('storyGrupTengah').checked;
+    const gBelakang = document.getElementById('storyGrupBelakang').checked;
+    const cb        = onlyDigits(document.getElementById('storyCB').value);
+    const angDepan  = onlyDigits(document.getElementById('storyAngkaDepan').value).slice(0, 1);
+    const ang2      = onlyDigits(document.getElementById('storyAngka2').value).slice(0, 2);
+
+    // Validasi: minimal BBFS atau salah satu filter
+    const hasFilter = cb || angDepan || ang2 || grup;
+    if (!bbfs && !hasFilter) {
+        toast('Isi BBFS atau minimal salah satu filter', 'error'); return;
+    }
+
+    // ─── Bangun pool dasar ───
+    let pool;
+    if (bbfs.length >= 4) {
+        pool = permutasi4DariDigit(bbfs);
+    } else {
+        pool = [];
+        for (let i = 0; i < 10000; i++) pool.push(String(i).padStart(4, '0'));
+    }
+    const totalAwal = pool.length;
+
+    // ─── Filter GRUP ───
+    let grupInfo = '';
+    if (grup) {
+        const depans = new Set(getGroupAs2DigitDepan(grup));
+        const belakangs = new Set(getGroupAs2DigitBelakang(grup));
+        // Tengah: 2D di posisi 1-2 valid jika ada di depans ATAU belakangs
+        const checkTengah = (t2) => depans.has(t2) || belakangs.has(t2);
+        const anyPos = gDepan || gTengah || gBelakang;
+        if (!anyPos) { toast('Centang minimal 1 posisi grup', 'error'); return; }
+        pool = pool.filter(n => {
+            const d2 = n.slice(0, 2), t2 = n.slice(1, 3), b2 = n.slice(2, 4);
+            if (gDepan && depans.has(d2)) return true;
+            if (gTengah && checkTengah(t2)) return true;
+            if (gBelakang && belakangs.has(b2)) return true;
+            return false;
+        });
+        const posArr = [];
+        if (gDepan) posArr.push('Depan');
+        if (gTengah) posArr.push('Tengah');
+        if (gBelakang) posArr.push('Belakang');
+        grupInfo = `Grup "${grup}" [${posArr.join('+')}]`;
+    }
+
+    // ─── Filter CB ───
+    if (cb) {
+        pool = pool.filter(n => {
+            for (const d of cb) if (n.includes(d)) return true;
+            return false;
+        });
+    }
+
+    // ─── Filter 1 Angka Depan (HANYA digit pertama) ───
+    if (angDepan) {
+        pool = pool.filter(n => n[0] === angDepan);
+    }
+
+    // ─── Filter 2 Angka (keduanya harus muncul, tidak harus berdampingan) ───
+    if (ang2 && ang2.length === 2) {
+        const d1 = ang2[0], d2 = ang2[1];
+        pool = pool.filter(n => n.includes(d1) && n.includes(d2));
+    }
+
+    if (pool.length === 0) { toast('Tidak ada hasil setelah filter', 'error'); return; }
+
+    pool.sort();
+    storyPredState.items = pool;
+    storyPredState.page = 0;
+
+    // Simpan meta untuk info
+    storyPredState.meta = {
+        totalAwal,
+        filters: [
+            bbfs ? `BBFS ${bbfs.length} digit` : 'BBFS: kosong (10000)',
+            grupInfo,
+            cb ? `CB ${cb.split('').join(' ')}` : null,
+            angDepan ? `Depan=${angDepan}` : null,
+            ang2 ? `2Angka=${ang2}` : null
+        ].filter(Boolean).join(' • ')
+    };
+
+    _storyPredRender();
+    toast('Berhasil: ' + pool.length.toLocaleString('id-ID') + ' dari ' + totalAwal.toLocaleString('id-ID'), 'success');
+}
+
+function _storyPredRender() {
+    const c = document.getElementById('storyPredResult');
+    const card = document.getElementById('storyPredResultCard');
+    card.style.display = 'block';
+
+    if (!storyPredState.items.length) {
+        c.innerHTML = '<div class="empty">Belum ada hasil. Klik Generate Prediksi.</div>';
+        return;
+    }
+
+    const total = storyPredState.items.length;
+    const tp = Math.ceil(total / storyPredState.size);
+    if (storyPredState.page >= tp) storyPredState.page = tp - 1;
+    if (storyPredState.page < 0) storyPredState.page = 0;
+    const st = storyPredState.page * storyPredState.size;
+    const pd = storyPredState.items.slice(st, st + storyPredState.size);
+
+    c.innerHTML =
+        '<div class="page-info"><b>' + esc(storyPredState.meta.filters) + '</b><br>' +
+        'Halaman ' + (storyPredState.page + 1) + ' / ' + tp + ' • ' +
+        pd.length + ' di halaman ini • Total ' + total.toLocaleString('id-ID') + ' dari ' +
+        storyPredState.meta.totalAwal.toLocaleString('id-ID') + ' (' +
+        ((total / storyPredState.meta.totalAwal) * 100).toFixed(1) + '% lolos)</div>' +
+        '<div class="page-content">' + pd.join('*') + (pd.length ? '*' : '') + '</div>' +
+        '<div class="page-nav">' +
+        '<button ' + (storyPredState.page === 0 ? 'disabled' : '') + ' onclick="_storyPredPage(-1)">◀ Prev</button>' +
+        '<span>' + (storyPredState.page + 1) + ' / ' + tp + '</span>' +
+        '<button ' + (storyPredState.page === tp - 1 ? 'disabled' : '') + ' onclick="_storyPredPage(1)">Next ▶</button>' +
+        '</div>' +
+        '<div class="page-actions">' +
+        '<button onclick="_storyPredCopyPage()">📋 Copy Halaman</button>' +
+        '<button onclick="_storyPredCopyAll()">📋 Copy Semua</button>' +
+        '<button onclick="_storyPredExport()">⬇ Export TXT</button>' +
+        '</div>';
+}
+
+window._storyPredPage = function (d) {
+    const tp = Math.ceil(storyPredState.items.length / storyPredState.size);
+    const nx = storyPredState.page + d;
+    if (nx < 0 || nx >= tp) return;
+    storyPredState.page = nx;
+    _storyPredRender();
+};
+window._storyPredCopyPage = function () {
+    const st = storyPredState.page * storyPredState.size;
+    copyTextToClipboard(storyPredState.items.slice(st, st + storyPredState.size).join('*') + '*');
+};
+window._storyPredCopyAll = function () {
+    copyTextToClipboard(storyPredState.items.join('*') + '*');
+};
+window._storyPredExport = function () {
+    const b = new Blob([storyPredState.items.join('*') + '*'], { type: 'text/plain;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(b);
+    a.download = 'sahard-story-pred-' + Date.now() + '.txt';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast('Diexport', 'success');
+};
+
+// Bind input sanitizers + tombol generate
+(function bindStoryPredEvents() {
+    const bbfsEl = document.getElementById('storyBBFS');
+    if (bbfsEl) bbfsEl.addEventListener('input', function (e) { e.target.value = onlyDigits(e.target.value).slice(0, 20); });
+    const cbEl = document.getElementById('storyCB');
+    if (cbEl) cbEl.addEventListener('input', function (e) { e.target.value = onlyDigits(e.target.value); });
+    const angDepanEl = document.getElementById('storyAngkaDepan');
+    if (angDepanEl) angDepanEl.addEventListener('input', function (e) { e.target.value = onlyDigits(e.target.value).slice(0, 1); });
+    const ang2El = document.getElementById('storyAngka2');
+    if (ang2El) ang2El.addEventListener('input', function (e) { e.target.value = onlyDigits(e.target.value).slice(0, 2); });
+    const genBtn = document.getElementById('storyGeneratePredBtn');
+    if (genBtn) genBtn.addEventListener('click', _storyPredGenerate);
+})();
 
 /* ═══════════════════════════════════════════════════════════════════════
    BLOK 54: EXPORT/IMPORT JSON MULTI-TABLE
@@ -6221,7 +6413,7 @@ function populateNewGrupDropdowns() {
         });
         return h;
     };
-    const ids = ['blGrup', 'c33Grup', 'gabungGrup1', 'gabungGrup2', 'gabungGrup3'];
+    const ids = ['blGrup', 'c33Grup', 'gabungGrup1', 'gabungGrup2', 'gabungGrup3', 'storyGrup'];
     ids.forEach(function(id) {
         const el = $(id); if (!el) return;
         const cur = el.value;
