@@ -2056,6 +2056,12 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
             <label for="storyAngka2">Angka Mengandung 2 Angka (kedua digit harus muncul)</label>
             <input type="text" id="storyAngka2" maxlength="2" inputmode="numeric" placeholder="12" autocomplete="off">
         </div>
+		<div class="field" style="display:flex; align-items:center; gap:8px;">
+			<input type="checkbox" id="storyUseAlurFilter" style="width:auto; cursor:pointer;">
+			<label for="storyUseAlurFilter" style="margin:0; cursor:pointer; font-size:13px;">
+				🔁 Batasi ke angka yang mengandung 2D dari alur cerita
+			</label>
+		</div>
         <button class="btn-primary" id="storyGeneratePredBtn" style="background:var(--success); color:#04101c;">⚡ Generate Prediksi (350/Halaman)</button>
     </div>
 
@@ -4684,67 +4690,160 @@ $('searchPatternBtn').addEventListener('click', function() {
     }
 
     // ── State prediksi filter ──
+	let lastStory2D = null;   // peta 2D alur — dipakai juga di handleGenerate
     const predState = { items: [], page: 0, size: 350, meta: null };
 
     // ── HANDLE: ANALISA ALUR ──
     function handleAnalyze() {
-        const results = [];
-        for (let i = 1; i <= 10; i++) {
-            const el = document.getElementById('storyRes' + i);
-            if (!el) continue;
-            const v = _onlyDigits(el.value);
-            if (v.length === 4) results.push(v);
-        }
-        if (!results.length) { _toast('Isi minimal 1 Result 4 digit', 'error'); return; }
-
-        const processed = results.map(_parseOne);
-        const c = document.getElementById('storyResultContainer');
-        if (!c) { _toast('Container hasil tidak ditemukan', 'error'); return; }
-
-        // ── 1. Narasi ──
-        let html = '<div class="card" style="border-color:var(--warn);">';
-        html += '<h3 style="color:var(--warn); margin-bottom:10px;">📖 Hasil Analisa Perjalanan Cerita</h3>';
-        html += '<p class="text-muted" style="font-size:12px; margin-bottom:12px;">Setiap result dibaca 3 posisi (Depan | Tengah | Belakang). Catatan menjelaskan <b>kenapa syair ini muncul</b> dibandingkan result sebelumnya.</p>';
-        html += '<div class="story-flow-container">';
-        processed.forEach((it, i) => { html += _renderCard(it, i > 0 ? processed[i - 1] : null, i); });
-        html += '</div></div>';
-
-        // ── 2. Auto prediksi tema ──
-        const latest = processed[processed.length - 1];
-        const temas = new Set();
-        [latest.depan, latest.tengah, latest.belakang].forEach(x => { if (x.theme && x.theme !== 'umum') temas.add(x.theme); });
-        const grupSentuh = new Set();
-        [latest.depan, latest.tengah, latest.belakang].forEach(x => { if (x.grup && x.grup !== '?') grupSentuh.add(x.grup); });
-        const autoSet = new Set();
-        if (typeof master !== 'undefined' && Array.isArray(master)) {
-            master.forEach(m => {
-                const th = _getTargetTheme(m.syair);
-                if (temas.has(th) || grupSentuh.has((m.grup || '').trim())) autoSet.add(m.nomor);
-            });
-        }
-        const autoArr = Array.from(autoSet).sort();
-        const auto25 = autoArr.slice(0, 25).join(' ');
-
-        html += '<div class="card" style="border-color:var(--accent); margin-top:14px;">';
-        html += '<h3 style="color:var(--accent); margin-bottom:8px;">🎯 Prediksi Otomatis Tema Result #' + processed.length + '</h3>';
-        html += '<div style="font-size:12px; color:var(--muted); margin-bottom:8px;">Tema: <b style="color:var(--warn);">' + ([...temas].join(', ').toUpperCase() || '—') + '</b>';
-        if (grupSentuh.size) html += ' · Grup: <b style="color:var(--accent);">' + [...grupSentuh].join(', ') + '</b>';
-        html += '</div>';
-        html += '<div style="font-family:monospace; font-size:13px; color:var(--success); background:rgba(0,0,0,0.25); padding:8px 10px; border-radius:6px; word-break:break-all;">' + (auto25 || 'Tidak ada angka cocok') + '</div>';
-        html += '<button class="btn-warn" style="margin-top:8px; padding:6px 12px; font-size:11px;" onclick="_storyCopy25()">📋 Copy 25 Angka</button>';
-        html += '</div>';
-
-        c.innerHTML = html;
-        c.style.display = 'block';
-        window._story25Cache = auto25;
-
-        // ── 3. Munculkan panel prediksi filter ──
-        const predCard = document.getElementById('storyPredCard');
-        if (predCard) predCard.style.display = 'block';
-        _toast('Alur cerita berhasil dianalisa', 'success');
+    const results = [];
+    for (let i = 1; i <= 10; i++) {
+        const el = document.getElementById('storyRes' + i);
+        if (!el) continue;
+        const v = _onlyDigits(el.value);
+        if (v.length === 4) results.push(v);
     }
+    if (!results.length) { _toast('Isi minimal 1 Result 4 digit', 'error'); return; }
 
-    window._storyCopy25 = function () { _copy(window._story25Cache || ''); };
+    const processed = results.map(_parseOne);
+    const container = document.getElementById('storyResultContainer');
+    if (!container) { _toast('Container hasil tidak ditemukan', 'error'); return; }
+
+    // ── 1. Narasi (tidak berubah) ──
+    let html = '<div class="card" style="border-color:var(--warn);">';
+    html += '<h3 style="color:var(--warn); margin-bottom:10px;">📖 Hasil Analisa Perjalanan Cerita</h3>';
+    html += '<p class="text-muted" style="font-size:12px; margin-bottom:12px;">Setiap result dibaca 3 posisi. Catatan menjelaskan <b>kenapa syair ini muncul</b> dibandingkan result sebelumnya.</p>';
+    html += '<div class="story-flow-container">';
+    processed.forEach((it, i) => { html += _renderCard(it, i > 0 ? processed[i - 1] : null, i); });
+    html += '</div></div>';
+
+    // ── 2. Bangun peta 2D alur ──
+    const latest = processed[processed.length - 1];
+    const temas = new Set();
+    [latest.depan, latest.tengah, latest.belakang].forEach(x => {
+        if (x.theme && x.theme !== 'umum') temas.add(x.theme);
+    });
+    const grupSentuh = new Set();
+    [latest.depan, latest.tengah, latest.belakang].forEach(x => {
+        if (x.grup && x.grup !== '?') grupSentuh.add(x.grup);
+    });
+
+    const story2D = {};
+    processed.forEach((item, idx) => {
+        [['depan', item.depan], ['tengah', item.tengah], ['belakang', item.belakang]].forEach(([side, pos]) => {
+            if (!story2D[pos.pair]) {
+                story2D[pos.pair] = { count: 0, sides: [], lastIdx: -1, syair: pos.syair, grup: pos.grup };
+            }
+            story2D[pos.pair].count++;
+            story2D[pos.pair].sides.push(side);
+            story2D[pos.pair].lastIdx = idx;
+        });
+    });
+    lastStory2D = story2D;
+
+    // ── 3. Scoring semua master ──
+    const scored = [];
+    master.forEach(m => {
+        const num = m.nomor;
+        const th = _getTargetTheme(m.syair);
+        const gr = (m.grup || '').trim();
+        let score = 0;
+        const reasons = [];
+
+        // Match tema & grup #10
+        if (temas.has(th)) { score += 40; reasons.push('tema'); }
+        if (grupSentuh.has(gr)) { score += 40; reasons.push('grup'); }
+
+        // Muncul di alur (INI YANG BIKIN 43 MASUK)
+        if (story2D[num]) {
+            const f = story2D[num];
+            score += 100 * f.count;
+            reasons.push('alur' + (f.count > 1 ? '×' + f.count : ''));
+            const bel = f.sides.filter(s => s === 'belakang').length;
+            if (bel > 0) {
+                score += 60 * bel;
+                reasons.push('belakang' + (bel > 1 ? '×' + bel : ''));
+            }
+            // Bonus recency (yang lebih baru lebih penting)
+            const rec = processed.length - 1 - f.lastIdx;
+            score += Math.max(0, 30 - rec * 4);
+        }
+
+        // Exact match dengan 3 posisi #10
+        if (num === latest.belakang.pair) { score += 200; reasons.push('BEL#' + processed.length); }
+        if (num === latest.tengah.pair)   { score += 120; reasons.push('TGH#' + processed.length); }
+        if (num === latest.depan.pair)    { score += 80;  reasons.push('DPN#' + processed.length); }
+
+        if (score > 0) scored.push({ nomor: num, score, syair: m.syair, grup: gr, tema: th, reasons });
+    });
+
+    scored.sort((a, b) => b.score - a.score || a.nomor.localeCompare(b.nomor));
+
+    const top25 = scored.slice(0, 25);
+    const top50 = scored.slice(0, 50);
+    const alurNums = Object.keys(story2D).sort();
+
+    const top25num = top25.map(x => x.nomor).join(' ');
+    const top50num = top50.map(x => x.nomor).join(' ');
+    const alurStr = alurNums.join(' ');
+
+    // ── 4. Tampilkan prediksi scoring ──
+    let predHtml = '<div class="card" style="border-color:var(--success); margin-top:14px;">';
+    predHtml += '<h3 style="color:var(--success); margin-bottom:8px;">🎯 Prediksi 2D Master — Scoring Alur + Tema</h3>';
+    predHtml += '<div style="font-size:12px; color:var(--muted); margin-bottom:8px;">';
+    predHtml += 'Tema #' + processed.length + ': <b style="color:var(--warn);">' + ([...temas].join(', ').toUpperCase() || '—') + '</b>';
+    if (grupSentuh.size) predHtml += ' · Grup: <b style="color:var(--accent);">' + [...grupSentuh].join(', ') + '</b>';
+    predHtml += '</div>';
+
+    // Top 50 dengan rank + bintang untuk top 25
+    predHtml += '<div style="font-size:10.5px; color:var(--muted); font-weight:700; text-transform:uppercase; margin-bottom:4px;">Top 50 — ★ = 25 Teratas</div>';
+    let listHtml = '<div style="font-family:monospace; font-size:12.5px; line-height:1.9; background:rgba(0,0,0,0.25); padding:8px 10px; border-radius:6px;">';
+    top50.forEach((x, i) => {
+        const star = i < 25 ? '★' : '·';
+        const color = i < 25 ? 'var(--success)' : 'var(--text-dim)';
+        const bold = i < 25 ? 'font-weight:700;' : '';
+        listHtml += `<span style="color:${color};${bold}" title="${_esc(x.syair)} (${_esc(x.grup)}) | ${x.reasons.join(', ')}">${star}${x.nomor}</span> `;
+    });
+    listHtml += '</div>';
+    predHtml += listHtml;
+
+    // Detail alasan Top 25
+    predHtml += '<details style="margin-top:8px; font-size:11px;"><summary style="cursor:pointer; color:var(--muted);">🔍 Alasan per angka (Top 25)</summary>';
+    predHtml += '<div style="margin-top:6px; display:flex; flex-direction:column; gap:3px;">';
+    top25.forEach((x, i) => {
+        predHtml += `<div style="display:flex; justify-content:space-between; gap:8px; padding:3px 6px; background:var(--card-2); border-radius:4px; font-size:11px;">` +
+            `<span><b style="color:var(--success); font-family:monospace;">${x.nomor}</b> <span style="color:var(--muted);">${_esc(x.syair)}</span></span>` +
+            `<span style="color:var(--accent); font-size:10px;">${x.reasons.join(' · ')}</span></div>`;
+    });
+    predHtml += '</div></details>';
+
+    // Angka Alur (2D yang sudah muncul di cerita)
+    predHtml += '<div style="font-size:10.5px; color:var(--muted); font-weight:700; text-transform:uppercase; margin-top:10px; margin-bottom:4px;">🔁 Angka Alur — 2D yang Sudah Muncul di Cerita</div>';
+    predHtml += '<div style="font-family:monospace; font-size:12px; color:var(--accent); background:rgba(34,211,238,0.08); padding:6px 8px; border-radius:6px; border:1px solid rgba(34,211,238,0.3); word-break:break-all;">' + (alurStr || '—') + '</div>';
+
+    // Copy buttons
+    predHtml += '<div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:10px;">';
+    predHtml += '<button class="btn-warn" style="padding:6px 10px; font-size:11px;" onclick="_storyCopyStr(\'' + top25num.replace(/'/g, "\\'") + '\')">📋 Copy Top 25</button>';
+    predHtml += '<button class="btn-warn" style="padding:6px 10px; font-size:11px;" onclick="_storyCopyStr(\'' + top50num.replace(/'/g, "\\'") + '\')">📋 Copy Top 50</button>';
+    predHtml += '<button class="btn-warn" style="padding:6px 10px; font-size:11px;" onclick="_storyCopyStr(\'' + alurStr.replace(/'/g, "\\'") + '\')">📋 Copy Alur</button>';
+    predHtml += '</div>';
+
+    predHtml += '<div style="margin-top:10px; padding:8px; background:rgba(251,191,36,0.08); border:1px solid rgba(251,191,36,0.3); border-radius:6px; font-size:11px; color:var(--warn);">';
+    predHtml += '💡 Untuk 350/halaman dengan filter BBFS/CB/Grup/Alur, gunakan panel <b>Generate Prediksi</b> di bawah.';
+    predHtml += '</div>';
+
+    predHtml += '</div>';
+    html += predHtml;
+
+    container.innerHTML = html;
+    container.style.display = 'block';
+
+    const predCard = document.getElementById('storyPredCard');
+    if (predCard) predCard.style.display = 'block';
+    _toast('Alur cerita + prediksi scoring berhasil dibuat', 'success');
+}
+
+// Helper copy
+window._storyCopyStr = function (s) { _copy(s); };
 
     // ── HANDLE: GENERATE PREDIKSI ──
     function handleGenerate() {
@@ -4757,9 +4856,11 @@ $('searchPatternBtn').addEventListener('click', function() {
         const angD = _onlyDigits(document.getElementById('storyAngkaDepan').value).slice(0, 1);
         const ang2 = _onlyDigits(document.getElementById('storyAngka2').value).slice(0, 2);
 
-        if (!bbfs && !cb && !angD && !ang2 && !grup) {
-            _toast('Isi BBFS atau minimal salah satu filter', 'error'); return;
-        }
+        const _alurChk = document.getElementById('storyUseAlurFilter');
+		const _alurOn = _alurChk && _alurChk.checked && lastStory2D;
+		if (!bbfs && !cb && !angD && !ang2 && !grup && !_alurOn) {
+			_toast('Isi BBFS atau minimal salah satu filter', 'error'); return;
+		}
 
         // Pool dasar
         let pool;
@@ -4796,6 +4897,16 @@ $('searchPatternBtn').addEventListener('click', function() {
         if (angD) pool = pool.filter(n => n[0] === angD);
         // Filter 2 Angka
         if (ang2 && ang2.length === 2) pool = pool.filter(n => n.includes(ang2[0]) && n.includes(ang2[1]));
+		// Filter: hanya angka yang mengandung 2D dari alur cerita
+		const useAlurEl = document.getElementById('storyUseAlurFilter');
+		if (useAlurEl && useAlurEl.checked && lastStory2D) {
+			const alurSet = new Set(Object.keys(lastStory2D));
+			pool = pool.filter(n =>
+				alurSet.has(n.slice(0, 2)) ||
+				alurSet.has(n.slice(1, 3)) ||
+				alurSet.has(n.slice(2, 4))
+			);
+		}
 
         if (!pool.length) { _toast('Tidak ada hasil setelah filter', 'error'); return; }
         pool.sort();
