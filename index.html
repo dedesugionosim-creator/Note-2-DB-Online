@@ -1998,7 +1998,7 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
         <p class="text-muted" style="font-size:12.5px; margin-bottom:12px;">
             Masukkan 10 Result terakhir (<b>Result 1 = Paling Lama</b>, <b>Result 10 = Paling Baru</b>).
             Sistem membaca alur narasinya: <b>kenapa syair 2 muncul setelah syair 1</b>, dst.
-            Nama syair & grup diambil dari <b>Master Nomor</b> dan <b>Data Grup</b>.
+            Nama syair &amp; grup diambil dari <b>Master Nomor</b> dan <b>Data Grup</b>.
         </p>
         <div class="grid-2">
             <div class="field"><label>Result 1 (Lama)</label><input type="text" id="storyRes1" maxlength="4" inputmode="numeric" placeholder="2356"></div>
@@ -2027,30 +2027,61 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
             <label for="storyBBFS">BBFS 20 Angka (4–20 digit) — <span style="color:var(--muted);">kosong = semua 10.000</span></label>
             <input type="text" id="storyBBFS" maxlength="20" inputmode="numeric" placeholder="0123456789" autocomplete="off">
         </div>
-        <div class="field">
-    <label>🎯 Angka Mengandung GRUP — 3 Posisi (boleh isi 1, 2, atau 3)</label>
-    <p style="font-size:11px; color:var(--muted); margin:2px 0 8px; font-style:italic;">
-        Semua yang diisi <b>HARUS</b> cocok (AND). Boleh beda grup per posisi.
-    </p>
-    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
-        <div>
-            <label for="storyGrupDepan" style="font-size:10.5px; color:var(--muted); margin-bottom:4px; display:block; font-weight:700;">2D DEPAN</label>
-            <select id="storyGrupDepan"><option value="">— Tanpa —</option></select>
-        </div>
-        <div>
-            <label for="storyGrupTengah" style="font-size:10.5px; color:var(--muted); margin-bottom:4px; display:block; font-weight:700;">2D TENGAH</label>
-            <select id="storyGrupTengah"><option value="">— Tanpa —</option></select>
-        </div>
-        <div>
-            <label for="storyGrupBelakang" style="font-size:10.5px; color:var(--muted); margin-bottom:4px; display:block; font-weight:700;">2D BELAKANG</label>
-            <select id="storyGrupBelakang"><option value="">— Tanpa —</option></select>
-        </div>
-    </div>
-    <p style="font-size:10.5px; color:var(--muted); margin-top:6px; font-style:italic;">
-        ℹ️ Posisi Tengah memakai daftar 2D grup (master 2-digit = depan & belakang identik).
-    </p>
-</div>
 
+        <div class="field">
+            <label>🎯 Angka Mengandung GRUP — 3 Posisi (boleh isi 1, 2, atau 3)</label>
+            <p style="font-size:11px; color:var(--muted); margin:2px 0 8px; font-style:italic;">
+                Semua yang diisi <b>HARUS</b> cocok (AND). Boleh beda grup per posisi.
+            </p>
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
+                <div>
+                    <label for="storyGrupDepan" style="font-size:10.5px; color:var(--muted); margin-bottom:4px; display:block; font-weight:700;">2D DEPAN</label>
+                    <select id="storyGrupDepan"><option value="">— Tanpa —</option></select>
+                </div>
+                <div>
+                    <label for="storyGrupTengah" style="font-size:10.5px; color:var(--muted); margin-bottom:4px; display:block; font-weight:700;">2D TENGAH</label>
+                    <select id="storyGrupTengah"><option value="">— Tanpa —</option></select>
+                </div>
+                <div>
+                    <label for="storyGrupBelakang" style="font-size:10.5px; color:var(--muted); margin-bottom:4px; display:block; font-weight:700;">2D BELAKANG</label>
+                    <select id="storyGrupBelakang"><option value="">— Tanpa —</option></select>
+                </div>
+            </div>
+            <p style="font-size:10.5px; color:var(--muted); margin-top:6px; font-style:italic;">
+                ℹ️ Posisi Tengah memakai daftar 2D grup (master 2-digit = depan &amp; belakang identik).
+            </p>
+        </div>
+
+        <div class="grid-2">
+            <div class="field">
+                <label for="storyCB">Angka Mengandung CB</label>
+                <input type="text" id="storyCB" maxlength="20" inputmode="numeric" placeholder="0 1 2 3 5" autocomplete="off">
+            </div>
+            <div class="field">
+                <label for="storyAngkaDepan">Angka Mengandung 1 Angka Awal/Depan — <span style="color:var(--muted); font-size:10.5px;">boleh banyak digit</span></label>
+                <input type="text" id="storyAngkaDepan" maxlength="20" inputmode="numeric" placeholder="0 1 2 3" autocomplete="off">
+            </div>
+        </div>
+
+        <div class="field">
+            <label for="storyAngka2">Angka Mengandung 2 Angka (kedua digit harus muncul)</label>
+            <input type="text" id="storyAngka2" maxlength="2" inputmode="numeric" placeholder="12" autocomplete="off">
+        </div>
+
+        <div class="field" style="display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" id="storyUseAlurFilter" style="width:auto; cursor:pointer;">
+            <label for="storyUseAlurFilter" style="margin:0; cursor:pointer; font-size:13px;">
+                🔁 Batasi ke angka yang mengandung 2D dari alur cerita
+            </label>
+        </div>
+
+        <button class="btn-primary" id="storyGeneratePredBtn" style="background:var(--success); color:#04101c;">⚡ Generate Prediksi (350/Halaman)</button>
+    </div>
+
+    <div class="card" id="storyPredResultCard" style="display:none; margin-top:14px;">
+        <div id="storyPredResult"></div>
+    </div>
+</div>
         </section>
 
         <!-- ═══════════════════════════════════════════════════════════════
@@ -4782,52 +4813,17 @@ $('searchPatternBtn').addEventListener('click', function() {
 
         if (score > 0) scored.push({ nomor: num, score, syair: m.syair, grup: gr, tema: th, reasons });
     });
-
-    // Sort: score DESC, nomor ASC sebagai tiebreaker
+	
+	    // Sort: score DESC, nomor ASC sebagai tiebreaker
     scored.sort((a, b) => (b.score - a.score) || a.nomor.localeCompare(b.nomor));
 
     // Simpan untuk cek-skor
     window._storyScored = scored;
 
-    // ── 3. Scoring semua master ──
-    const scored = [];
-    master.forEach(m => {
-        const num = m.nomor;
-        const th = _getTargetTheme(m.syair);
-        const gr = (m.grup || '').trim();
-        let score = 0;
-        const reasons = [];
-
-        // Match tema & grup #10
-        if (temas.has(th)) { score += 40; reasons.push('tema'); }
-        if (grupSentuh.has(gr)) { score += 40; reasons.push('grup'); }
-
-        // Muncul di alur (INI YANG BIKIN 43 MASUK)
-        if (story2D[num]) {
-            const f = story2D[num];
-            score += 100 * f.count;
-            reasons.push('alur' + (f.count > 1 ? '×' + f.count : ''));
-            const bel = f.sides.filter(s => s === 'belakang').length;
-            if (bel > 0) {
-                score += 60 * bel;
-                reasons.push('belakang' + (bel > 1 ? '×' + bel : ''));
-            }
-            // Bonus recency (yang lebih baru lebih penting)
-            const rec = processed.length - 1 - f.lastIdx;
-            score += Math.max(0, 30 - rec * 4);
-        }
-
-        // Exact match dengan 3 posisi #10
-        if (num === latest.belakang.pair) { score += 200; reasons.push('BEL#' + processed.length); }
-        if (num === latest.tengah.pair)   { score += 120; reasons.push('TGH#' + processed.length); }
-        if (num === latest.depan.pair)    { score += 80;  reasons.push('DPN#' + processed.length); }
-
-        if (score > 0) scored.push({ nomor: num, score, syair: m.syair, grup: gr, tema: th, reasons });
-    });
-
-    scored.sort((a, b) => b.score - a.score || a.nomor.localeCompare(b.nomor));
-
     const top25 = scored.slice(0, 25);
+    const top50 = scored.slice(0, 50);
+    const alurNums = Object.keys(story2D).sort();
+	
     const top50 = scored.slice(0, 50);
     const alurNums = Object.keys(story2D).sort();
 
@@ -7612,283 +7608,6 @@ console.log('Semua fitur siap. Selamat menggunakan SA_HARD!');
     }, 500);
 
     console.log('%c[FIX OK] Semua handler Rumus Syair siap.', 'color:#22c55e;font-weight:bold;');
-})();
-</script>
-
-<!-- ═══════════════════════════════════════════════════════════════════════
-     PATCH v3: Rebuild storyPredCard + Generate handler (self-contained)
-     - Deteksi elemen yang hilang → rebuild innerHTML
-     - Bind generate handler baru
-     - Multi-digit "Angka Mengandung 1 Angka Depan"
-     - Tidak bergantung pada IIFE lama
-     ═══════════════════════════════════════════════════════════════════════ -->
-<script>
-(function () {
-    'use strict';
-
-    function _onlyDigits(s) { return String(s || '').replace(/\D/g, ''); }
-    function _esc(s) { if (s == null) return ''; return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
-    function _toast(m, t) { if (typeof toast === 'function') toast(m, t); else console.log(m); }
-    function _perm(s) { return typeof permutasi4DariDigit === 'function' ? permutasi4DariDigit(s) : []; }
-    function _copy(t) { if (typeof copyTextToClipboard === 'function') copyTextToClipboard(t); else try { navigator.clipboard.writeText(t); } catch (e) {} }
-    function _perPage() { return typeof PER_PAGE !== 'undefined' ? PER_PAGE : 350; }
-
-    const state = { items: [], page: 0, size: _perPage(), meta: null };
-
-    // ── Struktur HTML lengkap ──
-    function buildCardHTML() {
-        return `
-        <div class="story-pred-header">🎯 Generate Prediksi 4D dari Alur Cerita</div>
-        <p class="text-muted" style="font-size:12px; margin-bottom:12px;">Semua filter <b>opsional</b>. Isi minimal BBFS atau salah satu filter.</p>
-
-        <div class="field">
-            <label for="storyBBFS">BBFS 20 Angka (4–20 digit) — <span style="color:var(--muted);">kosong = semua 10.000</span></label>
-            <input type="text" id="storyBBFS" maxlength="20" inputmode="numeric" placeholder="0123456789" autocomplete="off">
-        </div>
-
-        <div class="field">
-            <label>🎯 Angka Mengandung GRUP — 3 Posisi (boleh isi 1, 2, atau 3)</label>
-            <p style="font-size:11px; color:var(--muted); margin:2px 0 8px; font-style:italic;">Semua yang diisi <b>HARUS</b> cocok (AND). Boleh beda grup per posisi.</p>
-            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
-                <div>
-                    <label for="storyGrupDepan" style="font-size:10.5px; color:var(--muted); margin-bottom:4px; display:block; font-weight:700;">2D DEPAN</label>
-                    <select id="storyGrupDepan"><option value="">— Tanpa —</option></select>
-                </div>
-                <div>
-                    <label for="storyGrupTengah" style="font-size:10.5px; color:var(--muted); margin-bottom:4px; display:block; font-weight:700;">2D TENGAH</label>
-                    <select id="storyGrupTengah"><option value="">— Tanpa —</option></select>
-                </div>
-                <div>
-                    <label for="storyGrupBelakang" style="font-size:10.5px; color:var(--muted); margin-bottom:4px; display:block; font-weight:700;">2D BELAKANG</label>
-                    <select id="storyGrupBelakang"><option value="">— Tanpa —</option></select>
-                </div>
-            </div>
-        </div>
-
-        <div class="grid-2">
-            <div class="field">
-                <label for="storyCB">Angka Mengandung CB</label>
-                <input type="text" id="storyCB" maxlength="20" inputmode="numeric" placeholder="0 1 2 3 5" autocomplete="off">
-            </div>
-            <div class="field">
-                <label for="storyAngkaDepan">Angka Mengandung 1 Angka Awal/Depan — <span style="color:var(--muted); font-size:10.5px;">boleh banyak digit</span></label>
-                <input type="text" id="storyAngkaDepan" maxlength="20" inputmode="numeric" placeholder="0 1 2 3" autocomplete="off">
-            </div>
-        </div>
-
-        <div class="field">
-            <label for="storyAngka2">Angka Mengandung 2 Angka (kedua digit harus muncul)</label>
-            <input type="text" id="storyAngka2" maxlength="2" inputmode="numeric" placeholder="12" autocomplete="off">
-        </div>
-
-        <div class="field" style="display:flex; align-items:center; gap:8px;">
-            <input type="checkbox" id="storyUseAlurFilter" style="width:auto; cursor:pointer;">
-            <label for="storyUseAlurFilter" style="margin:0; cursor:pointer; font-size:13px;">🔁 Batasi ke angka yang mengandung 2D dari alur cerita</label>
-        </div>
-
-        <button class="btn-primary" id="storyGeneratePredBtn" style="background:var(--success); color:#04101c;">⚡ Generate Prediksi (350/Halaman)</button>
-        `;
-    }
-
-    function rebuildCard() {
-        const card = document.getElementById('storyPredCard');
-        if (!card) return false;
-        const needed = ['storyBBFS','storyCB','storyGrupDepan','storyGrupTengah','storyGrupBelakang','storyAngkaDepan','storyAngka2','storyGeneratePredBtn'];
-        const missing = needed.filter(id => !document.getElementById(id));
-        if (missing.length === 0) return true;
-        card.innerHTML = buildCardHTML();
-        card.style.display = 'block';
-        console.log('%c[PATCH v3] storyPredCard rebuilt. Missing: ' + missing.join(', '), 'color:#fbbf24;font-weight:bold;');
-        return true;
-    }
-
-    function ensureResultContainer() {
-        if (!document.getElementById('storyPredResultCard')) {
-            const card = document.getElementById('storyPredCard');
-            if (!card) return;
-            const div = document.createElement('div');
-            div.className = 'card';
-            div.id = 'storyPredResultCard';
-            div.style.cssText = 'display:none; margin-top:14px;';
-            div.innerHTML = '<div id="storyPredResult"></div>';
-            card.parentNode.insertBefore(div, card.nextSibling);
-        }
-        if (!document.getElementById('storyPredResult')) {
-            const rc = document.getElementById('storyPredResultCard');
-            if (rc) rc.innerHTML = '<div id="storyPredResult"></div>';
-        }
-    }
-
-    function populateGrup() {
-        const map = {};
-        if (typeof master !== 'undefined' && Array.isArray(master)) {
-            master.forEach(m => { const g = (m.grup || '').trim(); if (g) (map[g] = map[g] || []).push(m); });
-        }
-        const names = Object.keys(map).sort();
-        let opts = '<option value="">— Tanpa —</option>';
-        names.forEach(g => { opts += `<option value="${_esc(g)}">${_esc(g)} (${map[g].length})</option>`; });
-        ['storyGrupDepan','storyGrupTengah','storyGrupBelakang'].forEach(id => {
-            const sel = document.getElementById(id);
-            if (!sel) return;
-            const cur = sel.value;
-            sel.innerHTML = opts;
-            if (cur && names.includes(cur)) sel.value = cur;
-        });
-    }
-
-    function bindInputs() {
-        const bind = (id, max) => {
-            const el = document.getElementById(id);
-            if (!el || el._bound) return;
-            el._bound = true;
-            el.addEventListener('input', e => { e.target.value = _onlyDigits(e.target.value).slice(0, max); });
-        };
-        bind('storyBBFS', 20);
-        bind('storyCB', 20);
-        bind('storyAngkaDepan', 20);
-        bind('storyAngka2', 2);
-    }
-
-    // ── GENERATE HANDLER (self-contained) ──
-    function handleGenerate() {
-        const bbfs = _onlyDigits(document.getElementById('storyBBFS').value);
-        const cb = _onlyDigits(document.getElementById('storyCB').value);
-        const angDRaw = _onlyDigits(document.getElementById('storyAngkaDepan').value);
-        const angDSet = new Set(angDRaw.split(''));
-        const ang2 = _onlyDigits(document.getElementById('storyAngka2').value).slice(0, 2);
-        const grupDepan = document.getElementById('storyGrupDepan').value;
-        const grupTengah = document.getElementById('storyGrupTengah').value;
-        const grupBelakang = document.getElementById('storyGrupBelakang').value;
-        const useAlur = document.getElementById('storyUseAlurFilter').checked;
-
-        if (!bbfs && !cb && !angDSet.size && !ang2 && !grupDepan && !grupTengah && !grupBelakang && !useAlur) {
-            _toast('Isi BBFS atau minimal salah satu filter', 'error'); return;
-        }
-
-        let pool;
-        if (bbfs.length >= 4 && bbfs.length <= 20) {
-            pool = _perm(bbfs);
-        } else if (bbfs.length > 20) {
-            _toast('BBFS max 20 digit', 'error'); return;
-        } else {
-            pool = [];
-            for (let i = 0; i < 10000; i++) pool.push(String(i).padStart(4, '0'));
-        }
-        const totalAwal = pool.length;
-
-        let grupInfo = '';
-        if (grupDepan) {
-            const s = new Set(typeof getGroupAs2DigitDepan === 'function' ? getGroupAs2DigitDepan(grupDepan) : []);
-            pool = pool.filter(n => s.has(n.slice(0, 2)));
-            grupInfo += (grupInfo ? ' · ' : '') + `Depan="${grupDepan}"`;
-        }
-        if (grupTengah) {
-            const sD = new Set(typeof getGroupAs2DigitDepan === 'function' ? getGroupAs2DigitDepan(grupTengah) : []);
-            const sB = new Set(typeof getGroupAs2DigitBelakang === 'function' ? getGroupAs2DigitBelakang(grupTengah) : []);
-            pool = pool.filter(n => sD.has(n.slice(1, 3)) || sB.has(n.slice(1, 3)));
-            grupInfo += (grupInfo ? ' · ' : '') + `Tengah="${grupTengah}"`;
-        }
-        if (grupBelakang) {
-            const s = new Set(typeof getGroupAs2DigitBelakang === 'function' ? getGroupAs2DigitBelakang(grupBelakang) : []);
-            pool = pool.filter(n => s.has(n.slice(2, 4)));
-            grupInfo += (grupInfo ? ' · ' : '') + `Belakang="${grupBelakang}"`;
-        }
-
-        if (cb) pool = pool.filter(n => { for (const d of cb) if (n.includes(d)) return true; return false; });
-        if (angDSet.size) pool = pool.filter(n => angDSet.has(n[0]));
-        if (ang2 && ang2.length === 2) pool = pool.filter(n => n.includes(ang2[0]) && n.includes(ang2[1]));
-
-        if (useAlur && window._storyScored) {
-            const alur2D = new Set();
-            window._storyScored.forEach(x => { if (x.reasons.some(r => r.startsWith('alur'))) alur2D.add(x.nomor); });
-            if (alur2D.size) {
-                pool = pool.filter(n => alur2D.has(n.slice(0, 2)) || alur2D.has(n.slice(1, 3)) || alur2D.has(n.slice(2, 4)));
-            }
-        }
-
-        if (!pool.length) { _toast('Tidak ada hasil setelah filter', 'error'); return; }
-        pool.sort();
-
-        state.items = pool;
-        state.page = 0;
-        state.size = _perPage();
-        state.meta = {
-            totalAwal,
-            filters: [
-                bbfs ? `BBFS ${bbfs.length}d` : 'BBFS kosong',
-                grupInfo || null,
-                cb ? `CB ${cb.split('').join(' ')}` : null,
-                angDSet.size ? `Depan∈{${[...angDSet].join(',')}}` : null,
-                ang2 ? `2Angka=${ang2}` : null,
-                useAlur ? 'Alur' : null
-            ].filter(Boolean).join(' • ')
-        };
-        render();
-        _toast(`${pool.length.toLocaleString('id-ID')} dari ${totalAwal.toLocaleString('id-ID')}`, 'success');
-    }
-
-    function render() {
-        const c = document.getElementById('storyPredResult');
-        const card = document.getElementById('storyPredResultCard');
-        if (!c || !card) return;
-        card.style.display = 'block';
-        if (!state.items.length) { c.innerHTML = '<div class="empty">Belum ada hasil.</div>'; return; }
-        const total = state.items.length;
-        const tp = Math.ceil(total / state.size);
-        if (state.page >= tp) state.page = tp - 1;
-        if (state.page < 0) state.page = 0;
-        const st = state.page * state.size;
-        const pd = state.items.slice(st, st + state.size);
-        c.innerHTML =
-            `<div class="page-info"><b>${_esc(state.meta.filters)}</b><br>Halaman ${state.page + 1}/${tp} • ${pd.length} • Total ${total.toLocaleString('id-ID')} dari ${state.meta.totalAwal.toLocaleString('id-ID')} (${((total / state.meta.totalAwal) * 100).toFixed(1)}% lolos)</div>` +
-            `<div class="page-content">${pd.join('*')}${pd.length ? '*' : ''}</div>` +
-            `<div class="page-nav"><button ${state.page === 0 ? 'disabled' : ''} onclick="_storyPredPageX(-1)">◀ Prev</button><span>${state.page + 1} / ${tp}</span><button ${state.page === tp - 1 ? 'disabled' : ''} onclick="_storyPredPageX(1)">Next ▶</button></div>` +
-            `<div class="page-actions"><button onclick="_storyPredCopyPageX()">📋 Copy Halaman</button><button onclick="_storyPredCopyAllX()">📋 Copy Semua</button><button onclick="_storyPredExportX()">⬇ Export TXT</button></div>`;
-    }
-
-    window._storyPredPageX = function (d) {
-        const tp = Math.ceil(state.items.length / state.size);
-        const nx = state.page + d;
-        if (nx < 0 || nx >= tp) return;
-        state.page = nx; render();
-    };
-    window._storyPredCopyPageX = function () {
-        const st = state.page * state.size;
-        _copy(state.items.slice(st, st + state.size).join('*') + '*');
-    };
-    window._storyPredCopyAllX = function () { _copy(state.items.join('*') + '*'); };
-    window._storyPredExportX = function () {
-        const b = new Blob([state.items.join('*') + '*'], { type: 'text/plain;charset=utf-8' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(b);
-        a.download = 'sahard-story-pred-' + Date.now() + '.txt';
-        a.click(); URL.revokeObjectURL(a.href);
-        _toast('Diexport', 'success');
-    };
-
-    // Event delegation untuk tombol generate
-    document.addEventListener('click', function (e) {
-        if (e.target && e.target.id === 'storyGeneratePredBtn') {
-            e.preventDefault();
-            handleGenerate();
-        }
-    }, true);
-
-    function init() {
-        if (!document.getElementById('storyPredCard')) return false;
-        rebuildCard();
-        ensureResultContainer();
-        populateGrup();
-        bindInputs();
-        return true;
-    }
-
-    let tries = 0;
-    const timer = setInterval(function () {
-        if (init() || ++tries > 40) clearInterval(timer);
-    }, 250);
-
-    console.log('%c[PATCH v3] Alur Cerita Generate — siap (self-contained)', 'color:#22c55e;font-weight:bold;');
 })();
 </script>
 
