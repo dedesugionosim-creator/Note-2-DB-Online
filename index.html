@@ -3963,7 +3963,7 @@ function buildManualBreakdown(grup, mode, depans, belakangs, totalCombo, cb) {
    Fitur: Auto 00-99, Filter 1D Depan, Filter Mengandung Angka/Kata
    ═══════════════════════════════════════════════════════════════════════ */
 
-const ALL_00_99 = Array.from({length: 100}, (_, i) => String(i).padStart(2, '0'));
+// CATATAN: ALL_00_99 sudah dideklarasikan di atas, jadi tidak perlu dideklarasikan lagi di sini.
 
 function getManual1DDepanSelected() {
     const arr = [];
