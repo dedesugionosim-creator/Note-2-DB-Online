@@ -6446,14 +6446,13 @@ function _deletePrediksi() {
             catch (e) { console.warn('[SG Auto] Hook error:', e); }
         };
     }
-    // _tryHook();
-    // if (!_hooked) {
-    //     let attempts = 0;
-    //     const timer = setInterval(function() {
-    //         _tryHook(); attempts++;
-    //         if (_hooked || attempts >= 20) clearInterval(timer);
-    //     }, 250);
-    // }
+        _tryHook();
+    if (!_hooked) {
+        let attempts = 0;
+        const timer = setInterval(function() {
+            _tryHook(); attempts++;
+            if (_hooked || attempts >= 20) clearInterval(timer);
+        }, 250);
     }
 })();
 
