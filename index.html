@@ -6149,9 +6149,45 @@ window.hapusPasarTogel = function(event, id) {
     renderTogelGrid();
 };
 
+window.tambahPasarTogel = function() {
+    if (!_togelIsAdmin()) { toast('Hanya admin yang bisa menambah pasar', 'error'); return; }
+    
+    const name = prompt('Masukkan Nama Pasar Baru:\n(Contoh: MACAU4D, SYDNEY, HONGKONG)');
+    if (!name) return;
+
+    const schedule = prompt('Label Jadwal (Opsional):\n(Contoh: Setiap Hari, Senin & Kamis)', 'Setiap Hari') || '—';
+    const drawTimesRaw = prompt('Jam Mundur (Pisah koma jika banyak):\n(Contoh: 13:00, 19:00)', '13:00');
+
+    const drawTimes = (drawTimesRaw || '').split(',').map(s => s.trim()).filter(s => /^\d{2}:\d{2}$/.test(s));
+    if (drawTimes.length === 0) { toast('Format jam salah (Gunakan format 13:00)', 'error'); return; }
+
+    const id = 'mkt_' + Date.now();
+    const newMarket = {
+        id: id,
+        name: name.toUpperCase(),
+        schedule: schedule,
+        drawTimes: drawTimes,
+        isTogel: true,
+        history: []
+    };
+
+    marketData.markets.push(newMarket);
+    saveMarketData();
+    
+    // Otomatis buatkan tabel di Tabel Result
+    if (typeof getOrCreateMarketTable === 'function') {
+        getOrCreateMarketTable(id, name.toUpperCase());
+    }
+    
+    renderTogelGrid();
+    toast('Pasar ' + newMarket.name + ' berhasil ditambahkan', 'success');
+};
+
 // Bind Tombol Simpan
 const saveBtn = $('togelSaveResultBtn');
 if (saveBtn) saveBtn.addEventListener('click', _handleTogelSave);
+
+
 
 /* ═══════════════════════════════════════════════════════════════════════
    BLOK 56: EDIT PREDIKSI (ADMIN)
@@ -6410,13 +6446,14 @@ function _deletePrediksi() {
             catch (e) { console.warn('[SG Auto] Hook error:', e); }
         };
     }
-    _tryHook();
-    if (!_hooked) {
-        let attempts = 0;
-        const timer = setInterval(function() {
-            _tryHook(); attempts++;
-            if (_hooked || attempts >= 20) clearInterval(timer);
-        }, 250);
+    // _tryHook();
+    // if (!_hooked) {
+    //     let attempts = 0;
+    //     const timer = setInterval(function() {
+    //         _tryHook(); attempts++;
+    //         if (_hooked || attempts >= 20) clearInterval(timer);
+    //     }, 250);
+    // }
     }
 })();
 
