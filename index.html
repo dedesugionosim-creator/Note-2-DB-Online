@@ -1472,13 +1472,13 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
             </div>
         </div>
 
-                        <!-- PENYARINGAN LANJUTAN (BENTUK PERSIS SEPERTI 55 BARIS) -->
+                <!-- PENYARINGAN LANJUTAN (BENTUK PERSIS SEPERTI 55 BARIS) -->
         <div class="field" style="background:var(--card-2); padding:12px; border-radius:8px; border:1px solid var(--border); margin-top:16px;">
             <label style="color:var(--warn); margin-bottom:8px; display:block; font-weight:bold;">
                 🔍 Penyaringan Lanjutan: Kata / Angka Yang Mengandung (Opsional)
             </label>
             
-            <div class="m23-container" style="max-height: auto; padding: 6px;">
+            <div class="m23-container" style="max-height: auto; padding: 6px; background: var(--card-2); border: 1px solid var(--border); border-radius: var(--radius-md);">
                 <div class="m23-row">
                     <div class="m23-no">1</div>
                     <input type="text" class="m23-digits" id="manualMengandung1" maxlength="3" placeholder="237">
@@ -4072,7 +4072,7 @@ function buildManualBreakdown(grup, mode, depans, belakangs, totalCombo, cb) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 44: INPUT MANUAL GENERATOR (REVISI TAMPILAN & STATUS OTOMATIS)
+   BLOK 44: INPUT MANUAL GENERATOR (REVISI STATUS OTOMATIS)
    ═══════════════════════════════════════════════════════════════════════ */
 
 function getManual1DDepanSelected() {
@@ -4102,25 +4102,26 @@ function applyMengandungFilter(arr, rawInput) {
     });
 }
 
-window.clearManualFilter = function(n) {
-    if ($('manualMengandung' + n)) $('manualMengandung' + n).value = '';
-    if ($('manualMengandung' + n + '_kata')) $('manualMengandung' + n + '_kata').value = '';
-    if ($('filterStat' + n)) $('filterStat' + n).textContent = '—';
-    if ($('filterPage' + n)) $('filterPage' + n).textContent = '—';
-    updateManualInfo();
-};
-
+// Fungsi Hitung Status Otomatis (Real-time)
 function updateFilterStatus() {
-    const universe = typeof M23_UNIVERSE !== 'undefined' ? M23_UNIVERSE : [];
-    if (universe.length === 0) return;
+    // Gunakan universe 0000-9999
+    let universe = [];
+    if (typeof M23_UNIVERSE !== 'undefined') {
+        universe = M23_UNIVERSE;
+    } else {
+        for (let i = 0; i < 10000; i++) universe.push(String(i).padStart(4, '0'));
+    }
 
     for (let i = 1; i <= 3; i++) {
-        const a = $(`manualMengandung${i}`).value.trim();
-        const k = $(`manualMengandung${i}_kata`).value.trim();
+        const elAngka = $(`manualMengandung${i}`);
+        const elKata = $(`manualMengandung${i}_kata`);
         const statEl = $(`filterStat${i}`);
         const pageEl = $(`filterPage${i}`);
         
-        if (!statEl || !pageEl) continue;
+        if (!elAngka || !elKata || !statEl || !pageEl) continue;
+        
+        const a = elAngka.value.trim();
+        const k = elKata.value.trim();
         
         if (!a && !k) {
             statEl.textContent = '—';
@@ -4138,18 +4139,42 @@ function updateFilterStatus() {
     }
 }
 
-// Jangan lupa pasang event listener di bagian input
-['manualMengandung1', 'manualMengandung1_kata',
+window.clearManualFilter = function(n) {
+    if ($('manualMengandung' + n)) $('manualMengandung' + n).value = '';
+    if ($('manualMengandung' + n + '_kata')) $('manualMengandung' + n + '_kata').value = '';
+    updateFilterStatus();
+    updateManualInfo();
+};
+
+function _refreshManualPreview() {
+    const g1 = $('manualGrup1').value;
+    const g2 = $('manualGrup2').value;
+    const g3 = $('manualGrup3').value;
+    
+    renderGroupPreview(g1, $('manualPreview1'), 'depan', g1 ? 'Grup 1 → 2D Depan' : '');
+    renderGroupPreview(g2, $('manualPreview2'), 'both', g2 ? 'Grup 2 → 2D Tengah' : '');
+    renderGroupPreview(g3, $('manualPreview3'), 'belakang', g3 ? 'Grup 3 → 2D Belakang' : '');
+    
+    updateManualInfo();
+}
+
+$('manualGrup1').addEventListener('change', _refreshManualPreview);
+$('manualGrup2').addEventListener('change', _refreshManualPreview);
+$('manualGrup3').addEventListener('change', _refreshManualPreview);
+
+['manualDepan', 'manualBelakang', 'manualCB', 
+ 'manualMengandung1', 'manualMengandung1_kata',
  'manualMengandung2', 'manualMengandung2_kata',
  'manualMengandung3', 'manualMengandung3_kata'].forEach(function(id) {
     const el = $(id); 
     if (el) {
         el.addEventListener('input', function(e) {
+            // Validasi hanya angka untuk kolom kiri
             if (id.includes('Mengandung') && !id.includes('_kata')) {
                 e.target.value = onlyDigits(e.target.value).slice(0, 3);
             }
-            updateFilterStatus();
-            updateManualInfo();
+            updateFilterStatus(); // Hitung status (Total & Halaman)
+            updateManualInfo();   // Hitung total kombinasi utama
         });
     }
 });
@@ -4227,12 +4252,10 @@ $('manualGenerateBtn').addEventListener('click', function() {
     if (depanAuto) depan = ALL_00_99.slice();
     if (belakangAuto) belakang = ALL_00_99.slice();
 
-    // 1. Generate Cross Product
     let combos = [];
     for (const d of depan) for (const b of belakang) combos.push(d + b);
     let filtered = [...new Set(combos)];
 
-    // 2. Filter 3 Grup (Depan, Tengah, Belakang)
     if (g1 || g2 || g3) {
         const setG1 = g1 ? new Set(getGroupAs2DigitDepan(g1)) : null;
         const setG2 = g2 ? new Set([...getGroupAs2DigitDepan(g2), ...getGroupAs2DigitBelakang(g2)]) : null;
@@ -4252,13 +4275,11 @@ $('manualGenerateBtn').addEventListener('click', function() {
         if (filtered.length === 0) { toast('Tidak ada kombinasi yang cocok dengan filter Grup', 'error'); return; }
     }
 
-    // 3. Filter 1D Depan
     if (d1.length > 0) {
         filtered = filtered.filter(d => d1.includes(d[0]));
         if (filtered.length === 0) { toast('Tidak ada 2D depan yang cocok dengan Awalan 1D', 'error'); return; }
     }
 
-    // 4. Penyaringan Lanjutan (Mengandung Angka & Kata)
     if (m1_a) filtered = applyMengandungFilter(filtered, m1_a);
     if (m1_k) filtered = applyMengandungFilter(filtered, m1_k);
     if (m2_a) filtered = applyMengandungFilter(filtered, m2_a);
@@ -4270,7 +4291,6 @@ $('manualGenerateBtn').addEventListener('click', function() {
         toast('Tidak ada hasil setelah Penyaringan Lanjutan', 'error'); return; 
     }
 
-    // 5. Filter CB
     if (cb.length > 0) {
         filtered = filterByCB(filtered, cb.join(''), cbMode);
         if (filtered.length === 0) { toast('Tidak ada hasil setelah filter CB', 'error'); return; }
