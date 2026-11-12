@@ -1951,24 +1951,28 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
                 <div id="c33ResultsContainer"></div>
             </div>
 			
-	<!-- ─────────── SUBPANEL 10: MODE INPUT MENGANDUNG 2/3 (55 BARIS) ─────────── -->
-		<div id="subpanel-mengandung23" class="subpanel">
-			<div class="card">
-				<h3 style="margin-bottom:6px;">🔍 Mode Input Mengandung 2/3 (55 Baris)</h3>
-				<p class="text-muted" style="font-size:12.5px; margin-bottom:12px;">
-					Isi <b>2–3 digit</b> per baris + label pasar. Sistem akan men-generate semua 4D
-					(dari universe 0000–9999) yang <b>mengandung</b> digit tersebut (multiset).
-					Kosongkan baris yang tidak dipakai.
-					<br>Contoh: <code>237</code> → 4D yang mengandung minimal satu <code>2</code>, satu <code>3</code>, dan satu <code>7</code>.
-				</p>
-				<div class="m23-container" id="m23RowsContainer"></div>
-				<div class="pred-action-bar">
-					<button class="btn-primary" id="m23GenerateAllBtn">⚡ Generate Semua</button>
-					<button class="btn-warn" id="m23ClearAllBtn">🗑 Kosongkan 55 Baris</button>
-				</div>
-			</div>
-			<div id="m23ResultsContainer"></div>
-		</div>
+<!-- ─────────── SUBPANEL 10: MODE INPUT MENGANDUNG 2/3 (55 BARIS) ─────────── -->
+<div id="subpanel-mengandung23" class="subpanel">
+    <div class="card">
+        <h3 style="margin-bottom:6px;">🔍 Mode Input Mengandung 2/3 (55 Baris)</h3>
+        <p class="text-muted" style="font-size:12.5px; margin-bottom:12px;">
+            Isi 2–3 digit per baris + label pasar. Sistem akan men-generate semua 4D (dari universe 0000–9999) yang <b>mengandung</b> digit tersebut (multiset). Kosongkan baris yang tidak dipakai.<br>
+            Contoh: <code>237</code> → 4D yang mengandung minimal satu <code>2</code>, satu <code>3</code>, dan satu <code>7</code>.
+        </p>
+        
+        <div class="m23-container" id="m23RowsContainer" style="max-height: 450px; overflow-y: auto; padding: 6px; background: var(--card-2); border: 1px solid var(--border); border-radius: var(--radius-md);">
+            <!-- 55 Baris akan di-generate oleh JavaScript -->
+        </div>
+        
+        <div class="pred-action-bar">
+            <button class="btn-primary" id="m23GenerateAllBtn">⚡ Generate Semua</button>
+            <button class="btn-warn" id="m23ClearAllBtn">🗑 Kosongkan 55 Baris</button>
+        </div>
+    </div>
+    
+    <!-- Panel Total Keseluruhan & Hasil per Baris -->
+    <div id="m23ResultsContainer"></div>
+</div>
 
         </section>
         <!-- End Section input4Angka -->
@@ -7146,7 +7150,7 @@ document.addEventListener('DOMContentLoaded', function() {
    ═══════════════════════════════════════════════════════════════════════ */
    
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 65A: MODE INPUT MENGANDUNG 2/3 (55 BARIS) - AUTO CALCULATE
+   BLOK 65A: MODE INPUT MENGANDUNG 2/3 (55 BARIS) - STANDALONE TAB
    ═══════════════════════════════════════════════════════════════════════ */
 
 const M23_ROW_COUNT = 55;
@@ -7159,6 +7163,7 @@ const m23State = {
 
 const m23MasterState = { items: [], page: 0, size: PER_PAGE };
 
+// Universe 0000–9999
 const M23_UNIVERSE = (function() {
     const arr = [];
     for (let i = 0; i < 10000; i++) arr.push(String(i).padStart(4, '0'));
@@ -7175,6 +7180,7 @@ function m23ComputeForDigits(digits) {
 function renderM23Rows() {
     const container = $('m23RowsContainer');
     if (!container) return;
+    
     let html = '';
     m23State.rows.forEach(function(r) {
         const total = r.generated ? r.results.length : 0;
@@ -7183,31 +7189,28 @@ function renderM23Rows() {
         const pagesTxt = r.generated && r.digits ? (pages > 0 ? pages + ' hal' : '—') : '—';
         const canCopy = r.generated && r.results.length > 0;
         
-        html += '<div class="m23-row" data-idx="' + r.idx + '">'
-            + '<div class="m23-no">' + (r.idx + 1) + '</div>'
-            + '<input type="text" class="m23-digits" maxlength="3" inputmode="numeric"'
-            + ' placeholder="237" value="' + esc(r.digits) + '" data-idx="' + r.idx + '" data-field="digits">'
-            + '<input type="text" class="m23-pasar" placeholder="MACAU4D"'
-            + ' value="' + esc(r.pasar) + '" data-idx="' + r.idx + '" data-field="pasar">'
-            + '<div class="m23-total">' + totalTxt + '</div>'
-            + '<div class="m23-pages">' + pagesTxt + '</div>'
-            + '<button class="m23-copy btn-primary" ' + (canCopy ? '' : 'disabled')
-            + ' onclick="m23CopyRow(' + r.idx + ')">📋</button>'
-            + '</div>';
+        html += `<div class="m23-row" data-idx="${r.idx}">
+            <div class="m23-no">${r.idx + 1}</div>
+            <input type="text" class="m23-digits" maxlength="3" inputmode="numeric" placeholder="237" value="${esc(r.digits)}" data-idx="${r.idx}" data-field="digits">
+            <input type="text" class="m23-pasar" placeholder="MACAU4D" value="${esc(r.pasar)}" data-idx="${r.idx}" data-field="pasar">
+            <div class="m23-total">${totalTxt}</div>
+            <div class="m23-pages">${pagesTxt}</div>
+            <button class="m23-copy btn-primary" ${canCopy ? '' : 'disabled'} onclick="m23CopyRow(${r.idx})">📋</button>
+        </div>`;
     });
     container.innerHTML = html;
 
-    // Event listener dengan AUTO-CALCULATE
+    // Auto Calculate on Typing
     container.querySelectorAll('input').forEach(function(el) {
         el.addEventListener('input', function() {
             const idx = parseInt(el.dataset.idx, 10);
             const field = el.dataset.field;
+            
             if (field === 'digits') el.value = onlyDigits(el.value).slice(0, 3);
             
             const r = m23State.rows[idx];
             r[field] = el.value;
             
-            // AUTO CALCULATE SAAT MENGETIK
             if (r.digits.length >= 2) {
                 r.results = m23ComputeForDigits(r.digits);
                 r.generated = true;
@@ -7216,6 +7219,7 @@ function renderM23Rows() {
                 r.generated = false;
             }
 
+            // Update UI Row
             const rowEl = el.closest('.m23-row');
             if (rowEl) {
                 const total = r.results.length;
@@ -7252,6 +7256,7 @@ function renderM23Results() {
 
     let html = '';
 
+    // 1. Render Total Keseluruhan
     if (m23MasterState.items.length > 0) {
         const tp = Math.ceil(m23MasterState.items.length / m23MasterState.size);
         if (m23MasterState.page >= tp) m23MasterState.page = tp - 1;
@@ -7259,24 +7264,24 @@ function renderM23Results() {
         const st = m23MasterState.page * m23MasterState.size;
         const pd = m23MasterState.items.slice(st, st + m23MasterState.size);
 
-        html += '<div class="card" style="border-color:var(--success); background:rgba(34,197,94,0.05); margin-bottom:14px;">'
-            + '<h3 style="color:var(--success); margin-bottom:8px;">🎯 TOTAL KESELURUHAN GABUNGAN (UNIK)</h3>'
-            + '<div class="page-info">Halaman ' + (m23MasterState.page + 1) + ' / ' + tp
-            + ' • ' + pd.length + ' di halaman ini • Total ' + m23MasterState.items.length.toLocaleString('id-ID') + ' angka unik</div>'
-            + '<div class="page-content" style="max-height:200px; border-color:var(--success);">'
-            + pd.join('*') + (pd.length ? '*' : '') + '</div>'
-            + '<div class="page-nav">'
-            + '<button ' + (m23MasterState.page === 0 ? 'disabled' : '') + ' onclick="m23PageMaster(-1)">◀ Prev</button>'
-            + '<span>' + (m23MasterState.page + 1) + ' / ' + tp + '</span>'
-            + '<button ' + (m23MasterState.page === tp - 1 ? 'disabled' : '') + ' onclick="m23PageMaster(1)">Next ▶</button>'
-            + '</div>'
-            + '<div class="page-actions">'
-            + '<button class="btn-success" onclick="m23CopyMasterPage()">📋 Copy Hal. Ini</button>'
-            + '<button class="btn-success" onclick="m23CopyMasterAll()">📋 Copy Semua</button>'
-            + '<button class="btn-warn" onclick="m23ExportMaster()">⬇ Export TXT</button>'
-            + '</div></div>';
+        html += `<div class="card" style="border-color:var(--success); background:rgba(34,197,94,0.05); margin-bottom:14px;">
+            <h3 style="color:var(--success); margin-bottom:8px;">🎯 TOTAL KESELURUHAN GABUNGAN (UNIK)</h3>
+            <div class="page-info">Halaman ${m23MasterState.page + 1} / ${tp} • ${pd.length} di halaman ini • Total ${m23MasterState.items.length.toLocaleString('id-ID')} angka unik</div>
+            <div class="page-content" style="max-height:200px; border-color:var(--success);">${pd.join('*')}${pd.length ? '*' : ''}</div>
+            <div class="page-nav">
+                <button ${m23MasterState.page === 0 ? 'disabled' : ''} onclick="m23PageMaster(-1)">◀ Prev</button>
+                <span>${m23MasterState.page + 1} / ${tp}</span>
+                <button ${m23MasterState.page === tp - 1 ? 'disabled' : ''} onclick="m23PageMaster(1)">Next ▶</button>
+            </div>
+            <div class="page-actions">
+                <button class="btn-success" onclick="m23CopyMasterPage()">📋 Copy Hal. Ini</button>
+                <button class="btn-success" onclick="m23CopyMasterAll()">📋 Copy Semua</button>
+                <button class="btn-warn" onclick="m23ExportMaster()">⬇ Export TXT</button>
+            </div>
+        </div>`;
     }
 
+    // 2. Render per baris
     m23State.rows.forEach(function(r) {
         if (!r.generated || !r.digits || r.results.length === 0) return;
         const tp = Math.ceil(r.results.length / PER_PAGE);
@@ -7285,22 +7290,21 @@ function renderM23Results() {
         const st = r.page * PER_PAGE;
         const pd = r.results.slice(st, st + PER_PAGE);
 
-        html += '<div class="m23-result-block" id="m23-block-' + r.idx + '">'
-            + '<div class="m23-res-header">Hasil dari ' + esc(r.digits)
-            + (r.pasar ? ' <span class="pasar-tag">— ' + esc(r.pasar) + '</span>' : '') + '</div>'
-            + '<div class="page-info">Halaman ' + (r.page + 1) + ' / ' + tp
-            + ' • ' + pd.length + ' di halaman ini • Total ' + r.results.length.toLocaleString('id-ID') + '</div>'
-            + '<div class="page-content" style="max-height:240px;">' + pd.join('*') + (pd.length ? '*' : '') + '</div>'
-            + '<div class="page-nav">'
-            + '<button ' + (r.page === 0 ? 'disabled' : '') + ' onclick="m23Page(' + r.idx + ',-1)">◀ Prev</button>'
-            + '<span>' + (r.page + 1) + ' / ' + tp + '</span>'
-            + '<button ' + (r.page === tp - 1 ? 'disabled' : '') + ' onclick="m23Page(' + r.idx + ',1)">Next ▶</button>'
-            + '</div>'
-            + '<div class="page-actions">'
-            + '<button onclick="m23CopyPage(' + r.idx + ')">📋 Copy Hal</button>'
-            + '<button onclick="m23CopyRow(' + r.idx + ')">📋 Copy Semua</button>'
-            + '<button onclick="m23ExportRow(' + r.idx + ')">⬇ TXT</button>'
-            + '</div></div>';
+        html += `<div class="m23-result-block" id="m23-block-${r.idx}">
+            <div class="m23-res-header">Hasil dari ${esc(r.digits)} ${r.pasar ? `<span class="pasar-tag">— ${esc(r.pasar)}</span>` : ''}</div>
+            <div class="page-info">Halaman ${r.page + 1} / ${tp} • ${pd.length} di halaman ini • Total ${r.results.length.toLocaleString('id-ID')}</div>
+            <div class="page-content" style="max-height:240px;">${pd.join('*')}${pd.length ? '*' : ''}</div>
+            <div class="page-nav">
+                <button ${r.page === 0 ? 'disabled' : ''} onclick="m23Page(${r.idx},-1)">◀ Prev</button>
+                <span>${r.page + 1} / ${tp}</span>
+                <button ${r.page === tp - 1 ? 'disabled' : ''} onclick="m23Page(${r.idx},1)">Next ▶</button>
+            </div>
+            <div class="page-actions">
+                <button onclick="m23CopyPage(${r.idx})">📋 Copy Hal</button>
+                <button onclick="m23CopyRow(${r.idx})">📋 Copy Semua</button>
+                <button onclick="m23ExportRow(${r.idx})">⬇ TXT</button>
+            </div>
+        </div>`;
     });
 
     if (!html) {
@@ -7355,7 +7359,6 @@ window.m23ExportMaster = function() {
     toast('Diexport', 'success');
 };
 
-// Fungsi tombol Generate tetap dipertahankan untuk menyegarkan panel Total Gabungan di bawah
 if ($('m23GenerateAllBtn')) {
     $('m23GenerateAllBtn').addEventListener('click', function() {
         m23MasterState.page = 0;
@@ -7377,13 +7380,11 @@ if ($('m23ClearAllBtn')) {
     });
 }
 
-// Init render
+// Pastikan render dipanggil saat dimuat
 if (document.readyState !== 'loading') {
     renderM23Rows();
 } else {
-    document.addEventListener('DOMContentLoaded', function() {
-        renderM23Rows();
-    });
+    document.addEventListener('DOMContentLoaded', renderM23Rows);
 }
 
  /* ═══════════════════════════════════════════════════════════════════════
