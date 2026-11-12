@@ -2094,7 +2094,7 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
         <!-- ═══════════════════════════════════════════════════════════════
              SECTION: TABEL RESULT (MULTI-TABLE)
              ═══════════════════════════════════════════════════════════════ -->
-                    <section id="tabelResult">
+            <section id="tabelResult">
             <div class="table-header-actions">
                 <div class="table-controls">
                     <select id="tableSelector"></select>
@@ -2130,15 +2130,17 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
             <div class="table-container">
                 <table>
                     <thead>
-                        <tr>
-                            <th>Periode</th>
-                            <th>Tanggal</th>
-                            <th>Result</th>
-                            <th>Syair</th>
-                            <th>Grup</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
+						<tr>
+							<th>No</th>
+							<th>Tanggal</th>
+							<th>Periode</th>
+							<th>Result</th>
+							<th>Syair</th>
+							<th>Grup</th>
+							<th>Keterangan</th>
+							<th>Aksi</th>
+						</tr>
+					</thead>
                     <tbody id="resultTableBody"></tbody>
                 </table>
             </div>
@@ -2212,15 +2214,16 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
                         <div class="table-container" style="max-height:400px; overflow-y:auto;">
                             <table>
                                 <thead>
-                                    <tr>
-                                        <th>Tanggal</th>
-                                        <th>Result</th>
-                                        <th>Syair</th>
-                                        <th>Grup</th>
-                                        <!-- Tombol Hapus hanya muncul jika Admin -->
-                                        <th id="togelHistoryAksiCol" hidden>Aksi</th>
-                                    </tr>
-                                </thead>
+									<tr>
+										<th>Tanggal</th>
+										<th>Periode</th>
+										<th>Result</th>
+										<th>Syair</th>
+										<th>Grup</th>
+										<th>Keterangan</th>
+										<th id="togelHistoryAksiCol" hidden>Aksi</th>
+									</tr>
+								</thead>
                                 <tbody id="togelHistoryBody"></tbody>
                             </table>
                         </div>
@@ -3708,39 +3711,56 @@ function generateSyairAndGrup(result) {
     return { syair, grup };
 }
 
+function getCaraBacaString(result) {
+    if (!/^\d{4}$/.test(result)) return '-';
+    const d = result.slice(0, 2);
+    const t = result.slice(1, 3);
+    const b = result.slice(2, 4);
+    
+    const md = getMaster2D(d);
+    const mt = getMaster2D(t);
+    const mb = getMaster2D(b);
+    
+    const sd = md ? md.syair : '?';
+    const st = mt ? mt.syair : '?';
+    const sb = mb ? mb.syair : '?';
+    
+    return `Depan: ${d} (${sd}) | Tengah: ${t} (${st}) | Belakang: ${b} (${sb})`;
+}
 function renderResultTable() {
     const tbody = $('resultTableBody');
     const activeTable = getActiveTable();
     const entries = activeTable.entries || [];
     
     if (entries.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">Belum ada data. Klik "Tambah Result".</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px;">Belum ada data. Klik "Tambah Result".</td></tr>';
         return;
     }
     
-    // URUTKAN BERDASARKAN TANGGAL TERBARU (Descending)
+    // Urutkan berdasarkan tanggal terbaru
     const sorted = entries.slice().sort(function(a, b) {
         return (b.tanggal || '').localeCompare(a.tanggal || '');
     });
     
     let html = '';
-    for (let i = 0; i < sorted.length; i++) {
-        const r = sorted[i];
+    sorted.forEach(function(r, i) {
         const gen = generateSyairAndGrup(r.result);
         const pair1 = r.result.slice(0, 2);
         const pair2 = r.result.slice(2, 4);
         html += `<tr>
-            <td>${esc(r.periode)}</td>
+            <td>${i + 1}</td>
             <td>${esc(r.tanggal)}</td>
+            <td>${esc(r.periode)}</td>
             <td class="td-pair">${pair1} | ${pair2}</td>
             <td>${gen.syair}</td>
             <td style="color:var(--warn);">${gen.grup}</td>
+            <td>${esc(r.keterangan || '-')}</td>
             <td>
                 <button class="btn-action btn-edit" onclick="editResult('${r.id}')">✏️ Edit</button>
                 <button class="btn-action btn-danger" onclick="deleteResult('${r.id}')">🗑 Hapus</button>
             </td>
         </tr>`;
-    }
+    });
     tbody.innerHTML = html;
 }
 
@@ -5164,19 +5184,25 @@ if (cancelModalBtn) {
     });
 }
 
-// 3. Preview Syair saat User Mengetik Result
+// 3. Preview Syair & Cara Baca saat User Mengetik Result (Tabel Result)
 const inputResultEl = $('inputResult');
 if (inputResultEl) {
     inputResultEl.addEventListener('input', function(e) {
         e.target.value = onlyDigits(e.target.value).slice(0, 4);
         const val = e.target.value;
+        const box = $('tablePreviewBox');
+        
         if (val.length === 4) {
+            if (box) box.classList.add('show');
             const gen = generateSyairAndGrup(val);
-            $('previewSyair').textContent = gen.syair;
-            $('previewGrup').textContent = gen.grup;
+            
+            if ($('prevSyair')) $('prevSyair').textContent = gen.syair;
+            if ($('prevGrup')) $('prevGrup').textContent = gen.grup;
+            if ($('prevCaraBaca') && typeof getCaraBacaString === 'function') {
+                $('prevCaraBaca').textContent = getCaraBacaString(val);
+            }
         } else {
-            $('previewSyair').textContent = '-';
-            $('previewGrup').textContent = '-';
+            if (box) box.classList.remove('show');
         }
     });
 }
