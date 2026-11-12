@@ -1472,43 +1472,42 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
             </div>
         </div>
 
-                <!-- PENYARINGAN LANJUTAN (BENTUK PERSIS SEPERTI 55 BARIS) -->
+                        <!-- MODE INPUT MENGANDUNG 2/3 (PERSIS SEPERTI 55 BARIS) -->
         <div class="field" style="background:var(--card-2); padding:12px; border-radius:8px; border:1px solid var(--border); margin-top:16px;">
-            <label style="color:var(--warn); margin-bottom:8px; display:block; font-weight:bold;">
-                🔍 Penyaringan Lanjutan: Kata / Angka Yang Mengandung (Opsional)
+            <label style="color:var(--text); margin-bottom:8px; display:block; font-weight:bold; font-size:14px;">
+                □ Mode Input Mengandung 2/3 (55 Baris)
             </label>
+            <p style="font-size:11.5px; color:var(--muted); margin-bottom:12px; line-height:1.5;">
+                Isi 2–3 digit per baris + label pasar. Sistem akan men-generate semua 4D (dari universe 0000–9999) yang <b>mengandung</b> digit tersebut (multiset). Kosongkan baris yang tidak dipakai.<br>
+                Contoh: <code>237</code> → 4D yang mengandung minimal satu <code>2</code>, satu <code>3</code>, dan satu <code>7</code>.
+            </p>
             
             <div class="m23-container" style="max-height: auto; padding: 6px; background: var(--card-2); border: 1px solid var(--border); border-radius: var(--radius-md);">
                 <div class="m23-row">
                     <div class="m23-no">1</div>
                     <input type="text" class="m23-digits" id="manualMengandung1" maxlength="3" placeholder="237">
-                    <input type="text" class="m23-pasar" id="manualMengandung1_kata" placeholder="Kata Syair (cth: setan)">
+                    <input type="text" class="m23-pasar" id="manualMengandung1_pasar" placeholder="MACAU4D">
                     <div class="m23-total" id="filterStat1">—</div>
                     <div class="m23-pages" id="filterPage1">—</div>
-                    <button class="m23-copy btn-primary" onclick="clearManualFilter(1)" title="Hapus Filter">🗑</button>
+                    <button class="m23-copy btn-primary" onclick="copyManualFilter(1)" title="Copy Hasil Filter">📋</button>
                 </div>
                 <div class="m23-row">
                     <div class="m23-no">2</div>
                     <input type="text" class="m23-digits" id="manualMengandung2" maxlength="3" placeholder="23">
-                    <input type="text" class="m23-pasar" id="manualMengandung2_kata" placeholder="Kata Syair (opsional)">
+                    <input type="text" class="m23-pasar" id="manualMengandung2_pasar" placeholder="TEXASDAY">
                     <div class="m23-total" id="filterStat2">—</div>
                     <div class="m23-pages" id="filterPage2">—</div>
-                    <button class="m23-copy btn-primary" onclick="clearManualFilter(2)" title="Hapus Filter">🗑</button>
+                    <button class="m23-copy btn-primary" onclick="copyManualFilter(2)" title="Copy Hasil Filter">📋</button>
                 </div>
                 <div class="m23-row">
                     <div class="m23-no">3</div>
-                    <input type="text" class="m23-digits" id="manualMengandung3" maxlength="3" placeholder="7">
-                    <input type="text" class="m23-pasar" id="manualMengandung3_kata" placeholder="Kata Syair (opsional)">
+                    <input type="text" class="m23-digits" id="manualMengandung3" maxlength="3" placeholder="37">
+                    <input type="text" class="m23-pasar" id="manualMengandung3_pasar" placeholder="OREGON">
                     <div class="m23-total" id="filterStat3">—</div>
                     <div class="m23-pages" id="filterPage3">—</div>
-                    <button class="m23-copy btn-primary" onclick="clearManualFilter(3)" title="Hapus Filter">🗑</button>
+                    <button class="m23-copy btn-primary" onclick="copyManualFilter(3)" title="Copy Hasil Filter">📋</button>
                 </div>
             </div>
-            
-            <p style="font-size:11px; color:var(--muted); margin-top:8px;">
-                Isi kolom kiri untuk <b>Angka</b> (cth: 237), atau kolom kanan untuk <b>Kata</b> (cth: setan).<br>
-                (Jika lebih dari 1 baris diisi, hasil harus memenuhi semua filter tersebut).
-            </p>
         </div>
 
         <!-- FILTER 1D DEPAN -->
@@ -4072,7 +4071,7 @@ function buildManualBreakdown(grup, mode, depans, belakangs, totalCombo, cb) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 44: INPUT MANUAL GENERATOR (REVISI STATUS OTOMATIS)
+   BLOK 44: INPUT MANUAL GENERATOR (TERINTEGRASI 3 BARIS 2/3)
    ═══════════════════════════════════════════════════════════════════════ */
 
 function getManual1DDepanSelected() {
@@ -4083,67 +4082,52 @@ function getManual1DDepanSelected() {
     return arr;
 }
 
+// Fungsi filter berdasarkan angka
 function applyMengandungFilter(arr, rawInput) {
     const raw = String(rawInput || '').trim();
-    if (!raw) return arr;
-    
-    if (/^\d+$/.test(raw)) {
-        const ms = blParseMultiset(raw);
-        return arr.filter(function(n) { return blContainsCombo(n, ms); });
-    }
-    
-    const kw = raw.toLowerCase();
-    return arr.filter(function(n) {
-        const d2 = n.slice(0, 2), b2 = n.slice(2, 4);
-        const md = getMaster2D(d2), mb = getMaster2D(b2);
-        const sd = md ? String(md.syair || '').toLowerCase() : '';
-        const sb = mb ? String(mb.syair || '').toLowerCase() : '';
-        return sd.includes(kw) || sb.includes(kw);
-    });
+    if (!raw || !/^\d+$/.test(raw)) return arr;
+    const ms = blParseMultiset(raw);
+    return arr.filter(function(n) { return blContainsCombo(n, ms); });
 }
 
-// Fungsi Hitung Status Otomatis (Real-time)
+// Fungsi hitung status otomatis (Total & Halaman)
 function updateFilterStatus() {
-    // Gunakan universe 0000-9999
-    let universe = [];
-    if (typeof M23_UNIVERSE !== 'undefined') {
-        universe = M23_UNIVERSE;
-    } else {
-        for (let i = 0; i < 10000; i++) universe.push(String(i).padStart(4, '0'));
-    }
+    const universe = typeof M23_UNIVERSE !== 'undefined' ? M23_UNIVERSE : [];
+    if (universe.length === 0) return;
 
     for (let i = 1; i <= 3; i++) {
         const elAngka = $(`manualMengandung${i}`);
-        const elKata = $(`manualMengandung${i}_kata`);
         const statEl = $(`filterStat${i}`);
         const pageEl = $(`filterPage${i}`);
         
-        if (!elAngka || !elKata || !statEl || !pageEl) continue;
-        
+        if (!elAngka || !statEl || !pageEl) continue;
         const a = elAngka.value.trim();
-        const k = elKata.value.trim();
         
-        if (!a && !k) {
+        if (!a) {
             statEl.textContent = '—';
             pageEl.textContent = '—';
             continue;
         }
         
-        let matched = universe;
-        if (a) matched = applyMengandungFilter(matched, a);
-        if (k) matched = applyMengandungFilter(matched, k);
-        
+        let matched = applyMengandungFilter(universe, a);
         const count = matched.length;
         statEl.textContent = count > 0 ? count.toLocaleString('id-ID') : '0';
         pageEl.textContent = count > 0 ? Math.ceil(count / PER_PAGE) + ' hal' : '—';
     }
 }
 
-window.clearManualFilter = function(n) {
-    if ($('manualMengandung' + n)) $('manualMengandung' + n).value = '';
-    if ($('manualMengandung' + n + '_kata')) $('manualMengandung' + n + '_kata').value = '';
-    updateFilterStatus();
-    updateManualInfo();
+// Fungsi copy hasil per baris
+window.copyManualFilter = function(n) {
+    const elAngka = $(`manualMengandung${n}`);
+    if (!elAngka) return;
+    const a = elAngka.value.trim();
+    if (!a) { toast('Baris ini kosong', 'error'); return; }
+    
+    const universe = typeof M23_UNIVERSE !== 'undefined' ? M23_UNIVERSE : [];
+    const matched = applyMengandungFilter(universe, a);
+    if (matched.length === 0) { toast('Tidak ada hasil', 'error'); return; }
+    
+    copyTextToClipboard(matched.join('*') + '*');
 };
 
 function _refreshManualPreview() {
@@ -4163,18 +4147,15 @@ $('manualGrup2').addEventListener('change', _refreshManualPreview);
 $('manualGrup3').addEventListener('change', _refreshManualPreview);
 
 ['manualDepan', 'manualBelakang', 'manualCB', 
- 'manualMengandung1', 'manualMengandung1_kata',
- 'manualMengandung2', 'manualMengandung2_kata',
- 'manualMengandung3', 'manualMengandung3_kata'].forEach(function(id) {
+ 'manualMengandung1', 'manualMengandung2', 'manualMengandung3'].forEach(function(id) {
     const el = $(id); 
     if (el) {
         el.addEventListener('input', function(e) {
-            // Validasi hanya angka untuk kolom kiri
-            if (id.includes('Mengandung') && !id.includes('_kata')) {
+            if (id.includes('Mengandung')) {
                 e.target.value = onlyDigits(e.target.value).slice(0, 3);
+                updateFilterStatus();
             }
-            updateFilterStatus(); // Hitung status (Total & Halaman)
-            updateManualInfo();   // Hitung total kombinasi utama
+            updateManualInfo();
         });
     }
 });
@@ -4192,12 +4173,9 @@ function updateManualInfo() {
     const g3 = $('manualGrup3').value;
     const d1 = getManual1DDepanSelected();
     
-    let m1_a = $('manualMengandung1').value.trim();
-    let m1_k = $('manualMengandung1_kata').value.trim();
-    let m2_a = $('manualMengandung2').value.trim();
-    let m2_k = $('manualMengandung2_kata').value.trim();
-    let m3_a = $('manualMengandung3').value.trim();
-    let m3_k = $('manualMengandung3_kata').value.trim();
+    let m1 = $('manualMengandung1').value.trim();
+    let m2 = $('manualMengandung2').value.trim();
+    let m3 = $('manualMengandung3').value.trim();
 
     const info = $('manualInfo');
     if (!info) return;
@@ -4215,12 +4193,9 @@ function updateManualInfo() {
     if (d1.length > 0) text += ' • Awalan: ' + d1.join(',');
     
     let filters = [];
-    if (m1_a) filters.push(m1_a);
-    if (m1_k) filters.push(m1_k);
-    if (m2_a) filters.push(m2_a);
-    if (m2_k) filters.push(m2_k);
-    if (m3_a) filters.push(m3_a);
-    if (m3_k) filters.push(m3_k);
+    if (m1) filters.push(m1);
+    if (m2) filters.push(m2);
+    if (m3) filters.push(m3);
     
     if (filters.length > 0) text += ' • Saring: "' + filters.join('" & "') + '"';
     if (cb.length > 0) text += ' • CB: ' + cb.join(' ');
@@ -4236,12 +4211,9 @@ $('manualGenerateBtn').addEventListener('click', function() {
     const cbMode = $('manualCBMode').value;
     const d1 = getManual1DDepanSelected();
     
-    let m1_a = $('manualMengandung1').value.trim();
-    let m1_k = $('manualMengandung1_kata').value.trim();
-    let m2_a = $('manualMengandung2').value.trim();
-    let m2_k = $('manualMengandung2_kata').value.trim();
-    let m3_a = $('manualMengandung3').value.trim();
-    let m3_k = $('manualMengandung3_kata').value.trim();
+    let m1 = $('manualMengandung1').value.trim();
+    let m2 = $('manualMengandung2').value.trim();
+    let m3 = $('manualMengandung3').value.trim();
 
     let depan = parseTwoDigitList($('manualDepan').value);
     let belakang = parseTwoDigitList($('manualBelakang').value);
@@ -4280,14 +4252,11 @@ $('manualGenerateBtn').addEventListener('click', function() {
         if (filtered.length === 0) { toast('Tidak ada 2D depan yang cocok dengan Awalan 1D', 'error'); return; }
     }
 
-    if (m1_a) filtered = applyMengandungFilter(filtered, m1_a);
-    if (m1_k) filtered = applyMengandungFilter(filtered, m1_k);
-    if (m2_a) filtered = applyMengandungFilter(filtered, m2_a);
-    if (m2_k) filtered = applyMengandungFilter(filtered, m2_k);
-    if (m3_a) filtered = applyMengandungFilter(filtered, m3_a);
-    if (m3_k) filtered = applyMengandungFilter(filtered, m3_k);
+    if (m1) filtered = applyMengandungFilter(filtered, m1);
+    if (m2) filtered = applyMengandungFilter(filtered, m2);
+    if (m3) filtered = applyMengandungFilter(filtered, m3);
     
-    if (filtered.length === 0 && (m1_a || m1_k || m2_a || m2_k || m3_a || m3_k)) { 
+    if (filtered.length === 0 && (m1 || m2 || m3)) { 
         toast('Tidak ada hasil setelah Penyaringan Lanjutan', 'error'); return; 
     }
 
@@ -4303,7 +4272,7 @@ $('manualGenerateBtn').addEventListener('click', function() {
     let meta = (depanAuto ? 'AUTO' : depan.length) + ' depan × ' + (belakangAuto ? 'AUTO' : belakang.length) + ' belakang';
     if (g1 || g2 || g3) meta += ' • Filter Grup';
     if (d1.length > 0) meta += ' • Awalan: ' + d1.join(',');
-    if (m1_a || m1_k || m2_a || m2_k || m3_a || m3_k) meta += ' • Saring Lanjutan';
+    if (m1 || m2 || m3) meta += ' • Saring Lanjutan';
     if (cb.length > 0) meta += ' • CB: ' + cb.join(' ');
     pageState.manual.meta = meta;
 
