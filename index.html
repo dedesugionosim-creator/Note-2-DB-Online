@@ -1612,54 +1612,99 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
     <div class="card"><div id="bbfsResult"></div></div>
 </div>
 
-            <!-- ─────────── SUBPANEL 3: ANGKA TARUNG ─────────── -->
-            <div id="subpanel-angkaTarung" class="subpanel">
-                <div class="card">
-                    <h3 style="margin-bottom:6px;">Angka Tarung (AK) — 4 Posisi Digit</h3>
-                    <p class="text-muted" style="font-size:12.5px; margin-bottom:12px;">
-                        Cross product P1 × P2 × P3 × P4. Grup sebagai FILTER.
-                    </p>
-                    <div class="grid-2">
-                        <div class="field"><label for="atDigit1">Digit 1</label>
-                            <input type="text" id="atDigit1" placeholder="0123456789" maxlength="10" inputmode="numeric"></div>
-                        <div class="field"><label for="atDigit2">Digit 2</label>
-                            <input type="text" id="atDigit2" placeholder="0123456789" maxlength="10" inputmode="numeric"></div>
-                        <div class="field"><label for="atDigit3">Digit 3</label>
-                            <input type="text" id="atDigit3" placeholder="0123456789" maxlength="10" inputmode="numeric"></div>
-                        <div class="field"><label for="atDigit4">Digit 4</label>
-                            <input type="text" id="atDigit4" placeholder="0123456789" maxlength="10" inputmode="numeric"></div>
-                    </div>
-                    <div class="field">
-                        <label for="atGrup">Pilih Grup → FILTER berdasarkan 2D grup</label>
-                        <select id="atGrup"><option value="">— Manual (tanpa grup) —</option></select>
-                        <div id="atPreview" class="group-preview"></div>
-                    </div>
-                    <div class="field" id="atModeWrapper" style="display:none;">
-                        <label for="atMode">Mode Filter 2D</label>
-                        <select id="atMode">
-                            <option value="belakang" selected>🔵 Filter 2D BELAKANG</option>
-                            <option value="depan">🟡 Filter 2D DEPAN</option>
-                            <option value="keduanya">🟣 Filter DEPAN &amp; BELAKANG</option>
-                        </select>
-                    </div>
-                    <div class="field">
-                        <label for="atCB">Input CB (opsional)</label>
-                        <input type="text" id="atCB" placeholder="0 1 2 3 5" autocomplete="off">
-                    </div>
-                    <div class="field">
-                        <label for="atCBMode">Mode Filter CB</label>
-                        <select id="atCBMode">
-                            <option value="or" selected>Salah Satu Digit Muncul (OR)</option>
-                            <option value="and">Semua Digit Harus Muncul (AND)</option>
-                        </select>
-                    </div>
-                    <p id="atInfo" class="text-accent" style="font-size:13px; margin-bottom:12px;">
-                        Total kombinasi: — • Halaman: —
-                    </p>
-                    <button class="btn-primary" id="atGenerateBtn">⚡ Generate Angka Tarung</button>
+<!-- ─────────── SUBPANEL 3: ANGKA TARUNG ─────────── -->
+<div id="subpanel-angkaTarung" class="subpanel">
+    <div class="card">
+        <h3 style="margin-bottom:6px;">Angka Tarung (AK) — 4 Posisi Digit</h3>
+        <p class="text-muted" style="font-size:12.5px; margin-bottom:12px;">
+            Cross product P1 × P2 × P3 × P4. Semua field di bawah ini <b>opsional</b> sebagai penyaring.
+            (Jika P1-P4 kosong, otomatis pakai 0-9).
+        </p>
+        
+        <div class="grid-2">
+            <div class="field"><label for="atDigit1">Digit 1</label>
+                <input type="text" id="atDigit1" placeholder="0123456789" maxlength="10" inputmode="numeric"></div>
+            <div class="field"><label for="atDigit2">Digit 2</label>
+                <input type="text" id="atDigit2" placeholder="0123456789" maxlength="10" inputmode="numeric"></div>
+            <div class="field"><label for="atDigit3">Digit 3</label>
+                <input type="text" id="atDigit3" placeholder="0123456789" maxlength="10" inputmode="numeric"></div>
+            <div class="field"><label for="atDigit4">Digit 4</label>
+                <input type="text" id="atDigit4" placeholder="0123456789" maxlength="10" inputmode="numeric"></div>
+        </div>
+
+        <!-- 3 PILIH GRUP -->
+        <div style="background:var(--card-3); padding:12px; border-radius:8px; border:1px solid var(--border); margin-bottom:16px;">
+            <label style="color:var(--accent); margin-bottom:8px; display:block; font-weight:bold;">Pilih Grup Penyaring (Opsional)</label>
+            <div class="grid-2" style="margin-bottom:8px;">
+                <div class="field" style="margin:0;">
+                    <label for="atGrup1">Grup 1 → 2D Depan</label>
+                    <select id="atGrup1"><option value="">— AUTO 00-99 —</option></select>
+                    <div id="atPreview1" class="group-preview" style="margin-top:4px; padding:6px; font-size:11px;"></div>
                 </div>
-                <div class="card"><div id="atResult"></div></div>
+                <div class="field" style="margin:0;">
+                    <label for="atGrup2">Grup 2 → 2D Tengah</label>
+                    <select id="atGrup2"><option value="">— Bebas (Tanpa Batas) —</option></select>
+                    <div id="atPreview2" class="group-preview" style="margin-top:4px; padding:6px; font-size:11px;"></div>
+                </div>
             </div>
+            <div class="field" style="margin:0;">
+                <label for="atGrup3">Grup 3 → 2D Belakang</label>
+                <select id="atGrup3"><option value="">— AUTO 00-99 —</option></select>
+                <div id="atPreview3" class="group-preview" style="margin-top:4px; padding:6px; font-size:11px;"></div>
+            </div>
+        </div>
+
+        <!-- MODE INPUT MENGANDUNG 2/3 (55 BARIS DI AK) -->
+        <div class="field" style="background:var(--card-2); padding:12px; border-radius:8px; border:1px solid var(--border); margin-top:16px;">
+            <label style="color:var(--text); margin-bottom:8px; display:block; font-weight:bold; font-size:14px;">
+                □ Mode Input Mengandung 2/3 (55 Baris)
+            </label>
+            <p style="font-size:11.5px; color:var(--muted); margin-bottom:12px; line-height:1.5;">
+                Isi 2–3 digit per baris + label pasar. Sistem akan menyaring 4D dari AK yang <b>mengandung</b> digit tersebut.
+            </p>
+            
+            <div class="m23-container" id="at55RowsContainer" style="max-height: 400px; overflow-y: auto; padding: 6px; background: var(--card-2); border: 1px solid var(--border); border-radius: var(--radius-md);">
+                <!-- 55 Baris akan di-generate oleh JavaScript -->
+            </div>
+        </div>
+
+        <div class="field">
+            <label>Mode Input Angka 1D Depan (Opsional)</label>
+            <div class="d1-checkbox-group" id="at1DDepan">
+                <div><input type="checkbox" id="a1-0" value="0"><label for="a1-0">0</label></div>
+                <div><input type="checkbox" id="a1-1" value="1"><label for="a1-1">1</label></div>
+                <div><input type="checkbox" id="a1-2" value="2"><label for="a1-2">2</label></div>
+                <div><input type="checkbox" id="a1-3" value="3"><label for="a1-3">3</label></div>
+                <div><input type="checkbox" id="a1-4" value="4"><label for="a1-4">4</label></div>
+                <div><input type="checkbox" id="a1-5" value="5"><label for="a1-5">5</label></div>
+                <div><input type="checkbox" id="a1-6" value="6"><label for="a1-6">6</label></div>
+                <div><input type="checkbox" id="a1-7" value="7"><label for="a1-7">7</label></div>
+                <div><input type="checkbox" id="a1-8" value="8"><label for="a1-8">8</label></div>
+                <div><input type="checkbox" id="a1-9" value="9"><label for="a1-9">9</label></div>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="field">
+                <label for="atCB">Input CB (Opsional)</label>
+                <input type="text" id="atCB" placeholder="0 1 2 3 5" autocomplete="off">
+            </div>
+            <div class="field">
+                <label for="atCBMode">Mode Filter CB</label>
+                <select id="atCBMode">
+                    <option value="or" selected>Salah Satu Digit Muncul (OR)</option>
+                    <option value="and">Semua Digit Harus Muncul (AND)</option>
+                </select>
+            </div>
+        </div>
+
+        <p id="atInfo" class="text-accent" style="font-size:13px; margin:12px 0; font-weight:bold;">
+            Total kombinasi: — • Halaman: —
+        </p>
+        <button class="btn-primary" id="atGenerateBtn">⚡ Generate Angka Tarung</button>
+    </div>
+    <div class="card"><div id="atResult"></div></div>
+</div>
 
             <!-- ─────────── SUBPANEL 4: CB BBFS ─────────── -->
             <div id="subpanel-cbBBFS" class="subpanel">
@@ -4551,34 +4596,131 @@ if (document.readyState !== 'loading') {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 46: ANGKA TARUNG GENERATOR
+   BLOK 46: ANGKA TARUNG GENERATOR (DENGAN 3 GRUP, 1D, 55 BARIS, CB)
    ═══════════════════════════════════════════════════════════════════════ */
 
+function renderAT55Rows() {
+    const container = $('at55RowsContainer');
+    if (!container) return;
+    
+    let html = '';
+    for (let i = 1; i <= 55; i++) {
+        html += `<div class="m23-row">
+            <div class="m23-no">${i}</div>
+            <input type="text" class="m23-digits" id="atMengandung${i}" maxlength="3" placeholder="237" oninput="this.value = onlyDigits(this.value).slice(0,3); updateATFilterStatus(${i}); updateATInfo();">
+            <input type="text" class="m23-pasar" id="atMengandung${i}_pasar" placeholder="LABEL">
+            <div class="m23-total" id="atFilterStat${i}">—</div>
+            <div class="m23-pages" id="atFilterPage${i}">—</div>
+            <button class="m23-copy btn-primary" onclick="copyATFilter(${i})" title="Copy Hasil">📋</button>
+        </div>`;
+    }
+    container.innerHTML = html;
+}
+
+function getAT1DDepanSelected() {
+    const arr = [];
+    document.querySelectorAll('#at1DDepan input[type="checkbox"]:checked').forEach(function(e) {
+        arr.push(e.value);
+    });
+    return arr;
+}
+
+function updateATFilterStatus(idx) {
+    if (!idx) {
+        for (let i = 1; i <= 55; i++) updateATFilterStatus(i);
+        return;
+    }
+
+    const elAngka = $(`atMengandung${idx}`);
+    const statEl = $(`atFilterStat${idx}`);
+    const pageEl = $(`atFilterPage${idx}`);
+    
+    if (!elAngka || !statEl || !pageEl) return;
+    const a = elAngka.value.trim();
+    
+    if (!a) {
+        statEl.textContent = '—';
+        pageEl.textContent = '—';
+        return;
+    }
+    
+    // Ambil pool dari Input P1-P4
+    let p1 = parseSingleDigitList($('atDigit1').value);
+    let p2 = parseSingleDigitList($('atDigit2').value);
+    let p3 = parseSingleDigitList($('atDigit3').value);
+    let p4 = parseSingleDigitList($('atDigit4').value);
+    
+    if (p1.length === 0) p1 = ['0','1','2','3','4','5','6','7','8','9'];
+    if (p2.length === 0) p2 = ['0','1','2','3','4','5','6','7','8','9'];
+    if (p3.length === 0) p3 = ['0','1','2','3','4','5','6','7','8','9'];
+    if (p4.length === 0) p4 = ['0','1','2','3','4','5','6','7','8','9'];
+
+    // Generate pool secara instan untuk kalkulasi status
+    let pool = [];
+    for (const a1 of p1) for (const a2 of p2) for (const a3 of p3) for (const a4 of p4) pool.push(a1+a2+a3+a4);
+
+    let matched = applyMengandungFilter(pool, a);
+    const count = matched.length;
+    statEl.textContent = count > 0 ? count.toLocaleString('id-ID') : '0';
+    pageEl.textContent = count > 0 ? Math.ceil(count / PER_PAGE) + ' hal' : '—';
+}
+
+window.copyATFilter = function(idx) {
+    const elAngka = $(`atMengandung${idx}`);
+    if (!elAngka) return;
+    const a = elAngka.value.trim();
+    if (!a) { toast('Baris ini kosong', 'error'); return; }
+    
+    let p1 = parseSingleDigitList($('atDigit1').value);
+    let p2 = parseSingleDigitList($('atDigit2').value);
+    let p3 = parseSingleDigitList($('atDigit3').value);
+    let p4 = parseSingleDigitList($('atDigit4').value);
+    
+    if (p1.length === 0) p1 = ['0','1','2','3','4','5','6','7','8','9'];
+    if (p2.length === 0) p2 = ['0','1','2','3','4','5','6','7','8','9'];
+    if (p3.length === 0) p3 = ['0','1','2','3','4','5','6','7','8','9'];
+    if (p4.length === 0) p4 = ['0','1','2','3','4','5','6','7','8','9'];
+
+    let pool = [];
+    for (const a1 of p1) for (const a2 of p2) for (const a3 of p3) for (const a4 of p4) pool.push(a1+a2+a3+a4);
+
+    const matched = applyMengandungFilter(pool, a);
+    if (matched.length === 0) { toast('Tidak ada hasil', 'error'); return; }
+    
+    copyTextToClipboard(matched.join('*') + '*');
+};
+
+function _refreshATPreview() {
+    const g1 = $('atGrup1').value;
+    const g2 = $('atGrup2').value;
+    const g3 = $('atGrup3').value;
+    
+    renderGroupPreview(g1, $('atPreview1'), 'depan', g1 ? 'Grup 1 → 2D Depan' : '');
+    renderGroupPreview(g2, $('atPreview2'), 'both', g2 ? 'Grup 2 → 2D Tengah' : '');
+    renderGroupPreview(g3, $('atPreview3'), 'belakang', g3 ? 'Grup 3 → 2D Belakang' : '');
+    
+    updateATInfo();
+}
+
+$('atGrup1').addEventListener('change', _refreshATPreview);
+$('atGrup2').addEventListener('change', _refreshATPreview);
+$('atGrup3').addEventListener('change', _refreshATPreview);
+
 ['atDigit1', 'atDigit2', 'atDigit3', 'atDigit4'].forEach(function(id) {
-    const el = $(id);
+    const el = $(id); 
     if (el) {
         el.addEventListener('input', function(e) {
             e.target.value = onlyDigits(e.target.value).slice(0, MAX_AK_DIGITS);
+            updateATFilterStatus(); // Update status baris jika P1-P4 berubah
             updateATInfo();
         });
     }
 });
+
 $('atCB').addEventListener('input', updateATInfo);
 $('atCBMode').addEventListener('change', updateATInfo);
-
-function _refreshATPreview() {
-    const g = $('atGrup').value;
-    const mode = $('atMode').value;
-    const wrap = $('atModeWrapper');
-    if (wrap) wrap.style.display = g ? 'block' : 'none';
-    let activeSide = 'both';
-    if (mode === 'depan') activeSide = 'depan';
-    else if (mode === 'belakang') activeSide = 'belakang';
-    renderGroupPreview(g, $('atPreview'), activeSide, 'Grup dipakai sebagai FILTER hasil. Input AK tidak diubah.');
-}
-
-$('atGrup').addEventListener('change', function() { _refreshATPreview(); updateATInfo(); });
-$('atMode').addEventListener('change', function() { _refreshATPreview(); updateATInfo(); });
+const _a1Wrap = $('at1DDepan');
+if (_a1Wrap) _a1Wrap.addEventListener('change', updateATInfo);
 
 function updateATInfo() {
     const p1 = parseSingleDigitList($('atDigit1').value);
@@ -4586,74 +4728,128 @@ function updateATInfo() {
     const p3 = parseSingleDigitList($('atDigit3').value);
     const p4 = parseSingleDigitList($('atDigit4').value);
     const cb = parseSingleDigitList($('atCB').value);
-    const grup = $('atGrup').value;
-    const mode = $('atMode').value;
-    const info = $('atInfo');
-    if (p1.length === 0 || p2.length === 0 || p3.length === 0 || p4.length === 0) {
-        info.textContent = 'Total: — • Halaman: — (isi 4 posisi)';
-        return;
+    const g1 = $('atGrup1').value;
+    const g2 = $('atGrup2').value;
+    const g3 = $('atGrup3').value;
+    const d1 = getAT1DDepanSelected();
+    
+    let activeFilters = [];
+    for (let i = 1; i <= 55; i++) {
+        const el = $(`atMengandung${i}`);
+        if (el && el.value.trim()) activeFilters.push(el.value.trim());
     }
-    const total = p1.length * p2.length * p3.length * p4.length;
+
+    const info = $('atInfo');
+    if (!info) return;
+    
+    const c1 = p1.length === 0 ? 10 : p1.length;
+    const c2 = p2.length === 0 ? 10 : p2.length;
+    const c3 = p3.length === 0 ? 10 : p3.length;
+    const c4 = p4.length === 0 ? 10 : p4.length;
+    
+    const total = c1 * c2 * c3 * c4;
     const pages = Math.ceil(total / PER_PAGE);
-    let text = 'P1:' + p1.length + ' P2:' + p2.length + ' P3:' + p3.length + ' P4:' + p4.length
-        + ' • ' + total.toLocaleString('id-ID') + ' kombinasi • ' + pages + ' halaman';
-    if (grup) text += ' • FILTER 2D ' + mode.toUpperCase() + ': "' + grup + '"';
+    
+    let text = 'P1:' + c1 + ' P2:' + c2 + ' P3:' + c3 + ' P4:' + c4
+        + ' • Maks ' + total.toLocaleString('id-ID') + ' kombinasi (' + pages + ' hal)';
+        
+    if (g1 || g2 || g3) text += ' • Filter Grup';
+    if (d1.length > 0) text += ' • Awalan: ' + d1.join(',');
+    if (activeFilters.length > 0) text += ' • Saring: ' + activeFilters.length + ' baris';
     if (cb.length > 0) text += ' • CB: ' + cb.join(' ');
+    
     info.textContent = text;
 }
 
 $('atGenerateBtn').addEventListener('click', function() {
-    const p1 = parseSingleDigitList($('atDigit1').value);
-    const p2 = parseSingleDigitList($('atDigit2').value);
-    const p3 = parseSingleDigitList($('atDigit3').value);
-    const p4 = parseSingleDigitList($('atDigit4').value);
+    let p1 = parseSingleDigitList($('atDigit1').value);
+    let p2 = parseSingleDigitList($('atDigit2').value);
+    let p3 = parseSingleDigitList($('atDigit3').value);
+    let p4 = parseSingleDigitList($('atDigit4').value);
+    
+    if (p1.length === 0) p1 = ['0','1','2','3','4','5','6','7','8','9'];
+    if (p2.length === 0) p2 = ['0','1','2','3','4','5','6','7','8','9'];
+    if (p3.length === 0) p3 = ['0','1','2','3','4','5','6','7','8','9'];
+    if (p4.length === 0) p4 = ['0','1','2','3','4','5','6','7','8','9'];
+
+    const g1 = $('atGrup1').value;
+    const g2 = $('atGrup2').value;
+    const g3 = $('atGrup3').value;
     const cb = parseSingleDigitList($('atCB').value);
     const cbMode = $('atCBMode').value;
-    const grup = $('atGrup').value;
-    const filterMode = $('atMode').value;
-    if (p1.length === 0 || p2.length === 0 || p3.length === 0 || p4.length === 0) {
-        toast('Isi keempat posisi digit', 'error'); return;
+    const d1 = getAT1DDepanSelected();
+    
+    let activeFilters = [];
+    for (let i = 1; i <= 55; i++) {
+        const el = $(`atMengandung${i}`);
+        if (el && el.value.trim()) activeFilters.push(el.value.trim());
     }
-    const results = [];
-    for (const a of p1) for (const b of p2) for (const c of p3) for (const d of p4) results.push(a + b + c + d);
-    const totalAwal = results.length;
-    let filtered = results;
-    let filterValues = [];
-    if (grup) {
-        const depans = getGroupAs2DigitDepan(grup);
-        const belakangs = getGroupAs2DigitBelakang(grup);
-        if (filterMode === 'depan') {
-            filterValues = depans;
-            filtered = filtered.filter(function(c) { return depans.includes(c.slice(0, 2)); });
-        } else if (filterMode === 'belakang') {
-            filterValues = belakangs;
-            filtered = filtered.filter(function(c) { return belakangs.includes(c.slice(-2)); });
-        } else if (filterMode === 'keduanya') {
-            filterValues = [...new Set([...depans, ...belakangs])].sort();
-            filtered = filtered.filter(function(c) {
-                return depans.includes(c.slice(0, 2)) && belakangs.includes(c.slice(-2));
-            });
+
+    let filtered = [];
+    for (const a of p1) for (const b of p2) for (const c of p3) for (const d of p4) filtered.push(a + b + c + d);
+
+    // 1. Filter 3 Grup
+    if (g1 || g2 || g3) {
+        const setG1 = g1 ? new Set(getGroupAs2DigitDepan(g1)) : null;
+        const setG2 = g2 ? new Set([...getGroupAs2DigitDepan(g2), ...getGroupAs2DigitBelakang(g2)]) : null;
+        const setG3 = g3 ? new Set(getGroupAs2DigitBelakang(g3)) : null;
+
+        filtered = filtered.filter(n => {
+            const ab = n.slice(0, 2);
+            const bc = n.slice(1, 3);
+            const cd = n.slice(2, 4);
+            
+            if (setG1 && !setG1.has(ab)) return false;
+            if (setG2 && !setG2.has(bc)) return false;
+            if (setG3 && !setG3.has(cd)) return false;
+            return true;
+        });
+
+        if (filtered.length === 0) { toast('Tidak ada kombinasi yang cocok dengan filter Grup', 'error'); return; }
+    }
+
+    // 2. Filter 1D Depan
+    if (d1.length > 0) {
+        filtered = filtered.filter(n => d1.includes(n[0]));
+        if (filtered.length === 0) { toast('Tidak ada 2D depan yang cocok dengan Awalan 1D', 'error'); return; }
+    }
+
+    // 3. Filter 55 Baris Mengandung
+    for (let f of activeFilters) {
+        filtered = applyMengandungFilter(filtered, f);
+        if (filtered.length === 0) {
+            toast('Tidak ada hasil setelah filter mengandung "' + f + '"', 'error'); 
+            return;
         }
-        if (filterValues.length === 0) { toast('Grup kosong', 'error'); return; }
-        if (filtered.length === 0) { toast('Tidak ada hasil yang cocok', 'error'); return; }
     }
+
+    // 4. Filter CB
     if (cb.length > 0) {
         filtered = filterByCB(filtered, cb.join(''), cbMode);
-        if (filtered.length === 0) { toast('Tidak ada hasil setelah CB', 'error'); return; }
+        if (filtered.length === 0) { toast('Tidak ada hasil setelah filter CB', 'error'); return; }
     }
+
     filtered.sort();
     pageState.angkaTarung.pages = paginateArray(filtered);
     pageState.angkaTarung.current = 0;
-    let meta = 'P1:' + p1.join('') + ' P2:' + p2.join('') + ' P3:' + p3.join('') + ' P4:' + p4.join('');
-    if (grup) meta += ' • FILTER 2D ' + filterMode.toUpperCase() + ': ' + grup;
-    if (cb.length > 0) meta += ' • CB: ' + cb.join(' ') + ' (' + cbMode.toUpperCase() + ')';
-    if (grup || cb.length > 0) meta += ' • ' + filtered.length.toLocaleString('id-ID') + '/' + totalAwal.toLocaleString('id-ID') + ' lolos';
+    
+    let meta = 'P1:'+p1.length+' P2:'+p2.length+' P3:'+p3.length+' P4:'+p4.length;
+    if (g1 || g2 || g3) meta += ' • Filter Grup';
+    if (d1.length > 0) meta += ' • Awalan: ' + d1.join(',');
+    if (activeFilters.length > 0) meta += ' • Saring ' + activeFilters.length + ' baris';
+    if (cb.length > 0) meta += ' • CB: ' + cb.join(' ');
     pageState.angkaTarung.meta = meta;
-    let breakdown = '';
-    if (grup) breakdown = buildFilterBreakdown(grup, filterValues, totalAwal, filtered.length, cb.length > 0 ? cb.join('') : null, filterMode);
-    renderPagination('atResult', 'angkaTarung', 'Hasil', breakdown);
-    toast('Berhasil: ' + filtered.length.toLocaleString('id-ID') + ' dari ' + totalAwal.toLocaleString('id-ID'), 'success');
+
+    renderPagination('atResult', 'angkaTarung', 'Hasil', '');
+    toast('Berhasil: ' + filtered.length.toLocaleString('id-ID') + ' kombinasi', 'success');
 });
+
+// Init render 55 baris AK
+if (document.readyState !== 'loading') {
+    renderAT55Rows();
+} else {
+    document.addEventListener('DOMContentLoaded', renderAT55Rows);
+}
 
 /* ═══════════════════════════════════════════════════════════════════════
    BLOK 47: CB BBFS GENERATOR — REVISED (CB opsional)
@@ -6921,6 +7117,7 @@ function populateNewGrupDropdowns() {
         'blGrup', 'c33Grup', 
         'manualGrup1', 'manualGrup2', 'manualGrup3',
 		'bbfsGrup1', 'bbfsGrup2', 'bbfsGrup3',
+		'atGrup1', 'atGrup2', 'atGrup3',
         'gabungGrup1', 'gabungGrup2', 'gabungGrup3'
     ];
     
@@ -6930,8 +7127,8 @@ function populateNewGrupDropdowns() {
         
         let placeholderTxt = '— Pilih Grup —';
         if (id === 'blGrup' || id === 'c33Grup') placeholderTxt = '— Tanpa Grup —';
-        if (id === 'manualGrup1' || id === 'manualGrup3' || id === 'bbfsGrup1' || id === 'bbfsGrup3' || id === 'gabungGrup1' || id === 'gabungGrup3') placeholderTxt = '— AUTO 00-99 —';
-        if (id === 'manualGrup2' || id === 'bbfsGrup2' || id === 'gabungGrup2') placeholderTxt = '— Bebas (Tanpa Batas) —';
+        if (id === 'manualGrup1' || id === 'manualGrup3' || id === 'bbfsGrup1' || id === 'bbfsGrup3' || id === 'atGrup1' || id === 'atGrup3' || id === 'gabungGrup1' || id === 'gabungGrup3') placeholderTxt = '— AUTO 00-99 —';
+        if (id === 'manualGrup2' || id === 'bbfsGrup2' || id === 'atGrup2' || id === 'gabungGrup2') placeholderTxt = '— Bebas (Tanpa Batas) —';
         
         el.innerHTML = build(placeholderTxt);
         if (cur && names.includes(cur)) el.value = cur;
