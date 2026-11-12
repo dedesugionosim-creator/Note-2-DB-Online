@@ -1058,6 +1058,136 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
     white-space: pre-wrap;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════
+   REVISI: 1D Depan Checkbox + Mengandung 2/3 (55 Baris)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.d1-checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px;
+    background: var(--card-2);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+}
+.d1-checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    background: var(--card);
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 13px;
+    color: var(--text);
+    margin: 0;
+}
+.d1-checkbox-group label:hover { border-color: var(--accent); }
+.d1-checkbox-group input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+    transform: scale(1.1);
+}
+
+.m23-container {
+    background: var(--card-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 10px;
+    max-height: 650px;
+    overflow-y: auto;
+}
+.m23-row {
+    display: grid;
+    grid-template-columns: 30px 70px 1fr 60px 70px 50px;
+    gap: 6px;
+    align-items: center;
+    padding: 6px 8px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 4px;
+    font-size: 12px;
+}
+.m23-row .m23-no {
+    text-align: center;
+    font-family: monospace;
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 700;
+}
+.m23-row input.m23-digits {
+    width: 100%;
+    padding: 6px 4px;
+    text-align: center;
+    font-family: monospace;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 1.5px;
+    font-size: 13px;
+}
+.m23-row input.m23-pasar {
+    width: 100%;
+    padding: 6px 8px;
+    font-size: 12px;
+}
+.m23-row .m23-total {
+    text-align: center;
+    font-family: monospace;
+    font-weight: 700;
+    color: var(--success);
+    font-size: 11px;
+}
+.m23-row .m23-pages {
+    text-align: center;
+    font-family: monospace;
+    color: var(--warn);
+    font-size: 10px;
+}
+.m23-row .m23-copy {
+    padding: 4px 8px;
+    font-size: 10px;
+    border-radius: 6px;
+    width: 100%;
+}
+.m23-row .m23-copy:disabled { opacity: 0.3; }
+
+@media (max-width: 480px) {
+    .m23-row {
+        grid-template-columns: 26px 55px 1fr 50px 55px 42px;
+        gap: 4px;
+        padding: 4px 6px;
+    }
+    .m23-row input.m23-digits { font-size: 12px; padding: 5px 2px; }
+    .m23-row input.m23-pasar { font-size: 11px; padding: 5px 4px; }
+    .m23-row .m23-total { font-size: 10px; }
+    .m23-row .m23-pages { font-size: 9px; }
+}
+
+.m23-result-block {
+    margin-top: 8px;
+    padding: 10px;
+    background: var(--card-3);
+    border: 1px solid var(--border-2);
+    border-left: 3px solid var(--success);
+    border-radius: var(--radius-sm);
+}
+.m23-result-block .m23-res-header {
+    font-weight: 700;
+    color: var(--success);
+    font-size: 12.5px;
+    margin-bottom: 6px;
+}
+.m23-result-block .m23-res-header .pasar-tag {
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 400;
+}
+
 </style>
 </head>
 
@@ -1170,64 +1300,94 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
 
             <!-- TAB NAVIGASI (MENGGUNAKAN ONCLICK LANGSUNG) -->
             <div class="subtabs" id="subTabs4Angka">
-                <button onclick="switchSubTab(this)" data-subpanel="subpanel-manual" class="active">Input Manual</button>
-                <button onclick="switchSubTab(this)" data-subpanel="subpanel-bbfs">BBFS</button>
-                <button onclick="switchSubTab(this)" data-subpanel="subpanel-angkaTarung">Angka Tarung (AK)</button>
-                <button onclick="switchSubTab(this)" data-subpanel="subpanel-cbBBFS">CB BBFS</button>
-                <button onclick="switchSubTab(this)" data-subpanel="subpanel-gabungGrup">Gabung 3 Grup</button>
-                <button onclick="switchSubTab(this)" data-subpanel="subpanel-grupCB">Grup + CB</button>
-                <button onclick="switchSubTab(this)" data-subpanel="subpanel-bbfsLengkap" style="color:#f472b6; border-color:#f472b6;">🎯 BBFS Lengkap 20</button>
-                <button onclick="switchSubTab(this)" data-subpanel="subpanel-bbfsMurni" style="color:#22c55e; border-color:#22c55e;">💎 BBFS 20 Murni</button>
-                <button onclick="switchSubTab(this)" data-subpanel="subpanel-c33" style="color:#fbbf24; border-color:#fbbf24;">🔥 33 Input 3 Angka</button>
-            </div>
+				<button onclick="switchSubTab(this)" data-subpanel="subpanel-manual" class="active">Input Manual</button>
+				<button onclick="switchSubTab(this)" data-subpanel="subpanel-bbfs">BBFS</button>
+				<button onclick="switchSubTab(this)" data-subpanel="subpanel-angkaTarung">Angka Tarung (AK)</button>
+				<button onclick="switchSubTab(this)" data-subpanel="subpanel-cbBBFS">CB BBFS</button>
+				<button onclick="switchSubTab(this)" data-subpanel="subpanel-gabungGrup">Gabung 3 Grup</button>
+				<button onclick="switchSubTab(this)" data-subpanel="subpanel-grupCB">Grup + CB</button>
+				<button onclick="switchSubTab(this)" data-subpanel="subpanel-bbfsLengkap" style="color:#f472b6; border-color:#f472b6;">🎯 BBFS Lengkap 20</button>
+				<button onclick="switchSubTab(this)" data-subpanel="subpanel-bbfsMurni" style="color:#22c55e; border-color:#22c55e;">💎 BBFS 20 Murni</button>
+				<button onclick="switchSubTab(this)" data-subpanel="subpanel-c33" style="color:#fbbf24; border-color:#fbbf24;">🔥 33 Input 3 Angka</button>
+				<button onclick="switchSubTab(this)" data-subpanel="subpanel-mengandung23" style="color:#a78bfa; border-color:#a78bfa;">🔍 Mengandung 2/3 (55)</button>
+			</div>
 
             <!-- ─────────── SUBPANEL 1: INPUT MANUAL ─────────── -->
             <div id="subpanel-manual" class="subpanel active">
-                <div class="card">
-                    <h3 style="margin-bottom:6px;">Input Manual Kombinasi 4 Angka</h3>
-                    <p class="text-muted" style="font-size:12.5px; margin-bottom:12px;">
-                        Kombinasi <b>2 depan × 2 belakang</b>.
-                        Grup hanya <b>menseleksi angka</b> yang sesuai.
-                    </p>
-                    <div class="field">
-                        <label for="manualDepan">Input 2 Angka Depan (pisah spasi / koma)</label>
-                        <input type="text" id="manualDepan" placeholder="20 21 22 23 24" autocomplete="off">
-                    </div>
-                    <div class="field">
-                        <label for="manualBelakang">Input 2 Angka Belakang (pisah spasi / koma)</label>
-                        <input type="text" id="manualBelakang" placeholder="01 02 03 04 05" autocomplete="off">
-                    </div>
-                    <div class="field">
-                        <label for="manualGrup">Pilih Grup (Seleksi Angka)</label>
-                        <select id="manualGrup"><option value="">— Manual (tanpa grup) —</option></select>
-                        <div id="manualPreview" class="group-preview"></div>
-                    </div>
-                    <div class="field" id="manualFilterModeWrapper" style="display:none;">
-                        <label for="manualFilterMode">Mode Seleksi Grup</label>
-                        <select id="manualFilterMode">
-                            <option value="depan" selected>🟡 Filter 2D DEPAN</option>
-                            <option value="belakang">🔵 Filter 2D BELAKANG</option>
-                            <option value="keduanya">🟣 Filter DEPAN &amp; BELAKANG</option>
-                        </select>
-                    </div>
-                    <div class="field">
-                        <label for="manualCB">Input CB (opsional)</label>
-                        <input type="text" id="manualCB" placeholder="0 1 2 3 5" autocomplete="off">
-                    </div>
-                    <div class="field">
-                        <label for="manualCBMode">Mode Filter CB</label>
-                        <select id="manualCBMode">
-                            <option value="or" selected>Salah Satu Digit Muncul (OR)</option>
-                            <option value="and">Semua Digit Harus Muncul (AND)</option>
-                        </select>
-                    </div>
-                    <p id="manualInfo" class="text-accent" style="font-size:13px; margin-bottom:12px;">
-                        Total kombinasi: — • Halaman: —
-                    </p>
-                    <button class="btn-primary" id="manualGenerateBtn">⚡ Generate Kombinasi</button>
-                </div>
-                <div class="card"><div id="manualResult"></div></div>
+    <div class="card">
+        <h3 style="margin-bottom:6px;">Input Manual Kombinasi 4 Angka</h3>
+        <p class="text-muted" style="font-size:12.5px; margin-bottom:12px;">
+            Kombinasi <b>2 depan × 2 belakang</b>.
+            <b>Semua field opsional</b> — jika 2D depan/belakang kosong, sistem otomatis pakai semua 00–99.
+            Grup hanya <b>menseleksi angka</b> yang sesuai.
+        </p>
+        <div class="field">
+            <label for="manualDepan">Input 2 Angka Depan (pisah spasi / koma) — opsional</label>
+            <input type="text" id="manualDepan" placeholder="20 21 22 23 24" autocomplete="off">
+            <p style="font-size:11px; color:var(--muted); margin-top:4px;">Kosongkan → otomatis pakai semua 00–99</p>
+        </div>
+        <div class="field">
+            <label for="manualBelakang">Input 2 Angka Belakang (pisah spasi / koma) — opsional</label>
+            <input type="text" id="manualBelakang" placeholder="01 02 03 04 05" autocomplete="off">
+            <p style="font-size:11px; color:var(--muted); margin-top:4px;">Kosongkan → otomatis pakai semua 00–99</p>
+        </div>
+        <div class="field">
+            <label for="manualGrup">Pilih Grup (Seleksi Angka) — opsional</label>
+            <select id="manualGrup"><option value="">— Manual (tanpa grup) —</option></select>
+            <div id="manualPreview" class="group-preview"></div>
+        </div>
+        <div class="field" id="manualFilterModeWrapper" style="display:none;">
+            <label for="manualFilterMode">Mode Seleksi Grup</label>
+            <select id="manualFilterMode">
+                <option value="depan" selected>🟡 Filter 2D DEPAN</option>
+                <option value="belakang">🔵 Filter 2D BELAKANG</option>
+                <option value="keduanya">🟣 Filter DEPAN &amp; BELAKANG</option>
+            </select>
+        </div>
+        <div class="field">
+            <label for="manualMengandung">Kata / Angka yang Mengandung (opsional)</label>
+            <input type="text" id="manualMengandung" placeholder="Contoh: 23 (angka) atau setan (kata syair)" autocomplete="off">
+            <p style="font-size:11px; color:var(--muted); margin-top:4px;">
+                <b>Angka</b> (mis. 23) → filter 4D yang mengandung digit 2 dan 3.
+                <b>Kata</b> (mis. setan) → filter syair 2D depan/belakang yang mengandung kata itu.
+            </p>
+        </div>
+        <div class="field">
+            <label>Mode Input Angka 1D Depan (opsional)</label>
+            <div class="d1-checkbox-group" id="manual1DDepan">
+                <label><input type="checkbox" value="0">0</label>
+                <label><input type="checkbox" value="1">1</label>
+                <label><input type="checkbox" value="2">2</label>
+                <label><input type="checkbox" value="3">3</label>
+                <label><input type="checkbox" value="4">4</label>
+                <label><input type="checkbox" value="5">5</label>
+                <label><input type="checkbox" value="6">6</label>
+                <label><input type="checkbox" value="7">7</label>
+                <label><input type="checkbox" value="8">8</label>
+                <label><input type="checkbox" value="9">9</label>
             </div>
+            <p style="font-size:11px; color:var(--muted); margin-top:4px;">
+                Centang digit untuk menampilkan hanya hasil yang berawalan digit terpilih. Kosong → tanpa filter.
+            </p>
+        </div>
+        <div class="field">
+            <label for="manualCB">Input CB (opsional)</label>
+            <input type="text" id="manualCB" placeholder="0 1 2 3 5" autocomplete="off">
+        </div>
+        <div class="field">
+            <label for="manualCBMode">Mode Filter CB</label>
+            <select id="manualCBMode">
+                <option value="or" selected>Salah Satu Digit Muncul (OR)</option>
+                <option value="and">Semua Digit Harus Muncul (AND)</option>
+            </select>
+        </div>
+        <p id="manualInfo" class="text-accent" style="font-size:13px; margin-bottom:12px;">
+            Total kombinasi: — • Halaman: —
+        </p>
+        <button class="btn-primary" id="manualGenerateBtn">⚡ Generate Kombinasi</button>
+    </div>
+    <div class="card"><div id="manualResult"></div></div>
+</div>
 
             <!-- ─────────── SUBPANEL 2: BBFS ─────────── -->
             <div id="subpanel-bbfs" class="subpanel">
@@ -1333,7 +1493,7 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
                         <input type="text" id="cbBBFSInput" placeholder="0123456789" maxlength="16" inputmode="numeric">
                     </div>
                     <div class="field">
-                        <label for="cbBBFSDigits">Input CB (dipisah spasi)</label>
+                        <label for="cbBBFSDigits">Input CB (dipisah spasi) — opsional</label>
                         <input type="text" id="cbBBFSDigits" placeholder="0 1 2 3 5">
                     </div>
                     <div class="field">
@@ -1351,46 +1511,47 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
 
             <!-- ─────────── SUBPANEL 5: GABUNG 3 GRUP ─────────── -->
             <div id="subpanel-gabungGrup" class="subpanel">
-                <div class="card">
-                    <h3 style="margin-bottom:6px;">Gabung 3 Grup (2D Depan × Tengah × Belakang)</h3>
-                    <p class="text-muted" style="font-size:12.5px; margin-bottom:12px;">
-                        <b>G1 → 2D Depan</b>, <b>G2 → 2D Tengah</b> (opsional), <b>G3 → 2D Belakang</b>.
-                        Jika G2 kosong → jadi cross product G1 × G3 (mode 2-grup lama).
-                    </p>
-                    <div class="grid-2">
-                        <div class="field">
-                            <label for="gabungGrup1">Grup 1 → 2D Depan</label>
-                            <select id="gabungGrup1"></select>
-                            <div id="gabungPreviewDepan" class="group-preview"></div>
-                        </div>
-                        <div class="field">
-                            <label for="gabungGrup2">Grup 2 → 2D Tengah (opsional)</label>
-                            <select id="gabungGrup2"></select>
-                            <div id="gabungPreviewTengah" class="group-preview"></div>
-                        </div>
-                    </div>
-                    <div class="grid-2">
-                        <div class="field">
-                            <label for="gabungGrup3">Grup 3 → 2D Belakang</label>
-                            <select id="gabungGrup3"></select>
-                            <div id="gabungPreviewBelakang" class="group-preview"></div>
-                        </div>
-                        <div class="field" style="display:flex; flex-direction:column; justify-content:flex-end; gap:8px;">
-                            <div style="display:flex; align-items:center; gap:8px;">
-                                <input type="checkbox" id="gabungPermutasi">
-                                <label for="gabungPermutasi" style="margin:0; cursor:pointer; font-size:13px;">
-                                    Permutasi bolak-balik
-                                </label>
-                            </div>
-                            <button class="btn-primary" id="gabungGenerateBtn">⚡ Gabung 3 Grup</button>
-                        </div>
-                    </div>
-                    <p id="gabungInfo" class="text-accent" style="font-size:13px; margin:12px 0;">
-                        Info: pilih minimal G1 dan G3.
-                    </p>
-                </div>
-                <div class="card"><div id="gabungResult"></div></div>
+    <div class="card">
+        <h3 style="margin-bottom:6px;">Gabung 3 Grup (2D Depan × Tengah × Belakang)</h3>
+        <p class="text-muted" style="font-size:12.5px; margin-bottom:12px;">
+            <b>Semua field opsional.</b> G1 → 2D Depan, G2 → 2D Tengah (opsional), G3 → 2D Belakang.
+            Jika G1/G3 kosong → otomatis pakai <b>semua 00–99</b> untuk posisi tersebut.
+            Jika G2 kosong → tidak ada constraint BC (mode bebas).
+        </p>
+        <div class="grid-2">
+            <div class="field">
+                <label for="gabungGrup1">Grup 1 → 2D Depan (opsional)</label>
+                <select id="gabungGrup1"></select>
+                <div id="gabungPreviewDepan" class="group-preview"></div>
             </div>
+            <div class="field">
+                <label for="gabungGrup2">Grup 2 → 2D Tengah (opsional)</label>
+                <select id="gabungGrup2"></select>
+                <div id="gabungPreviewTengah" class="group-preview"></div>
+            </div>
+        </div>
+        <div class="grid-2">
+            <div class="field">
+                <label for="gabungGrup3">Grup 3 → 2D Belakang (opsional)</label>
+                <select id="gabungGrup3"></select>
+                <div id="gabungPreviewBelakang" class="group-preview"></div>
+            </div>
+            <div class="field" style="display:flex; flex-direction:column; justify-content:flex-end; gap:8px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <input type="checkbox" id="gabungPermutasi">
+                    <label for="gabungPermutasi" style="margin:0; cursor:pointer; font-size:13px;">
+                        Permutasi bolak-balik
+                    </label>
+                </div>
+                <button class="btn-primary" id="gabungGenerateBtn">⚡ Gabung 3 Grup</button>
+            </div>
+        </div>
+        <p id="gabungInfo" class="text-accent" style="font-size:13px; margin:12px 0;">
+            Info: pilih grup atau biarkan kosong untuk AUTO.
+        </p>
+    </div>
+    <div class="card"><div id="gabungResult"></div></div>
+</div>
 
             <!-- ─────────── SUBPANEL 6: GRUP + CB ─────────── -->
             <div id="subpanel-grupCB" class="subpanel">
@@ -1412,7 +1573,7 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
                         </div>
                     </div>
                     <div class="field">
-                        <label for="grupCBDigits">Input CB</label>
+                        <label for="grupCBDigits">Input CB — opsional</label>
                         <input type="text" id="grupCBDigits" placeholder="0 1 2 3 5">
                     </div>
                     <div class="field">
@@ -1565,6 +1726,25 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
                 </div>
                 <div id="c33ResultsContainer"></div>
             </div>
+			
+	<!-- ─────────── SUBPANEL 10: MODE INPUT MENGANDUNG 2/3 (55 BARIS) ─────────── -->
+		<div id="subpanel-mengandung23" class="subpanel">
+			<div class="card">
+				<h3 style="margin-bottom:6px;">🔍 Mode Input Mengandung 2/3 (55 Baris)</h3>
+				<p class="text-muted" style="font-size:12.5px; margin-bottom:12px;">
+					Isi <b>2–3 digit</b> per baris + label pasar. Sistem akan men-generate semua 4D
+					(dari universe 0000–9999) yang <b>mengandung</b> digit tersebut (multiset).
+					Kosongkan baris yang tidak dipakai.
+					<br>Contoh: <code>237</code> → 4D yang mengandung minimal satu <code>2</code>, satu <code>3</code>, dan satu <code>7</code>.
+				</p>
+				<div class="m23-container" id="m23RowsContainer"></div>
+				<div class="pred-action-bar">
+					<button class="btn-primary" id="m23GenerateAllBtn">⚡ Generate Semua</button>
+					<button class="btn-warn" id="m23ClearAllBtn">🗑 Kosongkan 55 Baris</button>
+				</div>
+			</div>
+			<div id="m23ResultsContainer"></div>
+		</div>
 
         </section>
         <!-- End Section input4Angka -->
@@ -2515,6 +2695,13 @@ async function copyTextToClipboard(text) {
     }
 }
 
+/* Helper: array semua 2-digit "00".."99" */
+const ALL_00_99 = (function() {
+    const arr = [];
+    for (let i = 0; i < 100; i++) arr.push(String(i).padStart(2, '0'));
+    return arr;
+})();
+
 /* ═══════════════════════════════════════════════════════════════════════
    BLOK 33: STORAGE & SEED MASTER
    ═══════════════════════════════════════════════════════════════════════ */
@@ -2742,7 +2929,8 @@ function masukAplikasi() {
 
     // Render form 33 input saat pertama kali login
     if (typeof renderC33Rows === 'function') renderC33Rows();
-    if (typeof populateNewGrupDropdowns === 'function') populateNewGrupDropdowns();
+	if (typeof populateNewGrupDropdowns === 'function') populateNewGrupDropdowns();
+	if (typeof renderM23Rows === 'function') renderM23Rows();
 
     if (currentUser.role === 'user' && isUserExpired(currentUser.data)) {
         showExpiredModal(currentUser.data);
@@ -3724,8 +3912,37 @@ function buildManualBreakdown(grup, mode, depans, belakangs, totalCombo, cb) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 44: INPUT MANUAL GENERATOR
+   BLOK 44: INPUT MANUAL GENERATOR — REVISED
+   • Semua field opsional (auto 00–99 jika kosong)
+   • Filter 1D Depan (checkbox 0–9)
+   • Filter "Kata/Angka Mengandung" (angka = multiset, kata = syair)
    ═══════════════════════════════════════════════════════════════════════ */
+
+function getManual1DDepanSelected() {
+    const arr = [];
+    document.querySelectorAll('#manual1DDepan input[type="checkbox"]:checked').forEach(function(e) {
+        arr.push(e.value);
+    });
+    return arr;
+}
+
+// Filter "mengandung": angka → multiset, kata → syair 2D depan/belakang
+function applyMengandungFilter(arr, rawInput) {
+    const raw = String(rawInput || '').trim();
+    if (!raw) return arr;
+    if (/^\d+$/.test(raw)) {
+        const ms = blParseMultiset(raw);
+        return arr.filter(function(n) { return blContainsCombo(n, ms); });
+    }
+    const kw = raw.toLowerCase();
+    return arr.filter(function(n) {
+        const d2 = n.slice(0, 2), b2 = n.slice(2, 4);
+        const md = getMaster2D(d2), mb = getMaster2D(b2);
+        const sd = md ? String(md.syair || '').toLowerCase() : '';
+        const sb = mb ? String(mb.syair || '').toLowerCase() : '';
+        return sd.includes(kw) || sb.includes(kw);
+    });
+}
 
 function _refreshManualPreview() {
     const g = $('manualGrup').value;
@@ -3745,27 +3962,33 @@ function _refreshManualPreview() {
 
 $('manualGrup').addEventListener('change', _refreshManualPreview);
 $('manualFilterMode').addEventListener('change', _refreshManualPreview);
-$('manualDepan').addEventListener('input', updateManualInfo);
-$('manualBelakang').addEventListener('input', updateManualInfo);
-$('manualCB').addEventListener('input', updateManualInfo);
+['manualDepan', 'manualBelakang', 'manualCB', 'manualMengandung'].forEach(function(id) {
+    const el = $(id); if (el) el.addEventListener('input', updateManualInfo);
+});
 $('manualCBMode').addEventListener('change', updateManualInfo);
+const _d1Wrap = $('manual1DDepan');
+if (_d1Wrap) _d1Wrap.addEventListener('change', updateManualInfo);
 
 function updateManualInfo() {
-    const depan = parseTwoDigitList($('manualDepan').value);
-    const belakang = parseTwoDigitList($('manualBelakang').value);
+    const depanRaw = parseTwoDigitList($('manualDepan').value);
+    const belakangRaw = parseTwoDigitList($('manualBelakang').value);
     const cb = parseSingleDigitList($('manualCB').value);
     const grup = $('manualGrup').value;
     const mode = $('manualFilterMode').value;
+    const d1 = getManual1DDepanSelected();
+    const mengandung = $('manualMengandung').value.trim();
     const info = $('manualInfo');
-    if (depan.length === 0 || belakang.length === 0) {
-        info.textContent = 'Total kombinasi: — • Halaman: —';
-        return;
-    }
-    const total = depan.length * belakang.length;
+    if (!info) return;
+    const depanCount = depanRaw.length > 0 ? depanRaw.length : 100;
+    const belakangCount = belakangRaw.length > 0 ? belakangRaw.length : 100;
+    const total = depanCount * belakangCount;
     const pages = Math.ceil(total / PER_PAGE);
-    let text = '2 depan: ' + depan.length + ' • 2 belakang: ' + belakang.length
-        + ' • Total: ' + total.toLocaleString('id-ID') + ' kombinasi • ' + pages + ' halaman';
-    if (grup) text += ' • Grup: ' + grup + ' (Seleksi: ' + mode + ')';
+    let text = '2 depan: ' + (depanRaw.length > 0 ? depanRaw.length : 'auto 100')
+        + ' • 2 belakang: ' + (belakangRaw.length > 0 ? belakangRaw.length : 'auto 100')
+        + ' • Maks ' + total.toLocaleString('id-ID') + ' kombinasi • ' + pages + ' halaman';
+    if (grup) text += ' • Grup: ' + grup + ' (' + mode + ')';
+    if (d1.length > 0) text += ' • 1D Depan: ' + d1.join('');
+    if (mengandung) text += ' • Mengandung: ' + mengandung;
     if (cb.length > 0) text += ' • CB: ' + cb.join(' ');
     info.textContent = text;
 }
@@ -3775,33 +3998,64 @@ $('manualGenerateBtn').addEventListener('click', function() {
     const mode = $('manualFilterMode').value;
     const cb = parseSingleDigitList($('manualCB').value);
     const cbMode = $('manualCBMode').value;
+    const d1 = getManual1DDepanSelected();
+    const mengandung = $('manualMengandung').value.trim();
+
     let depan = parseTwoDigitList($('manualDepan').value);
     let belakang = parseTwoDigitList($('manualBelakang').value);
-    if (depan.length === 0) { toast('Isi 2 depan', 'error'); return; }
-    if (belakang.length === 0) { toast('Isi 2 belakang', 'error'); return; }
+
+    const depanAuto = depan.length === 0;
+    const belakangAuto = belakang.length === 0;
+    if (depanAuto) depan = ALL_00_99.slice();
+    if (belakangAuto) belakang = ALL_00_99.slice();
+
     if (grup) {
         if (mode === 'depan' || mode === 'keduanya') {
-            const selectedDepans = getGroupAs2DigitDepan(grup);
-            depan = depan.filter(function(d) { return selectedDepans.includes(d); });
+            const selD = getGroupAs2DigitDepan(grup);
+            depan = depan.filter(function(d) { return selD.includes(d); });
         }
         if (mode === 'belakang' || mode === 'keduanya') {
-            const selectedBelakangs = getGroupAs2DigitBelakang(grup);
-            belakang = belakang.filter(function(b) { return selectedBelakangs.includes(b); });
+            const selB = getGroupAs2DigitBelakang(grup);
+            belakang = belakang.filter(function(b) { return selB.includes(b); });
         }
-        if (depan.length === 0) { toast('Tidak ada 2 depan yang cocok', 'error'); return; }
-        if (belakang.length === 0) { toast('Tidak ada 2 belakang yang cocok', 'error'); return; }
+        if (depan.length === 0) { toast('Tidak ada 2 depan yang cocok dengan grup', 'error'); return; }
+        if (belakang.length === 0) { toast('Tidak ada 2 belakang yang cocok dengan grup', 'error'); return; }
     }
+
+    if (d1.length > 0) {
+        depan = depan.filter(function(d) { return d1.includes(d[0]); });
+        if (depan.length === 0) { toast('Tidak ada 2 depan yang cocok dengan 1D Depan', 'error'); return; }
+    }
+
     const combos = [];
     for (const d of depan) for (const b of belakang) combos.push(d + b);
     let filtered = [...new Set(combos)];
-    if (cb.length > 0) filtered = filterByCB(filtered, cb.join(''), cbMode);
-    if (filtered.length === 0) { toast('Tidak ada hasil setelah filter', 'error'); return; }
+
+    if (mengandung) {
+        filtered = applyMengandungFilter(filtered, mengandung);
+        if (filtered.length === 0) {
+            toast('Tidak ada hasil setelah filter mengandung "' + mengandung + '"', 'error');
+            return;
+        }
+    }
+
+    if (cb.length > 0) {
+        filtered = filterByCB(filtered, cb.join(''), cbMode);
+        if (filtered.length === 0) { toast('Tidak ada hasil setelah CB', 'error'); return; }
+    }
+
     filtered.sort();
     pageState.manual.pages = paginateArray(filtered);
     pageState.manual.current = 0;
-    pageState.manual.meta = depan.length + ' depan × ' + belakang.length + ' belakang';
-    if (grup) pageState.manual.meta += ' • Grup: ' + grup;
-    if (cb.length > 0) pageState.manual.meta += ' • CB: ' + cb.join(' ') + ' (' + cbMode.toUpperCase() + ')';
+
+    let meta = (depanAuto ? 'AUTO(100)' : depan.length) + ' depan × '
+             + (belakangAuto ? 'AUTO(100)' : belakang.length) + ' belakang';
+    if (grup) meta += ' • Grup: ' + grup + ' (' + mode + ')';
+    if (d1.length > 0) meta += ' • 1D: ' + d1.join('');
+    if (mengandung) meta += ' • Mengandung: ' + mengandung;
+    if (cb.length > 0) meta += ' • CB: ' + cb.join(' ') + ' (' + cbMode.toUpperCase() + ')';
+    pageState.manual.meta = meta;
+
     const breakdown = buildManualBreakdown(grup, mode, depan, belakang, filtered.length, cb.length > 0 ? cb.join('') : null);
     renderPagination('manualResult', 'manual', 'Hasil', breakdown);
     toast('Berhasil: ' + filtered.length.toLocaleString('id-ID') + ' kombinasi', 'success');
@@ -4001,7 +4255,7 @@ $('atGenerateBtn').addEventListener('click', function() {
 });
 
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 47: CB BBFS GENERATOR
+   BLOK 47: CB BBFS GENERATOR — REVISED (CB opsional)
    ═══════════════════════════════════════════════════════════════════════ */
 
 $('cbBBFSInput').addEventListener('input', function(e) {
@@ -4015,12 +4269,12 @@ function updateCBBFFSInfo() {
     const bbfs = onlyDigits($('cbBBFSInput').value);
     const cb = onlyDigits($('cbBBFSDigits').value);
     const info = $('cbBBFSInfo');
+    if (!info) return;
     if (bbfs.length < 4) { info.textContent = 'Info: isi BBFS minimal 4 digit'; return; }
-    if (!cb) { info.textContent = 'Info: isi CB (contoh: 01235)'; return; }
     const n = bbfs.length;
     const total = n * (n - 1) * (n - 2) * (n - 3);
     const pages = Math.ceil(total / PER_PAGE);
-    info.textContent = 'BBFS: ' + bbfs + ' • CB: ' + cb.split('').join(' ')
+    info.textContent = 'BBFS: ' + bbfs + (cb ? ' • CB: ' + cb.split('').join(' ') : ' • tanpa CB')
         + ' • Maks ' + total.toLocaleString('id-ID') + ' • ' + pages + ' halaman';
 }
 
@@ -4029,19 +4283,21 @@ $('cbBBFSGenerateBtn').addEventListener('click', function() {
     const cb = onlyDigits($('cbBBFSDigits').value);
     const mode = $('cbBBFSMode').value;
     if (bbfs.length < 4) { toast('BBFS minimal 4 digit', 'error'); return; }
-    if (!cb) { toast('CB wajib diisi', 'error'); return; }
+
     const all = permutasi4DariDigit(bbfs);
-    const filtered = filterByCB(all, cb, mode);
-    if (filtered.length === 0) { toast('Tidak ada hasil setelah filter', 'error'); return; }
+    const filtered = cb ? filterByCB(all, cb, mode) : all;
+    if (filtered.length === 0) { toast('Tidak ada hasil', 'error'); return; }
+
     pageState.cbBBFS.pages = paginateArray(filtered);
     pageState.cbBBFS.current = 0;
-    pageState.cbBBFS.meta = 'BBFS: ' + bbfs + ' • CB: ' + cb.split('').join(' ') + ' • Mode: ' + mode.toUpperCase();
+    pageState.cbBBFS.meta = 'BBFS: ' + bbfs
+        + (cb ? ' • CB: ' + cb.split('').join(' ') + ' • Mode: ' + mode.toUpperCase() : ' • tanpa CB');
     renderPagination('cbBBFSResult', 'cbBBFS', 'Hasil');
-    toast('Berhasil: ' + filtered.length + ' dari ' + all.length, 'success');
+    toast('Berhasil: ' + filtered.length.toLocaleString('id-ID') + ' dari ' + all.length.toLocaleString('id-ID'), 'success');
 });
 
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 48: GRUP + CB GENERATOR (2 grup)
+   BLOK 48: GRUP + CB GENERATOR — REVISED (CB opsional)
    ═══════════════════════════════════════════════════════════════════════ */
 
 function crossProduct4Digit(depans, belakangs, withPerm) {
@@ -4070,10 +4326,10 @@ function updateGrupCBInfo() {
     const cb = onlyDigits($('grupCBDigits').value);
     const perm = $('grupCBPermutasi').checked;
     const info = $('grupCBInfo');
+    if (!info) return;
     renderGroupPreview(g1, $('grupCBPreviewDepan'), 'depan', 'Grup 1 → 2D DEPAN');
     renderGroupPreview(g2, $('grupCBPreviewBelakang'), 'belakang', 'Grup 2 → 2D BELAKANG');
     if (!g1 || !g2) { info.textContent = 'Info: pilih 2 grup'; info.style.color = 'var(--muted)'; return; }
-    if (!cb) { info.textContent = 'Info: isi CB'; info.style.color = 'var(--muted)'; return; }
     const depans = getGroupAs2DigitDepan(g1);
     const belakangs = getGroupAs2DigitBelakang(g2);
     if (depans.length === 0 || belakangs.length === 0) {
@@ -4092,7 +4348,8 @@ function updateGrupCBInfo() {
     }
     info.textContent = 'G1 "' + g1 + '": ' + depans.length + ' depan • G2 "' + g2 + '": ' + belakangs.length
         + ' belakang • ' + totalRaw + ' kombinasi' + (perm ? ' → ' + total + ' (permutasi)' : '')
-        + ' • CB: ' + cb.split('').join(' ') + ' • ' + Math.ceil(total / PER_PAGE) + ' halaman';
+        + (cb ? ' • CB: ' + cb.split('').join(' ') : ' • tanpa CB')
+        + ' • ' + Math.ceil(total / PER_PAGE) + ' halaman';
 }
 
 $('grupCBGenerateBtn').addEventListener('click', function() {
@@ -4102,21 +4359,23 @@ $('grupCBGenerateBtn').addEventListener('click', function() {
     const mode = $('grupCBMode').value;
     const perm = $('grupCBPermutasi').checked;
     if (!g1 || !g2) { toast('Pilih 2 grup', 'error'); return; }
-    if (!cb) { toast('CB wajib diisi', 'error'); return; }
     const depans = getGroupAs2DigitDepan(g1);
     const belakangs = getGroupAs2DigitBelakang(g2);
     if (depans.length === 0) { toast('Grup "' + g1 + '" kosong', 'error'); return; }
     if (belakangs.length === 0) { toast('Grup "' + g2 + '" kosong', 'error'); return; }
+
     const results = crossProduct4Digit(depans, belakangs, perm);
-    const filtered = filterByCB(results, cb, mode);
-    if (filtered.length === 0) { toast('Tidak ada hasil setelah filter CB', 'error'); return; }
+    const filtered = cb ? filterByCB(results, cb, mode) : results;
+    if (filtered.length === 0) { toast('Tidak ada hasil', 'error'); return; }
+
     pageState.grupCB.pages = paginateArray(filtered);
     pageState.grupCB.current = 0;
-    pageState.grupCB.meta = g1 + ' (2D depan) + ' + g2 + ' (2D belakang) • CB: ' + cb.split('').join(' ')
-        + ' • ' + mode.toUpperCase() + (perm ? ' • permutasi' : '');
+    pageState.grupCB.meta = g1 + ' (2D depan) + ' + g2 + ' (2D belakang)'
+        + (cb ? ' • CB: ' + cb.split('').join(' ') + ' • ' + mode.toUpperCase() : ' • tanpa CB')
+        + (perm ? ' • permutasi' : '');
     const breakdown = buildGabungBreakdown(g1, g2, depans, belakangs, results.length, perm, cb);
     renderPagination('grupCBResult', 'grupCB', 'Hasil', breakdown);
-    toast('Berhasil: ' + filtered.length.toLocaleString('id-ID') + ' dari ' + results.length.toLocaleString('id-ID') + ' lolos CB', 'success');
+    toast('Berhasil: ' + filtered.length.toLocaleString('id-ID') + ' dari ' + results.length.toLocaleString('id-ID'), 'success');
 });
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -6092,7 +6351,7 @@ if ($('c33ShowCaraBaca')) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 64: GABUNG 3 GRUP
+   BLOK 64: GABUNG 3 GRUP — REVISED (semua grup opsional, auto 00–99)
    ═══════════════════════════════════════════════════════════════════════ */
 
 function gabung3GetSets() {
@@ -6100,10 +6359,12 @@ function gabung3GetSets() {
     const g2 = $('gabungGrup2').value;
     const g3 = $('gabungGrup3').value;
     return {
-        g1, g2, g3,
-        s1: g1 ? getGroupAs2DigitDepan(g1) : [],
+        g1: g1, g2: g2, g3: g3,
+        g1Auto: !g1,
+        g3Auto: !g3,
+        s1: g1 ? getGroupAs2DigitDepan(g1) : ALL_00_99.slice(),
         s2: g2 ? [...new Set([...getGroupAs2DigitDepan(g2), ...getGroupAs2DigitBelakang(g2)])].sort() : [],
-        s3: g3 ? getGroupAs2DigitBelakang(g3) : []
+        s3: g3 ? getGroupAs2DigitBelakang(g3) : ALL_00_99.slice()
     };
 }
 
@@ -6135,19 +6396,13 @@ function updateGabung3Info() {
     const info = $('gabungInfo');
     if (!info) return;
     const sets = gabung3GetSets();
-    renderGroupPreview(sets.g1, $('gabungPreviewDepan'), 'depan', 'Grup 1 → 2D Depan');
-    renderGroupPreview(sets.g2, $('gabungPreviewTengah'), 'both', 'Grup 2 → 2D Tengah');
-    renderGroupPreview(sets.g3, $('gabungPreviewBelakang'), 'belakang', 'Grup 3 → 2D Belakang');
+    renderGroupPreview(sets.g1, $('gabungPreviewDepan'), 'depan', sets.g1 ? 'Grup 1 → 2D Depan' : 'Tanpa Grup — pakai semua 00–99');
+    renderGroupPreview(sets.g2, $('gabungPreviewTengah'), 'both', sets.g2 ? 'Grup 2 → 2D Tengah' : 'Tanpa Grup — tidak ada constraint BC');
+    renderGroupPreview(sets.g3, $('gabungPreviewBelakang'), 'belakang', sets.g3 ? 'Grup 3 → 2D Belakang' : 'Tanpa Grup — pakai semua 00–99');
 
-    if (!sets.g1 || !sets.g3) {
-        info.textContent = 'Info: pilih minimal G1 (Depan) dan G3 (Belakang).';
-        info.style.color = 'var(--muted)';
-        return;
-    }
     if (!sets.s1.length || !sets.s3.length) {
         info.textContent = '⚠️ Salah satu grup kosong di master.';
-        info.style.color = '#fca5a5';
-        return;
+        info.style.color = '#fca5a5'; return;
     }
     const comp = gabung3Compute();
     const permCheck = $('gabungPermutasi') && $('gabungPermutasi').checked;
@@ -6158,8 +6413,13 @@ function updateGabung3Info() {
         totalAfterPerm = exp.size;
     }
     info.style.color = 'var(--accent)';
-    const mode = sets.g2 ? '3-grup' : '2-grup';
-    info.textContent = 'Mode ' + mode + ' • G1(' + sets.s1.length + ') × G3(' + sets.s3.length + ')'
+    let modeLabel;
+    if (!sets.g1 && !sets.g3 && !sets.g2) modeLabel = 'bebas total';
+    else if (!sets.g2) modeLabel = '2-grup';
+    else modeLabel = '3-grup';
+    info.textContent = 'Mode ' + modeLabel
+        + ' • G1(' + (sets.g1Auto ? 'AUTO 100' : sets.s1.length) + ')'
+        + ' × G3(' + (sets.g3Auto ? 'AUTO 100' : sets.s3.length) + ')'
         + (sets.g2 ? ' ∩ G2(' + sets.s2.length + ')' : '')
         + ' = ' + comp.combos.length.toLocaleString('id-ID')
         + (permCheck ? ' → ' + totalAfterPerm.toLocaleString('id-ID') + ' (permutasi)' : '')
@@ -6169,9 +6429,12 @@ function updateGabung3Info() {
 if ($('gabungGenerateBtn')) {
     $('gabungGenerateBtn').addEventListener('click', function() {
         const sets = gabung3GetSets();
-        if (!sets.g1 || !sets.g3) { toast('Pilih G1 dan G3', 'error'); return; }
+        if (!sets.s1.length || !sets.s3.length) {
+            toast('Grup kosong di master', 'error'); return;
+        }
         const comp = gabung3Compute();
         if (!comp.combos.length) { toast('Tidak ada kombinasi', 'error'); return; }
+
         const permCheck = $('gabungPermutasi') && $('gabungPermutasi').checked;
         let results = comp.combos;
         if (permCheck) {
@@ -6179,9 +6442,15 @@ if ($('gabungGenerateBtn')) {
             comp.combos.forEach(function(c) { permutasi4DariNomor(c).forEach(function(p) { exp.add(p); }); });
             results = Array.from(exp).sort();
         }
+
+        if (results.length > 5000) {
+            if (!confirm('Akan generate ' + results.length.toLocaleString('id-ID') + ' kombinasi. Lanjutkan?')) return;
+        }
+
         pageState.gabungGrup.pages = paginateArray(results);
         pageState.gabungGrup.current = 0;
-        pageState.gabungGrup.meta = 'G1:' + sets.g1 + (sets.g2 ? ' G2:' + sets.g2 : '') + ' G3:' + sets.g3
+        pageState.gabungGrup.meta = 'G1:' + (sets.g1 || 'AUTO')
+            + (sets.g2 ? ' G2:' + sets.g2 : '') + ' G3:' + (sets.g3 || 'AUTO')
             + (permCheck ? ' • permutasi' : '');
         pageState.gabungGrup._breakdown = '';
         const breakdown = buildGabung3Breakdown(sets, results.length, permCheck);
@@ -6192,12 +6461,13 @@ if ($('gabungGenerateBtn')) {
 
 function buildGabung3Breakdown(sets, total, perm) {
     return '<div class="result-breakdown">'
-        + '<div class="rb-section"><div class="rb-title">📊 G1 "' + esc(sets.g1) + '" → 2D Depan</div>'
-        + '<div class="rb-values highlight">' + sets.s1.join(' ') + '</div></div>'
+        + '<div class="rb-section"><div class="rb-title">📊 G1 "' + esc(sets.g1 || 'AUTO 00–99') + '" → 2D Depan</div>'
+        + '<div class="rb-values highlight">' + (sets.g1 ? sets.s1.join(' ') : 'AUTO: 00 01 02 ... 99') + '</div></div>'
         + (sets.g2 ? '<div class="rb-section"><div class="rb-title">📊 G2 "' + esc(sets.g2) + '" → 2D Tengah</div>'
-          + '<div class="rb-values highlight-b">' + sets.s2.join(' ') + '</div></div>' : '')
-        + '<div class="rb-section"><div class="rb-title">📊 G3 "' + esc(sets.g3) + '" → 2D Belakang</div>'
-        + '<div class="rb-values highlight">' + sets.s3.join(' ') + '</div></div>'
+          + '<div class="rb-values highlight-b">' + sets.s2.join(' ') + '</div></div>'
+          : '<div class="rb-section"><div class="rb-label">G2 kosong → tidak ada constraint BC</div></div>')
+        + '<div class="rb-section"><div class="rb-title">📊 G3 "' + esc(sets.g3 || 'AUTO 00–99') + '" → 2D Belakang</div>'
+        + '<div class="rb-values highlight">' + (sets.g3 ? sets.s3.join(' ') : 'AUTO: 00 01 02 ... 99') + '</div></div>'
         + '<div class="rb-arrow">⬇ ' + total.toLocaleString('id-ID') + ' kombinasi'
         + (perm ? ' (permutasi aktif)' : '') + ' ⬇</div>'
         + '<div class="rb-note">Filter konsisten: digit ke-2 dari Depan = digit ke-1 Tengah, dst.</div></div>';
@@ -6233,12 +6503,245 @@ function populateNewGrupDropdowns() {
 document.addEventListener('DOMContentLoaded', function() {
     populateNewGrupDropdowns();
     renderC33Rows();
+    if (typeof renderM23Rows === 'function') renderM23Rows();
 });
 
 /* ═══════════════════════════════════════════════════════════════════════
    ▼▼▼ LANJUT DI PART 6 ▼▼▼
    ═══════════════════════════════════════════════════════════════════════ */
    
+/* ═══════════════════════════════════════════════════════════════════════
+   BLOK 65A: MODE INPUT MENGANDUNG 2/3 (55 BARIS)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+const M23_ROW_COUNT = 55;
+
+const m23State = {
+    rows: Array(M23_ROW_COUNT).fill(null).map(function(_, i) {
+        return { idx: i, digits: '', pasar: '', results: [], page: 0, generated: false };
+    })
+};
+
+const m23MasterState = { items: [], page: 0, size: PER_PAGE };
+
+// Universe 0000–9999 (cached)
+const M23_UNIVERSE = (function() {
+    const arr = [];
+    for (let i = 0; i < 10000; i++) arr.push(String(i).padStart(4, '0'));
+    return arr;
+})();
+
+function m23ComputeForDigits(digits) {
+    if (!digits || digits.length < 2 || digits.length > 3) return [];
+    if (!/^\d+$/.test(digits)) return [];
+    const ms = blParseMultiset(digits);
+    return M23_UNIVERSE.filter(function(n) { return blContainsCombo(n, ms); });
+}
+
+function renderM23Rows() {
+    const container = $('m23RowsContainer');
+    if (!container) return;
+    let html = '';
+    m23State.rows.forEach(function(r) {
+        const total = r.generated ? r.results.length : 0;
+        const pages = total > 0 ? Math.ceil(total / PER_PAGE) : 0;
+        const totalTxt = r.generated && r.digits ? (total > 0 ? total.toLocaleString('id-ID') : '0') : '—';
+        const pagesTxt = r.generated && r.digits ? (pages > 0 ? pages + ' hal' : '—') : '—';
+        const canCopy = r.generated && r.results.length > 0;
+        html += '<div class="m23-row" data-idx="' + r.idx + '">'
+            + '<div class="m23-no">' + (r.idx + 1) + '</div>'
+            + '<input type="text" class="m23-digits" maxlength="3" inputmode="numeric"'
+            + ' placeholder="237" value="' + esc(r.digits) + '" data-idx="' + r.idx + '" data-field="digits">'
+            + '<input type="text" class="m23-pasar" placeholder="MACAU4D"'
+            + ' value="' + esc(r.pasar) + '" data-idx="' + r.idx + '" data-field="pasar">'
+            + '<div class="m23-total">' + totalTxt + '</div>'
+            + '<div class="m23-pages">' + pagesTxt + '</div>'
+            + '<button class="m23-copy btn-primary" ' + (canCopy ? '' : 'disabled')
+            + ' onclick="m23CopyRow(' + r.idx + ')">📋</button>'
+            + '</div>';
+    });
+    container.innerHTML = html;
+    container.querySelectorAll('input').forEach(function(el) {
+        el.addEventListener('input', function() {
+            const idx = parseInt(el.dataset.idx, 10);
+            const field = el.dataset.field;
+            if (field === 'digits') el.value = onlyDigits(el.value).slice(0, 3);
+            m23State.rows[idx][field] = el.value;
+            m23State.rows[idx].generated = false;
+            const rowEl = el.closest('.m23-row');
+            if (rowEl) {
+                const totEl = rowEl.querySelector('.m23-total');
+                const pgEl = rowEl.querySelector('.m23-pages');
+                const cpyBtn = rowEl.querySelector('.m23-copy');
+                if (totEl) totEl.textContent = '—';
+                if (pgEl) pgEl.textContent = '—';
+                if (cpyBtn) cpyBtn.disabled = true;
+            }
+        });
+    });
+}
+
+window.m23CopyRow = function(idx) {
+    const r = m23State.rows[idx];
+    if (!r || !r.results.length) { toast('Belum ada hasil', 'error'); return; }
+    copyTextToClipboard(r.results.join('*') + '*');
+};
+
+function renderM23Results() {
+    const c = $('m23ResultsContainer');
+    if (!c) return;
+
+    const masterSet = new Set();
+    m23State.rows.forEach(function(r) {
+        if (r.generated && r.results.length > 0) {
+            r.results.forEach(function(n) { masterSet.add(n); });
+        }
+    });
+    m23MasterState.items = Array.from(masterSet).sort();
+
+    let html = '';
+
+    if (m23MasterState.items.length > 0) {
+        const tp = Math.ceil(m23MasterState.items.length / m23MasterState.size);
+        if (m23MasterState.page >= tp) m23MasterState.page = tp - 1;
+        if (m23MasterState.page < 0) m23MasterState.page = 0;
+        const st = m23MasterState.page * m23MasterState.size;
+        const pd = m23MasterState.items.slice(st, st + m23MasterState.size);
+
+        html += '<div class="card" style="border-color:var(--success); background:rgba(34,197,94,0.05); margin-bottom:14px;">'
+            + '<h3 style="color:var(--success); margin-bottom:8px;">🎯 TOTAL KESELURUHAN GABUNGAN (UNIK)</h3>'
+            + '<div class="page-info">Halaman ' + (m23MasterState.page + 1) + ' / ' + tp
+            + ' • ' + pd.length + ' di halaman ini • Total ' + m23MasterState.items.length.toLocaleString('id-ID') + ' angka unik</div>'
+            + '<div class="page-content" style="max-height:200px; border-color:var(--success);">'
+            + pd.join('*') + (pd.length ? '*' : '') + '</div>'
+            + '<div class="page-nav">'
+            + '<button ' + (m23MasterState.page === 0 ? 'disabled' : '') + ' onclick="m23PageMaster(-1)">◀ Prev</button>'
+            + '<span>' + (m23MasterState.page + 1) + ' / ' + tp + '</span>'
+            + '<button ' + (m23MasterState.page === tp - 1 ? 'disabled' : '') + ' onclick="m23PageMaster(1)">Next ▶</button>'
+            + '</div>'
+            + '<div class="page-actions">'
+            + '<button class="btn-success" onclick="m23CopyMasterPage()">📋 Copy Hal. Ini</button>'
+            + '<button class="btn-success" onclick="m23CopyMasterAll()">📋 Copy Semua</button>'
+            + '<button class="btn-warn" onclick="m23ExportMaster()">⬇ Export TXT</button>'
+            + '</div></div>';
+    }
+
+    m23State.rows.forEach(function(r) {
+        if (!r.generated || !r.digits || r.results.length === 0) return;
+        const tp = Math.ceil(r.results.length / PER_PAGE);
+        if (r.page >= tp) r.page = tp - 1;
+        if (r.page < 0) r.page = 0;
+        const st = r.page * PER_PAGE;
+        const pd = r.results.slice(st, st + PER_PAGE);
+
+        html += '<div class="m23-result-block" id="m23-block-' + r.idx + '">'
+            + '<div class="m23-res-header">Hasil dari ' + esc(r.digits)
+            + (r.pasar ? ' <span class="pasar-tag">— ' + esc(r.pasar) + '</span>' : '') + '</div>'
+            + '<div class="page-info">Halaman ' + (r.page + 1) + ' / ' + tp
+            + ' • ' + pd.length + ' di halaman ini • Total ' + r.results.length.toLocaleString('id-ID') + '</div>'
+            + '<div class="page-content" style="max-height:240px;">' + pd.join('*') + (pd.length ? '*' : '') + '</div>'
+            + '<div class="page-nav">'
+            + '<button ' + (r.page === 0 ? 'disabled' : '') + ' onclick="m23Page(' + r.idx + ',-1)">◀ Prev</button>'
+            + '<span>' + (r.page + 1) + ' / ' + tp + '</span>'
+            + '<button ' + (r.page === tp - 1 ? 'disabled' : '') + ' onclick="m23Page(' + r.idx + ',1)">Next ▶</button>'
+            + '</div>'
+            + '<div class="page-actions">'
+            + '<button onclick="m23CopyPage(' + r.idx + ')">📋 Copy Hal</button>'
+            + '<button onclick="m23CopyRow(' + r.idx + ')">📋 Copy Semua</button>'
+            + '<button onclick="m23ExportRow(' + r.idx + ')">⬇ TXT</button>'
+            + '</div></div>';
+    });
+
+    if (!html) {
+        html = '<div class="card"><div class="empty">Belum ada hasil. Isi minimal 1 baris dengan 2–3 digit, lalu Generate.</div></div>';
+    }
+    c.innerHTML = html;
+}
+
+window.m23Page = function(idx, d) {
+    const r = m23State.rows[idx]; if (!r) return;
+    const tp = Math.ceil(r.results.length / PER_PAGE);
+    const nx = r.page + d;
+    if (nx < 0 || nx >= tp) return;
+    r.page = nx; renderM23Results();
+};
+window.m23PageMaster = function(d) {
+    const tp = Math.ceil(m23MasterState.items.length / m23MasterState.size);
+    const nx = m23MasterState.page + d;
+    if (nx < 0 || nx >= tp) return;
+    m23MasterState.page = nx;
+    renderM23Results();
+};
+window.m23CopyPage = function(idx) {
+    const r = m23State.rows[idx]; if (!r || !r.results.length) return;
+    const st = r.page * PER_PAGE;
+    copyTextToClipboard(r.results.slice(st, st + PER_PAGE).join('*') + '*');
+};
+window.m23CopyMasterPage = function() {
+    const st = m23MasterState.page * m23MasterState.size;
+    copyTextToClipboard(m23MasterState.items.slice(st, st + m23MasterState.size).join('*') + '*');
+};
+window.m23CopyMasterAll = function() {
+    copyTextToClipboard(m23MasterState.items.join('*') + '*');
+};
+window.m23ExportRow = function(idx) {
+    const r = m23State.rows[idx]; if (!r || !r.results.length) return;
+    const b = new Blob([r.results.join('*') + '*'], { type: 'text/plain;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(b);
+    a.download = 'sahard-m23-' + (r.digits || idx) + '.txt';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast('Diexport', 'success');
+};
+window.m23ExportMaster = function() {
+    const b = new Blob([m23MasterState.items.join('*') + '*'], { type: 'text/plain;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(b);
+    a.download = 'sahard-m23-master.txt';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast('Diexport', 'success');
+};
+
+if ($('m23GenerateAllBtn')) {
+    $('m23GenerateAllBtn').addEventListener('click', function() {
+        let totalRows = 0, totalResults = 0;
+        m23State.rows.forEach(function(r) {
+            if (!r.digits || r.digits.length < 2 || r.digits.length > 3) {
+                r.generated = false; r.results = []; return;
+            }
+            r.results = m23ComputeForDigits(r.digits);
+            r.page = 0;
+            r.generated = true;
+            totalRows++;
+            totalResults += r.results.length;
+        });
+        m23MasterState.page = 0;
+        renderM23Rows();
+        renderM23Results();
+        toast('Generated ' + totalRows + ' baris • ' + totalResults.toLocaleString('id-ID') + ' total hasil', 'success');
+    });
+}
+
+if ($('m23ClearAllBtn')) {
+    $('m23ClearAllBtn').addEventListener('click', function() {
+        if (!confirm('Kosongkan semua 55 baris?')) return;
+        m23State.rows.forEach(function(r) {
+            r.digits = ''; r.pasar = ''; r.results = []; r.page = 0; r.generated = false;
+        });
+        m23MasterState.items = [];
+        m23MasterState.page = 0;
+        renderM23Rows();
+        renderM23Results();
+    });
+}
+
+// Init jika script dijalankan setelah DOM ready (script ada di akhir body)
+if (document.readyState !== 'loading') {
+    renderM23Rows();
+}
+
  /* ═══════════════════════════════════════════════════════════════════════
    BLOK 66: USER MANAGEMENT — EVENT LISTENERS
    ═══════════════════════════════════════════════════════════════════════ */
