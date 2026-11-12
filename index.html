@@ -1960,10 +1960,62 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
             Contoh: <code>237</code> → 4D yang mengandung minimal satu <code>2</code>, satu <code>3</code>, dan satu <code>7</code>.
         </p>
         
+        <!-- 3 PILIH GRUP -->
+        <div style="background:var(--card-3); padding:12px; border-radius:8px; border:1px solid var(--border); margin-bottom:16px;">
+            <label style="color:var(--accent); margin-bottom:8px; display:block; font-weight:bold;">Pilih Grup Penyaring (Opsional)</label>
+            <div class="grid-2" style="margin-bottom:8px;">
+                <div class="field" style="margin:0;">
+                    <label for="m23Grup1">Grup 1 → 2D Depan</label>
+                    <select id="m23Grup1"><option value="">— AUTO 00-99 —</option></select>
+                    <div id="m23Preview1" class="group-preview" style="margin-top:4px; padding:6px; font-size:11px;"></div>
+                </div>
+                <div class="field" style="margin:0;">
+                    <label for="m23Grup2">Grup 2 → 2D Tengah</label>
+                    <select id="m23Grup2"><option value="">— Bebas (Tanpa Batas) —</option></select>
+                    <div id="m23Preview2" class="group-preview" style="margin-top:4px; padding:6px; font-size:11px;"></div>
+                </div>
+            </div>
+            <div class="field" style="margin:0;">
+                <label for="m23Grup3">Grup 3 → 2D Belakang</label>
+                <select id="m23Grup3"><option value="">— AUTO 00-99 —</option></select>
+                <div id="m23Preview3" class="group-preview" style="margin-top:4px; padding:6px; font-size:11px;"></div>
+            </div>
+        </div>
+
         <div class="m23-container" id="m23RowsContainer" style="max-height: 450px; overflow-y: auto; padding: 6px; background: var(--card-2); border: 1px solid var(--border); border-radius: var(--radius-md);">
             <!-- 55 Baris akan di-generate oleh JavaScript -->
         </div>
         
+        <div class="field" style="margin-top:16px;">
+            <label>Mode Input Angka 1D Depan (Opsional)</label>
+            <div class="d1-checkbox-group" id="m231DDepan">
+                <div><input type="checkbox" id="m1-0" value="0"><label for="m1-0">0</label></div>
+                <div><input type="checkbox" id="m1-1" value="1"><label for="m1-1">1</label></div>
+                <div><input type="checkbox" id="m1-2" value="2"><label for="m1-2">2</label></div>
+                <div><input type="checkbox" id="m1-3" value="3"><label for="m1-3">3</label></div>
+                <div><input type="checkbox" id="m1-4" value="4"><label for="m1-4">4</label></div>
+                <div><input type="checkbox" id="m1-5" value="5"><label for="m1-5">5</label></div>
+                <div><input type="checkbox" id="m1-6" value="6"><label for="m1-6">6</label></div>
+                <div><input type="checkbox" id="m1-7" value="7"><label for="m1-7">7</label></div>
+                <div><input type="checkbox" id="m1-8" value="8"><label for="m1-8">8</label></div>
+                <div><input type="checkbox" id="m1-9" value="9"><label for="m1-9">9</label></div>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="field">
+                <label for="m23CB">Input CB (Opsional)</label>
+                <input type="text" id="m23CB" placeholder="0 1 2 3 5" autocomplete="off">
+            </div>
+            <div class="field">
+                <label for="m23CBMode">Mode Filter CB</label>
+                <select id="m23CBMode">
+                    <option value="or" selected>Salah Satu Digit Muncul (OR)</option>
+                    <option value="and">Semua Digit Harus Muncul (AND)</option>
+                </select>
+            </div>
+        </div>
+
         <div class="pred-action-bar">
             <button class="btn-primary" id="m23GenerateAllBtn">⚡ Generate Semua</button>
             <button class="btn-warn" id="m23ClearAllBtn">🗑 Kosongkan 55 Baris</button>
@@ -7150,7 +7202,7 @@ document.addEventListener('DOMContentLoaded', function() {
    ═══════════════════════════════════════════════════════════════════════ */
    
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 65A: MODE INPUT MENGANDUNG 2/3 (55 BARIS) - STANDALONE TAB
+   BLOK 65A: MODE INPUT MENGANDUNG 2/3 (55 BARIS) + FULL FILTER
    ═══════════════════════════════════════════════════════════════════════ */
 
 const M23_ROW_COUNT = 55;
@@ -7163,18 +7215,74 @@ const m23State = {
 
 const m23MasterState = { items: [], page: 0, size: PER_PAGE };
 
-// Universe 0000–9999
 const M23_UNIVERSE = (function() {
     const arr = [];
     for (let i = 0; i < 10000; i++) arr.push(String(i).padStart(4, '0'));
     return arr;
 })();
 
-function m23ComputeForDigits(digits) {
-    if (!digits || digits.length < 2 || digits.length > 3) return [];
-    if (!/^\d+$/.test(digits)) return [];
-    const ms = blParseMultiset(digits);
-    return M23_UNIVERSE.filter(function(n) { return blContainsCombo(n, ms); });
+function getM231DDepanSelected() {
+    const arr = [];
+    document.querySelectorAll('#m231DDepan input[type="checkbox"]:checked').forEach(function(e) {
+        arr.push(e.value);
+    });
+    return arr;
+}
+
+function applyM23Filters(n) {
+    const g1 = $('m23Grup1').value;
+    const g2 = $('m23Grup2').value;
+    const g3 = $('m23Grup3').value;
+    const d1 = getM231DDepanSelected();
+    const cb = parseSingleDigitList($('m23CB').value);
+    const cbMode = $('m23CBMode').value;
+
+    // 1. Filter 3 Grup
+    if (g1 || g2 || g3) {
+        const setG1 = g1 ? new Set(getGroupAs2DigitDepan(g1)) : null;
+        const setG2 = g2 ? new Set([...getGroupAs2DigitDepan(g2), ...getGroupAs2DigitBelakang(g2)]) : null;
+        const setG3 = g3 ? new Set(getGroupAs2DigitBelakang(g3)) : null;
+        
+        const ab = n.slice(0, 2);
+        const bc = n.slice(1, 3);
+        const cd = n.slice(2, 4);
+        
+        if (setG1 && !setG1.has(ab)) return false;
+        if (setG2 && !setG2.has(bc)) return false;
+        if (setG3 && !setG3.has(cd)) return false;
+    }
+
+    // 2. Filter 1D Depan
+    if (d1.length > 0 && !d1.includes(n[0])) return false;
+
+    // 3. Filter CB
+    if (cb.length > 0) {
+        if (cbMode === 'and') {
+            if (!cb.every(d => n.includes(d))) return false;
+        } else {
+            if (!cb.some(d => n.includes(d))) return false;
+        }
+    }
+    return true;
+}
+
+function recalcM23All() {
+    // 1. Ambil semua universe, lalu saring berdasarkan Grup, 1D, dan CB terlebih dahulu
+    const baseUniverse = M23_UNIVERSE.filter(applyM23Filters);
+
+    // 2. Hitung ulang hasil per baris berdasarkan baseUniverse
+    m23State.rows.forEach(function(r) {
+        if (!r.digits || r.digits.length < 2 || r.digits.length > 3) {
+            r.generated = false; r.results = []; return;
+        }
+        const ms = blParseMultiset(r.digits);
+        r.results = baseUniverse.filter(function(n) { return blContainsCombo(n, ms); });
+        r.generated = true;
+    });
+
+    // 3. Update Tampilan
+    renderM23Rows();
+    renderM23Results();
 }
 
 function renderM23Rows() {
@@ -7200,7 +7308,6 @@ function renderM23Rows() {
     });
     container.innerHTML = html;
 
-    // Auto Calculate on Typing
     container.querySelectorAll('input').forEach(function(el) {
         el.addEventListener('input', function() {
             const idx = parseInt(el.dataset.idx, 10);
@@ -7212,14 +7319,15 @@ function renderM23Rows() {
             r[field] = el.value;
             
             if (r.digits.length >= 2) {
-                r.results = m23ComputeForDigits(r.digits);
+                const baseUniverse = M23_UNIVERSE.filter(applyM23Filters);
+                const ms = blParseMultiset(r.digits);
+                r.results = baseUniverse.filter(function(n) { return blContainsCombo(n, ms); });
                 r.generated = true;
             } else {
                 r.results = [];
                 r.generated = false;
             }
 
-            // Update UI Row
             const rowEl = el.closest('.m23-row');
             if (rowEl) {
                 const total = r.results.length;
@@ -7256,7 +7364,6 @@ function renderM23Results() {
 
     let html = '';
 
-    // 1. Render Total Keseluruhan
     if (m23MasterState.items.length > 0) {
         const tp = Math.ceil(m23MasterState.items.length / m23MasterState.size);
         if (m23MasterState.page >= tp) m23MasterState.page = tp - 1;
@@ -7281,7 +7388,6 @@ function renderM23Results() {
         </div>`;
     }
 
-    // 2. Render per baris
     m23State.rows.forEach(function(r) {
         if (!r.generated || !r.digits || r.results.length === 0) return;
         const tp = Math.ceil(r.results.length / PER_PAGE);
@@ -7359,11 +7465,32 @@ window.m23ExportMaster = function() {
     toast('Diexport', 'success');
 };
 
+// --- Event Listeners untuk Filter M23 ---
+function _refreshM23Preview() {
+    const g1 = $('m23Grup1').value;
+    const g2 = $('m23Grup2').value;
+    const g3 = $('m23Grup3').value;
+    
+    renderGroupPreview(g1, $('m23Preview1'), 'depan', g1 ? 'Grup 1 → 2D Depan' : '');
+    renderGroupPreview(g2, $('m23Preview2'), 'both', g2 ? 'Grup 2 → 2D Tengah' : '');
+    renderGroupPreview(g3, $('m23Preview3'), 'belakang', g3 ? 'Grup 3 → 2D Belakang' : '');
+    
+    recalcM23All();
+}
+
+$('m23Grup1').addEventListener('change', _refreshM23Preview);
+$('m23Grup2').addEventListener('change', _refreshM23Preview);
+$('m23Grup3').addEventListener('change', _refreshM23Preview);
+$('m23CB').addEventListener('input', recalcM23All);
+$('m23CBMode').addEventListener('change', recalcM23All);
+const _m1Wrap = $('m231DDepan');
+if (_m1Wrap) _m1Wrap.addEventListener('change', recalcM23All);
+
 if ($('m23GenerateAllBtn')) {
     $('m23GenerateAllBtn').addEventListener('click', function() {
         m23MasterState.page = 0;
-        renderM23Results();
-        toast('Panel gabungan berhasil diperbarui', 'success');
+        recalcM23All();
+        toast('Berhasil di-generate dengan filter aktif', 'success');
     });
 }
 
@@ -7380,7 +7507,6 @@ if ($('m23ClearAllBtn')) {
     });
 }
 
-// Pastikan render dipanggil saat dimuat
 if (document.readyState !== 'loading') {
     renderM23Rows();
 } else {
