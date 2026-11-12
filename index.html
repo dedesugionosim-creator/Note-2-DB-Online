@@ -1102,10 +1102,9 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
     overflow-y: auto;
 }
 .m23-row {
-    display: grid;
-    grid-template-columns: 30px 70px 1fr 60px 70px 50px;
-    gap: 6px;
+    display: flex;
     align-items: center;
+    gap: 6px;
     padding: 6px 8px;
     background: var(--card);
     border: 1px solid var(--border);
@@ -1114,79 +1113,24 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
     font-size: 12px;
 }
 .m23-row .m23-no {
-    text-align: center;
-    font-family: monospace;
-    font-size: 11px;
-    color: var(--muted);
-    font-weight: 700;
+    width: 20px; text-align: center; font-family: monospace; font-size: 11px; color: var(--muted); font-weight: 700;
 }
 .m23-row input.m23-digits {
-    width: 100%;
-    padding: 6px 4px;
-    text-align: center;
-    font-family: monospace;
-    font-weight: 700;
-    color: var(--accent);
-    letter-spacing: 1.5px;
-    font-size: 13px;
+    width: 55px; flex-shrink: 0; padding: 6px 4px; text-align: center; font-family: monospace; font-weight: 700; color: var(--accent); letter-spacing: 1.5px; font-size: 13px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-2);
 }
 .m23-row input.m23-pasar {
-    width: 100%;
-    padding: 6px 8px;
-    font-size: 12px;
+    flex: 1; min-width: 80px; padding: 6px 8px; font-size: 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-2);
 }
 .m23-row .m23-total {
-    text-align: center;
-    font-family: monospace;
-    font-weight: 700;
-    color: var(--success);
-    font-size: 11px;
+    width: 55px; text-align: center; font-family: monospace; font-weight: 700; color: var(--success); font-size: 11px; flex-shrink: 0;
 }
 .m23-row .m23-pages {
-    text-align: center;
-    font-family: monospace;
-    color: var(--warn);
-    font-size: 10px;
+    width: 55px; text-align: center; font-family: monospace; color: var(--warn); font-size: 10px; flex-shrink: 0;
 }
 .m23-row .m23-copy {
-    padding: 4px 8px;
-    font-size: 10px;
-    border-radius: 6px;
-    width: 100%;
+    width: 40px; padding: 6px 0; font-size: 12px; border-radius: 6px; flex-shrink: 0; border: none; cursor: pointer;
 }
 .m23-row .m23-copy:disabled { opacity: 0.3; }
-
-@media (max-width: 480px) {
-    .m23-row {
-        grid-template-columns: 26px 55px 1fr 50px 55px 42px;
-        gap: 4px;
-        padding: 4px 6px;
-    }
-    .m23-row input.m23-digits { font-size: 12px; padding: 5px 2px; }
-    .m23-row input.m23-pasar { font-size: 11px; padding: 5px 4px; }
-    .m23-row .m23-total { font-size: 10px; }
-    .m23-row .m23-pages { font-size: 9px; }
-}
-
-.m23-result-block {
-    margin-top: 8px;
-    padding: 10px;
-    background: var(--card-3);
-    border: 1px solid var(--border-2);
-    border-left: 3px solid var(--success);
-    border-radius: var(--radius-sm);
-}
-.m23-result-block .m23-res-header {
-    font-weight: 700;
-    color: var(--success);
-    font-size: 12.5px;
-    margin-bottom: 6px;
-}
-.m23-result-block .m23-res-header .pasar-tag {
-    color: var(--accent);
-    font-size: 11px;
-    font-weight: 400;
-}
 
 /* ═══════════════════════════════════════════════════════════════════════
    REVISI: Tampilan Checkbox 1D Depan
@@ -6830,7 +6774,7 @@ document.addEventListener('DOMContentLoaded', function() {
    ═══════════════════════════════════════════════════════════════════════ */
    
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 65A: MODE INPUT MENGANDUNG 2/3 (55 BARIS)
+   BLOK 65A: MODE INPUT MENGANDUNG 2/3 (55 BARIS) - AUTO CALCULATE
    ═══════════════════════════════════════════════════════════════════════ */
 
 const M23_ROW_COUNT = 55;
@@ -6843,7 +6787,6 @@ const m23State = {
 
 const m23MasterState = { items: [], page: 0, size: PER_PAGE };
 
-// Universe 0000–9999
 const M23_UNIVERSE = (function() {
     const arr = [];
     for (let i = 0; i < 10000; i++) arr.push(String(i).padStart(4, '0'));
@@ -6867,6 +6810,7 @@ function renderM23Rows() {
         const totalTxt = r.generated && r.digits ? (total > 0 ? total.toLocaleString('id-ID') : '0') : '—';
         const pagesTxt = r.generated && r.digits ? (pages > 0 ? pages + ' hal' : '—') : '—';
         const canCopy = r.generated && r.results.length > 0;
+        
         html += '<div class="m23-row" data-idx="' + r.idx + '">'
             + '<div class="m23-no">' + (r.idx + 1) + '</div>'
             + '<input type="text" class="m23-digits" maxlength="3" inputmode="numeric"'
@@ -6880,21 +6824,37 @@ function renderM23Rows() {
             + '</div>';
     });
     container.innerHTML = html;
+
+    // Event listener dengan AUTO-CALCULATE
     container.querySelectorAll('input').forEach(function(el) {
         el.addEventListener('input', function() {
             const idx = parseInt(el.dataset.idx, 10);
             const field = el.dataset.field;
             if (field === 'digits') el.value = onlyDigits(el.value).slice(0, 3);
-            m23State.rows[idx][field] = el.value;
-            m23State.rows[idx].generated = false;
+            
+            const r = m23State.rows[idx];
+            r[field] = el.value;
+            
+            // AUTO CALCULATE SAAT MENGETIK
+            if (r.digits.length >= 2) {
+                r.results = m23ComputeForDigits(r.digits);
+                r.generated = true;
+            } else {
+                r.results = [];
+                r.generated = false;
+            }
+
             const rowEl = el.closest('.m23-row');
             if (rowEl) {
+                const total = r.results.length;
+                const pages = total > 0 ? Math.ceil(total / PER_PAGE) : 0;
                 const totEl = rowEl.querySelector('.m23-total');
                 const pgEl = rowEl.querySelector('.m23-pages');
                 const cpyBtn = rowEl.querySelector('.m23-copy');
-                if (totEl) totEl.textContent = '—';
-                if (pgEl) pgEl.textContent = '—';
-                if (cpyBtn) cpyBtn.disabled = true;
+
+                if (totEl) totEl.textContent = total > 0 ? total.toLocaleString('id-ID') : '—';
+                if (pgEl) pgEl.textContent = pages > 0 ? pages + ' hal' : '—';
+                if (cpyBtn) cpyBtn.disabled = total === 0;
             }
         });
     });
@@ -6972,7 +6932,7 @@ function renderM23Results() {
     });
 
     if (!html) {
-        html = '<div class="card"><div class="empty">Belum ada hasil. Isi minimal 1 baris dengan 2–3 digit, lalu Generate.</div></div>';
+        html = '<div class="card"><div class="empty">Belum ada hasil. Isi minimal 1 baris dengan 2–3 digit.</div></div>';
     }
     c.innerHTML = html;
 }
@@ -7023,23 +6983,12 @@ window.m23ExportMaster = function() {
     toast('Diexport', 'success');
 };
 
+// Fungsi tombol Generate tetap dipertahankan untuk menyegarkan panel Total Gabungan di bawah
 if ($('m23GenerateAllBtn')) {
     $('m23GenerateAllBtn').addEventListener('click', function() {
-        let totalRows = 0, totalResults = 0;
-        m23State.rows.forEach(function(r) {
-            if (!r.digits || r.digits.length < 2 || r.digits.length > 3) {
-                r.generated = false; r.results = []; return;
-            }
-            r.results = m23ComputeForDigits(r.digits);
-            r.page = 0;
-            r.generated = true;
-            totalRows++;
-            totalResults += r.results.length;
-        });
         m23MasterState.page = 0;
-        renderM23Rows();
         renderM23Results();
-        toast('Generated ' + totalRows + ' baris • ' + totalResults.toLocaleString('id-ID') + ' total hasil', 'success');
+        toast('Panel gabungan berhasil diperbarui', 'success');
     });
 }
 
