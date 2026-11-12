@@ -1318,6 +1318,50 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
     outline: none;
 }
 
+/* CSS untuk Penyaringan Lanjutan Bentuk Baris (seperti gambar 55 baris) */
+.filter-row-exact {
+    display: grid;
+    grid-template-columns: 30px 70px 1fr;
+    gap: 6px;
+    align-items: center;
+    padding: 6px 8px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 6px;
+}
+.filter-row-exact .f-no {
+    text-align: center;
+    font-family: monospace;
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 700;
+}
+.filter-row-exact input.f-angka {
+    width: 100%;
+    padding: 6px 4px;
+    text-align: center;
+    font-family: monospace;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 1.5px;
+    font-size: 13px;
+    background: var(--card-2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+}
+.filter-row-exact input.f-kata {
+    width: 100%;
+    padding: 6px 8px;
+    font-size: 12px;
+    background: var(--card-2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+}
+.filter-row-exact input:focus {
+    border-color: var(--accent);
+}
+
 </style>
 </head>
 
@@ -1487,26 +1531,28 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
                 <!-- PENYARINGAN LANJUTAN (MENGANDUNG 3 BARIS SEPERTI GAMBAR) -->
         <div class="field" style="background:var(--card-2); padding:12px; border-radius:8px; border:1px solid var(--border);">
             <label style="color:var(--warn); margin-bottom:8px; display:block; font-weight:bold;">
-                🔍 Penyaringan Lanjutan: Kata / Angka Yang Mengandung (Opsional, 3 Kolom)
+                🔍 Penyaringan Lanjutan: Kata / Angka Yang Mengandung (Opsional)
             </label>
             
-            <div class="filter-row">
-                <div class="filter-no">1</div>
-                <input type="text" id="manualMengandung1" placeholder="Ketik Angka (cth: 237) atau Kata (cth: setan)" autocomplete="off">
+            <div class="filter-row-exact">
+                <div class="f-no">1</div>
+                <input type="text" class="f-angka" id="manualMengandung1" maxlength="3" placeholder="237">
+                <input type="text" class="f-kata" id="manualMengandung1_kata" placeholder="Kata Syair (opsional)">
             </div>
-            <div class="filter-row">
-                <div class="filter-no">2</div>
-                <input type="text" id="manualMengandung2" placeholder="Ketik Angka atau Kata..." autocomplete="off">
+            <div class="filter-row-exact">
+                <div class="f-no">2</div>
+                <input type="text" class="f-angka" id="manualMengandung2" maxlength="3" placeholder="23">
+                <input type="text" class="f-kata" id="manualMengandung2_kata" placeholder="Kata Syair (opsional)">
             </div>
-            <div class="filter-row">
-                <div class="filter-no">3</div>
-                <input type="text" id="manualMengandung3" placeholder="Ketik Angka atau Kata..." autocomplete="off">
+            <div class="filter-row-exact">
+                <div class="f-no">3</div>
+                <input type="text" class="f-angka" id="manualMengandung3" maxlength="3" placeholder="7">
+                <input type="text" class="f-kata" id="manualMengandung3_kata" placeholder="Kata Syair (opsional)">
             </div>
             
             <p style="font-size:11px; color:var(--muted); margin-top:8px;">
-                Jika diisi <b>Angka</b> → Filter 4D yang mengandung angka tersebut.<br>
-                Jika diisi <b>Kata</b> → Filter syair 2D depan/belakang yang mengandung kata tersebut.<br>
-                (Jika lebih dari 1 kolom diisi, hasil harus memenuhi semua filter tersebut).
+                Isi kolom kiri untuk <b>Angka</b> (cth: 237), atau kolom kanan untuk <b>Kata</b> (cth: setan).<br>
+                (Jika lebih dari 1 baris diisi, hasil harus memenuhi semua filter tersebut).
             </p>
         </div>
 
@@ -4071,7 +4117,7 @@ function buildManualBreakdown(grup, mode, depans, belakangs, totalCombo, cb) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 44: INPUT MANUAL GENERATOR (REVISI 3 GRUP & PENYARINGAN LANJUTAN)
+   BLOK 44: INPUT MANUAL GENERATOR (REVISI 3 GRUP & 2 KOLOM PENYARINGAN)
    ═══════════════════════════════════════════════════════════════════════ */
 
 function getManual1DDepanSelected() {
@@ -4117,9 +4163,13 @@ $('manualGrup1').addEventListener('change', _refreshManualPreview);
 $('manualGrup2').addEventListener('change', _refreshManualPreview);
 $('manualGrup3').addEventListener('change', _refreshManualPreview);
 
-['manualDepan', 'manualBelakang', 'manualCB', 'manualMengandung1', 'manualMengandung2', 'manualMengandung3'].forEach(function(id) {
+['manualDepan', 'manualBelakang', 'manualCB', 
+ 'manualMengandung1', 'manualMengandung1_kata',
+ 'manualMengandung2', 'manualMengandung2_kata',
+ 'manualMengandung3', 'manualMengandung3_kata'].forEach(function(id) {
     const el = $(id); if (el) el.addEventListener('input', updateManualInfo);
 });
+
 $('manualCBMode').addEventListener('change', updateManualInfo);
 const _d1Wrap = $('manual1DDepan');
 if (_d1Wrap) _d1Wrap.addEventListener('change', updateManualInfo);
@@ -4132,11 +4182,15 @@ function updateManualInfo() {
     const g2 = $('manualGrup2').value;
     const g3 = $('manualGrup3').value;
     const d1 = getManual1DDepanSelected();
-    const m1 = $('manualMengandung1').value.trim();
-    const m2 = $('manualMengandung2').value.trim();
-    const m3 = $('manualMengandung3').value.trim();
-    const info = $('manualInfo');
     
+    let m1_a = $('manualMengandung1').value.trim();
+    let m1_k = $('manualMengandung1_kata').value.trim();
+    let m2_a = $('manualMengandung2').value.trim();
+    let m2_k = $('manualMengandung2_kata').value.trim();
+    let m3_a = $('manualMengandung3').value.trim();
+    let m3_k = $('manualMengandung3_kata').value.trim();
+
+    const info = $('manualInfo');
     if (!info) return;
     
     const depanCount = depanRaw.length > 0 ? depanRaw.length : 100;
@@ -4148,13 +4202,17 @@ function updateManualInfo() {
              + ' × 2 Belakang: ' + (belakangRaw.length > 0 ? belakangRaw.length : 'AUTO')
              + ' • Maks: ' + total.toLocaleString('id-ID') + ' kombinasi (' + pages + ' hal)';
              
-    if (g1 || g2 || g3) text += ' • Filter Grup Aktif';
+    if (g1 || g2 || g3) text += ' • Filter Grup';
     if (d1.length > 0) text += ' • Awalan: ' + d1.join(',');
     
     let filters = [];
-    if (m1) filters.push(m1);
-    if (m2) filters.push(m2);
-    if (m3) filters.push(m3);
+    if (m1_a) filters.push(m1_a);
+    if (m1_k) filters.push(m1_k);
+    if (m2_a) filters.push(m2_a);
+    if (m2_k) filters.push(m2_k);
+    if (m3_a) filters.push(m3_a);
+    if (m3_k) filters.push(m3_k);
+    
     if (filters.length > 0) text += ' • Saring: "' + filters.join('" & "') + '"';
     if (cb.length > 0) text += ' • CB: ' + cb.join(' ');
     
@@ -4168,9 +4226,13 @@ $('manualGenerateBtn').addEventListener('click', function() {
     const cb = parseSingleDigitList($('manualCB').value);
     const cbMode = $('manualCBMode').value;
     const d1 = getManual1DDepanSelected();
-    const m1 = $('manualMengandung1').value.trim();
-    const m2 = $('manualMengandung2').value.trim();
-    const m3 = $('manualMengandung3').value.trim();
+    
+    let m1_a = $('manualMengandung1').value.trim();
+    let m1_k = $('manualMengandung1_kata').value.trim();
+    let m2_a = $('manualMengandung2').value.trim();
+    let m2_k = $('manualMengandung2_kata').value.trim();
+    let m3_a = $('manualMengandung3').value.trim();
+    let m3_k = $('manualMengandung3_kata').value.trim();
 
     let depan = parseTwoDigitList($('manualDepan').value);
     let belakang = parseTwoDigitList($('manualBelakang').value);
@@ -4212,12 +4274,15 @@ $('manualGenerateBtn').addEventListener('click', function() {
         if (filtered.length === 0) { toast('Tidak ada 2D depan yang cocok dengan Awalan 1D', 'error'); return; }
     }
 
-    // 4. Penyaringan Lanjutan (Mengandung Angka/Kata)
-    if (m1) filtered = applyMengandungFilter(filtered, m1);
-    if (m2) filtered = applyMengandungFilter(filtered, m2);
-    if (m3) filtered = applyMengandungFilter(filtered, m3);
+    // 4. Penyaringan Lanjutan (Mengandung Angka & Kata)
+    if (m1_a) filtered = applyMengandungFilter(filtered, m1_a);
+    if (m1_k) filtered = applyMengandungFilter(filtered, m1_k);
+    if (m2_a) filtered = applyMengandungFilter(filtered, m2_a);
+    if (m2_k) filtered = applyMengandungFilter(filtered, m2_k);
+    if (m3_a) filtered = applyMengandungFilter(filtered, m3_a);
+    if (m3_k) filtered = applyMengandungFilter(filtered, m3_k);
     
-    if (filtered.length === 0 && (m1 || m2 || m3)) { 
+    if (filtered.length === 0 && (m1_a || m1_k || m2_a || m2_k || m3_a || m3_k)) { 
         toast('Tidak ada hasil setelah Penyaringan Lanjutan', 'error'); return; 
     }
 
@@ -4234,7 +4299,7 @@ $('manualGenerateBtn').addEventListener('click', function() {
     let meta = (depanAuto ? 'AUTO' : depan.length) + ' depan × ' + (belakangAuto ? 'AUTO' : belakang.length) + ' belakang';
     if (g1 || g2 || g3) meta += ' • Filter Grup';
     if (d1.length > 0) meta += ' • Awalan: ' + d1.join(',');
-    if (m1 || m2 || m3) meta += ' • Saring Lanjutan';
+    if (m1_a || m1_k || m2_a || m2_k || m3_a || m3_k) meta += ' • Saring Lanjutan';
     if (cb.length > 0) meta += ' • CB: ' + cb.join(' ');
     pageState.manual.meta = meta;
 
