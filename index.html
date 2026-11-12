@@ -4672,23 +4672,46 @@ function refreshGrupDropdowns() {
         });
         return html;
     };
+    
+    // Ambil elemen dengan aman (mencegah error null)
+    const elM1 = $('manualGrup1');
+    const elM2 = $('manualGrup2');
+    const elM3 = $('manualGrup3');
+    const elB = $('bbfsGrup');
+    const elA = $('atGrup');
+    const elC1 = $('grupCB1');
+    const elC2 = $('grupCB2');
+
+    // Simpan nilai yang sedang dipilih
     const selected = {
-        manualGrup: $('manualGrup').value,
-        bbfsGrup: $('bbfsGrup').value,
-        atGrup: $('atGrup').value,
-        grupCB1: $('grupCB1').value,
-        grupCB2: $('grupCB2').value
+        m1: elM1 ? elM1.value : '',
+        m2: elM2 ? elM2.value : '',
+        m3: elM3 ? elM3.value : '',
+        b: elB ? elB.value : '',
+        a: elA ? elA.value : '',
+        c1: elC1 ? elC1.value : '',
+        c2: elC2 ? elC2.value : ''
     };
-    $('manualGrup').innerHTML = buildOptions('— Manual (tanpa grup) —');
-    $('bbfsGrup').innerHTML = buildOptions('— Manual (tanpa grup) —');
-    $('atGrup').innerHTML = buildOptions('— Manual (tanpa grup) —');
-    $('grupCB1').innerHTML = buildOptions('— Pilih Grup 1 —');
-    $('grupCB2').innerHTML = buildOptions('— Pilih Grup 2 —');
-    ['manualGrup', 'bbfsGrup', 'atGrup', 'grupCB1', 'grupCB2'].forEach(function(id) {
-        const prev = selected[id];
-        if (prev && names.includes(prev)) $(id).value = prev;
-    });
-    // Refresh dropdown baru (PART 5)
+
+    // Render ulang dropdown
+    if (elM1) elM1.innerHTML = buildOptions('— AUTO 00-99 —');
+    if (elM2) elM2.innerHTML = buildOptions('— Bebas (Tanpa Batas) —');
+    if (elM3) elM3.innerHTML = buildOptions('— AUTO 00-99 —');
+    if (elB) elB.innerHTML = buildOptions('— Manual (tanpa grup) —');
+    if (elA) elA.innerHTML = buildOptions('— Manual (tanpa grup) —');
+    if (elC1) elC1.innerHTML = buildOptions('— Pilih Grup 1 —');
+    if (elC2) elC2.innerHTML = buildOptions('— Pilih Grup 2 —');
+
+    // Kembalikan nilai yang dipilih sebelumnya (jika ada)
+    if (selected.m1 && names.includes(selected.m1) && elM1) elM1.value = selected.m1;
+    if (selected.m2 && names.includes(selected.m2) && elM2) elM2.value = selected.m2;
+    if (selected.m3 && names.includes(selected.m3) && elM3) elM3.value = selected.m3;
+    if (selected.b && names.includes(selected.b) && elB) elB.value = selected.b;
+    if (selected.a && names.includes(selected.a) && elA) elA.value = selected.a;
+    if (selected.c1 && names.includes(selected.c1) && elC1) elC1.value = selected.c1;
+    if (selected.c2 && names.includes(selected.c2) && elC2) elC2.value = selected.c2;
+
+    // Panggil populate baru
     if (typeof populateNewGrupDropdowns === 'function') populateNewGrupDropdowns();
 }
 
@@ -4696,14 +4719,14 @@ function refreshAll() {
     renderMaster();
     renderGrup();
     refreshGrupDropdowns();
-    _refreshManualPreview();
-    _refreshBBFSPreview();
-    _refreshATPreview();
-    updateManualInfo();
-    updateBBFSInfo();
-    updateATInfo();
-    updateGrupCBInfo();
-    updateCBBFFSInfo();
+    if (typeof _refreshManualPreview === 'function') _refreshManualPreview();
+    if (typeof _refreshBBFSPreview === 'function') _refreshBBFSPreview();
+    if (typeof _refreshATPreview === 'function') _refreshATPreview();
+    if (typeof updateManualInfo === 'function') updateManualInfo();
+    if (typeof updateBBFSInfo === 'function') updateBBFSInfo();
+    if (typeof updateATInfo === 'function') updateATInfo();
+    if (typeof updateGrupCBInfo === 'function') updateGrupCBInfo();
+    if (typeof updateCBBFFSInfo === 'function') updateCBBFFSInfo();
     if (typeof updateGabung3Info === 'function') updateGabung3Info();
     if (typeof blUpdateInfo === 'function') blUpdateInfo();
 }
