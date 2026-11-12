@@ -1528,26 +1528,37 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
             </div>
         </div>
 
-                <!-- PENYARINGAN LANJUTAN (MENGANDUNG 3 BARIS SEPERTI GAMBAR) -->
+                <!-- PENYARINGAN LANJUTAN (BENTUK PERSIS SEPERTI 55 BARIS) -->
         <div class="field" style="background:var(--card-2); padding:12px; border-radius:8px; border:1px solid var(--border);">
             <label style="color:var(--warn); margin-bottom:8px; display:block; font-weight:bold;">
                 🔍 Penyaringan Lanjutan: Kata / Angka Yang Mengandung (Opsional)
             </label>
             
-            <div class="filter-row-exact">
-                <div class="f-no">1</div>
-                <input type="text" class="f-angka" id="manualMengandung1" maxlength="3" placeholder="237">
-                <input type="text" class="f-kata" id="manualMengandung1_kata" placeholder="Kata Syair (opsional)">
-            </div>
-            <div class="filter-row-exact">
-                <div class="f-no">2</div>
-                <input type="text" class="f-angka" id="manualMengandung2" maxlength="3" placeholder="23">
-                <input type="text" class="f-kata" id="manualMengandung2_kata" placeholder="Kata Syair (opsional)">
-            </div>
-            <div class="filter-row-exact">
-                <div class="f-no">3</div>
-                <input type="text" class="f-angka" id="manualMengandung3" maxlength="3" placeholder="7">
-                <input type="text" class="f-kata" id="manualMengandung3_kata" placeholder="Kata Syair (opsional)">
+            <div class="m23-container" style="max-height: none; padding: 0; background: transparent; border: none;">
+                <div class="m23-row">
+                    <div class="m23-no">1</div>
+                    <input type="text" class="m23-digits" id="manualMengandung1" maxlength="3" placeholder="237">
+                    <input type="text" class="m23-pasar" id="manualMengandung1_kata" placeholder="Kata Syair (cth: setan)">
+                    <div class="m23-total" id="filterStat1">-</div>
+                    <div class="m23-pages" id="filterPage1">-</div>
+                    <button class="m23-copy btn-warn" onclick="clearManualFilter(1)" title="Hapus">🗑</button>
+                </div>
+                <div class="m23-row">
+                    <div class="m23-no">2</div>
+                    <input type="text" class="m23-digits" id="manualMengandung2" maxlength="3" placeholder="23">
+                    <input type="text" class="m23-pasar" id="manualMengandung2_kata" placeholder="Kata Syair (opsional)">
+                    <div class="m23-total" id="filterStat2">-</div>
+                    <div class="m23-pages" id="filterPage2">-</div>
+                    <button class="m23-copy btn-warn" onclick="clearManualFilter(2)" title="Hapus">🗑</button>
+                </div>
+                <div class="m23-row">
+                    <div class="m23-no">3</div>
+                    <input type="text" class="m23-digits" id="manualMengandung3" maxlength="3" placeholder="7">
+                    <input type="text" class="m23-pasar" id="manualMengandung3_kata" placeholder="Kata Syair (opsional)">
+                    <div class="m23-total" id="filterStat3">-</div>
+                    <div class="m23-pages" id="filterPage3">-</div>
+                    <button class="m23-copy btn-warn" onclick="clearManualFilter(3)" title="Hapus">🗑</button>
+                </div>
             </div>
             
             <p style="font-size:11px; color:var(--muted); margin-top:8px;">
@@ -4117,7 +4128,7 @@ function buildManualBreakdown(grup, mode, depans, belakangs, totalCombo, cb) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 44: INPUT MANUAL GENERATOR (REVISI 3 GRUP & 2 KOLOM PENYARINGAN)
+   BLOK 44: INPUT MANUAL GENERATOR (REVISI TAMPILAN & STATUS OTOMATIS)
    ═══════════════════════════════════════════════════════════════════════ */
 
 function getManual1DDepanSelected() {
@@ -4147,6 +4158,44 @@ function applyMengandungFilter(arr, rawInput) {
     });
 }
 
+window.clearManualFilter = function(n) {
+    if ($('manualMengandung' + n)) $('manualMengandung' + n).value = '';
+    if ($('manualMengandung' + n + '_kata')) $('manualMengandung' + n + '_kata').value = '';
+    if ($('filterStat' + n)) $('filterStat' + n).textContent = '-';
+    if ($('filterPage' + n)) $('filterPage' + n).textContent = '-';
+    updateManualInfo();
+};
+
+function updateFilterStatus() {
+    // Pastikan M23_UNIVERSE sudah dideklarasikan di BLOK 65A
+    const universe = typeof M23_UNIVERSE !== 'undefined' ? M23_UNIVERSE : [];
+    if (universe.length === 0) return;
+
+    for (let i = 1; i <= 3; i++) {
+        const a = $(`manualMengandung${i}`).value.trim();
+        const k = $(`manualMengandung${i}_kata`).value.trim();
+        const statEl = $(`filterStat${i}`);
+        const pageEl = $(`filterPage${i}`);
+        
+        if (!statEl || !pageEl) continue;
+        
+        if (!a && !k) {
+            statEl.textContent = '-';
+            pageEl.textContent = '-';
+            continue;
+        }
+        
+        // Hitung berapa banyak dari 0000-9999 yang cocok dengan filter ini
+        let matched = universe;
+        if (a) matched = applyMengandungFilter(matched, a);
+        if (k) matched = applyMengandungFilter(matched, k);
+        
+        const count = matched.length;
+        statEl.textContent = count > 0 ? count.toLocaleString('id-ID') : '0';
+        pageEl.textContent = count > 0 ? Math.ceil(count / PER_PAGE) + ' hal' : '-';
+    }
+}
+
 function _refreshManualPreview() {
     const g1 = $('manualGrup1').value;
     const g2 = $('manualGrup2').value;
@@ -4167,7 +4216,17 @@ $('manualGrup3').addEventListener('change', _refreshManualPreview);
  'manualMengandung1', 'manualMengandung1_kata',
  'manualMengandung2', 'manualMengandung2_kata',
  'manualMengandung3', 'manualMengandung3_kata'].forEach(function(id) {
-    const el = $(id); if (el) el.addEventListener('input', updateManualInfo);
+    const el = $(id); 
+    if (el) {
+        el.addEventListener('input', function(e) {
+            // Validasi kolom angka (hanya boleh angka)
+            if (id.includes('Mengandung') && !id.includes('_kata')) {
+                e.target.value = onlyDigits(e.target.value).slice(0, 3);
+            }
+            updateFilterStatus(); // Update status real-time
+            updateManualInfo();
+        });
+    }
 });
 
 $('manualCBMode').addEventListener('change', updateManualInfo);
