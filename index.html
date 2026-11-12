@@ -1229,6 +1229,64 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
     box-shadow: 0 0 10px rgba(34,211,238,0.4);
 }
 
+/* ═══════════════════════════════════════════════════════════════════════
+   REVISI: Mengandung 2/3 (55 Baris) & Input Manual 3 Kolom
+   ═══════════════════════════════════════════════════════════════════════ */
+.d1-checkbox-group {
+    display: flex; flex-wrap: wrap; gap: 8px; padding: 10px;
+    background: var(--card-2); border-radius: var(--radius-sm); border: 1px solid var(--border);
+}
+.d1-checkbox-group label {
+    display: flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; background: var(--card);
+    border-radius: 50%; border: 1px solid var(--border);
+    cursor: pointer; font-family: monospace; font-weight: bold; font-size: 14px;
+    color: var(--text); margin: 0; transition: all 0.2s;
+}
+.d1-checkbox-group label:hover { border-color: var(--accent); }
+.d1-checkbox-group input[type="checkbox"] { display: none; }
+.d1-checkbox-group input[type="checkbox"]:checked + label {
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    color: #04101c; border-color: transparent; transform: scale(1.1);
+    box-shadow: 0 0 10px rgba(34,211,238,0.4);
+}
+
+/* CSS M23 55 Baris */
+.m23-container {
+    background: var(--card-2); border: 1px solid var(--border);
+    border-radius: var(--radius-md); padding: 10px;
+    max-height: 600px; overflow-y: auto;
+}
+.m23-row {
+    display: grid; grid-template-columns: 30px 70px 1fr 65px 70px 50px;
+    gap: 6px; align-items: center; padding: 6px 8px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); margin-bottom: 4px; font-size: 12px;
+}
+.m23-row .m23-no { text-align: center; font-family: monospace; font-size: 11px; color: var(--muted); font-weight: 700; }
+.m23-row input.m23-digits {
+    width: 100%; padding: 6px 4px; text-align: center;
+    font-family: monospace; font-weight: 700; color: var(--accent);
+    letter-spacing: 1.5px; font-size: 13px;
+}
+.m23-row input.m23-pasar { width: 100%; padding: 6px 8px; font-size: 12px; }
+.m23-row .m23-total { text-align: center; font-family: monospace; font-weight: 700; color: var(--success); font-size: 11px; }
+.m23-row .m23-pages { text-align: center; font-family: monospace; color: var(--warn); font-size: 10px; }
+.m23-row .m23-copy { padding: 4px 8px; font-size: 10px; border-radius: 6px; width: 100%; }
+.m23-row .m23-copy:disabled { opacity: 0.3; }
+@media (max-width: 480px) {
+    .m23-row { grid-template-columns: 26px 55px 1fr 50px 55px 42px; gap: 4px; padding: 4px 6px; }
+    .m23-row input.m23-digits { font-size: 12px; padding: 5px 2px; }
+    .m23-row input.m23-pasar { font-size: 11px; padding: 5px 4px; }
+}
+.m23-result-block {
+    margin-top: 8px; padding: 10px; background: var(--card-3);
+    border: 1px solid var(--border-2); border-left: 3px solid var(--success);
+    border-radius: var(--radius-sm);
+}
+.m23-result-block .m23-res-header { font-weight: 700; color: var(--success); font-size: 12.5px; margin-bottom: 6px; }
+.m23-result-block .m23-res-header .pasar-tag { color: var(--accent); font-size: 11px; font-weight: 400; }
+
 </style>
 </head>
 
@@ -1389,11 +1447,16 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
         </div>
 
         <div class="field" style="background:var(--card-3); padding:12px; border-radius:8px; border:1px solid var(--border);">
-            <label for="manualMengandung" style="color:var(--accent);">🔍 Kata / Angka Yang Mengandung (Opsional)</label>
-            <input type="text" id="manualMengandung" placeholder="Contoh: 23 (angka) atau setan (kata syair)" autocomplete="off">
-            <p style="font-size:11px; color:var(--muted); margin-top:6px;">
-                Jika diisi <b>Angka</b> (mis. 237) → Filter 4D yang mengandung angka tersebut.<br>
-                Jika diisi <b>Kata</b> (mis. setan) → Filter syair 2D depan/belakang yang mengandung kata tersebut.
+            <label style="color:var(--accent);">🔍 Kata / Angka Yang Mengandung (Opsional, 3 Kolom)</label>
+            <div class="grid-2" style="margin-top:8px;">
+                <input type="text" id="manualMengandung1" placeholder="Filter 1 (cth: 23 / setan)" autocomplete="off" style="margin-bottom:6px;">
+                <input type="text" id="manualMengandung2" placeholder="Filter 2 (cth: 7 / nakal)" autocomplete="off" style="margin-bottom:6px;">
+                <input type="text" id="manualMengandung3" placeholder="Filter 3 (cth: 0 / mati)" autocomplete="off" style="margin-bottom:6px;">
+            </div>
+            <p style="font-size:11px; color:var(--muted);">
+                Jika diisi <b>Angka</b> → Filter 4D yang mengandung angka tersebut.<br>
+                Jika diisi <b>Kata</b> → Filter syair 2D depan/belakang yang mengandung kata tersebut.<br>
+                (Jika ketiganya diisi, hasil harus memenuhi ketiga filter tersebut).
             </p>
         </div>
 
@@ -2978,6 +3041,7 @@ function masukAplikasi() {
     if (typeof renderC33Rows === 'function') renderC33Rows();
 	if (typeof populateNewGrupDropdowns === 'function') populateNewGrupDropdowns();
 	if (typeof renderM23Rows === 'function') renderM23Rows();
+	if (typeof renderM23Rows === 'function') renderM23Rows();
 
     if (currentUser.role === 'user' && isUserExpired(currentUser.data)) {
         showExpiredModal(currentUser.data);
@@ -3959,11 +4023,8 @@ function buildManualBreakdown(grup, mode, depans, belakangs, totalCombo, cb) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 44: INPUT MANUAL GENERATOR (REVISI TOTAL)
-   Fitur: Auto 00-99, Filter 1D Depan, Filter Mengandung Angka/Kata
+   BLOK 44: INPUT MANUAL GENERATOR (REVISI 3 FILTER)
    ═══════════════════════════════════════════════════════════════════════ */
-
-// CATATAN: ALL_00_99 sudah dideklarasikan di atas, jadi tidak perlu dideklarasikan lagi di sini.
 
 function getManual1DDepanSelected() {
     const arr = [];
@@ -3977,13 +4038,11 @@ function applyMengandungFilter(arr, rawInput) {
     const raw = String(rawInput || '').trim();
     if (!raw) return arr;
     
-    // Jika isinya murni angka -> Filter Multiset (berurutan/huruf acak)
     if (/^\d+$/.test(raw)) {
         const ms = blParseMultiset(raw);
         return arr.filter(function(n) { return blContainsCombo(n, ms); });
     }
     
-    // Jika isinya huruf/kata -> Filter Syair
     const kw = raw.toLowerCase();
     return arr.filter(function(n) {
         const d2 = n.slice(0, 2), b2 = n.slice(2, 4);
@@ -4012,7 +4071,7 @@ function _refreshManualPreview() {
 
 $('manualGrup').addEventListener('change', _refreshManualPreview);
 $('manualFilterMode').addEventListener('change', _refreshManualPreview);
-['manualDepan', 'manualBelakang', 'manualCB', 'manualMengandung'].forEach(function(id) {
+['manualDepan', 'manualBelakang', 'manualCB', 'manualMengandung1', 'manualMengandung2', 'manualMengandung3'].forEach(function(id) {
     const el = $(id); if (el) el.addEventListener('input', updateManualInfo);
 });
 $('manualCBMode').addEventListener('change', updateManualInfo);
@@ -4025,7 +4084,9 @@ function updateManualInfo() {
     const cb = parseSingleDigitList($('manualCB').value);
     const grup = $('manualGrup').value;
     const d1 = getManual1DDepanSelected();
-    const mengandung = $('manualMengandung').value.trim();
+    const m1 = $('manualMengandung1').value.trim();
+    const m2 = $('manualMengandung2').value.trim();
+    const m3 = $('manualMengandung3').value.trim();
     const info = $('manualInfo');
     
     if (!info) return;
@@ -4041,7 +4102,12 @@ function updateManualInfo() {
              
     if (grup) text += ' • Grup: ' + grup;
     if (d1.length > 0) text += ' • Awalan: ' + d1.join(',');
-    if (mengandung) text += ' • Filter: "' + mengandung + '"';
+    
+    let filters = [];
+    if (m1) filters.push(m1);
+    if (m2) filters.push(m2);
+    if (m3) filters.push(m3);
+    if (filters.length > 0) text += ' • Filter: "' + filters.join('" & "') + '"';
     if (cb.length > 0) text += ' • CB: ' + cb.join(' ');
     
     info.textContent = text;
@@ -4053,7 +4119,9 @@ $('manualGenerateBtn').addEventListener('click', function() {
     const cb = parseSingleDigitList($('manualCB').value);
     const cbMode = $('manualCBMode').value;
     const d1 = getManual1DDepanSelected();
-    const mengandung = $('manualMengandung').value.trim();
+    const m1 = $('manualMengandung1').value.trim();
+    const m2 = $('manualMengandung2').value.trim();
+    const m3 = $('manualMengandung3').value.trim();
 
     let depan = parseTwoDigitList($('manualDepan').value);
     let belakang = parseTwoDigitList($('manualBelakang').value);
@@ -4064,7 +4132,6 @@ $('manualGenerateBtn').addEventListener('click', function() {
     if (depanAuto) depan = ALL_00_99.slice();
     if (belakangAuto) belakang = ALL_00_99.slice();
 
-    // Filter berdasarkan Grup (Jika grup dipilih)
     if (grup) {
         if (mode === 'depan' || mode === 'keduanya') {
             const selD = getGroupAs2DigitDepan(grup);
@@ -4079,24 +4146,24 @@ $('manualGenerateBtn').addEventListener('click', function() {
         }
     }
 
-    // Filter 1D Depan
     if (d1.length > 0) {
         depan = depan.filter(d => d1.includes(d[0]));
         if (depan.length === 0) { toast('Tidak ada 2D depan yang cocok dengan Awalan 1D', 'error'); return; }
     }
 
-    // Generate
     let combos = [];
     for (const d of depan) for (const b of belakang) combos.push(d + b);
     let filtered = [...new Set(combos)];
 
-    // Filter Mengandung (Angka/Kata)
-    if (mengandung) {
-        filtered = applyMengandungFilter(filtered, mengandung);
-        if (filtered.length === 0) { toast('Tidak ada hasil setelah filter mengandung', 'error'); return; }
+    // Proses 3 Filter Mengandung
+    if (m1) filtered = applyMengandungFilter(filtered, m1);
+    if (m2) filtered = applyMengandungFilter(filtered, m2);
+    if (m3) filtered = applyMengandungFilter(filtered, m3);
+    
+    if (filtered.length === 0 && (m1 || m2 || m3)) { 
+        toast('Tidak ada hasil setelah filter mengandung', 'error'); return; 
     }
 
-    // Filter CB
     if (cb.length > 0) {
         filtered = filterByCB(filtered, cb.join(''), cbMode);
         if (filtered.length === 0) { toast('Tidak ada hasil setelah filter CB', 'error'); return; }
@@ -4108,7 +4175,7 @@ $('manualGenerateBtn').addEventListener('click', function() {
     
     let meta = (depanAuto ? 'AUTO' : depan.length) + ' depan × ' + (belakangAuto ? 'AUTO' : belakang.length) + ' belakang';
     if (d1.length > 0) meta += ' • Awalan: ' + d1.join(',');
-    if (mengandung) meta += ' • Filter: ' + mengandung;
+    if (m1 || m2 || m3) meta += ' • Filter Mengandung';
     if (cb.length > 0) meta += ' • CB: ' + cb.join(' ');
     pageState.manual.meta = meta;
 
@@ -6587,7 +6654,7 @@ const m23State = {
 
 const m23MasterState = { items: [], page: 0, size: PER_PAGE };
 
-// Universe 0000–9999 (cached)
+// Universe 0000–9999
 const M23_UNIVERSE = (function() {
     const arr = [];
     for (let i = 0; i < 10000; i++) arr.push(String(i).padStart(4, '0'));
@@ -6800,9 +6867,13 @@ if ($('m23ClearAllBtn')) {
     });
 }
 
-// Init jika script dijalankan setelah DOM ready (script ada di akhir body)
+// Init render
 if (document.readyState !== 'loading') {
     renderM23Rows();
+} else {
+    document.addEventListener('DOMContentLoaded', function() {
+        renderM23Rows();
+    });
 }
 
  /* ═══════════════════════════════════════════════════════════════════════
