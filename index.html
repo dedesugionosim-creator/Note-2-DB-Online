@@ -1525,48 +1525,92 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
     </div>
     <div class="card"><div id="manualResult"></div></div>
 </div>
-            <!-- ─────────── SUBPANEL 2: BBFS ─────────── -->
-            <div id="subpanel-bbfs" class="subpanel">
-                <div class="card">
-                    <h3 style="margin-bottom:6px;">BBFS — Bolak-Balik (Max 16 Angka)</h3>
-                    <p class="text-muted" style="font-size:12.5px; margin-bottom:12px;">
-                        Input 4–16 digit → permutasi 4-digit. Grup sebagai FILTER.
-                    </p>
-                    <div class="field">
-                        <label for="bbfsInput">Input BBFS (4–16 digit)</label>
-                        <input type="text" id="bbfsInput" placeholder="0123456789" maxlength="16" inputmode="numeric">
-                    </div>
-                    <div class="field">
-                        <label for="bbfsGrup">Pilih Grup → FILTER berdasarkan 2D grup</label>
-                        <select id="bbfsGrup"><option value="">— Manual (tanpa grup) —</option></select>
-                        <div id="bbfsPreview" class="group-preview"></div>
-                    </div>
-                    <div class="field" id="bbfsModeWrapper" style="display:none;">
-                        <label for="bbfsMode">Mode Filter 2D</label>
-                        <select id="bbfsMode">
-                            <option value="belakang" selected>🔵 Filter 2D BELAKANG</option>
-                            <option value="depan">🟡 Filter 2D DEPAN</option>
-                            <option value="keduanya">🟣 Filter DEPAN &amp; BELAKANG</option>
-                        </select>
-                    </div>
-                    <div class="field">
-                        <label for="bbfsCB">Input CB (opsional)</label>
-                        <input type="text" id="bbfsCB" placeholder="0 1 2 3 5" autocomplete="off">
-                    </div>
-                    <div class="field">
-                        <label for="bbfsCBMode">Mode Filter CB</label>
-                        <select id="bbfsCBMode">
-                            <option value="or" selected>Salah Satu Digit Muncul (OR)</option>
-                            <option value="and">Semua Digit Harus Muncul (AND)</option>
-                        </select>
-                    </div>
-                    <p id="bbfsInfo" class="text-accent" style="font-size:13px; margin-bottom:12px;">
-                        Total kombinasi: — • Halaman: —
-                    </p>
-                    <button class="btn-primary" id="bbfsGenerateBtn">⚡ Generate BBFS</button>
+<!-- ─────────── SUBPANEL 2: BBFS ─────────── -->
+<div id="subpanel-bbfs" class="subpanel">
+    <div class="card">
+        <h3 style="margin-bottom:6px;">BBFS — Bolak-Balik (Max 16 Angka)</h3>
+        <p class="text-muted" style="font-size:12.5px; margin-bottom:12px;">
+            Input 4–16 digit → permutasi 4-digit. Semua field di bawah ini <b>opsional</b> sebagai penyaring.
+        </p>
+        
+        <div class="field">
+            <label for="bbfsInput" style="color:var(--accent); font-weight:bold;">Input BBFS (4–16 digit) - WAJIB</label>
+            <input type="text" id="bbfsInput" placeholder="0123456789" maxlength="16" inputmode="numeric" style="font-size:18px; font-family:monospace; letter-spacing:2px;">
+        </div>
+
+        <!-- 3 PILIH GRUP -->
+        <div style="background:var(--card-3); padding:12px; border-radius:8px; border:1px solid var(--border); margin-bottom:16px;">
+            <label style="color:var(--accent); margin-bottom:8px; display:block; font-weight:bold;">Pilih Grup Penyaring (Opsional)</label>
+            <div class="grid-2" style="margin-bottom:8px;">
+                <div class="field" style="margin:0;">
+                    <label for="bbfsGrup1">Grup 1 → 2D Depan</label>
+                    <select id="bbfsGrup1"><option value="">— AUTO 00-99 —</option></select>
+                    <div id="bbfsPreview1" class="group-preview" style="margin-top:4px; padding:6px; font-size:11px;"></div>
                 </div>
-                <div class="card"><div id="bbfsResult"></div></div>
+                <div class="field" style="margin:0;">
+                    <label for="bbfsGrup2">Grup 2 → 2D Tengah</label>
+                    <select id="bbfsGrup2"><option value="">— Bebas (Tanpa Batas) —</option></select>
+                    <div id="bbfsPreview2" class="group-preview" style="margin-top:4px; padding:6px; font-size:11px;"></div>
+                </div>
             </div>
+            <div class="field" style="margin:0;">
+                <label for="bbfsGrup3">Grup 3 → 2D Belakang</label>
+                <select id="bbfsGrup3"><option value="">— AUTO 00-99 —</option></select>
+                <div id="bbfsPreview3" class="group-preview" style="margin-top:4px; padding:6px; font-size:11px;"></div>
+            </div>
+        </div>
+
+        <!-- MODE INPUT MENGANDUNG 2/3 (55 BARIS DI BBFS) -->
+        <div class="field" style="background:var(--card-2); padding:12px; border-radius:8px; border:1px solid var(--border); margin-top:16px;">
+            <label style="color:var(--text); margin-bottom:8px; display:block; font-weight:bold; font-size:14px;">
+                □ Mode Input Mengandung 2/3 (55 Baris)
+            </label>
+            <p style="font-size:11.5px; color:var(--muted); margin-bottom:12px; line-height:1.5;">
+                Isi 2–3 digit per baris + label pasar. Sistem akan menyaring 4D dari BBFS yang <b>mengandung</b> digit tersebut (multiset).
+            </p>
+            
+            <div class="m23-container" id="bbfs55RowsContainer" style="max-height: 400px; overflow-y: auto; padding: 6px; background: var(--card-2); border: 1px solid var(--border); border-radius: var(--radius-md);">
+                <!-- 55 Baris akan di-generate oleh JavaScript -->
+            </div>
+        </div>
+
+        <div class="field">
+            <label>Mode Input Angka 1D Depan (Opsional)</label>
+            <div class="d1-checkbox-group" id="bbfs1DDepan">
+                <div><input type="checkbox" id="b1-0" value="0"><label for="b1-0">0</label></div>
+                <div><input type="checkbox" id="b1-1" value="1"><label for="b1-1">1</label></div>
+                <div><input type="checkbox" id="b1-2" value="2"><label for="b1-2">2</label></div>
+                <div><input type="checkbox" id="b1-3" value="3"><label for="b1-3">3</label></div>
+                <div><input type="checkbox" id="b1-4" value="4"><label for="b1-4">4</label></div>
+                <div><input type="checkbox" id="b1-5" value="5"><label for="b1-5">5</label></div>
+                <div><input type="checkbox" id="b1-6" value="6"><label for="b1-6">6</label></div>
+                <div><input type="checkbox" id="b1-7" value="7"><label for="b1-7">7</label></div>
+                <div><input type="checkbox" id="b1-8" value="8"><label for="b1-8">8</label></div>
+                <div><input type="checkbox" id="b1-9" value="9"><label for="b1-9">9</label></div>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="field">
+                <label for="bbfsCB">Input CB (Opsional)</label>
+                <input type="text" id="bbfsCB" placeholder="0 1 2 3 5" autocomplete="off">
+            </div>
+            <div class="field">
+                <label for="bbfsCBMode">Mode Filter CB</label>
+                <select id="bbfsCBMode">
+                    <option value="or" selected>Salah Satu Digit Muncul (OR)</option>
+                    <option value="and">Semua Digit Harus Muncul (AND)</option>
+                </select>
+            </div>
+        </div>
+
+        <p id="bbfsInfo" class="text-accent" style="font-size:13px; margin:12px 0; font-weight:bold;">
+            Total kombinasi: — • Halaman: —
+        </p>
+        <button class="btn-primary" id="bbfsGenerateBtn">⚡ Generate BBFS</button>
+    </div>
+    <div class="card"><div id="bbfsResult"></div></div>
+</div>
 
             <!-- ─────────── SUBPANEL 3: ANGKA TARUNG ─────────── -->
             <div id="subpanel-angkaTarung" class="subpanel">
@@ -4282,92 +4326,229 @@ if (document.readyState !== 'loading') {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 45: BBFS GENERATOR
+   BLOK 45: BBFS GENERATOR (DENGAN 3 GRUP, 1D, 55 BARIS, CB)
    ═══════════════════════════════════════════════════════════════════════ */
+
+function renderBBFS55Rows() {
+    const container = $('bbfs55RowsContainer');
+    if (!container) return;
+    
+    let html = '';
+    for (let i = 1; i <= 55; i++) {
+        html += `<div class="m23-row">
+            <div class="m23-no">${i}</div>
+            <input type="text" class="m23-digits" id="bbfsMengandung${i}" maxlength="3" placeholder="237" oninput="this.value = onlyDigits(this.value).slice(0,3); updateBFFSFilterStatus(${i}); updateBBFSInfo();">
+            <input type="text" class="m23-pasar" id="bbfsMengandung${i}_pasar" placeholder="LABEL">
+            <div class="m23-total" id="bbfsFilterStat${i}">—</div>
+            <div class="m23-pages" id="bbfsFilterPage${i}">—</div>
+            <button class="m23-copy btn-primary" onclick="copyBBFSFilter(${i})" title="Copy Hasil">📋</button>
+        </div>`;
+    }
+    container.innerHTML = html;
+}
+
+function getBBFS1DDepanSelected() {
+    const arr = [];
+    document.querySelectorAll('#bbfs1DDepan input[type="checkbox"]:checked').forEach(function(e) {
+        arr.push(e.value);
+    });
+    return arr;
+}
+
+function updateBFFSFilterStatus(idx) {
+    if (!idx) {
+        for (let i = 1; i <= 55; i++) updateBFFSFilterStatus(i);
+        return;
+    }
+
+    const elAngka = $(`bbfsMengandung${idx}`);
+    const statEl = $(`bbfsFilterStat${idx}`);
+    const pageEl = $(`bbfsFilterPage${idx}`);
+    
+    if (!elAngka || !statEl || !pageEl) return;
+    const a = elAngka.value.trim();
+    
+    if (!a) {
+        statEl.textContent = '—';
+        pageEl.textContent = '—';
+        return;
+    }
+    
+    // Hitung berdasarkan universe BBFS jika diisi, atau 0000-9999
+    const bbfsRaw = onlyDigits($('bbfsInput').value);
+    let pool = (typeof M23_UNIVERSE !== 'undefined') ? M23_UNIVERSE : [];
+    
+    if (bbfsRaw.length >= 4) {
+        pool = permutasi4DariDigit(bbfsRaw);
+    }
+
+    let matched = applyMengandungFilter(pool, a);
+    const count = matched.length;
+    statEl.textContent = count > 0 ? count.toLocaleString('id-ID') : '0';
+    pageEl.textContent = count > 0 ? Math.ceil(count / PER_PAGE) + ' hal' : '—';
+}
+
+window.copyBBFSFilter = function(idx) {
+    const elAngka = $(`bbfsMengandung${idx}`);
+    if (!elAngka) return;
+    const a = elAngka.value.trim();
+    if (!a) { toast('Baris ini kosong', 'error'); return; }
+    
+    const bbfsRaw = onlyDigits($('bbfsInput').value);
+    let pool = (typeof M23_UNIVERSE !== 'undefined') ? M23_UNIVERSE : [];
+    if (bbfsRaw.length >= 4) pool = permutasi4DariDigit(bbfsRaw);
+
+    const matched = applyMengandungFilter(pool, a);
+    if (matched.length === 0) { toast('Tidak ada hasil', 'error'); return; }
+    
+    copyTextToClipboard(matched.join('*') + '*');
+};
+
+function _refreshBBFSPreview() {
+    const g1 = $('bbfsGrup1').value;
+    const g2 = $('bbfsGrup2').value;
+    const g3 = $('bbfsGrup3').value;
+    
+    renderGroupPreview(g1, $('bbfsPreview1'), 'depan', g1 ? 'Grup 1 → 2D Depan' : '');
+    renderGroupPreview(g2, $('bbfsPreview2'), 'both', g2 ? 'Grup 2 → 2D Tengah' : '');
+    renderGroupPreview(g3, $('bbfsPreview3'), 'belakang', g3 ? 'Grup 3 → 2D Belakang' : '');
+    
+    updateBBFSInfo();
+}
+
+$('bbfsGrup1').addEventListener('change', _refreshBBFSPreview);
+$('bbfsGrup2').addEventListener('change', _refreshBBFSPreview);
+$('bbfsGrup3').addEventListener('change', _refreshBBFSPreview);
 
 $('bbfsInput').addEventListener('input', function(e) {
     e.target.value = onlyDigits(e.target.value).slice(0, MAX_BBFS_DIGITS);
+    updateBFFSFilterStatus(); // Update status baris jika BBFS berubah
     updateBBFSInfo();
 });
+
 $('bbfsCB').addEventListener('input', updateBBFSInfo);
 $('bbfsCBMode').addEventListener('change', updateBBFSInfo);
-
-function _refreshBBFSPreview() {
-    const g = $('bbfsGrup').value;
-    const mode = $('bbfsMode').value;
-    const wrap = $('bbfsModeWrapper');
-    if (wrap) wrap.style.display = g ? 'block' : 'none';
-    let activeSide = 'both';
-    if (mode === 'depan') activeSide = 'depan';
-    else if (mode === 'belakang') activeSide = 'belakang';
-    renderGroupPreview(g, $('bbfsPreview'), activeSide, 'Grup dipakai sebagai FILTER hasil. Input BBFS tidak diubah.');
-}
-
-$('bbfsGrup').addEventListener('change', function() { _refreshBBFSPreview(); updateBBFSInfo(); });
-$('bbfsMode').addEventListener('change', function() { _refreshBBFSPreview(); updateBBFSInfo(); });
+const _b1Wrap = $('bbfs1DDepan');
+if (_b1Wrap) _b1Wrap.addEventListener('change', updateBBFSInfo);
 
 function updateBBFSInfo() {
     const digits = onlyDigits($('bbfsInput').value);
-    const cb = onlyDigits($('bbfsCB').value);
-    const grup = $('bbfsGrup').value;
-    const mode = $('bbfsMode').value;
+    const cb = parseSingleDigitList($('bbfsCB').value);
+    const g1 = $('bbfsGrup1').value;
+    const g2 = $('bbfsGrup2').value;
+    const g3 = $('bbfsGrup3').value;
+    const d1 = getBBFS1DDepanSelected();
+    
+    let activeFilters = [];
+    for (let i = 1; i <= 55; i++) {
+        const el = $(`bbfsMengandung${i}`);
+        if (el && el.value.trim()) activeFilters.push(el.value.trim());
+    }
+
     const info = $('bbfsInfo');
-    if (digits.length < 4) { info.textContent = 'Total kombinasi: — • Halaman: —'; return; }
+    if (!info) return;
+    
+    if (digits.length < 4) { 
+        info.textContent = 'Total kombinasi: — • Halaman: — (Isi BBFS minimal 4 digit)'; 
+        return; 
+    }
+    
     const n = digits.length;
     const total = n * (n - 1) * (n - 2) * (n - 3);
     const pages = Math.ceil(total / PER_PAGE);
+    
     let text = 'BBFS: ' + total.toLocaleString('id-ID') + ' kombinasi • ' + pages + ' halaman';
-    if (grup) text += ' • FILTER 2D ' + mode.toUpperCase() + ': "' + grup + '"';
-    if (cb) text += ' • CB: ' + cb.split('').join(' ');
+    if (g1 || g2 || g3) text += ' • Filter Grup';
+    if (d1.length > 0) text += ' • Awalan: ' + d1.join(',');
+    if (activeFilters.length > 0) text += ' • Saring: ' + activeFilters.length + ' baris';
+    if (cb.length > 0) text += ' • CB: ' + cb.join(' ');
+    
     info.textContent = text;
 }
 
 $('bbfsGenerateBtn').addEventListener('click', function() {
     const raw = onlyDigits($('bbfsInput').value);
-    const cb = onlyDigits($('bbfsCB').value);
+    const g1 = $('bbfsGrup1').value;
+    const g2 = $('bbfsGrup2').value;
+    const g3 = $('bbfsGrup3').value;
+    const cb = parseSingleDigitList($('bbfsCB').value);
     const cbMode = $('bbfsCBMode').value;
-    const grup = $('bbfsGrup').value;
-    const filterMode = $('bbfsMode').value;
-    if (raw.length < 4) { toast('Minimal 4 digit', 'error'); return; }
-    if (raw.length > 16) { toast('Maksimal 16 digit', 'error'); return; }
-    let all = permutasi4DariDigit(raw);
-    const totalAwal = all.length;
-    if (all.length === 0) { toast('Tidak ada kombinasi', 'error'); return; }
-    let filterValues = [];
-    if (grup) {
-        const depans = getGroupAs2DigitDepan(grup);
-        const belakangs = getGroupAs2DigitBelakang(grup);
-        if (filterMode === 'depan') {
-            filterValues = depans;
-            all = all.filter(function(c) { return depans.includes(c.slice(0, 2)); });
-        } else if (filterMode === 'belakang') {
-            filterValues = belakangs;
-            all = all.filter(function(c) { return belakangs.includes(c.slice(-2)); });
-        } else if (filterMode === 'keduanya') {
-            filterValues = [...new Set([...depans, ...belakangs])].sort();
-            all = all.filter(function(c) {
-                return depans.includes(c.slice(0, 2)) && belakangs.includes(c.slice(-2));
-            });
+    const d1 = getBBFS1DDepanSelected();
+    
+    let activeFilters = [];
+    for (let i = 1; i <= 55; i++) {
+        const el = $(`bbfsMengandung${i}`);
+        if (el && el.value.trim()) activeFilters.push(el.value.trim());
+    }
+
+    if (raw.length < 4) { toast('BBFS minimal 4 digit', 'error'); return; }
+    if (raw.length > 16) { toast('BBFS maksimal 16 digit', 'error'); return; }
+
+    let filtered = permutasi4DariDigit(raw);
+    if (filtered.length === 0) { toast('Tidak ada kombinasi', 'error'); return; }
+
+    // 1. Filter 3 Grup
+    if (g1 || g2 || g3) {
+        const setG1 = g1 ? new Set(getGroupAs2DigitDepan(g1)) : null;
+        const setG2 = g2 ? new Set([...getGroupAs2DigitDepan(g2), ...getGroupAs2DigitBelakang(g2)]) : null;
+        const setG3 = g3 ? new Set(getGroupAs2DigitBelakang(g3)) : null;
+
+        filtered = filtered.filter(n => {
+            const ab = n.slice(0, 2);
+            const bc = n.slice(1, 3);
+            const cd = n.slice(2, 4);
+            
+            if (setG1 && !setG1.has(ab)) return false;
+            if (setG2 && !setG2.has(bc)) return false;
+            if (setG3 && !setG3.has(cd)) return false;
+            return true;
+        });
+
+        if (filtered.length === 0) { toast('Tidak ada kombinasi yang cocok dengan filter Grup', 'error'); return; }
+    }
+
+    // 2. Filter 1D Depan
+    if (d1.length > 0) {
+        filtered = filtered.filter(d => d1.includes(d[0]));
+        if (filtered.length === 0) { toast('Tidak ada 2D depan yang cocok dengan Awalan 1D', 'error'); return; }
+    }
+
+    // 3. Filter 55 Baris Mengandung
+    for (let f of activeFilters) {
+        filtered = applyMengandungFilter(filtered, f);
+        if (filtered.length === 0) {
+            toast('Tidak ada hasil setelah filter mengandung "' + f + '"', 'error'); 
+            return;
         }
-        if (filterValues.length === 0) { toast('Grup "' + grup + '" kosong', 'error'); return; }
-        if (all.length === 0) { toast('Tidak ada hasil yang cocok', 'error'); return; }
     }
-    if (cb) {
-        all = filterByCB(all, cb, cbMode);
-        if (all.length === 0) { toast('Tidak ada hasil setelah CB', 'error'); return; }
+
+    // 4. Filter CB
+    if (cb.length > 0) {
+        filtered = filterByCB(filtered, cb.join(''), cbMode);
+        if (filtered.length === 0) { toast('Tidak ada hasil setelah filter CB', 'error'); return; }
     }
-    pageState.bbfs.pages = paginateArray(all);
+
+    filtered.sort();
+    pageState.bbfs.pages = paginateArray(filtered);
     pageState.bbfs.current = 0;
-    let meta = 'BBFS: ' + raw + ' • ' + raw.length + ' digit';
-    if (grup) meta += ' • FILTER 2D ' + filterMode.toUpperCase() + ': ' + grup;
-    if (cb) meta += ' • CB: ' + cb.split('').join(' ') + ' (' + cbMode.toUpperCase() + ')';
-    if (grup || cb) meta += ' • ' + all.length.toLocaleString('id-ID') + '/' + totalAwal.toLocaleString('id-ID') + ' lolos';
+    
+    let meta = 'BBFS: ' + raw;
+    if (g1 || g2 || g3) meta += ' • Filter Grup';
+    if (d1.length > 0) meta += ' • Awalan: ' + d1.join(',');
+    if (activeFilters.length > 0) meta += ' • Saring ' + activeFilters.length + ' baris';
+    if (cb.length > 0) meta += ' • CB: ' + cb.join(' ');
     pageState.bbfs.meta = meta;
-    let breakdown = '';
-    if (grup) breakdown = buildFilterBreakdown(grup, filterValues, totalAwal, all.length, cb.length > 0 ? cb : null, filterMode);
-    renderPagination('bbfsResult', 'bbfs', 'Hasil', breakdown);
-    toast('Berhasil: ' + all.length.toLocaleString('id-ID') + ' dari ' + totalAwal.toLocaleString('id-ID'), 'success');
+
+    renderPagination('bbfsResult', 'bbfs', 'Hasil', '');
+    toast('Berhasil: ' + filtered.length.toLocaleString('id-ID') + ' kombinasi', 'success');
 });
+
+// Init render 55 baris BBFS
+if (document.readyState !== 'loading') {
+    renderBBFS55Rows();
+} else {
+    document.addEventListener('DOMContentLoaded', renderBBFS55Rows);
+}
 
 /* ═══════════════════════════════════════════════════════════════════════
    BLOK 46: ANGKA TARUNG GENERATOR
@@ -6739,6 +6920,7 @@ function populateNewGrupDropdowns() {
     const ids = [
         'blGrup', 'c33Grup', 
         'manualGrup1', 'manualGrup2', 'manualGrup3',
+		'bbfsGrup1', 'bbfsGrup2', 'bbfsGrup3',
         'gabungGrup1', 'gabungGrup2', 'gabungGrup3'
     ];
     
@@ -6748,9 +6930,8 @@ function populateNewGrupDropdowns() {
         
         let placeholderTxt = '— Pilih Grup —';
         if (id === 'blGrup' || id === 'c33Grup') placeholderTxt = '— Tanpa Grup —';
-        if (id === 'manualGrup1' || id === 'manualGrup3') placeholderTxt = '— AUTO 00-99 —';
-        if (id === 'manualGrup2' || id === 'gabungGrup2') placeholderTxt = '— Bebas (Tanpa Batas) —';
-        if (id === 'gabungGrup1' || id === 'gabungGrup3') placeholderTxt = '— AUTO 00-99 —';
+        if (id === 'manualGrup1' || id === 'manualGrup3' || id === 'bbfsGrup1' || id === 'bbfsGrup3' || id === 'gabungGrup1' || id === 'gabungGrup3') placeholderTxt = '— AUTO 00-99 —';
+        if (id === 'manualGrup2' || id === 'bbfsGrup2' || id === 'gabungGrup2') placeholderTxt = '— Bebas (Tanpa Batas) —';
         
         el.innerHTML = build(placeholderTxt);
         if (cur && names.includes(cur)) el.value = cur;
