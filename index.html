@@ -1188,6 +1188,47 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
     font-weight: 400;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════
+   REVISI: Tampilan Checkbox 1D Depan
+   ═══════════════════════════════════════════════════════════════════════ */
+.d1-checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px;
+    background: var(--card-2);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+}
+.d1-checkbox-group label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: var(--card);
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 14px;
+    color: var(--text);
+    margin: 0;
+    transition: all 0.2s;
+}
+.d1-checkbox-group label:hover { border-color: var(--accent); }
+.d1-checkbox-group input[type="checkbox"] {
+    display: none;
+}
+.d1-checkbox-group input[type="checkbox"]:checked + label {
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    color: #04101c;
+    border-color: transparent;
+    transform: scale(1.1);
+    box-shadow: 0 0 10px rgba(34,211,238,0.4);
+}
+
 </style>
 </head>
 
@@ -1312,30 +1353,32 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
 				<button onclick="switchSubTab(this)" data-subpanel="subpanel-mengandung23" style="color:#a78bfa; border-color:#a78bfa;">🔍 Mengandung 2/3 (55)</button>
 			</div>
 
-            <!-- ─────────── SUBPANEL 1: INPUT MANUAL ─────────── -->
-            <div id="subpanel-manual" class="subpanel active">
+<!-- ─────────── SUBPANEL 1: INPUT MANUAL ─────────── -->
+<div id="subpanel-manual" class="subpanel active">
     <div class="card">
         <h3 style="margin-bottom:6px;">Input Manual Kombinasi 4 Angka</h3>
         <p class="text-muted" style="font-size:12.5px; margin-bottom:12px;">
-            Kombinasi <b>2 depan × 2 belakang</b>.
+            Kombinasi <b>2 depan × 2 belakang</b>. 
             <b>Semua field opsional</b> — jika 2D depan/belakang kosong, sistem otomatis pakai semua 00–99.
-            Grup hanya <b>menseleksi angka</b> yang sesuai.
         </p>
-        <div class="field">
-            <label for="manualDepan">Input 2 Angka Depan (pisah spasi / koma) — opsional</label>
-            <input type="text" id="manualDepan" placeholder="20 21 22 23 24" autocomplete="off">
-            <p style="font-size:11px; color:var(--muted); margin-top:4px;">Kosongkan → otomatis pakai semua 00–99</p>
+        
+        <div class="grid-2">
+            <div class="field">
+                <label for="manualDepan">Input 2 Angka Depan (pisah spasi)</label>
+                <input type="text" id="manualDepan" placeholder="20 21 22... (Kosong = Auto 00-99)" autocomplete="off">
+            </div>
+            <div class="field">
+                <label for="manualBelakang">Input 2 Angka Belakang (pisah spasi)</label>
+                <input type="text" id="manualBelakang" placeholder="01 02 03... (Kosong = Auto 00-99)" autocomplete="off">
+            </div>
         </div>
+
         <div class="field">
-            <label for="manualBelakang">Input 2 Angka Belakang (pisah spasi / koma) — opsional</label>
-            <input type="text" id="manualBelakang" placeholder="01 02 03 04 05" autocomplete="off">
-            <p style="font-size:11px; color:var(--muted); margin-top:4px;">Kosongkan → otomatis pakai semua 00–99</p>
-        </div>
-        <div class="field">
-            <label for="manualGrup">Pilih Grup (Seleksi Angka) — opsional</label>
+            <label for="manualGrup">Pilih Grup (Seleksi Angka) — Opsional</label>
             <select id="manualGrup"><option value="">— Manual (tanpa grup) —</option></select>
             <div id="manualPreview" class="group-preview"></div>
         </div>
+        
         <div class="field" id="manualFilterModeWrapper" style="display:none;">
             <label for="manualFilterMode">Mode Seleksi Grup</label>
             <select id="manualFilterMode">
@@ -1344,51 +1387,56 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
                 <option value="keduanya">🟣 Filter DEPAN &amp; BELAKANG</option>
             </select>
         </div>
-        <div class="field">
-            <label for="manualMengandung">Kata / Angka yang Mengandung (opsional)</label>
+
+        <div class="field" style="background:var(--card-3); padding:12px; border-radius:8px; border:1px solid var(--border);">
+            <label for="manualMengandung" style="color:var(--accent);">🔍 Kata / Angka Yang Mengandung (Opsional)</label>
             <input type="text" id="manualMengandung" placeholder="Contoh: 23 (angka) atau setan (kata syair)" autocomplete="off">
-            <p style="font-size:11px; color:var(--muted); margin-top:4px;">
-                <b>Angka</b> (mis. 23) → filter 4D yang mengandung digit 2 dan 3.
-                <b>Kata</b> (mis. setan) → filter syair 2D depan/belakang yang mengandung kata itu.
+            <p style="font-size:11px; color:var(--muted); margin-top:6px;">
+                Jika diisi <b>Angka</b> (mis. 237) → Filter 4D yang mengandung angka tersebut.<br>
+                Jika diisi <b>Kata</b> (mis. setan) → Filter syair 2D depan/belakang yang mengandung kata tersebut.
             </p>
         </div>
+
         <div class="field">
-            <label>Mode Input Angka 1D Depan (opsional)</label>
+            <label>Mode Input Angka 1D Depan (Opsional)</label>
             <div class="d1-checkbox-group" id="manual1DDepan">
-                <label><input type="checkbox" value="0">0</label>
-                <label><input type="checkbox" value="1">1</label>
-                <label><input type="checkbox" value="2">2</label>
-                <label><input type="checkbox" value="3">3</label>
-                <label><input type="checkbox" value="4">4</label>
-                <label><input type="checkbox" value="5">5</label>
-                <label><input type="checkbox" value="6">6</label>
-                <label><input type="checkbox" value="7">7</label>
-                <label><input type="checkbox" value="8">8</label>
-                <label><input type="checkbox" value="9">9</label>
+                <div><input type="checkbox" id="d1-0" value="0"><label for="d1-0">0</label></div>
+                <div><input type="checkbox" id="d1-1" value="1"><label for="d1-1">1</label></div>
+                <div><input type="checkbox" id="d1-2" value="2"><label for="d1-2">2</label></div>
+                <div><input type="checkbox" id="d1-3" value="3"><label for="d1-3">3</label></div>
+                <div><input type="checkbox" id="d1-4" value="4"><label for="d1-4">4</label></div>
+                <div><input type="checkbox" id="d1-5" value="5"><label for="d1-5">5</label></div>
+                <div><input type="checkbox" id="d1-6" value="6"><label for="d1-6">6</label></div>
+                <div><input type="checkbox" id="d1-7" value="7"><label for="d1-7">7</label></div>
+                <div><input type="checkbox" id="d1-8" value="8"><label for="d1-8">8</label></div>
+                <div><input type="checkbox" id="d1-9" value="9"><label for="d1-9">9</label></div>
             </div>
-            <p style="font-size:11px; color:var(--muted); margin-top:4px;">
-                Centang digit untuk menampilkan hanya hasil yang berawalan digit terpilih. Kosong → tanpa filter.
+            <p style="font-size:11px; color:var(--muted); margin-top:6px;">
+                Centang angka untuk menampilkan hasil yang berawalan angka tersebut.
             </p>
         </div>
-        <div class="field">
-            <label for="manualCB">Input CB (opsional)</label>
-            <input type="text" id="manualCB" placeholder="0 1 2 3 5" autocomplete="off">
+
+        <div class="grid-2">
+            <div class="field">
+                <label for="manualCB">Input CB (Opsional)</label>
+                <input type="text" id="manualCB" placeholder="0 1 2 3 5" autocomplete="off">
+            </div>
+            <div class="field">
+                <label for="manualCBMode">Mode Filter CB</label>
+                <select id="manualCBMode">
+                    <option value="or" selected>Salah Satu Digit Muncul (OR)</option>
+                    <option value="and">Semua Digit Harus Muncul (AND)</option>
+                </select>
+            </div>
         </div>
-        <div class="field">
-            <label for="manualCBMode">Mode Filter CB</label>
-            <select id="manualCBMode">
-                <option value="or" selected>Salah Satu Digit Muncul (OR)</option>
-                <option value="and">Semua Digit Harus Muncul (AND)</option>
-            </select>
-        </div>
-        <p id="manualInfo" class="text-accent" style="font-size:13px; margin-bottom:12px;">
+
+        <p id="manualInfo" class="text-accent" style="font-size:13px; margin:12px 0; font-weight:bold;">
             Total kombinasi: — • Halaman: —
         </p>
         <button class="btn-primary" id="manualGenerateBtn">⚡ Generate Kombinasi</button>
     </div>
     <div class="card"><div id="manualResult"></div></div>
 </div>
-
             <!-- ─────────── SUBPANEL 2: BBFS ─────────── -->
             <div id="subpanel-bbfs" class="subpanel">
                 <div class="card">
@@ -1509,30 +1557,29 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
                 <div class="card"><div id="cbBBFSResult"></div></div>
             </div>
 
-            <!-- ─────────── SUBPANEL 5: GABUNG 3 GRUP ─────────── -->
-            <div id="subpanel-gabungGrup" class="subpanel">
+<!-- ─────────── SUBPANEL 5: GABUNG 3 GRUP ─────────── -->
+<div id="subpanel-gabungGrup" class="subpanel">
     <div class="card">
         <h3 style="margin-bottom:6px;">Gabung 3 Grup (2D Depan × Tengah × Belakang)</h3>
         <p class="text-muted" style="font-size:12.5px; margin-bottom:12px;">
-            <b>Semua field opsional.</b> G1 → 2D Depan, G2 → 2D Tengah (opsional), G3 → 2D Belakang.
-            Jika G1/G3 kosong → otomatis pakai <b>semua 00–99</b> untuk posisi tersebut.
-            Jika G2 kosong → tidak ada constraint BC (mode bebas).
+            <b>Semua field opsional.</b> Jika G1/G3 kosong, sistem otomatis memakai <b>semua angka 00–99</b>.<br>
+            Jika G2 kosong, tidak ada batasan tengah (mode bebas).
         </p>
         <div class="grid-2">
             <div class="field">
-                <label for="gabungGrup1">Grup 1 → 2D Depan (opsional)</label>
+                <label for="gabungGrup1">Grup 1 → 2D Depan</label>
                 <select id="gabungGrup1"></select>
                 <div id="gabungPreviewDepan" class="group-preview"></div>
             </div>
             <div class="field">
-                <label for="gabungGrup2">Grup 2 → 2D Tengah (opsional)</label>
+                <label for="gabungGrup2">Grup 2 → 2D Tengah (Opsional)</label>
                 <select id="gabungGrup2"></select>
                 <div id="gabungPreviewTengah" class="group-preview"></div>
             </div>
         </div>
         <div class="grid-2">
             <div class="field">
-                <label for="gabungGrup3">Grup 3 → 2D Belakang (opsional)</label>
+                <label for="gabungGrup3">Grup 3 → 2D Belakang</label>
                 <select id="gabungGrup3"></select>
                 <div id="gabungPreviewBelakang" class="group-preview"></div>
             </div>
@@ -1547,7 +1594,7 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
             </div>
         </div>
         <p id="gabungInfo" class="text-accent" style="font-size:13px; margin:12px 0;">
-            Info: pilih grup atau biarkan kosong untuk AUTO.
+            Info: Kosongkan grup untuk mode AUTO (00-99).
         </p>
     </div>
     <div class="card"><div id="gabungResult"></div></div>
@@ -3912,11 +3959,11 @@ function buildManualBreakdown(grup, mode, depans, belakangs, totalCombo, cb) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 44: INPUT MANUAL GENERATOR — REVISED
-   • Semua field opsional (auto 00–99 jika kosong)
-   • Filter 1D Depan (checkbox 0–9)
-   • Filter "Kata/Angka Mengandung" (angka = multiset, kata = syair)
+   BLOK 44: INPUT MANUAL GENERATOR (REVISI TOTAL)
+   Fitur: Auto 00-99, Filter 1D Depan, Filter Mengandung Angka/Kata
    ═══════════════════════════════════════════════════════════════════════ */
+
+const ALL_00_99 = Array.from({length: 100}, (_, i) => String(i).padStart(2, '0'));
 
 function getManual1DDepanSelected() {
     const arr = [];
@@ -3926,14 +3973,17 @@ function getManual1DDepanSelected() {
     return arr;
 }
 
-// Filter "mengandung": angka → multiset, kata → syair 2D depan/belakang
 function applyMengandungFilter(arr, rawInput) {
     const raw = String(rawInput || '').trim();
     if (!raw) return arr;
+    
+    // Jika isinya murni angka -> Filter Multiset (berurutan/huruf acak)
     if (/^\d+$/.test(raw)) {
         const ms = blParseMultiset(raw);
         return arr.filter(function(n) { return blContainsCombo(n, ms); });
     }
+    
+    // Jika isinya huruf/kata -> Filter Syair
     const kw = raw.toLowerCase();
     return arr.filter(function(n) {
         const d2 = n.slice(0, 2), b2 = n.slice(2, 4);
@@ -3953,7 +4003,7 @@ function _refreshManualPreview() {
         let activeSide = 'both';
         if (mode === 'depan') activeSide = 'depan';
         else if (mode === 'belakang') activeSide = 'belakang';
-        renderGroupPreview(g, $('manualPreview'), activeSide, 'Grup hanya menseleksi angka yang sesuai. Input teks Anda tidak diubah.');
+        renderGroupPreview(g, $('manualPreview'), activeSide, 'Grup menseleksi angka yang diinput.');
     } else {
         renderGroupPreview('', $('manualPreview'), null, '');
     }
@@ -3974,27 +4024,31 @@ function updateManualInfo() {
     const belakangRaw = parseTwoDigitList($('manualBelakang').value);
     const cb = parseSingleDigitList($('manualCB').value);
     const grup = $('manualGrup').value;
-    const mode = $('manualFilterMode').value;
     const d1 = getManual1DDepanSelected();
     const mengandung = $('manualMengandung').value.trim();
     const info = $('manualInfo');
+    
     if (!info) return;
+    
     const depanCount = depanRaw.length > 0 ? depanRaw.length : 100;
     const belakangCount = belakangRaw.length > 0 ? belakangRaw.length : 100;
     const total = depanCount * belakangCount;
     const pages = Math.ceil(total / PER_PAGE);
-    let text = '2 depan: ' + (depanRaw.length > 0 ? depanRaw.length : 'auto 100')
-        + ' • 2 belakang: ' + (belakangRaw.length > 0 ? belakangRaw.length : 'auto 100')
-        + ' • Maks ' + total.toLocaleString('id-ID') + ' kombinasi • ' + pages + ' halaman';
-    if (grup) text += ' • Grup: ' + grup + ' (' + mode + ')';
-    if (d1.length > 0) text += ' • 1D Depan: ' + d1.join('');
-    if (mengandung) text += ' • Mengandung: ' + mengandung;
+    
+    let text = '2 Depan: ' + (depanRaw.length > 0 ? depanRaw.length : 'AUTO 100') 
+             + ' × 2 Belakang: ' + (belakangRaw.length > 0 ? belakangRaw.length : 'AUTO 100')
+             + ' • Maks: ' + total.toLocaleString('id-ID') + ' kombinasi (' + pages + ' hal)';
+             
+    if (grup) text += ' • Grup: ' + grup;
+    if (d1.length > 0) text += ' • Awalan: ' + d1.join(',');
+    if (mengandung) text += ' • Filter: "' + mengandung + '"';
     if (cb.length > 0) text += ' • CB: ' + cb.join(' ');
+    
     info.textContent = text;
 }
 
 $('manualGenerateBtn').addEventListener('click', function() {
-    const grup = $('manualGrup').value;
+    let grup = $('manualGrup').value;
     const mode = $('manualFilterMode').value;
     const cb = parseSingleDigitList($('manualCB').value);
     const cbMode = $('manualCBMode').value;
@@ -4006,58 +4060,59 @@ $('manualGenerateBtn').addEventListener('click', function() {
 
     const depanAuto = depan.length === 0;
     const belakangAuto = belakang.length === 0;
+    
     if (depanAuto) depan = ALL_00_99.slice();
     if (belakangAuto) belakang = ALL_00_99.slice();
 
+    // Filter berdasarkan Grup (Jika grup dipilih)
     if (grup) {
         if (mode === 'depan' || mode === 'keduanya') {
             const selD = getGroupAs2DigitDepan(grup);
-            depan = depan.filter(function(d) { return selD.includes(d); });
+            depan = depan.filter(d => selD.includes(d));
         }
         if (mode === 'belakang' || mode === 'keduanya') {
             const selB = getGroupAs2DigitBelakang(grup);
-            belakang = belakang.filter(function(b) { return selB.includes(b); });
+            belakang = belakang.filter(b => selB.includes(b));
         }
-        if (depan.length === 0) { toast('Tidak ada 2 depan yang cocok dengan grup', 'error'); return; }
-        if (belakang.length === 0) { toast('Tidak ada 2 belakang yang cocok dengan grup', 'error'); return; }
+        if (depan.length === 0 || belakang.length === 0) { 
+            toast('Grup tidak cocok dengan input 2D', 'error'); return; 
+        }
     }
 
+    // Filter 1D Depan
     if (d1.length > 0) {
-        depan = depan.filter(function(d) { return d1.includes(d[0]); });
-        if (depan.length === 0) { toast('Tidak ada 2 depan yang cocok dengan 1D Depan', 'error'); return; }
+        depan = depan.filter(d => d1.includes(d[0]));
+        if (depan.length === 0) { toast('Tidak ada 2D depan yang cocok dengan Awalan 1D', 'error'); return; }
     }
 
-    const combos = [];
+    // Generate
+    let combos = [];
     for (const d of depan) for (const b of belakang) combos.push(d + b);
     let filtered = [...new Set(combos)];
 
+    // Filter Mengandung (Angka/Kata)
     if (mengandung) {
         filtered = applyMengandungFilter(filtered, mengandung);
-        if (filtered.length === 0) {
-            toast('Tidak ada hasil setelah filter mengandung "' + mengandung + '"', 'error');
-            return;
-        }
+        if (filtered.length === 0) { toast('Tidak ada hasil setelah filter mengandung', 'error'); return; }
     }
 
+    // Filter CB
     if (cb.length > 0) {
         filtered = filterByCB(filtered, cb.join(''), cbMode);
-        if (filtered.length === 0) { toast('Tidak ada hasil setelah CB', 'error'); return; }
+        if (filtered.length === 0) { toast('Tidak ada hasil setelah filter CB', 'error'); return; }
     }
 
     filtered.sort();
     pageState.manual.pages = paginateArray(filtered);
     pageState.manual.current = 0;
-
-    let meta = (depanAuto ? 'AUTO(100)' : depan.length) + ' depan × '
-             + (belakangAuto ? 'AUTO(100)' : belakang.length) + ' belakang';
-    if (grup) meta += ' • Grup: ' + grup + ' (' + mode + ')';
-    if (d1.length > 0) meta += ' • 1D: ' + d1.join('');
-    if (mengandung) meta += ' • Mengandung: ' + mengandung;
-    if (cb.length > 0) meta += ' • CB: ' + cb.join(' ') + ' (' + cbMode.toUpperCase() + ')';
+    
+    let meta = (depanAuto ? 'AUTO' : depan.length) + ' depan × ' + (belakangAuto ? 'AUTO' : belakang.length) + ' belakang';
+    if (d1.length > 0) meta += ' • Awalan: ' + d1.join(',');
+    if (mengandung) meta += ' • Filter: ' + mengandung;
+    if (cb.length > 0) meta += ' • CB: ' + cb.join(' ');
     pageState.manual.meta = meta;
 
-    const breakdown = buildManualBreakdown(grup, mode, depan, belakang, filtered.length, cb.length > 0 ? cb.join('') : null);
-    renderPagination('manualResult', 'manual', 'Hasil', breakdown);
+    renderPagination('manualResult', 'manual', 'Hasil', '');
     toast('Berhasil: ' + filtered.length.toLocaleString('id-ID') + ' kombinasi', 'success');
 });
 
@@ -6362,6 +6417,7 @@ function gabung3GetSets() {
         g1: g1, g2: g2, g3: g3,
         g1Auto: !g1,
         g3Auto: !g3,
+        // Jika kosong, gunakan semua 00-99
         s1: g1 ? getGroupAs2DigitDepan(g1) : ALL_00_99.slice(),
         s2: g2 ? [...new Set([...getGroupAs2DigitDepan(g2), ...getGroupAs2DigitBelakang(g2)])].sort() : [],
         s3: g3 ? getGroupAs2DigitBelakang(g3) : ALL_00_99.slice()
@@ -6495,7 +6551,14 @@ function populateNewGrupDropdowns() {
     ids.forEach(function(id) {
         const el = $(id); if (!el) return;
         const cur = el.value;
-        el.innerHTML = build('— ' + (id === 'blGrup' || id === 'c33Grup' ? 'Tanpa Grup' : 'Pilih Grup') + ' —');
+        
+        // Ubah placeholder khusus untuk Gabung 3 Grup
+        let placeholderTxt = '— Pilih Grup —';
+        if (id === 'blGrup' || id === 'c33Grup') placeholderTxt = '— Tanpa Grup —';
+        if (id === 'gabungGrup1' || id === 'gabungGrup3') placeholderTxt = '— AUTO 00-99 —';
+        if (id === 'gabungGrup2') placeholderTxt = '— Bebas (Tanpa Batas) —';
+        
+        el.innerHTML = build(placeholderTxt);
         if (cur && names.includes(cur)) el.value = cur;
     });
 }
