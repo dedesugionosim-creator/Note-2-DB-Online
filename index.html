@@ -1287,6 +1287,37 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
 .m23-result-block .m23-res-header { font-weight: 700; color: var(--success); font-size: 12.5px; margin-bottom: 6px; }
 .m23-result-block .m23-res-header .pasar-tag { color: var(--accent); font-size: 11px; font-weight: 400; }
 
+/* CSS untuk Penyaringan Lanjutan (Bentuk Baris seperti 55 Baris) */
+.filter-row {
+    display: flex;
+    align-items: center;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 6px 8px;
+    margin-bottom: 6px;
+    gap: 8px;
+}
+.filter-row .filter-no {
+    width: 30px;
+    text-align: center;
+    font-family: monospace;
+    font-weight: 700;
+    color: var(--muted);
+    font-size: 12px;
+}
+.filter-row input {
+    flex: 1;
+    padding: 8px 10px;
+    font-size: 13px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+}
+.filter-row input:focus {
+    border-color: var(--warn);
+    outline: none;
+}
+
 </style>
 </head>
 
@@ -1453,15 +1484,26 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
             </div>
         </div>
 
-        <!-- PENYARINGAN LANJUTAN (MENGANDUNG 3 KOLOM) -->
+                <!-- PENYARINGAN LANJUTAN (MENGANDUNG 3 BARIS SEPERTI GAMBAR) -->
         <div class="field" style="background:var(--card-2); padding:12px; border-radius:8px; border:1px solid var(--border);">
-            <label style="color:var(--warn); margin-bottom:8px; display:block; font-weight:bold;">🔍 Penyaringan Lanjutan: Kata / Angka Yang Mengandung (Opsional, 3 Kolom)</label>
-            <div class="grid-2" style="margin-top:8px;">
-                <input type="text" id="manualMengandung1" placeholder="Filter 1 (cth: 23)" autocomplete="off" style="margin-bottom:6px; border-color:var(--warn);">
-                <input type="text" id="manualMengandung2" placeholder="Filter 2 (cth: 7)" autocomplete="off" style="margin-bottom:6px; border-color:var(--warn);">
-                <input type="text" id="manualMengandung3" placeholder="Filter 3 (cth: setan)" autocomplete="off" style="margin-bottom:6px; border-color:var(--warn);">
+            <label style="color:var(--warn); margin-bottom:8px; display:block; font-weight:bold;">
+                🔍 Penyaringan Lanjutan: Kata / Angka Yang Mengandung (Opsional, 3 Kolom)
+            </label>
+            
+            <div class="filter-row">
+                <div class="filter-no">1</div>
+                <input type="text" id="manualMengandung1" placeholder="Ketik Angka (cth: 237) atau Kata (cth: setan)" autocomplete="off">
             </div>
-            <p style="font-size:11px; color:var(--muted);">
+            <div class="filter-row">
+                <div class="filter-no">2</div>
+                <input type="text" id="manualMengandung2" placeholder="Ketik Angka atau Kata..." autocomplete="off">
+            </div>
+            <div class="filter-row">
+                <div class="filter-no">3</div>
+                <input type="text" id="manualMengandung3" placeholder="Ketik Angka atau Kata..." autocomplete="off">
+            </div>
+            
+            <p style="font-size:11px; color:var(--muted); margin-top:8px;">
                 Jika diisi <b>Angka</b> → Filter 4D yang mengandung angka tersebut.<br>
                 Jika diisi <b>Kata</b> → Filter syair 2D depan/belakang yang mengandung kata tersebut.<br>
                 (Jika lebih dari 1 kolom diisi, hasil harus memenuhi semua filter tersebut).
