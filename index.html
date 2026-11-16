@@ -5848,16 +5848,14 @@ function refreshGrupDropdowns() {
 	}
 
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 55: MENU TOGEL v3 (ADMIN & USER VIEW) - LENGKAP & FIXED
+   BLOK 55: MENU TOGEL v3 (SINKRONISASI TOTAL DENGAN TABEL RESULT)
    ═══════════════════════════════════════════════════════════════════════ */
 
-// 1. Fungsi Deteksi Admin
 function _togelIsAdmin() {
     if (typeof currentUser === 'undefined' || !currentUser) return false;
     return currentUser.role === 'admin' || (currentUser.data && currentUser.data.username === 'SA_HARD');
 }
 
-// 2. Load & Save Prediksi
 function loadTogelPredictions() {
     try { togelPredictions = JSON.parse(localStorage.getItem(LS_TOGEL_PREDICTIONS) || '{}'); }
     catch (e) { togelPredictions = {}; }
@@ -5867,7 +5865,6 @@ function saveTogelPredictions() {
     catch (e) { toast('Gagal simpan prediksi', 'error'); }
 }
 
-// 3. Helper Pasar Togel
 function getTogelMarkets() {
     return marketData.markets.filter(function(m) { return m.isTogel === true; });
 }
@@ -5882,7 +5879,6 @@ function _formatTanggalShort(dateString) {
     return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
-// 4. Helper Waktu & Countdown (WIB)
 function _getWIBNowSec() {
     const d = new Date();
     const h = (d.getUTCHours() + 7) % 24;
@@ -5900,9 +5896,7 @@ function _getNextDrawInfo(drawTimes) {
         const m = parseInt(parts[1], 10);
         if (isNaN(h) || isNaN(m)) continue;
         const drawSec = h * 3600 + m * 60;
-        if (drawSec > nowSec) {
-            return _fmtCd(drawSec - nowSec, 'P' + (i + 1), drawTimes[i]);
-        }
+        if (drawSec > nowSec) return _fmtCd(drawSec - nowSec, 'P' + (i + 1), drawTimes[i]);
     }
     const parts = String(drawTimes[0]).split(':');
     const h = parseInt(parts[0], 10);
@@ -5921,7 +5915,7 @@ function _fmtCd(diffSec, label, timeStr) {
     };
 }
 
-// 5. Helper Tabel Pasar
+// Ambil tabel yang terhubung dengan pasar Togel
 function getOrCreateMarketTable(marketId, marketName) {
     let tbl = tableData.tables.find(function(t) { return t.id === marketId; });
     if (!tbl) {
@@ -5932,16 +5926,12 @@ function getOrCreateMarketTable(marketId, marketName) {
     return tbl;
 }
 
-// 6. TAMBAH PASAR BARU
 window.tambahPasarTogel = function() {
     if (!_togelIsAdmin()) { toast('Hanya admin yang bisa menambah pasar', 'error'); return; }
-
     const nama = prompt('Masukkan Nama Pasar Baru:\n(Contoh: Singapore, Hongkong, Sydney)');
     if (!nama || nama.trim() === '') return;
-
     const jadwal = prompt('Masukkan Label Jadwal (Opsional):\n(Contoh: Setiap Hari, Senin & Kamis)', 'Setiap Hari');
     if (jadwal === null) return;
-
     const jamStr = prompt('Masukkan Jam Mundur (Pisahkan dengan koma jika lebih dari satu):\n(Format 24 Jam, Contoh: 13:00, 19:00)', '13:00');
     if (jamStr === null) return;
 
@@ -5949,32 +5939,22 @@ window.tambahPasarTogel = function() {
     if (drawTimes.length === 0) { toast('Format jam salah. Gunakan format HH:MM (Contoh: 13:00)', 'error'); return; }
 
     const id = 'market_' + Date.now();
-    const newMarket = {
-        id: id,
-        name: nama.trim(),
-        schedule: (jadwal || '—').trim(),
-        drawTimes: drawTimes,
-        history: [],
-        isTogel: true
-    };
-
-    marketData.markets.push(newMarket);
+    marketData.markets.push({
+        id: id, name: nama.trim(), schedule: (jadwal || '—').trim(),
+        drawTimes: drawTimes, isTogel: true
+    });
     saveMarketData();
 
-    const newTable = { id: id, name: nama.trim(), entries: [] };
-    tableData.tables.push(newTable);
-    saveTableData();
-
+    getOrCreateMarketTable(id, nama.trim()); // Buat tabel di Tabel Result
     if (typeof syncTogelWithTable === 'function') syncTogelWithTable();
     if (typeof refreshTableSelector === 'function') refreshTableSelector();
+    
     renderTogelGrid();
     stopTogelCountdown();
     startTogelCountdown();
-
     toast('Pasar "' + nama + '" berhasil ditambahkan!', 'success');
 };
 
-// 7. RENDER MENU TOGEL UTAMA
 function renderMenuTogel() {
     closeTogelDetail();
     renderTogelGrid();
@@ -5983,7 +5963,6 @@ function renderMenuTogel() {
 function renderTogelGrid() {
     const grid = $('togelMarketGrid');
     if (!grid) return;
-
     const isAdmin = _togelIsAdmin();
     const addBtn = $('addNewTogelMarketBtn');
     if (addBtn) addBtn.style.display = isAdmin ? 'inline-block' : 'none';
@@ -5997,23 +5976,17 @@ function renderTogelGrid() {
     let html = '';
     list.forEach(function(m) {
         const tbl = getOrCreateMarketTable(m.id, m.name);
-        const historyData = tbl.entries || [];
+        const historyData = tbl.entries || []; // BACA DARI TABLE DATA
         const sorted = historyData.slice().sort(function(a, b) { return (b.tanggal || '').localeCompare(a.tanggal || ''); });
         const latest = sorted[0];
-        
         const cd = _getNextDrawInfo(m.drawTimes);
-        const countdownHtml = cd
-            ? `<div class="market-countdown${cd.urgent ? ' urgent' : ''}" data-countdown-market="${m.id}">⏱️ ${cd.remaining} (${cd.label})</div>`
-            : `<div class="market-countdown">⏱️ Waktu belum diatur</div>`;
-            
-        let adminButtons = '';
-        if (isAdmin) {
-            adminButtons = `
+        
+        let countdownHtml = cd ? `<div class="market-countdown${cd.urgent ? ' urgent' : ''}" data-countdown-market="${m.id}">⏱️ ${cd.remaining} (${cd.label})</div>` : `<div class="market-countdown">⏱️ Waktu belum diatur</div>`;
+        let adminButtons = isAdmin ? `
             <div style="position:absolute; top:10px; right:10px; z-index:10; display:flex; gap:4px;">
                 <button class="btn-warn" style="padding:4px 8px; font-size:10px; border-radius:6px; font-weight:bold;" onclick="editPasarTogel(event, '${m.id}')" title="Edit Jam Mundur">✏️ Edit</button>
                 <button class="btn-danger" style="padding:4px 8px; font-size:10px; border-radius:6px; font-weight:bold;" onclick="hapusPasarTogel(event, '${m.id}')" title="Hapus Pasar">❌ Hapus</button>
-            </div>`;
-        }
+            </div>` : '';
 
         html += `
         <div class="togel-market-card" style="position: relative;" onclick="openTogelDetail('${m.id}')">
@@ -6031,7 +6004,6 @@ function renderTogelGrid() {
     grid.innerHTML = html;
 }
 
-// 8. BUKA / TUTUP DETAIL PASAR
 window.openTogelDetail = function(id) {
     activeTogelMarketId = id;
     togelDetailTab = 'history';
@@ -6056,11 +6028,9 @@ window.switchTogelDetailTab = function(tab) {
     if (tab === 'prediksi') renderTogelPrediksi();
 };
 
-// 9. RENDER DETAIL PASAR
 function renderTogelDetail() {
     const m = getActiveTogelMarket();
     if (!m) return;
-    
     $('togelDetailName').textContent = m.name;
     $('togelDetailSchedule').textContent = m.schedule || '—';
     
@@ -6088,12 +6058,11 @@ function renderTogelDetail() {
     
     const adminCard = $('togelAdminInputCard');
     if (adminCard) adminCard.hidden = !_togelIsAdmin();
-    
     const dateEl = $('togelInputDate');
     if (dateEl && !dateEl.value) dateEl.value = new Date().toISOString().split('T')[0];
 }
 
-// 10. RENDER HISTORY TABEL
+// MENAMPILKAN HISTORY DI TOGEL (Murni dari Tabel Result)
 function renderTogelHistory() {
     const m = getActiveTogelMarket();
     const tbody = $('togelHistoryBody');
@@ -6112,7 +6081,6 @@ function renderTogelHistory() {
     }
     
     const sorted = historyData.slice().sort(function(a, b) { return (b.tanggal || '').localeCompare(a.tanggal || ''); });
-    
     let html = '';
     sorted.forEach(function(r) {
         const gen = generateSyairAndGrup(r.result);
@@ -6121,15 +6089,13 @@ function renderTogelHistory() {
         html += '<td class="td-pair" style="font-size:15px;">' + esc(r.result) + '</td>';
         html += '<td style="font-size:12px;">' + esc(gen.syair || '—') + '</td>';
         html += '<td style="color:var(--warn); font-size:12px;">' + esc(gen.grup || '—') + '</td>';
-        if (isAdmin) {
-            html += '<td><button class="btn-danger btn-action" onclick="deleteTogelResult(\'' + r.id + '\')">🗑</button></td>';
-        }
+        if (isAdmin) html += '<td><button class="btn-danger btn-action" onclick="deleteTogelResult(\'' + r.id + '\')">🗑</button></td>';
         html += '</tr>';
     });
     tbody.innerHTML = html;
 }
 
-// 11. RENDER PREDIKSI (FITUR YANG SEBELUMNYA HILANG)
+// MENAMPILKAN PREDIKSI (Dari Edit Prediksi)
 function renderTogelPrediksi() {
     const m = getActiveTogelMarket();
     const container = $('togelPrediksiContainer');
@@ -6137,70 +6103,32 @@ function renderTogelPrediksi() {
 
     const p = togelPredictions[m.id];
     if (!p || !p.publishedAt) {
-        container.innerHTML = `
-        <div class="togel-empty-prediction">
-            <div class="icon">🔮</div>
-            <div class="title">Belum Ada Prediksi</div>
-            <div class="desc">Admin belum mempublikasikan prediksi untuk pasar ini.<br>Silakan cek kembali nanti.</div>
-        </div>`;
+        container.innerHTML = `<div class="togel-empty-prediction"><div class="icon">🔮</div><div class="title">Belum Ada Prediksi</div><div class="desc">Admin belum mempublikasikan prediksi untuk pasar ini.<br>Silakan cek kembali nanti.</div></div>`;
         return;
     }
 
     const pubDate = new Date(p.publishedAt).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
-    
-    // Format 350 Angka
     let html350 = p.angka350 && p.angka350.length > 0 ? p.angka350.join('*') + '*' : '—';
-    // Format 25 Angka
     let html25 = p.angka25 && p.angka25.length > 0 ? p.angka25.join(' ') : '—';
-    // Format 2D
     let depan2D = p.depan2D && p.depan2D.length > 0 ? p.depan2D.join(' ') : '—';
     let belakang2D = p.belakang2D && p.belakang2D.length > 0 ? p.belakang2D.join(' ') : '—';
 
     let html = `
     <div class="togel-prediction-box">
-        <div class="pred-header">
-            <span>🔮 Prediksi Pasar ${esc(m.name)}</span>
-            <span class="pred-meta">Dipublish: ${pubDate}</span>
-        </div>
-        
-        <div class="pred-section">
-            <div class="pred-label">Target Syair</div>
-            <div class="pred-values primary" style="font-size:16px;">${esc(p.target || '—')}</div>
-        </div>
-
-        ${p.angka350 && p.angka350.length > 0 ? `
-        <div class="pred-section">
-            <div class="pred-label">350 Angka Prediksi (4D)</div>
-            <div class="pred-values">${html350}</div>
-        </div>` : ''}
-
-        ${p.angka25 && p.angka25.length > 0 ? `
-        <div class="pred-section">
-            <div class="pred-label">25 Angka Master (4D)</div>
-            <div class="pred-values primary">${html25}</div>
-        </div>` : ''}
-
+        <div class="pred-header"><span>🔮 Prediksi Pasar ${esc(m.name)}</span><span class="pred-meta">Dipublish: ${pubDate}</span></div>
+        <div class="pred-section"><div class="pred-label">Target Syair</div><div class="pred-values primary" style="font-size:16px;">${esc(p.target || '—')}</div></div>
+        ${p.angka350 && p.angka350.length > 0 ? `<div class="pred-section"><div class="pred-label">350 Angka Prediksi (4D)</div><div class="pred-values">${html350}</div></div>` : ''}
+        ${p.angka25 && p.angka25.length > 0 ? `<div class="pred-section"><div class="pred-label">25 Angka Master (4D)</div><div class="pred-values primary">${html25}</div></div>` : ''}
         <div class="pred-section" style="display:flex; gap:10px; flex-wrap:wrap;">
-            <div style="flex:1; min-width:120px;">
-                <div class="pred-label">2D Depan</div>
-                <div class="pred-values" style="color:var(--warn);">${depan2D}</div>
-            </div>
-            <div style="flex:1; min-width:120px;">
-                <div class="pred-label">2D Belakang</div>
-                <div class="pred-values" style="color:var(--warn);">${belakang2D}</div>
-            </div>
+            <div style="flex:1; min-width:120px;"><div class="pred-label">2D Depan</div><div class="pred-values" style="color:var(--warn);">${depan2D}</div></div>
+            <div style="flex:1; min-width:120px;"><div class="pred-label">2D Belakang</div><div class="pred-values" style="color:var(--warn);">${belakang2D}</div></div>
         </div>
-
-        ${p.note ? `
-        <div class="pred-note">
-            📝 ${esc(p.note)}
-        </div>` : ''}
+        ${p.note ? `<div class="pred-note">📝 ${esc(p.note)}</div>` : ''}
     </div>`;
-
     container.innerHTML = html;
 }
 
-// 12. SIMPAN / EDIT RESULT
+// SIMPAN RESULT (Mencegah Data Tertimpa, Sinkron Semua Menu)
 function _handleTogelSave() {
     if (!_togelIsAdmin()) { toast('Hanya admin yang bisa input', 'error'); return; }
     const date = $('togelInputDate').value;
@@ -6215,30 +6143,36 @@ function _handleTogelSave() {
     
     const dupIndex = tbl.entries.findIndex(function(r) { return r.tanggal === date; });
     if (dupIndex !== -1) {
-        tbl.entries[dupIndex].result = result;
-        toast('Result tanggal ' + date + ' berhasil diubah', 'success');
+        // JIKA TANGGAL SAMA: Beri konfirmasi untuk edit, bukan asal timpa
+        if (confirm('Result untuk tanggal ' + date + ' sudah ada. Ingin mengubah (menimpa) result tersebut?')) {
+            tbl.entries[dupIndex].result = result;
+            toast('Result tanggal ' + date + ' berhasil diubah', 'success');
+        } else {
+            return; // Batal simpan
+        }
     } else {
+        // JIKA TANGGAL BARU: Tambahkan
         let nextNum = 1;
         if (tbl.entries.length > 0) {
             let max = 0;
             tbl.entries.forEach(function(e) { const num = parseInt(e.periode, 10); if (!isNaN(num) && num > max) max = num; });
             nextNum = max + 1;
         }
-        tbl.entries.push({
-            id: 'r_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
-            tanggal: date, result: result, periode: String(nextNum).padStart(3, '0')
+        tbl.entries.push({ 
+            id: 'r_' + Date.now() + '_' + Math.floor(Math.random() * 1000), 
+            tanggal: date, result: result, periode: String(nextNum).padStart(3, '0') 
         });
         toast('Result baru berhasil disimpan', 'success');
     }
     
-    tbl.entries.sort(function(a, b) { return (a.tanggal || '').localeCompare(b.tanggal || ''); });
-    saveTableData();
+    saveTableData(); // Simpan ke tabel utama
     
-    if (typeof syncTogelWithTable === 'function') syncTogelWithTable();
+    // REFRESH SEMUA TAMPILAN AGAR SINKRON
     $('togelInputResult').value = '';
-    
     renderTogelDetail();
     renderTogelGrid();
+    if (typeof renderResultTable === 'function') renderResultTable();
+    if (typeof renderMarketResultTable === 'function') renderMarketResultTable();
 }
 
 window.deleteTogelResult = function(id) {
@@ -6249,61 +6183,56 @@ window.deleteTogelResult = function(id) {
     const tbl = getOrCreateMarketTable(m.id, m.name);
     tbl.entries = tbl.entries.filter(function(r) { return r.id !== id; });
     saveTableData();
-    if (typeof syncTogelWithTable === 'function') syncTogelWithTable();
     
     renderTogelDetail();
     renderTogelGrid();
+    if (typeof renderResultTable === 'function') renderResultTable();
+    if (typeof renderMarketResultTable === 'function') renderMarketResultTable();
     toast('Result dihapus', 'success');
 };
 
-// 13. EDIT & HAPUS PASAR
 window.editPasarTogel = function(event, id) {
     if (event) event.stopPropagation();
     const m = marketData.markets.find(function(x) { return x.id === id; });
     if (!m) return;
-
-    const newName = prompt('Edit Nama Pasar:', m.name);
-    if (newName === null) return;
-    const newSchedule = prompt('Edit Label Jadwal:', m.schedule || '');
-    if (newSchedule === null) return;
-    const newDrawTimesStr = prompt('Edit Jam Mundur (Pisah koma jika banyak):\nContoh: 13:00, 19:00', (m.drawTimes || []).join(', '));
-    if (newDrawTimesStr === null) return;
-
+    const newName = prompt('Edit Nama Pasar:', m.name); if (newName === null) return;
+    const newSchedule = prompt('Edit Label Jadwal:', m.schedule || ''); if (newSchedule === null) return;
+    const newDrawTimesStr = prompt('Edit Jam Mundur (Pisah koma jika banyak):\nContoh: 13:00, 19:00', (m.drawTimes || []).join(', ')); if (newDrawTimesStr === null) return;
+    
     const drawTimes = newDrawTimesStr.split(',').map(function(s) { return s.trim(); }).filter(function(s) { return /^\d{2}:\d{2}$/.test(s); });
     if (drawTimes.length === 0) { toast('Format jam salah', 'error'); return; }
 
-    m.name = newName;
-    m.schedule = newSchedule || '—';
-    m.drawTimes = drawTimes;
+    m.name = newName; m.schedule = newSchedule || '—'; m.drawTimes = drawTimes;
     saveMarketData();
 
-    if (typeof tableData !== 'undefined' && tableData.tables) {
-        const tbl = tableData.tables.find(function(t) { return t.id === id; });
-        if (tbl) { tbl.name = newName; if (typeof saveTableData === 'function') saveTableData(); }
-    }
+    const tbl = tableData.tables.find(function(t) { return t.id === id; });
+    if (tbl) { tbl.name = newName; saveTableData(); }
 
-    toast('Pasar & Jam Mundur diperbarui', 'success');
-    renderTogelGrid();
-    stopTogelCountdown();
+    toast('Pasar diperbarui', 'success');
+    renderTogelGrid(); 
+    stopTogelCountdown(); 
     startTogelCountdown();
+    if (typeof refreshTableSelector === 'function') refreshTableSelector();
 };
 
 window.hapusPasarTogel = function(event, id) {
     if (event) event.stopPropagation();
     if (!confirm('Hapus pasar ini beserta seluruh resultnya?')) return;
+    
     marketData.markets = marketData.markets.filter(function(m) { return m.id !== id; });
     saveMarketData();
-    if (typeof tableData !== 'undefined' && tableData.tables) {
-        tableData.tables = tableData.tables.filter(function(t) { return t.id !== id; });
-        if (typeof saveTableData === 'function') saveTableData();
-    }
+    
+    tableData.tables = tableData.tables.filter(function(t) { return t.id !== id; });
+    saveTableData();
+    
     toast('Pasar dihapus', 'success');
     renderTogelGrid();
+    if (typeof refreshTableSelector === 'function') refreshTableSelector();
 };
 
-// 14. COUNTDOWN TIMER
 function startTogelCountdown() { stopTogelCountdown(); _togelCountdownInterval = setInterval(updateTogelCountdowns, 1000); updateTogelCountdowns(); }
 function stopTogelCountdown() { if (_togelCountdownInterval) { clearInterval(_togelCountdownInterval); _togelCountdownInterval = null; } }
+
 function updateTogelCountdowns() {
     document.querySelectorAll('[data-countdown-market]').forEach(function(el) {
         const mid = el.dataset.countdownMarket;
@@ -6322,68 +6251,8 @@ function updateTogelCountdowns() {
     }
 }
 
-// 15. Bind Tombol Simpan Result
-const saveBtn55 = $('togelSaveResultBtn');
-if (saveBtn55) saveBtn55.addEventListener('click', _handleTogelSave);
-
-/* ═══════════════════════════════════════════════════════════════════════
-   FUNGSI TAMPILKAN HISTORY DATA PASAR
-   ═══════════════════════════════════════════════════════════════════════ */
-window.renderMarketResultTable = function() {
-    const container = $('marketResultContainer');
-    if (!container) return;
-    
-    // Ambil pasar yang sedang dipilih
-    const activeMarket = getActiveMarket();
-    if (!activeMarket) return;
-    
-    const history = activeMarket.history || [];
-    
-    if (history.length === 0) {
-        container.innerHTML = '<div class="card"><div class="empty">Belum ada data history di pasar ini. Silakan input result di menu Togel.</div></div>';
-        return;
-    }
-    
-    // Urutkan dari tanggal terbaru
-    const sorted = history.slice().sort(function(a, b) {
-        return (b.date || '').localeCompare(a.date || '');
-    });
-    
-    let html = `
-    <div class="card">
-        <h3 style="color:var(--accent); margin-bottom:12px;">📜 History Result: ${esc(activeMarket.name)}</h3>
-        <div class="table-container" style="max-height:400px; overflow-y:auto;">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Tanggal</th>
-                        <th>Result</th>
-                        <th>Syair</th>
-                        <th>Grup</th>
-                    </tr>
-                </thead>
-                <tbody>`;
-                
-    sorted.forEach(function(r) {
-        const gen = generateSyairAndGrup(r.result);
-        html += `<tr>
-            <td>${esc(r.date)}</td>
-            <td class="td-pair">${esc(r.result)}</td>
-            <td>${esc(gen.syair || '—')}</td>
-            <td style="color:var(--warn);">${esc(gen.grup || '—')}</td>
-        </tr>`;
-    });
-    
-    html += `</tbody></table></div></div>`;
-    container.innerHTML = html;
-};
-
-// Event listener: Saat pasar diganti dari dropdown, tabel history ikut berubah
-const elMarketSelectorUpdate = $('marketSelector');
-if (elMarketSelectorUpdate) {
-    elMarketSelectorUpdate.addEventListener('change', function() {
-        if (typeof renderMarketResultTable === 'function') renderMarketResultTable();
-    });
+if ($('togelSaveResultBtn')) {
+    $('togelSaveResultBtn').addEventListener('click', _handleTogelSave);
 }
 
 	/* ═══════════════════════════════════════════════════════════════════════
