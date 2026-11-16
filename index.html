@@ -6039,8 +6039,8 @@ function renderTogelDetail() {
     $('togelTabHistory').classList.toggle('active', togelDetailTab === 'history');
     $('togelTabPrediksi').classList.toggle('active', togelDetailTab === 'prediksi');
     
-    const adminCard = $('togelAdminInputCard');
-    if (adminCard) adminCard.hidden = !_togelIsAdmin();
+        const adminCard = $('togelAdminInputCard');
+    if (adminCard) adminCard.hidden = true; // Form input di Togel SELALU DISEMBUNYIKAN
     const dateEl = $('togelInputDate');
     if (dateEl && !dateEl.value) dateEl.value = new Date().toISOString().split('T')[0];
 }
