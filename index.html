@@ -7159,7 +7159,6 @@ function buildGabung3Breakdown(sets, total, perm) {
 
 /* ═══════════════════════════════════════════════════════════════════════
    BLOK 65: POPULATE DROPDOWN BARU + INIT 33 ROWS
-   [FIXED] — Koma array `ids` diperbaiki + m23Grup1/2/3 ditambahkan
    ═══════════════════════════════════════════════════════════════════════ */
 
 function populateNewGrupDropdowns() {
@@ -7177,37 +7176,31 @@ function populateNewGrupDropdowns() {
         return h;
     };
     
-    // ✅ DIPERBAIKI: koma ditambahkan setelah 'gabungGrup3' + m23Grup1/2/3 ditambahkan
     const ids = [
-        'blGrup', 'c33Grup',
+        'blGrup', 'c33Grup', 
         'manualGrup1', 'manualGrup2', 'manualGrup3',
-        'bbfsGrup1', 'bbfsGrup2', 'bbfsGrup3',
-        'atGrup1', 'atGrup2', 'atGrup3',
+		'bbfsGrup1', 'bbfsGrup2', 'bbfsGrup3',
+		'atGrup1', 'atGrup2', 'atGrup3',
         'gabungGrup1', 'gabungGrup2', 'gabungGrup3',
-        'm23Grup1', 'm23Grup2', 'm23Grup3'
+		'm23Grup1', 'm23Grup2', 'm23Grup3'
     ];
     
     ids.forEach(function(id) {
-        const el = $(id);
-        if (!el) return;
+        const el = $(id); if (!el) return;
         const cur = el.value;
         
         let placeholderTxt = '— Pilih Grup —';
-        if (id === 'blGrup' || id === 'c33Grup') {
-            placeholderTxt = '— Tanpa Grup —';
-        }
-        if (id === 'manualGrup1' || id === 'manualGrup3' ||
-            id === 'bbfsGrup1'   || id === 'bbfsGrup3'   ||
-            id === 'atGrup1'     || id === 'atGrup3'     ||
-            id === 'gabungGrup1' || id === 'gabungGrup3' ||
-            id === 'm23Grup1'    || id === 'm23Grup3') {
-            placeholderTxt = '— AUTO 00-99 —';
-        }
-        if (id === 'manualGrup2' || id === 'bbfsGrup2' ||
-            id === 'atGrup2'     || id === 'gabungGrup2' ||
-            id === 'm23Grup2') {
-            placeholderTxt = '— Bebas (Tanpa Batas) —';
-        }
+			if (id === 'blGrup' || id === 'c33Grup') placeholderTxt = '— Tanpa Grup —';
+			if (id === 'manualGrup1' || id === 'manualGrup3' 
+			 || id === 'bbfsGrup1'  || id === 'bbfsGrup3' 
+			 || id === 'atGrup1'    || id === 'atGrup3' 
+			 || id === 'gabungGrup1'|| id === 'gabungGrup3'
+			 || id === 'm23Grup1'   || id === 'm23Grup3')
+				placeholderTxt = '— AUTO 00-99 —';
+			if (id === 'manualGrup2' || id === 'bbfsGrup2' 
+			 || id === 'atGrup2'     || id === 'gabungGrup2'
+			 || id === 'm23Grup2')
+				placeholderTxt = '— Bebas (Tanpa Batas) —';
         
         el.innerHTML = build(placeholderTxt);
         if (cur && names.includes(cur)) el.value = cur;
@@ -7216,7 +7209,7 @@ function populateNewGrupDropdowns() {
 
 document.addEventListener('DOMContentLoaded', function() {
     populateNewGrupDropdowns();
-    if (typeof renderC33Rows === 'function') renderC33Rows();
+    renderC33Rows();
     if (typeof renderM23Rows === 'function') renderM23Rows();
 });
 
@@ -7332,43 +7325,39 @@ function renderM23Rows() {
     container.innerHTML = html;
 
     container.querySelectorAll('input').forEach(function(el) {
-    el.addEventListener('input', function() {
-        const idx = parseInt(el.dataset.idx, 10);
-        const field = el.dataset.field;
-        
-        if (field === 'digits') el.value = onlyDigits(el.value).slice(0, 3);
-        
-        const r = m23State.rows[idx];
-        r[field] = el.value;
-        
-        if (r.digits.length >= 2) {
-            const baseUniverse = M23_UNIVERSE.filter(applyM23Filters);
-            const ms = blParseMultiset(r.digits);
-            r.results = baseUniverse.filter(function(n) { return blContainsCombo(n, ms); });
-            r.generated = true;
-        } else {
-            r.results = [];
-            r.generated = false;
-        }
+        el.addEventListener('input', function() {
+            const idx = parseInt(el.dataset.idx, 10);
+            const field = el.dataset.field;
+            
+            if (field === 'digits') el.value = onlyDigits(el.value).slice(0, 3);
+            
+            const r = m23State.rows[idx];
+            r[field] = el.value;
+            
+            if (r.digits.length >= 2) {
+                const baseUniverse = M23_UNIVERSE.filter(applyM23Filters);
+                const ms = blParseMultiset(r.digits);
+                r.results = baseUniverse.filter(function(n) { return blContainsCombo(n, ms); });
+                r.generated = true;
+            } else {
+                r.results = [];
+                r.generated = false;
+            }
 
-        const rowEl = el.closest('.m23-row');
-        if (rowEl) {
-            const total = r.results.length;
-            const pages = total > 0 ? Math.ceil(total / PER_PAGE) : 0;
-            const totEl = rowEl.querySelector('.m23-total');
-            const pgEl = rowEl.querySelector('.m23-pages');
-            const cpyBtn = rowEl.querySelector('.m23-copy');
+            const rowEl = el.closest('.m23-row');
+            if (rowEl) {
+                const total = r.results.length;
+                const pages = total > 0 ? Math.ceil(total / PER_PAGE) : 0;
+                const totEl = rowEl.querySelector('.m23-total');
+                const pgEl = rowEl.querySelector('.m23-pages');
+                const cpyBtn = rowEl.querySelector('.m23-copy');
 
-            if (totEl) totEl.textContent = total > 0 ? total.toLocaleString('id-ID') : '—';
-            if (pgEl) pgEl.textContent = pages > 0 ? pages + ' hal' : '—';
-            if (cpyBtn) cpyBtn.disabled = total === 0;
-        }
-        
-        // ✅ BONUS: auto-update panel Total Keseluruhan (debounce 400ms)
-        clearTimeout(window._m23Debounce);
-        window._m23Debounce = setTimeout(renderM23Results, 400);
+                if (totEl) totEl.textContent = total > 0 ? total.toLocaleString('id-ID') : '—';
+                if (pgEl) pgEl.textContent = pages > 0 ? pages + ' hal' : '—';
+                if (cpyBtn) cpyBtn.disabled = total === 0;
+            }
+        });
     });
-});
 }
 
 window.m23CopyRow = function(idx) {
