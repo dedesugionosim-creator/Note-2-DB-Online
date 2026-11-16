@@ -6121,34 +6121,30 @@ function _handleTogelSave() {
     const m = getActiveTogelMarket();
     if (!m) return;
     
-    const tbl = tableData.tables.find(function(t) { return t.id === m.id; });
-    if (!tbl) { toast('Tabel untuk pasar ini tidak ditemukan', 'error'); return; }
-    
-    // SELALU TAMBAH BARU (Tidak peduli tanggalnya sama)
-    let nextNum = 1;
-    if (tbl.entries.length > 0) {
-        let max = 0;
-        tbl.entries.forEach(function(e) { const num = parseInt(e.periode, 10); if (!isNaN(num) && num > max) max = num; });
-        nextNum = max + 1;
+    let tbl = tableData.tables.find(function(t) { return t.id === m.id; });
+    if (!tbl) {
+        tbl = { id: m.id, name: m.name, entries: [] };
+        tableData.tables.push(tbl);
     }
     
-    tbl.entries.push({ 
-        id: 'r_' + Date.now(), 
-        tanggal: date, 
-        result: result, 
-        periode: String(nextNum).padStart(3, '0'),
-        createdAt: Date.now() // <-- Penanda waktu input
-    });
-    
-    saveTableData(); // Simpan ke Tabel Result
-    
-    $('togelInputResult').value = '';
-    renderTogelDetail();
-    renderTogelGrid();
-    if (typeof renderResultTable === 'function') renderResultTable();
-    if (typeof renderMarketResultTable === 'function') renderMarketResultTable();
-    toast('Result baru berhasil disimpan', 'success');
-}
+    const dupIndex = tbl.entries.findIndex(function(r) { return r.tanggal === date; });
+    if (dupIndex !== -1) {
+        if (confirm('Result untuk tanggal ' + date + ' sudah ada. Ingin mengubah?')) {
+            tbl.entries[dupIndex].result = result;
+            toast('Result berhasil diubah', 'success');
+        } else {
+            return;
+        }
+    } else {
+        let nextNum = 1;
+        if (tbl.entries.length > 0) {
+            let max = 0;
+            tbl.entries.forEach(function(e) { const num = parseInt(e.periode, 10); if (!isNaN(num) && num > max) max = num; });
+            nextNum = max + 1;
+        }
+        tbl.entries.push({ id: 'r_' + Date.now(), tanggal: date, result: result, periode: String(nextNum).padStart(3, '0') });
+        toast('Result baru berhasil disimpan', 'success');
+    }
     
     saveTableData(); // Simpan ke Tabel Result
     
