@@ -5173,65 +5173,94 @@ if (document.readyState !== 'loading') {
 		return map;
 	}
 
-	function refreshGrupDropdowns() {
-		const map = grupMapWithCount();
-		const names = Object.keys(map).sort(function(a, b) { return a.localeCompare(b); });
-		const buildOptions = function(placeholder) {
-			let html = '<option value="">' + placeholder + '</option>';
-			names.forEach(function(g) {
-				html += '<option value="' + esc(g) + '">' + esc(g) + ' (' + map[g].length + ')</option>';
-			});
-			return html;
-		};
-		
-		// Ambil elemen dengan aman (mencegah error null)
-		const elM1 = $('manualGrup1');
-		const elM2 = $('manualGrup2');
-		const elM3 = $('manualGrup3');
-		const elB1 = $('bbfsGrup1');
-		const elB2 = $('bbfsGrup2');
-		const elB3 = $('bbfsGrup3');
-		const elA1 = $('atGrup1');
-		const elA2 = $('atGrup2');
-		const elA3 = $('atGrup3');
-		const elN1 = $('m23Grup1');   // ✅ TAMBAHKAN
-		const elN2 = $('m23Grup2');   // ✅ TAMBAHKAN
-		const elN3 = $('m23Grup3');   // ✅ TAMBAHKAN
-		const elC1 = $('grupCB1');
-		const elC2 = $('grupCB2');
+function refreshGrupDropdowns() {
+    const map = grupMapWithCount();
+    const names = Object.keys(map).sort(function(a, b) { return a.localeCompare(b); });
+    const buildOptions = function(placeholder) {
+        let html = '<option value="">' + placeholder + '</option>';
+        names.forEach(function(g) {
+            html += '<option value="' + esc(g) + '">' + esc(g) + ' (' + map[g].length + ')</option>';
+        });
+        return html;
+    };
+    
+    // Ambil elemen dengan aman (mencegah error null)
+    const elM1 = $('manualGrup1');
+    const elM2 = $('manualGrup2');
+    const elM3 = $('manualGrup3');
+    const elB1 = $('bbfsGrup1');
+    const elB2 = $('bbfsGrup2');
+    const elB3 = $('bbfsGrup3');
+    const elA1 = $('atGrup1');
+    const elA2 = $('atGrup2');
+    const elA3 = $('atGrup3');
+    const elC1 = $('grupCB1');
+    const elC2 = $('grupCB2');
+    const elN1 = $('m23Grup1');
+    const elN2 = $('m23Grup2');
+    const elN3 = $('m23Grup3');
 
-		// Simpan nilai yang sedang dipilih
-		const selected = {
-			m1: elM1 ? elM1.value : '',
-			m2: elM2 ? elM2.value : '',
-			m3: elM3 ? elM3.value : '',
-			b: elB ? elB.value : '',
-			a: elA ? elA.value : '',
-			c1: elC1 ? elC1.value : '',
-			c2: elC2 ? elC2.value : ''
-		};
+    // Simpan nilai yang sedang dipilih
+    const selected = {
+        m1: elM1 ? elM1.value : '',
+        m2: elM2 ? elM2.value : '',
+        m3: elM3 ? elM3.value : '',
+        b1: elB1 ? elB1.value : '',
+        b2: elB2 ? elB2.value : '',
+        b3: elB3 ? elB3.value : '',
+        a1: elA1 ? elA1.value : '',
+        a2: elA2 ? elA2.value : '',
+        a3: elA3 ? elA3.value : '',
+        c1: elC1 ? elC1.value : '',
+        c2: elC2 ? elC2.value : '',
+        n1: elN1 ? elN1.value : '',
+        n2: elN2 ? elN2.value : '',
+        n3: elN3 ? elN3.value : ''
+    };
 
-		// Render ulang dropdown
-		if (elM1) elM1.innerHTML = buildOptions('— AUTO 00-99 —');
-		if (elM2) elM2.innerHTML = buildOptions('— Bebas (Tanpa Batas) —');
-		if (elM3) elM3.innerHTML = buildOptions('— AUTO 00-99 —');
-		if (elB) elB.innerHTML = buildOptions('— Manual (tanpa grup) —');
-		if (elA) elA.innerHTML = buildOptions('— Manual (tanpa grup) —');
-		if (elC1) elC1.innerHTML = buildOptions('— Pilih Grup 1 —');
-		if (elC2) elC2.innerHTML = buildOptions('— Pilih Grup 2 —');
+    // Render ulang dropdown
+    if (elM1) elM1.innerHTML = buildOptions('— AUTO 00-99 —');
+    if (elM2) elM2.innerHTML = buildOptions('— Bebas (Tanpa Batas) —');
+    if (elM3) elM3.innerHTML = buildOptions('— AUTO 00-99 —');
+    
+    if (elB1) elB1.innerHTML = buildOptions('— AUTO 00-99 —');
+    if (elB2) elB2.innerHTML = buildOptions('— Bebas (Tanpa Batas) —');
+    if (elB3) elB3.innerHTML = buildOptions('— AUTO 00-99 —');
+    
+    if (elA1) elA1.innerHTML = buildOptions('— AUTO 00-99 —');
+    if (elA2) elA2.innerHTML = buildOptions('— Bebas (Tanpa Batas) —');
+    if (elA3) elA3.innerHTML = buildOptions('— AUTO 00-99 —');
+    
+    if (elC1) elC1.innerHTML = buildOptions('— Pilih Grup 1 —');
+    if (elC2) elC2.innerHTML = buildOptions('— Pilih Grup 2 —');
 
-		// Kembalikan nilai yang dipilih sebelumnya (jika ada)
-		if (selected.m1 && names.includes(selected.m1) && elM1) elM1.value = selected.m1;
-		if (selected.m2 && names.includes(selected.m2) && elM2) elM2.value = selected.m2;
-		if (selected.m3 && names.includes(selected.m3) && elM3) elM3.value = selected.m3;
-		if (selected.b && names.includes(selected.b) && elB) elB.value = selected.b;
-		if (selected.a && names.includes(selected.a) && elA) elA.value = selected.a;
-		if (selected.c1 && names.includes(selected.c1) && elC1) elC1.value = selected.c1;
-		if (selected.c2 && names.includes(selected.c2) && elC2) elC2.value = selected.c2;
+    if (elN1) elN1.innerHTML = buildOptions('— AUTO 00-99 —');
+    if (elN2) elN2.innerHTML = buildOptions('— Bebas (Tanpa Batas) —');
+    if (elN3) elN3.innerHTML = buildOptions('— AUTO 00-99 —');
 
-		// Panggil populate baru
-		if (typeof populateNewGrupDropdowns === 'function') populateNewGrupDropdowns();
-	}
+    // Kembalikan nilai yang dipilih sebelumnya (jika ada)
+    if (selected.m1 && names.includes(selected.m1) && elM1) elM1.value = selected.m1;
+    if (selected.m2 && names.includes(selected.m2) && elM2) elM2.value = selected.m2;
+    if (selected.m3 && names.includes(selected.m3) && elM3) elM3.value = selected.m3;
+    
+    if (selected.b1 && names.includes(selected.b1) && elB1) elB1.value = selected.b1;
+    if (selected.b2 && names.includes(selected.b2) && elB2) elB2.value = selected.b2;
+    if (selected.b3 && names.includes(selected.b3) && elB3) elB3.value = selected.b3;
+    
+    if (selected.a1 && names.includes(selected.a1) && elA1) elA1.value = selected.a1;
+    if (selected.a2 && names.includes(selected.a2) && elA2) elA2.value = selected.a2;
+    if (selected.a3 && names.includes(selected.a3) && elA3) elA3.value = selected.a3;
+    
+    if (selected.c1 && names.includes(selected.c1) && elC1) elC1.value = selected.c1;
+    if (selected.c2 && names.includes(selected.c2) && elC2) elC2.value = selected.c2;
+
+    if (selected.n1 && names.includes(selected.n1) && elN1) elN1.value = selected.n1;
+    if (selected.n2 && names.includes(selected.n2) && elN2) elN2.value = selected.n2;
+    if (selected.n3 && names.includes(selected.n3) && elN3) elN3.value = selected.n3;
+
+    // Panggil populate baru
+    if (typeof populateNewGrupDropdowns === 'function') populateNewGrupDropdowns();
+}
 
 	function refreshAll() {
 		renderMaster();
