@@ -3809,6 +3809,7 @@ function renderResultTable() {
         </tr>`;
     }
     tbody.innerHTML = html;
+}
 
 // --- FUNGSI CRUD TABEL RESULT (GLOBAL) ---
 window.openAddResultModal = function() {
@@ -5959,9 +5960,7 @@ function renderTogelGrid() {
         const tbl = tableData.tables.find(function(t) { return t.id === m.id; });
         const historyData = tbl ? (tbl.entries || []) : [];
         
-        const sorted = historyData.slice().sort(function(a, b) { 
-    return (b.createdAt || b.id || '').localeCompare(a.createdAt || a.id || ''); 
-});
+        const sorted = historyData.slice().sort(function(a, b) { return (b.tanggal || '').localeCompare(a.tanggal || ''); });
         const latest = sorted[0];
         const cd = _getNextDrawInfo(m.drawTimes);
         
@@ -6020,9 +6019,7 @@ function renderTogelDetail() {
     
     const tbl = tableData.tables.find(function(t) { return t.id === m.id; });
     const historyData = tbl ? (tbl.entries || []) : [];
-    const sorted = historyData.slice().sort(function(a, b) { 
-    return (b.createdAt || b.id || '').localeCompare(a.createdAt || a.id || ''); 
-});
+    const sorted = historyData.slice().sort(function(a, b) { return (b.tanggal || '').localeCompare(a.tanggal || ''); });
     const latest = sorted[0];
     
     if (latest) {
@@ -6066,9 +6063,7 @@ function renderTogelHistory() {
         return;
     }
     
-    const sorted = historyData.slice().sort(function(a, b) { 
-    return (b.createdAt || b.id || '').localeCompare(a.createdAt || a.id || ''); 
-});
+    const sorted = historyData.slice().sort(function(a, b) { return (b.tanggal || '').localeCompare(a.tanggal || ''); });
     let html = '';
     sorted.forEach(function(r) {
         const gen = generateSyairAndGrup(r.result);
@@ -6245,45 +6240,6 @@ function updateTogelCountdowns() {
 }
 
 if ($('togelSaveResultBtn')) {
-// SIMPAN RESULT (SELALU TAMBAH BARU, TIDAK PEDULI TANGGAL SAMA)
-function _handleTogelSave() {
-    if (!_togelIsAdmin()) { toast('Hanya admin yang bisa input', 'error'); return; }
-    const date = $('togelInputDate').value;
-    const result = onlyDigits($('togelInputResult').value);
-    if (!date) { toast('Tanggal wajib diisi', 'error'); return; }
-    if (result.length !== 4) { toast('Result harus 4 digit', 'error'); return; }
-    
-    const m = getActiveTogelMarket();
-    if (!m) return;
-    
-    const tbl = tableData.tables.find(function(t) { return t.id === m.id; });
-    if (!tbl) { toast('Tabel untuk pasar ini tidak ditemukan', 'error'); return; }
-    
-    // SELALU TAMBAH BARU (Sesuai request: 1 hari bisa 6x result)
-    let nextNum = 1;
-    if (tbl.entries.length > 0) {
-        let max = 0;
-        tbl.entries.forEach(function(e) { const num = parseInt(e.periode, 10); if (!isNaN(num) && num > max) max = num; });
-        nextNum = max + 1;
-    }
-    
-    tbl.entries.push({ 
-        id: 'r_' + Date.now(), 
-        tanggal: date, 
-        result: result, 
-        periode: String(nextNum).padStart(3, '0'),
-        createdAt: Date.now() // Penanda waktu input (agar urutan akurat)
-    });
-    
-    saveTableData(); // Simpan ke Tabel Result
-    
-    $('togelInputResult').value = '';
-    renderTogelDetail();
-    renderTogelGrid();
-    if (typeof renderResultTable === 'function') renderResultTable();
-    if (typeof renderMarketResultTable === 'function') renderMarketResultTable();
-    toast('Result baru berhasil disimpan', 'success');
-}
     $('togelSaveResultBtn').addEventListener('click', _handleTogelSave);
 }
 
