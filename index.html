@@ -4447,6 +4447,7 @@ $('manualGenerateBtn').addEventListener('click', function() {
 
     renderPagination('manualResult', 'manual', 'Hasil', '');
     toast('Berhasil: ' + filtered.length.toLocaleString('id-ID') + ' kombinasi', 'success');
+	document.getElementById('manualResult').scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
 
 // Inisialisasi render 55 baris saat pertama kali dimuat
@@ -4616,7 +4617,12 @@ $('bbfsGenerateBtn').addEventListener('click', function() {
     if (raw.length > 16) { toast('BBFS maksimal 16 digit', 'error'); return; }
 
     let filtered = permutasi4DariDigit(raw);
-    if (filtered.length === 0) { toast('Tidak ada kombinasi', 'error'); return; }
+    if (filtered.length === 0) { 
+    toast('Tidak ada kombinasi yang cocok', 'error'); 
+    pageState.manual.pages = []; // Ganti 'manual' dengan nama state masing-masing (bbfs, angkaTarung, dll)
+    renderPagination('manualResult', 'manual', 'Hasil', ''); // Ganti dengan ID dan state yang sesuai
+    return; 
+}
 
     // 1. Filter 3 Grup
     if (g1 || g2 || g3) {
