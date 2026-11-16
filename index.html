@@ -4863,94 +4863,108 @@ if (document.readyState !== 'loading') {
 	}
 
 	$('atGenerateBtn').addEventListener('click', function() {
-		let p1 = parseSingleDigitList($('atDigit1').value);
-		let p2 = parseSingleDigitList($('atDigit2').value);
-		let p3 = parseSingleDigitList($('atDigit3').value);
-		let p4 = parseSingleDigitList($('atDigit4').value);
-		
-		if (p1.length === 0) p1 = ['0','1','2','3','4','5','6','7','8','9'];
-		if (p2.length === 0) p2 = ['0','1','2','3','4','5','6','7','8','9'];
-		if (p3.length === 0) p3 = ['0','1','2','3','4','5','6','7','8','9'];
-		if (p4.length === 0) p4 = ['0','1','2','3','4','5','6','7','8','9'];
+    // 1. Ambil semua input P1 - P4
+    let p1 = parseSingleDigitList($('atDigit1').value);
+    let p2 = parseSingleDigitList($('atDigit2').value);
+    let p3 = parseSingleDigitList($('atDigit3').value);
+    let p4 = parseSingleDigitList($('atDigit4').value);
+    
+    // Jika kosong, otomatis pakai 0-9
+    if (p1.length === 0) p1 = ['0','1','2','3','4','5','6','7','8','9'];
+    if (p2.length === 0) p2 = ['0','1','2','3','4','5','6','7','8','9'];
+    if (p3.length === 0) p3 = ['0','1','2','3','4','5','6','7','8','9'];
+    if (p4.length === 0) p4 = ['0','1','2','3','4','5','6','7','8','9'];
 
-		const g1 = $('atGrup1').value;
-		const g2 = $('atGrup2').value;
-		const g3 = $('atGrup3').value;
-		const cb = parseSingleDigitList($('atCB').value);
-		const cbMode = $('atCBMode').value;
-		const d1 = getAT1DDepanSelected();
-		
-		let activeFilters = [];
-		for (let i = 1; i <= 55; i++) {
-			const el = $(`atMengandung${i}`);
-			if (el && el.value.trim()) activeFilters.push(el.value.trim());
-		}
+    // 2. Ambil filter lainnya
+    const g1 = $('atGrup1').value;
+    const g2 = $('atGrup2').value;
+    const g3 = $('atGrup3').value;
+    const cb = parseSingleDigitList($('atCB').value);
+    const cbMode = $('atCBMode').value;
+    const d1 = getAT1DDepanSelected();
+    
+    let activeFilters = [];
+    for (let i = 1; i <= 55; i++) {
+        const el = $(`atMengandung${i}`);
+        if (el && el.value.trim()) activeFilters.push(el.value.trim());
+    }
 
-		let filtered = [];
-		for (const a of p1) for (const b of p2) for (const c of p3) for (const d of p4) filtered.push(a + b + c + d);
+    // 3. Generate dasar (Cross Product)
+    let filtered = [];
+    for (const a of p1) for (const b of p2) for (const c of p3) for (const d of p4) filtered.push(a + b + c + d);
 
-		// 1. Filter 3 Grup
-		if (g1 || g2 || g3) {
-			const setG1 = g1 ? new Set(getGroupAs2DigitDepan(g1)) : null;
-			const setG2 = g2 ? new Set([...getGroupAs2DigitDepan(g2), ...getGroupAs2DigitBelakang(g2)]) : null;
-			const setG3 = g3 ? new Set(getGroupAs2DigitBelakang(g3)) : null;
+    // Helper: Jika hasil 0, bersihkan layar dan beri pesan
+    function tampilkanKosong(pesan) {
+        toast(pesan, 'error');
+        pageState.angkaTarung.pages = [];
+        renderPagination('atResult', 'angkaTarung', 'Hasil', '');
+    }
 
-			filtered = filtered.filter(n => {
-				const ab = n.slice(0, 2);
-				const bc = n.slice(1, 3);
-				const cd = n.slice(2, 4);
-				
-				if (setG1 && !setG1.has(ab)) return false;
-				if (setG2 && !setG2.has(bc)) return false;
-				if (setG3 && !setG3.has(cd)) return false;
-				return true;
-			});
+    // 4. Filter 3 Grup
+    if (g1 || g2 || g3) {
+        const setG1 = g1 ? new Set(getGroupAs2DigitDepan(g1)) : null;
+        const setG2 = g2 ? new Set([...getGroupAs2DigitDepan(g2), ...getGroupAs2DigitBelakang(g2)]) : null;
+        const setG3 = g3 ? new Set(getGroupAs2DigitBelakang(g3)) : null;
 
-			if (filtered.length === 0) { toast('Tidak ada kombinasi yang cocok dengan filter Grup', 'error'); return; }
-		}
+        filtered = filtered.filter(n => {
+            const ab = n.slice(0, 2);
+            const bc = n.slice(1, 3);
+            const cd = n.slice(2, 4);
+            
+            if (setG1 && !setG1.has(ab)) return false;
+            if (setG2 && !setG2.has(bc)) return false;
+            if (setG3 && !setG3.has(cd)) return false;
+            return true;
+        });
 
-		// 2. Filter 1D Depan
-		if (d1.length > 0) {
-			filtered = filtered.filter(n => d1.includes(n[0]));
-			if (filtered.length === 0) { toast('Tidak ada 2D depan yang cocok dengan Awalan 1D', 'error'); return; }
-		}
+        if (filtered.length === 0) { 
+            tampilkanKosong('Tidak ada kombinasi yang cocok dengan filter Grup'); return; 
+        }
+    }
 
-		// 3. Filter 55 Baris Mengandung
-		for (let f of activeFilters) {
-			filtered = applyMengandungFilter(filtered, f);
-			if (filtered.length === 0) {
-				toast('Tidak ada hasil setelah filter mengandung "' + f + '"', 'error'); 
-				return;
-			}
-		}
+    // 5. Filter 1D Depan
+    if (d1.length > 0) {
+        filtered = filtered.filter(n => d1.includes(n[0]));
+        if (filtered.length === 0) { 
+            tampilkanKosong('Tidak ada kombinasi yang cocok dengan Awalan 1D'); return; 
+        }
+    }
 
-		// 4. Filter CB
-		if (cb.length > 0) {
-			filtered = filterByCB(filtered, cb.join(''), cbMode);
-			if (filtered.length === 0) { toast('Tidak ada hasil setelah filter CB', 'error'); return; }
-		}
+    // 6. Filter 55 Baris Mengandung
+    for (let f of activeFilters) {
+        filtered = applyMengandungFilter(filtered, f);
+        if (filtered.length === 0) {
+            tampilkanKosong('Tidak ada hasil setelah filter mengandung "' + f + '"'); return;
+        }
+    }
 
-		filtered.sort();
-		pageState.angkaTarung.pages = paginateArray(filtered);
-		pageState.angkaTarung.current = 0;
-		
-		let meta = 'P1:'+p1.length+' P2:'+p2.length+' P3:'+p3.length+' P4:'+p4.length;
-		if (g1 || g2 || g3) meta += ' • Filter Grup';
-		if (d1.length > 0) meta += ' • Awalan: ' + d1.join(',');
-		if (activeFilters.length > 0) meta += ' • Saring ' + activeFilters.length + ' baris';
-		if (cb.length > 0) meta += ' • CB: ' + cb.join(' ');
-		pageState.angkaTarung.meta = meta;
+    // 7. Filter CB
+    if (cb.length > 0) {
+        filtered = filterByCB(filtered, cb.join(''), cbMode);
+        if (filtered.length === 0) { 
+            tampilkanKosong('Tidak ada hasil setelah filter CB'); return; 
+        }
+    }
 
-		renderPagination('atResult', 'angkaTarung', 'Hasil', '');
-		toast('Berhasil: ' + filtered.length.toLocaleString('id-ID') + ' kombinasi', 'success');
-	});
+    // 8. Tampilkan Hasil Akhir
+    filtered.sort();
+    pageState.angkaTarung.pages = paginateArray(filtered);
+    pageState.angkaTarung.current = 0;
+    
+    let meta = 'P1:'+p1.length+' P2:'+p2.length+' P3:'+p3.length+' P4:'+p4.length;
+    if (g1 || g2 || g3) meta += ' • Filter Grup';
+    if (d1.length > 0) meta += ' • Awalan: ' + d1.join(',');
+    if (activeFilters.length > 0) meta += ' • Saring ' + activeFilters.length + ' baris';
+    if (cb.length > 0) meta += ' • CB: ' + cb.join(' ');
+    pageState.angkaTarung.meta = meta;
 
-	// Init render 55 baris AK
-	if (document.readyState !== 'loading') {
-		renderAT55Rows();
-	} else {
-		document.addEventListener('DOMContentLoaded', renderAT55Rows);
-	}
+    renderPagination('atResult', 'angkaTarung', 'Hasil', '');
+    toast('Berhasil: ' + filtered.length.toLocaleString('id-ID') + ' kombinasi', 'success');
+    
+    // Gulir otomatis ke kotak hasil
+    const resBox = $('atResult');
+    if (resBox) resBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
 
 	/* ═══════════════════════════════════════════════════════════════════════
 	   BLOK 47: CB BBFS GENERATOR — REVISED (CB opsional)
