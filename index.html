@@ -1761,6 +1761,21 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
             <b>Semua field opsional.</b> Jika G1/G3 kosong, sistem otomatis memakai <b>semua angka 00–99</b>.<br>
             Jika G2 kosong, tidak ada batasan tengah (mode bebas).
         </p>
+		<!-- TAMBAHKAN BLOK INI -->
+        <div class="grid-2">
+            <div class="field">
+                <label for="gabungBBFS">BBFS Filter (Opsional)</label>
+                <input type="text" id="gabungBBFS" maxlength="20" inputmode="numeric" placeholder="0123456 (Kosongkan jika tidak dipakai)">
+            </div>
+            <div class="field">
+                <label for="gabungCB">CB Filter (Opsional)</label>
+                <input type="text" id="gabungCB" placeholder="0 1 2 (Pisah spasi)">
+            </div>
+        </div>
+
+        <p id="gabungInfo" class="text-accent" style="font-size:13px; margin:12px 0;">
+            Info: Kosongkan grup untuk mode AUTO (00-99).
+        </p>
         <div class="grid-2">
             <div class="field">
                 <label for="gabungGrup1">Grup 1 → 2D Depan</label>
