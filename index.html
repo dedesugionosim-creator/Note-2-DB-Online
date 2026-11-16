@@ -8518,5 +8518,170 @@ console.log('Semua fitur siap. Selamat menggunakan SA_HARD!');
 })();
 </script>
 
+<script>
+/* ═══════════════════════════════════════════════════════════════════════
+   FITUR AUTO-SAVE (VERSI RINGAN - BEBAS LAG)
+   ═══════════════════════════════════════════════════════════════════════ */
+(function() {
+    var KEY_INPUT = 'sa_save_inputs_v1';  // Untuk teks yang diketik
+    var KEY_STATE = 'sa_save_state_v1';   // Untuk hasil generate (berat)
+    var sudahDimuat = false;
+    var saveTimer = null;
+
+    // 1. FUNGSI SIMPAN INPUT (Hanya teks ketikan, sangat ringan)
+    function simpanInput() {
+        if (typeof currentUser === 'undefined' || !currentUser) return;
+        try {
+            var fields = {};
+            var inputs = document.querySelectorAll('#app input, #app select, #app textarea');
+            for (var i = 0; i < inputs.length; i++) {
+                var el = inputs[i];
+                if (!el.id || el.closest('#chatMenu')) continue;
+                if (el.type === 'password' || el.type === 'file') continue;
+                fields[el.id] = (el.type === 'checkbox') ? el.checked : el.value;
+            }
+            localStorage.setItem(KEY_INPUT, JSON.stringify(fields));
+        } catch (e) {}
+    }
+
+    // 2. FUNGSI SIMPAN STATE (Hasil generate, hanya dipanggil saat keluar/pindah tab)
+    function simpanState() {
+        if (typeof currentUser === 'undefined' || !currentUser) return;
+        try {
+            var state = {};
+            var activeTab = document.querySelector('#subTabs4Angka button.active');
+            if (activeTab) state.activeTab = activeTab.getAttribute('data-subpanel');
+            
+            if (typeof pageState !== 'undefined') state.pageState = pageState;
+            if (typeof bmState !== 'undefined') state.bmState = bmState;
+            if (typeof c33State !== 'undefined') state.c33State = c33State;
+            if (typeof c33MasterState !== 'undefined') state.c33MasterState = c33MasterState;
+            if (typeof m23State !== 'undefined') state.m23State = m23State;
+            if (typeof m23MasterState !== 'undefined') state.m23MasterState = m23MasterState;
+            
+            if (typeof blSections !== 'undefined') {
+                state.blSections = {};
+                for (var k in blSections) {
+                    state.blSections[k] = {
+                        items: blSections[k].items,
+                        page: blSections[k].page,
+                        label: blSections[k].label,
+                        combo: blSections[k].combo
+                    };
+                }
+            }
+            localStorage.setItem(KEY_STATE, JSON.stringify(state));
+        } catch (e) {}
+    }
+
+    // 3. FUNGSI MUAT DATA (Saat aplikasi dibuka/login)
+    function muat() {
+        if (sudahDimuat) return;
+        try {
+            // Kembalikan teks input
+            var rawInput = localStorage.getItem(KEY_INPUT);
+            if (rawInput) {
+                var fields = JSON.parse(rawInput);
+                for (var id in fields) {
+                    var el = document.getElementById(id);
+                    if (!el) continue;
+                    if (el.type === 'checkbox') el.checked = fields[id];
+                    else el.value = fields[id];
+                }
+            }
+
+            // Kembalikan hasil generate
+            var rawState = localStorage.getItem(KEY_STATE);
+            if (rawState) {
+                var state = JSON.parse(rawState);
+                if (state.pageState && typeof pageState !== 'undefined') Object.assign(pageState, state.pageState);
+                if (state.bmState && typeof bmState !== 'undefined') Object.assign(bmState, state.bmState);
+                if (state.c33State && typeof c33State !== 'undefined') Object.assign(c33State, state.c33State);
+                if (state.c33MasterState && typeof c33MasterState !== 'undefined') Object.assign(c33MasterState, state.c33MasterState);
+                if (state.m23State && typeof m23State !== 'undefined') Object.assign(m23State, state.m23State);
+                if (state.m23MasterState && typeof m23MasterState !== 'undefined') Object.assign(m23MasterState, state.m23MasterState);
+                
+                if (state.blSections && typeof blSections !== 'undefined') {
+                    for (var k3 in blSections) delete blSections[k3];
+                    for (var k4 in state.blSections) blSections[k4] = state.blSections[k4];
+                }
+
+                // Render ulang tampilan di background (Delay 300ms agar tidak berat saat login)
+                setTimeout(function() {
+                    for (var k in pageState) {
+                        if (pageState[k].pages && pageState[k].pages.length > 0) {
+                            try { renderPagination(PAGE_MAP[k][0], k, PAGE_MAP[k][1]); } catch(er) {}
+                        }
+                    }
+                    if (bmState.items && bmState.items.length > 0) { try { renderBM(); } catch(er) {} }
+                    try { renderC33Rows(); renderC33Results(); } catch(er) {}
+                    try { renderM23Rows(); renderM23Results(); } catch(er) {}
+                    
+                    if (state.blSections && typeof blBuildSection === 'function') {
+                        var html = '';
+                        for (var k5 in blSections) {
+                            try { html += blBuildSection(k5, blSections[k5].label, blSections[k5].items, blSections[k5].combo); } catch(er) {}
+                        }
+                        var container = document.getElementById('blResultsContainer');
+                        if (container) container.innerHTML = html;
+                        for (var k6 in blSections) { try { blRenderSection(k6); } catch(er) {} }
+                    }
+                    
+                    if (typeof updateManualInfo === 'function') updateManualInfo();
+                    if (typeof updateBBFSInfo === 'function') updateBBFSInfo();
+                    if (typeof updateATInfo === 'function') updateATInfo();
+                    if (typeof blUpdateInfo === 'function') blUpdateInfo();
+                    if (typeof updateGrupCBInfo === 'function') updateGrupCBInfo();
+                    if (typeof updateCBBFFSInfo === 'function') updateCBBFFSInfo();
+                    if (typeof updateGabung3Info === 'function') updateGabung3Info();
+                }, 300);
+
+                if (state.activeTab) {
+                    var btn = document.querySelector('#subTabs4Angka button[data-subpanel="' + state.activeTab + '"]');
+                    if (btn) btn.click();
+                }
+            }
+            sudahDimuat = true;
+        } catch (e) { sudahDimuat = true; }
+    }
+
+    // 4. EVENT LISTENER
+    // Saat ngetik: tunggu 1 detik baru simpan input (Biarpun ngetik cepat, gak akan lag)
+    document.addEventListener('input', function(e) {
+        if (e.target && e.target.closest && e.target.closest('#app')) {
+            clearTimeout(saveTimer);
+            saveTimer = setTimeout(simpanInput, 1000);
+        }
+    });
+    document.addEventListener('change', function(e) {
+        if (e.target && e.target.closest && e.target.closest('#app')) {
+            clearTimeout(saveTimer);
+            saveTimer = setTimeout(simpanInput, 1000);
+        }
+    });
+
+    // Saat keluar aplikasi / pindah tab: Simpan hasil generate
+    window.addEventListener('beforeunload', simpanState);
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'hidden') simpanState();
+    });
+
+    // 5. LOAD SAAT APLIKASI TERBUKA
+    var app = document.getElementById('app');
+    if (app) {
+        if (!app.hidden) {
+            setTimeout(muat, 800);
+        } else {
+            var observer = new MutationObserver(function() {
+                if (!app.hidden) {
+                    setTimeout(muat, 800);
+                    observer.disconnect();
+                }
+            });
+            observer.observe(app, { attributes: true, attributeFilter: ['hidden'] });
+        }
+    }
+})();
+</script>
 </body>
 </html>
