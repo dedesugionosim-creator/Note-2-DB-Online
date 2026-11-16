@@ -1763,16 +1763,14 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
         </p>
 		<!-- TAMBAHKAN BLOK INI -->
         <div class="grid-2">
-                    <div class="grid-2">
             <div class="field">
                 <label for="gabungBBFS">BBFS Filter (Opsional)</label>
-                <input type="text" id="gabungBBFS" maxlength="20" inputmode="numeric" placeholder="Kosongkan jika tidak dipakai">
+                <input type="text" id="gabungBBFS" maxlength="20" inputmode="numeric" placeholder="0123456 (Kosongkan jika tidak dipakai)">
             </div>
             <div class="field">
                 <label for="gabungCB">CB Filter (Opsional)</label>
                 <input type="text" id="gabungCB" placeholder="0 1 2 (Pisah spasi)">
             </div>
-        </div>
         </div>
 
         <p id="gabungInfo" class="text-accent" style="font-size:13px; margin:12px 0;">
@@ -3693,6 +3691,39 @@ function syncTogelWithTable() {
     if (typeof saveTableData === 'function') saveTableData();
 }
 
+function syncTogelWithTable() {
+    if (typeof marketData === 'undefined' || typeof tableData === 'undefined') return;
+    
+    // 1. Pastikan setiap Pasar di Togel punya Tabel
+    marketData.markets.forEach(function(m) {
+        if (m.isTogel) {
+            let tbl = tableData.tables.find(function(t) { return t.id === m.id; });
+            if (!tbl) {
+                tbl = { id: m.id, name: m.name, entries: [] };
+                tableData.tables.push(tbl);
+            } else {
+                tbl.name = m.name;
+            }
+            
+            // 2. Sinkronisasi dari Tabel Result ke Togel
+            if (tbl.entries && tbl.entries.length > 0) {
+                m.history = tbl.entries.map(function(e) { 
+                    return { id: e.id, date: e.tanggal, result: e.result }; 
+                });
+            } else {
+                m.history = [];
+            }
+        }
+    });
+    
+    // Hapus tabel yang pasarnya sudah dihapus di Togel
+    tableData.tables = tableData.tables.filter(function(t) {
+        return marketData.markets.some(function(m) { return m.id === t.id && m.isTogel; });
+    });
+    
+    saveTableData();
+    saveMarketData();
+}
 
 function refreshTableSelector() {
     const sel = $('tableSelector');
@@ -3756,8 +3787,8 @@ function renderResultTable() {
     
     // URUTKAN BERDASARKAN TANGGAL TERBARU (Descending)
     const sorted = entries.slice().sort(function(a, b) {
-    return (b.createdAt || 0) - (a.createdAt || 0);
-});
+        return (b.tanggal || '').localeCompare(a.tanggal || '');
+    });
     
     let html = '';
     for (let i = 0; i < sorted.length; i++) {
@@ -4043,32 +4074,57 @@ function renderPagination(containerId, stateKey, labelPrefix, breakdownHTML) {
     if (breakdownHTML) state._breakdown = breakdownHTML;
     const breakdown = state._breakdown || '';
     
+    // JIKA HASIL KOSONG: Bersihkan layar dan tampilkan pesan
     if (state.pages.length === 0 || state.pages[0].length === 0) {
-        container.innerHTML = '<div class="empty">Tidak ada hasil yang cocok. Coba ubah filter.</div>';
+        container.innerHTML = '<div class="empty">Tidak ada hasil yang cocok. Coba ubah filter atau angka.</div>';
         return;
     }
+
     const totalPages = state.pages.length;
+    
+    // PENGAMAN: Pastikan halaman tidak error jika hasil baru lebih sedikit
     if (state.current >= totalPages || state.current < 0) state.current = 0;
 
     const current = state.current;
     const pageData = state.pages[current];
     const totalItems = state.pages.reduce(function(sum, p) { return sum + p.length; }, 0);
-    
+    const displayNum = current + 1;
+    const prevDisabled = (current === 0) ? 'disabled' : '';
+    const nextDisabled = (current === totalPages - 1) ? 'disabled' : '';
+
+    // KOSONGKAN DULU (Ini trik agar HP tidak bingung saat tinggi layar berubah)
+    container.innerHTML = '';
+
+    // Render HTML baru
     container.innerHTML = `
         ${breakdown}
-        <div class="page-info">${esc(labelPrefix)} ${current + 1} dari ${totalPages} • ${pageData.length} angka • Total: ${totalItems.toLocaleString('id-ID')} ${state.meta ? ' • ' + esc(state.meta) : ''}</div>
+        <div class="page-info">
+            ${esc(labelPrefix)} ${displayNum} dari ${totalPages}
+            • ${pageData.length} angka di halaman ini
+            • Total: ${totalItems.toLocaleString('id-ID')} angka
+            ${state.meta ? ' • ' + esc(state.meta) : ''}
+        </div>
         <div class="page-content">${pageData.join('*')}*</div>
         <div class="page-nav">
-            <button ${current === 0 ? 'disabled' : ''} onclick="goPage('${stateKey}', -1)">◀ Sebelumnya</button>
-            <span>${current + 1} / ${totalPages}</span>
-            <button ${current === totalPages - 1 ? 'disabled' : ''} onclick="goPage('${stateKey}', 1)">Berikutnya ▶</button>
+            <button ${prevDisabled} onclick="goPage('${stateKey}', -1)">◀ Sebelumnya</button>
+            <span>${esc(labelPrefix)} ${displayNum} / ${totalPages}</span>
+            <button ${nextDisabled} onclick="goPage('${stateKey}', 1)">Berikutnya ▶</button>
+        </div>
+        <div class="page-jump">
+            <span>Lompat ke halaman:</span>
+            <input type="number" min="1" max="${totalPages}" value="${displayNum}" id="jump-${stateKey}">
+            <button onclick="jumpPage('${stateKey}')">Go</button>
         </div>
         <div class="page-actions">
             <button onclick="copyCurrentPage('${stateKey}')">📋 Copy Halaman Ini</button>
             <button onclick="copyAllPages('${stateKey}')">📋 Copy Semua</button>
+            <button onclick="exportPages('${stateKey}')">⬇ Export TXT</button>
         </div>`;
 
-    setTimeout(function() { container.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
+    // PAKSA LAYAR HP MELUNCUR KE ATAS KE AREA HASIL
+    setTimeout(function() {
+        container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
 }
 
 window.goPage = function(stateKey, delta) {
@@ -5157,27 +5213,81 @@ function refreshGrupDropdowns() {
         return html;
     };
     
-    const elM1 = $('manualGrup1'); const elM2 = $('manualGrup2'); const elM3 = $('manualGrup3');
-    const elB1 = $('bbfsGrup1'); const elB2 = $('bbfsGrup2'); const elB3 = $('bbfsGrup3');
-    const elA1 = $('atGrup1'); const elA2 = $('atGrup2'); const elA3 = $('atGrup3');
-    const elC1 = $('grupCB1'); const elC2 = $('grupCB2');
-    const elN1 = $('m23Grup1'); const elN2 = $('m23Grup2'); const elN3 = $('m23Grup3');
+    // Ambil elemen dengan aman (mencegah error null)
+    const elM1 = $('manualGrup1');
+    const elM2 = $('manualGrup2');
+    const elM3 = $('manualGrup3');
+    const elB1 = $('bbfsGrup1');
+    const elB2 = $('bbfsGrup2');
+    const elB3 = $('bbfsGrup3');
+    const elA1 = $('atGrup1');
+    const elA2 = $('atGrup2');
+    const elA3 = $('atGrup3');
+    const elC1 = $('grupCB1');
+    const elC2 = $('grupCB2');
+    const elN1 = $('m23Grup1');
+    const elN2 = $('m23Grup2');
+    const elN3 = $('m23Grup3');
 
+    // Simpan nilai yang sedang dipilih
+    const selected = {
+        m1: elM1 ? elM1.value : '',
+        m2: elM2 ? elM2.value : '',
+        m3: elM3 ? elM3.value : '',
+        b1: elB1 ? elB1.value : '',
+        b2: elB2 ? elB2.value : '',
+        b3: elB3 ? elB3.value : '',
+        a1: elA1 ? elA1.value : '',
+        a2: elA2 ? elA2.value : '',
+        a3: elA3 ? elA3.value : '',
+        c1: elC1 ? elC1.value : '',
+        c2: elC2 ? elC2.value : '',
+        n1: elN1 ? elN1.value : '',
+        n2: elN2 ? elN2.value : '',
+        n3: elN3 ? elN3.value : ''
+    };
+
+    // Render ulang dropdown
     if (elM1) elM1.innerHTML = buildOptions('— AUTO 00-99 —');
     if (elM2) elM2.innerHTML = buildOptions('— Bebas (Tanpa Batas) —');
     if (elM3) elM3.innerHTML = buildOptions('— AUTO 00-99 —');
+    
     if (elB1) elB1.innerHTML = buildOptions('— AUTO 00-99 —');
     if (elB2) elB2.innerHTML = buildOptions('— Bebas (Tanpa Batas) —');
     if (elB3) elB3.innerHTML = buildOptions('— AUTO 00-99 —');
+    
     if (elA1) elA1.innerHTML = buildOptions('— AUTO 00-99 —');
     if (elA2) elA2.innerHTML = buildOptions('— Bebas (Tanpa Batas) —');
     if (elA3) elA3.innerHTML = buildOptions('— AUTO 00-99 —');
+    
     if (elC1) elC1.innerHTML = buildOptions('— Pilih Grup 1 —');
     if (elC2) elC2.innerHTML = buildOptions('— Pilih Grup 2 —');
+
     if (elN1) elN1.innerHTML = buildOptions('— AUTO 00-99 —');
     if (elN2) elN2.innerHTML = buildOptions('— Bebas (Tanpa Batas) —');
     if (elN3) elN3.innerHTML = buildOptions('— AUTO 00-99 —');
 
+    // Kembalikan nilai yang dipilih sebelumnya (jika ada)
+    if (selected.m1 && names.includes(selected.m1) && elM1) elM1.value = selected.m1;
+    if (selected.m2 && names.includes(selected.m2) && elM2) elM2.value = selected.m2;
+    if (selected.m3 && names.includes(selected.m3) && elM3) elM3.value = selected.m3;
+    
+    if (selected.b1 && names.includes(selected.b1) && elB1) elB1.value = selected.b1;
+    if (selected.b2 && names.includes(selected.b2) && elB2) elB2.value = selected.b2;
+    if (selected.b3 && names.includes(selected.b3) && elB3) elB3.value = selected.b3;
+    
+    if (selected.a1 && names.includes(selected.a1) && elA1) elA1.value = selected.a1;
+    if (selected.a2 && names.includes(selected.a2) && elA2) elA2.value = selected.a2;
+    if (selected.a3 && names.includes(selected.a3) && elA3) elA3.value = selected.a3;
+    
+    if (selected.c1 && names.includes(selected.c1) && elC1) elC1.value = selected.c1;
+    if (selected.c2 && names.includes(selected.c2) && elC2) elC2.value = selected.c2;
+
+    if (selected.n1 && names.includes(selected.n1) && elN1) elN1.value = selected.n1;
+    if (selected.n2 && names.includes(selected.n2) && elN2) elN2.value = selected.n2;
+    if (selected.n3 && names.includes(selected.n3) && elN3) elN3.value = selected.n3;
+
+    // Panggil populate baru
     if (typeof populateNewGrupDropdowns === 'function') populateNewGrupDropdowns();
 }
 
@@ -5308,8 +5418,8 @@ function refreshGrupDropdowns() {
 			if (entries.length < 2) { toast('Minimal butuh 2 data', 'error'); return; }
 			
 			const sorted = entries.slice().sort(function(a, b) {
-    return (b.createdAt || 0) - (a.createdAt || 0);
-});
+				return (a.periode || '').localeCompare(b.periode || '', undefined, { numeric: true });
+			});
 			
 			const freqMap = {};
 			for (let i = 0; i < sorted.length - 1; i++) {
@@ -5352,8 +5462,8 @@ function refreshGrupDropdowns() {
 		const entries = getActiveTable().entries;
 		if (entries.length < 2) { toast('Minimal butuh 2 data', 'error'); return; }
 		const sorted = entries.slice().sort(function(a, b) {
-    return (b.createdAt || 0) - (a.createdAt || 0);
-});
+			return a.periode.localeCompare(b.periode, undefined, { numeric: true });
+		});
 		const freqMap = {};
 		for (let i = 0; i < sorted.length - 1; i++) {
 			const r = sorted[i].result;
@@ -5929,8 +6039,8 @@ function renderTogelDetail() {
     $('togelTabHistory').classList.toggle('active', togelDetailTab === 'history');
     $('togelTabPrediksi').classList.toggle('active', togelDetailTab === 'prediksi');
     
-        const adminCard = $('togelAdminInputCard');
-    if (adminCard) adminCard.hidden = true; // Form input di Togel SELALU DISEMBUNYIKAN
+    const adminCard = $('togelAdminInputCard');
+    if (adminCard) adminCard.hidden = !_togelIsAdmin();
     const dateEl = $('togelInputDate');
     if (dateEl && !dateEl.value) dateEl.value = new Date().toISOString().split('T')[0];
 }
@@ -6002,40 +6112,39 @@ function renderTogelPrediksi() {
 
 // SIMPAN RESULT (Langsung ke Tabel Result)
 function _handleTogelSave() {
-    if (!_togelIsAdmin()) { toast('Hanya admin', 'error'); return; }
+    if (!_togelIsAdmin()) { toast('Hanya admin yang bisa input', 'error'); return; }
     const date = $('togelInputDate').value;
     const result = onlyDigits($('togelInputResult').value);
-    if (!date) { toast('Tanggal wajib', 'error'); return; }
-    if (result.length !== 4) { toast('Result 4 digit', 'error'); return; }
+    if (!date) { toast('Tanggal wajib diisi', 'error'); return; }
+    if (result.length !== 4) { toast('Result harus 4 digit', 'error'); return; }
     
     const m = getActiveTogelMarket();
     if (!m) return;
     
-    const tbl = tableData.tables.find(function(t) { return t.id === m.id; });
-    if (!tbl) return;
-    
-    let nextNum = 1;
-    if (tbl.entries.length > 0) {
-        let max = 0;
-        tbl.entries.forEach(function(e) { const num = parseInt(e.periode, 10); if (!isNaN(num) && num > max) max = num; });
-        nextNum = max + 1;
+    let tbl = tableData.tables.find(function(t) { return t.id === m.id; });
+    if (!tbl) {
+        tbl = { id: m.id, name: m.name, entries: [] };
+        tableData.tables.push(tbl);
     }
     
-    // SELALU TAMBAH BARU (Tidak peduli tanggal sama)
-    tbl.entries.push({ 
-        id: 'r_' + Date.now(), tanggal: date, result: result, 
-        periode: String(nextNum).padStart(3, '0'), createdAt: Date.now() 
-    });
-    
-    saveTableData();
-    $('togelInputResult').value = '';
-    renderTogelDetail(); renderTogelGrid();
-    if (typeof renderResultTable === 'function') renderResultTable();
-    toast('Result disimpan', 'success');
-}
-
-// Lalu cari semua fungsi sort dan ubah menjadi:
-// const sorted = historyData.slice().sort(function(a, b) { return (b.createdAt || 0) - (a.createdAt || 0); });
+    const dupIndex = tbl.entries.findIndex(function(r) { return r.tanggal === date; });
+    if (dupIndex !== -1) {
+        if (confirm('Result untuk tanggal ' + date + ' sudah ada. Ingin mengubah?')) {
+            tbl.entries[dupIndex].result = result;
+            toast('Result berhasil diubah', 'success');
+        } else {
+            return;
+        }
+    } else {
+        let nextNum = 1;
+        if (tbl.entries.length > 0) {
+            let max = 0;
+            tbl.entries.forEach(function(e) { const num = parseInt(e.periode, 10); if (!isNaN(num) && num > max) max = num; });
+            nextNum = max + 1;
+        }
+        tbl.entries.push({ id: 'r_' + Date.now(), tanggal: date, result: result, periode: String(nextNum).padStart(3, '0') });
+        toast('Result baru berhasil disimpan', 'success');
+    }
     
     saveTableData(); // Simpan ke Tabel Result
     
@@ -7167,55 +7276,31 @@ function updateGabung3Info() {
 if ($('gabungGenerateBtn')) {
     $('gabungGenerateBtn').addEventListener('click', function() {
         const sets = gabung3GetSets();
-        const bbfsRaw = onlyDigits($('gabungBBFS') ? $('gabungBBFS').value : '');
-        const cbRaw = onlyDigits($('gabungCB') ? $('gabungCB').value : '');
-        
-        if (bbfsRaw.length > 0 && (bbfsRaw.length < 4 || bbfsRaw.length > 20)) {
-            toast('BBFS harus 4-20 digit', 'error'); return;
+        if (!sets.s1.length || !sets.s3.length) {
+            toast('Grup kosong di master', 'error'); return;
+        }
+        const comp = gabung3Compute();
+        if (!comp.combos.length) { toast('Tidak ada kombinasi', 'error'); return; }
+
+        const permCheck = $('gabungPermutasi') && $('gabungPermutasi').checked;
+        let results = comp.combos;
+        if (permCheck) {
+            const exp = new Set();
+            comp.combos.forEach(function(c) { permutasi4DariNomor(c).forEach(function(p) { exp.add(p); }); });
+            results = Array.from(exp).sort();
         }
 
-        let results = [];
-
-        if (bbfsRaw.length >= 4) {
-            let pool = permutasi4DariDigit(bbfsRaw);
-            if (sets.g1 || sets.g2 || sets.g3) {
-                const setG1 = sets.g1 ? new Set(getGroupAs2DigitDepan(sets.g1)) : null;
-                const setG2 = sets.g2 ? new Set([...getGroupAs2DigitDepan(sets.g2), ...getGroupAs2DigitBelakang(sets.g2)]) : null;
-                const setG3 = sets.g3 ? new Set(getGroupAs2DigitBelakang(sets.g3)) : null;
-                pool = pool.filter(n => {
-                    if (setG1 && !setG1.has(n.slice(0, 2))) return false;
-                    if (setG2 && !setG2.has(n.slice(1, 3))) return false;
-                    if (setG3 && !setG3.has(n.slice(2, 4))) return false;
-                    return true;
-                });
-            }
-            results = pool;
-        } else {
-            if (!sets.s1.length || !sets.s3.length) { toast('Grup kosong di master', 'error'); return; }
-            const comp = gabung3Compute();
-            results = comp.combos;
-            if ($('gabungPermutasi') && $('gabungPermutasi').checked) {
-                const exp = new Set();
-                results.forEach(function(c) { permutasi4DariNomor(c).forEach(function(p) { exp.add(p); }); });
-                results = Array.from(exp).sort();
-            }
+        if (results.length > 5000) {
+            if (!confirm('Akan generate ' + results.length.toLocaleString('id-ID') + ' kombinasi. Lanjutkan?')) return;
         }
 
-        if (cbRaw.length > 0) results = filterByCB(results, cbRaw, 'or');
-
-        if (results.length === 0) {
-            toast('Tidak ada kombinasi', 'error');
-            pageState.gabungGrup.pages = [];
-            renderPagination('gabungResult', 'gabungGrup', 'Hasil', '');
-            return;
-        }
-
-        results.sort();
         pageState.gabungGrup.pages = paginateArray(results);
         pageState.gabungGrup.current = 0;
-        pageState.gabungGrup.meta = bbfsRaw ? ('BBFS: ' + bbfsRaw) : ('G1:' + (sets.g1 || 'AUTO') + ' G3:' + (sets.g3 || 'AUTO'));
-        
-        const breakdown = buildGabung3Breakdown(sets, results.length, $('gabungPermutasi') && $('gabungPermutasi').checked, bbfsRaw, cbRaw);
+        pageState.gabungGrup.meta = 'G1:' + (sets.g1 || 'AUTO')
+            + (sets.g2 ? ' G2:' + sets.g2 : '') + ' G3:' + (sets.g3 || 'AUTO')
+            + (permCheck ? ' • permutasi' : '');
+        pageState.gabungGrup._breakdown = '';
+        const breakdown = buildGabung3Breakdown(sets, results.length, permCheck);
         renderPagination('gabungResult', 'gabungGrup', 'Hasil', breakdown);
         toast('Berhasil: ' + results.length.toLocaleString('id-ID'), 'success');
     });
