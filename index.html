@@ -3187,19 +3187,19 @@ function showExpiredModal(user) {
 
 /* ═══════════════════════════════════════════════════════════════════════
    BLOK 35: LOGIN MULTI-USER
-   [FIXED] — Hapus duplikasi loadUsers/loadPricing/renderM23Rows
    ═══════════════════════════════════════════════════════════════════════ */
 
 function masukAplikasi() {
     $('loginError').textContent = '';
     $('loginScreen').style.display = 'none';
     $('app').hidden = false;
-
-    // ─── 1. Load semua data dasar (masing-masing SEKALI saja) ───
     loadMaster();
     loadTableData();
     loadMarketData();
-    syncTogelWithTable();
+	syncTogelWithTable();
+
+    loadUsers();
+    loadPricing();
     loadUsers();
     loadPricing();
     loadChats();
@@ -3207,28 +3207,74 @@ function masukAplikasi() {
     initNotifications();
     applyRolePermissions();
 
-    // ─── 2. Render form yang butuh container HTML (33 & 55 baris) ───
-    //     Populate dropdown grup TIDAK perlu di sini karena sudah
-    //     ditangani oleh refreshAll() → refreshGrupDropdowns()
-    //     → populateNewGrupDropdowns() (BLOK 50).
+    // Render form 33 input saat pertama kali login
     if (typeof renderC33Rows === 'function') renderC33Rows();
-    if (typeof renderM23Rows === 'function') renderM23Rows();
+	if (typeof populateNewGrupDropdowns === 'function') populateNewGrupDropdowns();
+	if (typeof renderM23Rows === 'function') renderM23Rows();
+	if (typeof renderM23Rows === 'function') renderM23Rows();
 
-    // ─── 3. Redirect sesuai status user ───
     if (currentUser.role === 'user' && isUserExpired(currentUser.data)) {
         showExpiredModal(currentUser.data);
         switchSection('chatMenu');
         renderChatSidebar();
     } else {
-        // refreshAll() akan memanggil:
-        //   renderMaster, renderGrup, refreshGrupDropdowns
-        //   (→ populateNewGrupDropdowns untuk SEMUA dropdown termasuk m23),
-        //   _refreshManualPreview, _refreshBBFSPreview, _refreshATPreview,
-        //   _refreshM23Preview, update*Info, dll.
         refreshAll();
         switchSection('inputMaster');
     }
 }
+
+$('loginForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const u = $('username').value.trim();
+    const p = $('password').value.replace(/\s/g, '');
+    if (u === CREDENTIALS.username && p === CREDENTIALS.password) {
+        currentUser = { role: 'admin' };
+        sessionStorage.setItem('sa_logged_in', JSON.stringify({ role: 'admin' }));
+        loadUsers();
+        masukAplikasi();
+        toast('Selamat datang, Admin', 'success');
+        return;
+    }
+    loadUsers();
+    const foundUser = userList.find(function(user) {
+        return user.username === u && user.password === p;
+    });
+    if (foundUser) {
+        currentUser = { role: 'user', data: foundUser };
+        sessionStorage.setItem('sa_logged_in', JSON.stringify({ role: 'user', userId: foundUser.id }));
+        masukAplikasi();
+        if (!isUserExpired(foundUser)) toast('Selamat datang, ' + foundUser.nama, 'success');
+    } else {
+        $('loginError').textContent = 'Username atau password salah';
+    }
+});
+
+$('logoutBtn').addEventListener('click', function() {
+    if (confirm('Yakin ingin logout?')) {
+        sessionStorage.removeItem('sa_logged_in');
+        location.reload();
+    }
+});
+$('expiredLogoutBtn').addEventListener('click', function() {
+    sessionStorage.removeItem('sa_logged_in');
+    location.reload();
+});
+$('requestRenewalBtn').addEventListener('click', function() {
+    if (!currentUser || currentUser.role !== 'user') return;
+    const u = currentUser.data;
+    const idx = userList.findIndex(function(usr) { return usr.id === u.id; });
+    if (idx !== -1) { userList[idx].status = 'menunggu_konfirmasi'; saveUsers(); }
+    chatHistory.push({
+        id: 'MSG-' + Date.now(), from: 'user', to: 'admin', targetId: u.id,
+        message: 'Halo Admin, saya ' + u.nama + ' (' + u.id + ') ingin mengajukan perpanjangan langganan. Mohon dibantu.',
+        timestamp: Date.now(), read: false
+    });
+    saveChats();
+    $('expiredModal').classList.remove('show');
+    toast('Pengajuan terkirim. Silakan chat Admin.', 'success');
+    switchSection('chatMenu');
+    renderChatSidebar();
+});
 
 /* ═══════════════════════════════════════════════════════════════════════
    BLOK 36: NAVIGATION & SUB-TABS
@@ -5009,7 +5055,6 @@ if (elSyairMarketSelect) {
 
 /* ═══════════════════════════════════════════════════════════════════════
    BLOK 50: DROPDOWN REFRESH & REFRESH ALL
-   [FIXED] — Delegasi ke populateNewGrupDropdowns() (BLOK 65)
    ═══════════════════════════════════════════════════════════════════════ */
 
 function grupMapWithCount() {
@@ -5022,16 +5067,6 @@ function grupMapWithCount() {
 }
 
 function refreshGrupDropdowns() {
-    // ✅ Semua dropdown grup (manual*, bbfs*, at*, gabung*, blGrup, c33Grup,
-    //    m23Grup1/2/3) sudah ditangani oleh populateNewGrupDropdowns() di BLOK 65.
-    //    Fungsi ini cukup mendelegasikan agar tidak duplikasi logika.
-    if (typeof populateNewGrupDropdowns === 'function') {
-        populateNewGrupDropdowns();
-        return;
-    }
-
-    // ─── Fallback minimal (hanya untuk berjaga-jaga jika BLOK 65 belum ada) ───
-    // Hanya populate dropdown yang sudah pasti ada di HTML.
     const map = grupMapWithCount();
     const names = Object.keys(map).sort(function(a, b) { return a.localeCompare(b); });
     const buildOptions = function(placeholder) {
@@ -5041,34 +5076,54 @@ function refreshGrupDropdowns() {
         });
         return html;
     };
+    
+    // Ambil elemen dengan aman (mencegah error null)
+    const elM1 = $('manualGrup1');
+    const elM2 = $('manualGrup2');
+    const elM3 = $('manualGrup3');
+    const elB1 = $('bbfsGrup1');
+	const elB2 = $('bbfsGrup2');
+	const elB3 = $('bbfsGrup3');
+	const elA1 = $('atGrup1');
+	const elA2 = $('atGrup2');
+	const elA3 = $('atGrup3');
+	const elN1 = $('m23Grup1');   // ✅ TAMBAHKAN
+	const elN2 = $('m23Grup2');   // ✅ TAMBAHKAN
+	const elN3 = $('m23Grup3');   // ✅ TAMBAHKAN
+    const elC1 = $('grupCB1');
+    const elC2 = $('grupCB2');
 
-    const fallbackIds = [
-        { id: 'manualGrup1', ph: '— AUTO 00-99 —' },
-        { id: 'manualGrup2', ph: '— Bebas (Tanpa Batas) —' },
-        { id: 'manualGrup3', ph: '— AUTO 00-99 —' },
-        { id: 'bbfsGrup1',   ph: '— AUTO 00-99 —' },
-        { id: 'bbfsGrup2',   ph: '— Bebas (Tanpa Batas) —' },
-        { id: 'bbfsGrup3',   ph: '— AUTO 00-99 —' },
-        { id: 'atGrup1',     ph: '— AUTO 00-99 —' },
-        { id: 'atGrup2',     ph: '— Bebas (Tanpa Batas) —' },
-        { id: 'atGrup3',     ph: '— AUTO 00-99 —' },
-        { id: 'gabungGrup1', ph: '— AUTO 00-99 —' },
-        { id: 'gabungGrup2', ph: '— Bebas (Tanpa Batas) —' },
-        { id: 'gabungGrup3', ph: '— AUTO 00-99 —' },
-        { id: 'blGrup',      ph: '— Tanpa Grup —' },
-        { id: 'c33Grup',     ph: '— Tanpa Grup —' },
-        { id: 'm23Grup1',    ph: '— AUTO 00-99 —' },
-        { id: 'm23Grup2',    ph: '— Bebas (Tanpa Batas) —' },
-        { id: 'm23Grup3',    ph: '— AUTO 00-99 —' }
-    ];
+    // Simpan nilai yang sedang dipilih
+    const selected = {
+        m1: elM1 ? elM1.value : '',
+        m2: elM2 ? elM2.value : '',
+        m3: elM3 ? elM3.value : '',
+        b: elB ? elB.value : '',
+        a: elA ? elA.value : '',
+        c1: elC1 ? elC1.value : '',
+        c2: elC2 ? elC2.value : ''
+    };
 
-    fallbackIds.forEach(function(item) {
-        const el = $(item.id);
-        if (!el) return;
-        const cur = el.value;
-        el.innerHTML = buildOptions(item.ph);
-        if (cur && names.includes(cur)) el.value = cur;
-    });
+    // Render ulang dropdown
+    if (elM1) elM1.innerHTML = buildOptions('— AUTO 00-99 —');
+    if (elM2) elM2.innerHTML = buildOptions('— Bebas (Tanpa Batas) —');
+    if (elM3) elM3.innerHTML = buildOptions('— AUTO 00-99 —');
+    if (elB) elB.innerHTML = buildOptions('— Manual (tanpa grup) —');
+    if (elA) elA.innerHTML = buildOptions('— Manual (tanpa grup) —');
+    if (elC1) elC1.innerHTML = buildOptions('— Pilih Grup 1 —');
+    if (elC2) elC2.innerHTML = buildOptions('— Pilih Grup 2 —');
+
+    // Kembalikan nilai yang dipilih sebelumnya (jika ada)
+    if (selected.m1 && names.includes(selected.m1) && elM1) elM1.value = selected.m1;
+    if (selected.m2 && names.includes(selected.m2) && elM2) elM2.value = selected.m2;
+    if (selected.m3 && names.includes(selected.m3) && elM3) elM3.value = selected.m3;
+    if (selected.b && names.includes(selected.b) && elB) elB.value = selected.b;
+    if (selected.a && names.includes(selected.a) && elA) elA.value = selected.a;
+    if (selected.c1 && names.includes(selected.c1) && elC1) elC1.value = selected.c1;
+    if (selected.c2 && names.includes(selected.c2) && elC2) elC2.value = selected.c2;
+
+    // Panggil populate baru
+    if (typeof populateNewGrupDropdowns === 'function') populateNewGrupDropdowns();
 }
 
 function refreshAll() {
@@ -5078,7 +5133,6 @@ function refreshAll() {
     if (typeof _refreshManualPreview === 'function') _refreshManualPreview();
     if (typeof _refreshBBFSPreview === 'function') _refreshBBFSPreview();
     if (typeof _refreshATPreview === 'function') _refreshATPreview();
-    if (typeof _refreshM23Preview === 'function') _refreshM23Preview();
     if (typeof updateManualInfo === 'function') updateManualInfo();
     if (typeof updateBBFSInfo === 'function') updateBBFSInfo();
     if (typeof updateATInfo === 'function') updateATInfo();
