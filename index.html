@@ -2746,10 +2746,10 @@ const SEED_MASTER = [
     ["01", "Setan", "Figur"],
     ["02", "Iblis", "Figur"],
     ["03", "Jin", "Figur"],
-    ["04", "Insaf", "Keinginan"],
+    ["04", "Insaf", "Akibat"],
     ["05", "Dokter", "Figur"],
     ["06", "Sundal", "Figur"],
-    ["07", "Gol", "Keinginan"],
+    ["07", "Gol", "Akibat"],
     ["08", "Penggoda", "Figur"],
     ["09", "Risau", "Akibat"],
     ["10", "Kotor", "Akibat"],
@@ -2761,9 +2761,9 @@ const SEED_MASTER = [
     ["16", "Sengsara", "Akibat"],
     ["17", "Celaka", "Akibat"],
     ["18", "Sial", "Akibat"],
-    ["19", "Bahagia", "Keinginan"],
+    ["19", "Bahagia", "Akibat"],
     ["20", "Mampus", "Kematian"],
-    ["21", "Ikat Diri", "Keinginan"],
+    ["21", "Ikat Diri", "Akibat"],
     ["22", "Bunuh Diri", "Kematian"],
     ["23", "Benci", "Akibat"],
     ["24", "Berani", "Akibat"],
@@ -2781,50 +2781,50 @@ const SEED_MASTER = [
     ["36", "Biadab", "Figur"],
     ["37", "Kecewa", "Akibat"],
     ["38", "Bajingan", "Figur"],
-    ["39", "Menari", "Keinginan"],
+    ["39", "Menari", "Akibat"],
     ["40", "Dirasuki", "Akibat"],
     ["41", "Kecurian", "Akibat"],
     ["42", "Jurang", "Akibat"],
-    ["43", "Kejam", "Keinginan"],
+    ["43", "Kejam", "Akibat"],
     ["44", "TBC", "Akibat"],
     ["45", "Gantung Diri", "Kematian"],
     ["46", "Telanjang Bulat", "Akibat"],
-    ["47", "Gila Pangkat", "Keinginan"],
+    ["47", "Gila Pangkat", "Akibat"],
     ["48", "Calon Mati", "Kematian"],
     ["49", "Neraka", "Akibat"],
-    ["50", "Serakah", "Keinginan"],
+    ["50", "Serakah", "Akibat"],
     ["51", "Isap Lidah", "Akibat"],
     ["52", "Kubur", "Kematian"],
     ["53", "Maut", "Kematian"],
     ["54", "Draw", "Akibat"],
-    ["55", "Indah", "Keinginan"],
-    ["56", "Tertawa", "Keinginan"],
+    ["55", "Indah", "Akibat"],
+    ["56", "Tertawa", "Akibat"],
     ["57", "Menjolok", "Akibat"],
     ["58", "Marah", "Akibat"],
     ["59", "Tersinggung", "Akibat"],
     ["60", "Sakit Hati", "Akibat"],
     ["61", "Kalah", "Akibat"],
     ["62", "Hina", "Akibat"],
-    ["63", "Kabur", "Keinginan"],
+    ["63", "Kabur", "Akibat"],
     ["64", "Cantik", "Figur"],
     ["65", "Brengsek", "Figur"],
     ["66", "Nakal", "Figur"],
     ["67", "Begal", "Figur"],
     ["68", "Rusak", "Akibat"],
-    ["69", "Menghajar", "Keinginan"],
-    ["70", "Puji Diri", "Keinginan"],
-    ["71", "Berkelana", "Keinginan"],
-    ["72", "Keinginan", "Keinginan"],
+    ["69", "Menghajar", "Akibat"],
+    ["70", "Puji Diri", "Akibat"],
+    ["71", "Berkelana", "Akibat"],
+    ["72", "Keinginan", "Akibat"],
     ["73", "Imbalan", "Akibat"],
     ["74", "Payudara", "Figur"],
     ["75", "Bosan", "Akibat"],
     ["76", "Bantah", "Akibat"],
     ["77", "Kecewa", "Akibat"],
     ["78", "Durhaka", "Akibat"],
-    ["79", "Menghajar", "Keinginan"],
+    ["79", "Menghajar", "Akibat"],
     ["80", "Bingung", "Akibat"],
-    ["81", "Merantau", "Keinginan"],
-    ["82", "Lancong", "Keinginan"],
+    ["81", "Merantau", "Akibat"],
+    ["82", "Lancong", "Akibat"],
     ["83", "Cinta", "Akibat"],
     ["84", "Ciuman", "Akibat"],
     ["85", "Hangus", "Akibat"],
@@ -2832,7 +2832,7 @@ const SEED_MASTER = [
     ["87", "Pusing", "Akibat"],
     ["88", "Perbuatan", "Akibat"],
     ["89", "Takut", "Akibat"],
-    ["90", "Langsung", "Keinginan"],
+    ["90", "Langsung", "Akibat"],
     ["91", "Telanjang", "Akibat"],
     ["92", "Dambaan", "Figur"],
     ["93", "Zina", "Akibat"],
@@ -4030,16 +4030,16 @@ function renderPagination(containerId, stateKey, labelPrefix, breakdownHTML) {
     if (breakdownHTML) state._breakdown = breakdownHTML;
     const breakdown = state._breakdown || '';
     
-    if (state.pages.length === 0) {
-        container.innerHTML = '<div class="empty">Belum ada hasil. Klik tombol Generate.</div>';
+    // JIKA HASIL KOSONG: Bersihkan layar dan tampilkan pesan
+    if (state.pages.length === 0 || state.pages[0].length === 0) {
+        container.innerHTML = '<div class="empty">Tidak ada hasil yang cocok. Coba ubah filter atau angka.</div>';
         return;
     }
 
     const totalPages = state.pages.length;
     
-    // ⬇️ PENGAMAN: Reset halaman ke 0 jika posisi halaman melebihi total halaman baru
-    if (state.current >= totalPages) state.current = 0;
-    if (state.current < 0) state.current = 0;
+    // PENGAMAN: Pastikan halaman tidak error jika hasil baru lebih sedikit
+    if (state.current >= totalPages || state.current < 0) state.current = 0;
 
     const current = state.current;
     const pageData = state.pages[current];
@@ -4048,6 +4048,10 @@ function renderPagination(containerId, stateKey, labelPrefix, breakdownHTML) {
     const prevDisabled = (current === 0) ? 'disabled' : '';
     const nextDisabled = (current === totalPages - 1) ? 'disabled' : '';
 
+    // KOSONGKAN DULU (Ini trik agar HP tidak bingung saat tinggi layar berubah)
+    container.innerHTML = '';
+
+    // Render HTML baru
     container.innerHTML = `
         ${breakdown}
         <div class="page-info">
@@ -4072,6 +4076,11 @@ function renderPagination(containerId, stateKey, labelPrefix, breakdownHTML) {
             <button onclick="copyAllPages('${stateKey}')">📋 Copy Semua</button>
             <button onclick="exportPages('${stateKey}')">⬇ Export TXT</button>
         </div>`;
+
+    // PAKSA LAYAR HP MELUNCUR KE ATAS KE AREA HASIL
+    setTimeout(function() {
+        container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
 }
 
 window.goPage = function(stateKey, delta) {
@@ -4975,7 +4984,12 @@ if (document.readyState !== 'loading') {
 
 		const all = permutasi4DariDigit(bbfs);
 		const filtered = cb ? filterByCB(all, cb, mode) : all;
-		if (filtered.length === 0) { toast('Tidak ada hasil', 'error'); return; }
+		    if (filtered.length === 0) { 
+        toast('Tidak ada hasil', 'error'); 
+        pageState.bbfs.pages = []; 
+        renderPagination('bbfsResult', 'bbfs', 'Hasil', ''); 
+        return; 
+    }
 
 		pageState.cbBBFS.pages = paginateArray(filtered);
 		pageState.cbBBFS.current = 0;
@@ -5055,7 +5069,12 @@ if (document.readyState !== 'loading') {
 
 		const results = crossProduct4Digit(depans, belakangs, perm);
 		const filtered = cb ? filterByCB(results, cb, mode) : results;
-		if (filtered.length === 0) { toast('Tidak ada hasil', 'error'); return; }
+		if (filtered.length === 0) { 
+        toast('Tidak ada hasil', 'error'); 
+        pageState.manual.pages = []; // Bersihkan data lama
+        renderPagination('manualResult', 'manual', 'Hasil', ''); // Hapus layar
+        return; 
+    }
 
 		pageState.grupCB.pages = paginateArray(filtered);
 		pageState.grupCB.current = 0;
