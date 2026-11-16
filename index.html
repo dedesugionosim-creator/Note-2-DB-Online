@@ -5852,8 +5852,38 @@ function refreshGrupDropdowns() {
    ═══════════════════════════════════════════════════════════════════════ */
 
 // Fungsi ini dikosongkan agar sistem lama tidak lagi memaksa Togel & Tabel Result menyatu
-function syncTogelWithTable() {
-    // Sengaja dikosongkan. Tabel Result dan Togel sekarang berjalan sendiri-sendiri.
+function _handleTogelSave() {
+    if (!_togelIsAdmin()) { toast('Hanya admin yang bisa input', 'error'); return; }
+    const date = $('togelInputDate').value;
+    const result = onlyDigits($('togelInputResult').value);
+    if (!date) { toast('Tanggal wajib diisi', 'error'); return; }
+    if (result.length !== 4) { toast('Result harus 4 digit', 'error'); return; }
+    
+    const m = getActiveTogelMarket();
+    if (!m) return;
+    
+    if (!m.history) m.history = [];
+    
+    const dupIndex = m.history.findIndex(function(r) { return r.date === date; });
+    if (dupIndex !== -1) {
+        if (confirm('Result untuk tanggal ' + date + ' sudah ada di Togel ini. Ingin mengubah?')) {
+            m.history[dupIndex].result = result;
+            toast('Result Togel diubah', 'success');
+        } else { return; }
+    } else {
+        m.history.push({ id: 'r_' + Date.now() + '_' + Math.floor(Math.random() * 1000), date: date, result: result });
+        toast('Result Togel disimpan', 'success');
+    }
+    
+    m.history.sort(function(a, b) { return (a.date || '').localeCompare(b.date || ''); });
+    
+    // HANYA SIMPAN KE MARKET DATA (Togel)
+    saveMarketData(); 
+    
+    $('togelInputResult').value = '';
+    renderTogelDetail();
+    renderTogelGrid();
+    if (typeof renderMarketResultTable === 'function') renderMarketResultTable();
 }
 
 function _togelIsAdmin() {
