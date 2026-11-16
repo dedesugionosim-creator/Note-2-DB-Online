@@ -3669,26 +3669,26 @@ function syncTogelWithTable() {
     if (typeof marketData === 'undefined' || typeof tableData === 'undefined') return;
     if (!marketData.markets || !tableData.tables) return;
 
-    // Pastikan setiap Pasar di Togel punya "Tabel" di Menu Tabel Result
+    // 1. Pastikan setiap Pasar di Togel punya Tabel di Tabel Result
     marketData.markets.forEach(function(m) {
         if (m.isTogel) {
             let tbl = tableData.tables.find(function(t) { return t.id === m.id; });
-            
             if (!tbl) {
-                // Jika belum ada, buatkan tabel baru yang kosong
                 tbl = { id: m.id, name: m.name, entries: [] };
                 tableData.tables.push(tbl);
             } else {
-                // Jika sudah ada, pastikan namanya selalu sama
                 tbl.name = m.name;
             }
         }
     });
     
-    // Simpan perubahan
-    if (typeof saveTableData === 'function') {
-        saveTableData();
-    }
+    // 2. Hapus tabel Togel yang pasarnya sudah tidak ada
+    tableData.tables = tableData.tables.filter(function(t) {
+        if (t.id === 'table_default') return true;
+        return marketData.markets.some(function(m) { return m.id === t.id && m.isTogel; });
+    });
+
+    if (typeof saveTableData === 'function') saveTableData();
 }
 
 function syncTogelWithTable() {
@@ -5833,48 +5833,6 @@ function refreshGrupDropdowns() {
 		reader.readAsText(file);
 		e.target.value = '';
 	});
-
-	// FUNGSI SINKRONISASI ANTAR TABEL RESULT & MENU TOGEL
-	function syncTogelWithTable() {
-		if (typeof tableData === 'undefined' || typeof marketData === 'undefined') return;
-		
-		// 1. Pastikan setiap Pasar Togel punya Tabel di Tabel Result
-		marketData.markets.forEach(function(m) {
-			if (m.isTogel) {
-				// Cari tabel berdasarkan ID atau Nama yang mirip
-				let tbl = tableData.tables.find(function(t) { 
-					return t.id === m.id || t.name.toLowerCase() === m.name.toLowerCase(); 
-				});
-				
-				if (!tbl) {
-					// Jika tidak ada, buatkan tabel baru
-					tbl = { id: m.id, name: m.name, entries: [] };
-					tableData.tables.push(tbl);
-				} else {
-					// Jika ada, samakan ID-nya dengan ID Pasar Togel
-					tbl.id = m.id; 
-					tbl.name = m.name;
-				}
-
-				// Pindahkan data dari m.history (data lama) ke Tabel Result
-				if (m.history && m.history.length > 0) {
-					m.history.forEach(function(h) {
-						const exists = tbl.entries.some(function(e) { return e.tanggal === h.date; });
-						if (!exists) {
-							tbl.entries.push({
-								id: h.id || 'mig_' + Date.now() + Math.random(),
-								tanggal: h.date,
-								result: h.result,
-								periode: String(tbl.entries.length + 1).padStart(3, '0')
-							});
-						}
-					});
-					m.history = []; // Kosongkan data lama agar tidak dobel
-				}
-			}
-		});
-		if (typeof saveTableData === 'function') saveTableData();
-	}
 
 /* ═══════════════════════════════════════════════════════════════════════
    BLOK 55: MENU TOGEL (TERHUBUNG KE TABEL RESULT)
