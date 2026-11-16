@@ -4643,14 +4643,12 @@ $('bbfsGenerateBtn').addEventListener('click', function() {
     let filtered = permutasi4DariDigit(raw);
     if (filtered.length === 0) { toast('Tidak ada kombinasi', 'error'); return; }
 
-    // Helper: Jika hasil 0, bersihkan layar dan beri pesan
     function tampilkanKosong(pesan) {
         toast(pesan, 'error');
         pageState.bbfs.pages = [];
         renderPagination('bbfsResult', 'bbfs', 'Hasil', '');
     }
 
-    // 1. Filter 3 Grup
     if (g1 || g2 || g3) {
         const setG1 = g1 ? new Set(getGroupAs2DigitDepan(g1)) : null;
         const setG2 = g2 ? new Set([...getGroupAs2DigitDepan(g2), ...getGroupAs2DigitBelakang(g2)]) : null;
@@ -4672,7 +4670,6 @@ $('bbfsGenerateBtn').addEventListener('click', function() {
         }
     }
 
-    // 2. Filter 1D Depan
     if (d1.length > 0) {
         filtered = filtered.filter(d => d1.includes(d[0]));
         if (filtered.length === 0) { 
@@ -4680,7 +4677,6 @@ $('bbfsGenerateBtn').addEventListener('click', function() {
         }
     }
 
-    // 3. Filter 55 Baris Mengandung
     for (let f of activeFilters) {
         filtered = applyMengandungFilter(filtered, f);
         if (filtered.length === 0) {
@@ -4688,7 +4684,6 @@ $('bbfsGenerateBtn').addEventListener('click', function() {
         }
     }
 
-    // 4. Filter CB
     if (cb.length > 0) {
         filtered = filterByCB(filtered, cb.join(''), cbMode);
         if (filtered.length === 0) { 
@@ -4696,7 +4691,6 @@ $('bbfsGenerateBtn').addEventListener('click', function() {
         }
     }
 
-    // 5. Tampilkan Hasil Akhir
     filtered.sort();
     pageState.bbfs.pages = paginateArray(filtered);
     pageState.bbfs.current = 0;
@@ -4711,10 +4705,27 @@ $('bbfsGenerateBtn').addEventListener('click', function() {
     renderPagination('bbfsResult', 'bbfs', 'Hasil', '');
     toast('Berhasil: ' + filtered.length.toLocaleString('id-ID') + ' kombinasi', 'success');
     
-    // Gulir otomatis ke kotak hasil
     const resBox = $('bbfsResult');
     if (resBox) resBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
+
+function renderBBFS55Rows() {
+    const container = $('bbfs55RowsContainer');
+    if (!container) return;
+    
+    let html = '';
+    for (let i = 1; i <= 55; i++) {
+        html += `<div class="m23-row">
+            <div class="m23-no">${i}</div>
+            <input type="text" class="m23-digits" id="bbfsMengandung${i}" maxlength="3" placeholder="237" oninput="this.value = onlyDigits(this.value).slice(0,3); updateBFFSFilterStatus(${i}); updateBBFSInfo();">
+            <input type="text" class="m23-pasar" id="bbfsMengandung${i}_pasar" placeholder="LABEL">
+            <div class="m23-total" id="bbfsFilterStat${i}">—</div>
+            <div class="m23-pages" id="bbfsFilterPage${i}">—</div>
+            <button class="m23-copy btn-primary" onclick="copyBBFSFilter(${i})" title="Copy Hasil">📋</button>
+        </div>`;
+    }
+    container.innerHTML = html;
+}
 
 // Init render 55 baris BBFS
 if (document.readyState !== 'loading') {
