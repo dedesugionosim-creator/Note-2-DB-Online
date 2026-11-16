@@ -3662,6 +3662,35 @@ function getActiveTable() {
     return found || { id: '', name: 'Tabel Result', entries: [] };
 }
 
+/* ═══════════════════════════════════════════════════════════════════════
+   FUNGSI JEMBATAN: MENGHUBUNGKAN TOGEL DENGAN TABEL RESULT
+   ═══════════════════════════════════════════════════════════════════════ */
+function syncTogelWithTable() {
+    if (typeof marketData === 'undefined' || typeof tableData === 'undefined') return;
+    if (!marketData.markets || !tableData.tables) return;
+
+    // Pastikan setiap Pasar di Togel punya "Tabel" di Menu Tabel Result
+    marketData.markets.forEach(function(m) {
+        if (m.isTogel) {
+            let tbl = tableData.tables.find(function(t) { return t.id === m.id; });
+            
+            if (!tbl) {
+                // Jika belum ada, buatkan tabel baru yang kosong
+                tbl = { id: m.id, name: m.name, entries: [] };
+                tableData.tables.push(tbl);
+            } else {
+                // Jika sudah ada, pastikan namanya selalu sama
+                tbl.name = m.name;
+            }
+        }
+    });
+    
+    // Simpan perubahan
+    if (typeof saveTableData === 'function') {
+        saveTableData();
+    }
+}
+
 function syncTogelWithTable() {
     if (typeof marketData === 'undefined' || typeof tableData === 'undefined') return;
     
