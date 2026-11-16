@@ -5067,10 +5067,6 @@ function grupMapWithCount() {
 }
 
 function refreshGrupDropdowns() {
-    if (typeof populateNewGrupDropdowns === 'function') {
-        populateNewGrupDropdowns();
-        return;
-    }
     const map = grupMapWithCount();
     const names = Object.keys(map).sort(function(a, b) { return a.localeCompare(b); });
     const buildOptions = function(placeholder) {
