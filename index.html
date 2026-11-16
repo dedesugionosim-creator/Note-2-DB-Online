@@ -2166,7 +2166,7 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
         <!-- ═══════════════════════════════════════════════════════════════
              SECTION: DATA PASAR
              ═══════════════════════════════════════════════════════════════ -->
-         <section id="dataPasar">
+                 <section id="dataPasar">
             <h2>📚 Data Pasar Global</h2>
             <p class="text-muted mb-10" style="font-size:13px;">
                 Pilih pasar di bawah ini untuk dianalisa oleh <b>Rumus Syair (Mode Global)</b>.
@@ -2180,8 +2180,71 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
                     ℹ️ Data history dari pasar yang Anda tambahkan di menu Togel akan otomatis masuk ke sini untuk dijadikan bahan analisa.
                 </div>
             </div>
+            
+            <!-- TAMBAHKAN BARIS INI -->
+            <div id="marketResultContainer" style="margin-top: 14px;"></div>
+            
         </section>
 
+/* ═══════════════════════════════════════════════════════════════════════
+   FUNGSI TAMPILKAN HISTORY DATA PASAR
+   ═══════════════════════════════════════════════════════════════════════ */
+window.renderMarketResultTable = function() {
+    const container = $('marketResultContainer');
+    if (!container) return;
+    
+    // Ambil pasar yang sedang dipilih
+    const activeMarket = getActiveMarket();
+    if (!activeMarket) return;
+    
+    const history = activeMarket.history || [];
+    
+    if (history.length === 0) {
+        container.innerHTML = '<div class="card"><div class="empty">Belum ada data history di pasar ini. Silakan input result di menu Togel.</div></div>';
+        return;
+    }
+    
+    // Urutkan dari tanggal terbaru
+    const sorted = history.slice().sort(function(a, b) {
+        return (b.date || '').localeCompare(a.date || '');
+    });
+    
+    let html = `
+    <div class="card">
+        <h3 style="color:var(--accent); margin-bottom:12px;">📜 History Result: ${esc(activeMarket.name)}</h3>
+        <div class="table-container" style="max-height:400px; overflow-y:auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>Result</th>
+                        <th>Syair</th>
+                        <th>Grup</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+                
+    sorted.forEach(function(r) {
+        const gen = generateSyairAndGrup(r.result);
+        html += `<tr>
+            <td>${esc(r.date)}</td>
+            <td class="td-pair">${esc(r.result)}</td>
+            <td>${esc(gen.syair || '—')}</td>
+            <td style="color:var(--warn);">${esc(gen.grup || '—')}</td>
+        </tr>`;
+    });
+    
+    html += `</tbody></table></div></div>`;
+    container.innerHTML = html;
+};
+
+// Event listener: Saat pasar diganti dari dropdown, tabel history ikut berubah
+const elMarketSelectorUpdate = $('marketSelector');
+if (elMarketSelectorUpdate) {
+    elMarketSelectorUpdate.addEventListener('change', function() {
+        if (typeof renderMarketResultTable === 'function') renderMarketResultTable();
+    });
+}
         <!-- ═══════════════════════════════════════════════════════════════
              SECTION: MENU TOGEL (GRID + DETAIL)
              ═══════════════════════════════════════════════════════════════ -->
