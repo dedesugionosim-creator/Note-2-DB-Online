@@ -3665,7 +3665,7 @@ function getActiveTable() {
 function syncTogelWithTable() {
     if (typeof marketData === 'undefined' || typeof tableData === 'undefined') return;
     
-    // Pastikan setiap Pasar Togel punya Tabel di Tabel Result
+    // 1. Pastikan setiap Pasar di Togel punya Tabel
     marketData.markets.forEach(function(m) {
         if (m.isTogel) {
             let tbl = tableData.tables.find(function(t) { return t.id === m.id; });
@@ -3673,13 +3673,19 @@ function syncTogelWithTable() {
                 tbl = { id: m.id, name: m.name, entries: [] };
                 tableData.tables.push(tbl);
             } else {
-                tbl.name = m.name; // Samakan namanya
+                tbl.name = m.name;
+            }
+            
+            // 2. Sinkronisasi dari Tabel Result ke Togel
+            if (tbl.entries && tbl.entries.length > 0) {
+                m.history = tbl.entries.map(function(e) { 
+                    return { id: e.id, date: e.tanggal, result: e.result }; 
+                });
+            } else {
+                m.history = [];
             }
         }
     });
-    
-    saveTableData();
-}
     
     // Hapus tabel yang pasarnya sudah dihapus di Togel
     tableData.tables = tableData.tables.filter(function(t) {
