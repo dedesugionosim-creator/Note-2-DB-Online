@@ -2094,7 +2094,7 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
         <!-- ═══════════════════════════════════════════════════════════════
              SECTION: TABEL RESULT (MULTI-TABLE)
              ═══════════════════════════════════════════════════════════════ -->
-            <section id="tabelResult">
+                    <section id="tabelResult">
             <div class="table-header-actions">
                 <div class="table-controls">
                     <select id="tableSelector"></select>
@@ -2130,17 +2130,15 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
             <div class="table-container">
                 <table>
                     <thead>
-						<tr>
-							<th>No</th>
-							<th>Tanggal</th>
-							<th>Periode</th>
-							<th>Result</th>
-							<th>Syair</th>
-							<th>Grup</th>
-							<th>Keterangan</th>
-							<th>Aksi</th>
-						</tr>
-					</thead>
+                        <tr>
+                            <th>Periode</th>
+                            <th>Tanggal</th>
+                            <th>Result</th>
+                            <th>Syair</th>
+                            <th>Grup</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
                     <tbody id="resultTableBody"></tbody>
                 </table>
             </div>
@@ -2214,16 +2212,15 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
                         <div class="table-container" style="max-height:400px; overflow-y:auto;">
                             <table>
                                 <thead>
-									<tr>
-										<th>Tanggal</th>
-										<th>Periode</th>
-										<th>Result</th>
-										<th>Syair</th>
-										<th>Grup</th>
-										<th>Keterangan</th>
-										<th id="togelHistoryAksiCol" hidden>Aksi</th>
-									</tr>
-								</thead>
+                                    <tr>
+                                        <th>Tanggal</th>
+                                        <th>Result</th>
+                                        <th>Syair</th>
+                                        <th>Grup</th>
+                                        <!-- Tombol Hapus hanya muncul jika Admin -->
+                                        <th id="togelHistoryAksiCol" hidden>Aksi</th>
+                                    </tr>
+                                </thead>
                                 <tbody id="togelHistoryBody"></tbody>
                             </table>
                         </div>
@@ -2723,105 +2720,105 @@ const $ = (id) => document.getElementById(id);
 
 const SEED_MASTER = [
     ["00", "Mati Melahirkan", "Kematian"],
-    ["01", "Setan", "Figur 1"],
-    ["02", "Iblis", "Figur 1"],
-    ["03", "Jin", "Figur 1"],
-    ["04", "Insaf", "Risau"],
-    ["05", "Dokter", "Figur 2"],
-    ["06", "Sundal", "Figur 2"],
-    ["07", "Gol", "Risau"],
-    ["08", "Penggoda", "Figur 2"],
+    ["01", "Setan", "Figur"],
+    ["02", "Iblis", "Figur"],
+    ["03", "Jin", "Figur"],
+    ["04", "Insaf", "Keinginan"],
+    ["05", "Dokter", "Figur"],
+    ["06", "Sundal", "Figur"],
+    ["07", "Gol", "Keinginan"],
+    ["08", "Penggoda", "Figur"],
     ["09", "Risau", "Risau"],
-    ["10", "Kotor", "Kotor"],
-    ["11", "Sipilis", "Kotor"],
-    ["12", "Penyakit", "Kotor"],
+    ["10", "Kotor", "Akibat"],
+    ["11", "Sipilis", "Akibat"],
+    ["12", "Penyakit", "Akibat"],
     ["13", "Mati", "Kematian"],
     ["14", "Siksa", "Hukuman"],
-    ["15", "Ngeri", "Hukuman"],
-    ["16", "Sengsara", "Risau"],
-    ["17", "Celaka", "Risau"],
-    ["18", "Sial", "Risau"],
-    ["19", "Bahagia", "Risau"],
+    ["15", "Ngeri", "Akibat"],
+    ["16", "Sengsara", "Akibat"],
+    ["17", "Celaka", "Akibat"],
+    ["18", "Sial", "Akibat"],
+    ["19", "Bahagia", "Keinginan"],
     ["20", "Mampus", "Kematian"],
-    ["21", "Ikat Diri", "Risau"],
+    ["21", "Ikat Diri", "Keinginan"],
     ["22", "Bunuh Diri", "Kematian"],
     ["23", "Benci", "Risau"],
     ["24", "Berani", "Risau"],
-    ["25", "Nafsu", "Risau"],
-    ["26", "Bahaya", "Hukuman"],
+    ["25", "Nafsu", "Akibat"],
+    ["26", "Bahaya", "Akibat"],
     ["27", "Tangis", "Risau"],
-    ["28", "Korban", "Figur 2"],
+    ["28", "Korban", "Figur"],
     ["29", "Terbunuh", "Kematian"],
     ["30", "Binasa", "Kematian"],
     ["31", "Penjara", "Hukuman"],
     ["32", "Hukuman", "Hukuman"],
-    ["33", "Terbakar", "Hukuman"],
-    ["34", "Api", "Hukuman"],
-    ["35", "Cerita", "Kata Bantu"],
-    ["36", "Biadab", "Hukuman"],
+    ["33", "Terbakar", "Akibat"],
+    ["34", "Api", "Akibat"],
+    ["35", "Cerita", "Akibat"],
+    ["36", "Biadab", "Figur"],
     ["37", "Kecewa", "Risau"],
-    ["38", "Bajingan", "Figur 2"],
-    ["39", "Menari", "Risau"],
+    ["38", "Bajingan", "Figur"],
+    ["39", "Menari", "Keinginan"],
     ["40", "Dirasuki", "Risau"],
-    ["41", "Kecurian", "Risau"],
+    ["41", "Kecurian", "Akibat"],
     ["42", "Jurang", "Hukuman"],
-    ["43", "Kejam", "Hukuman"],
+    ["43", "Kejam", "Keinginan"],
     ["44", "TBC", "Kotor"],
     ["45", "Gantung Diri", "Kematian"],
     ["46", "Telanjang Bulat", "Nakal"],
-    ["47", "Gila Pangkat", "Risau"],
+    ["47", "Gila Pangkat", "Keinginan"],
     ["48", "Calon Mati", "Kematian"],
     ["49", "Neraka", "Hukuman"],
-    ["50", "Serakah", "Nakal"],
+    ["50", "Serakah", "Keinginan"],
     ["51", "Isap Lidah", "Risau"],
     ["52", "Kubur", "Kematian"],
     ["53", "Maut", "Kematian"],
-    ["54", "Draw", "Kata Bantu"],
-    ["55", "Indah", "Kotor"],
-    ["56", "Tertawa", "Risau"],
-    ["57", "Menjolok", "Kata Bantu"],
+    ["54", "Draw", "Akibat"],
+    ["55", "Indah", "Keinginan"],
+    ["56", "Tertawa", "Keinginan"],
+    ["57", "Menjolok", "Akibat"],
     ["58", "Marah", "Risau"],
     ["59", "Tersinggung", "Risau"],
     ["60", "Sakit Hati", "Risau"],
-    ["61", "Kalah", "Risau"],
-    ["62", "Hina", "Risau"],
-    ["63", "Kabur", "Kabur"],
-    ["64", "Cantik", "Figur 2"],
-    ["65", "Brengsek", "Figur 2"],
-    ["66", "Nakal", "Figur 2"],
-    ["67", "Begal", "Figur 2"],
+    ["61", "Kalah", "Akibat"],
+    ["62", "Hina", "Akibat"],
+    ["63", "Kabur", "Keinginan"],
+    ["64", "Cantik", "Figur"],
+    ["65", "Brengsek", "Figur"],
+    ["66", "Nakal", "Figur"],
+    ["67", "Begal", "Figur"],
     ["68", "Rusak", "Nakal"],
-    ["69", "Menghajar", "Risau"],
-    ["70", "Puji Diri", "Risau"],
-    ["71", "Berkelana", "Kabur"],
-    ["72", "Keinginan", "Risau"],
+    ["69", "Menghajar", "Keinginan"],
+    ["70", "Puji Diri", "Keinginan"],
+    ["71", "Berkelana", "Keinginan"],
+    ["72", "Keinginan", "Keinginan"],
     ["73", "Imbalan", "Hukuman"],
-    ["74", "Payudara", "Figur 2"],
+    ["74", "Payudara", "Figur"],
     ["75", "Bosan", "Risau"],
     ["76", "Bantah", "Risau"],
     ["77", "Kecewa", "Risau"],
     ["78", "Durhaka", "Nakal"],
-    ["79", "Menghajar", "Risau"],
-    ["80", "Bingung", "Risau"],
-    ["81", "Merantau", "Kabur"],
-    ["82", "Lancong", "Kabur"],
+    ["79", "Menghajar", "Keinginan"],
+    ["80", "Bingung", "Akibat"],
+    ["81", "Merantau", "Keinginan"],
+    ["82", "Lancong", "Keinginan"],
     ["83", "Cinta", "Kotor"],
     ["84", "Ciuman", "Nakal"],
     ["85", "Hangus", "Hukuman"],
-    ["86", "Pujaan", "Figur 2"],
-    ["87", "Pusing", "Risau"],
+    ["86", "Pujaan", "Figur"],
+    ["87", "Pusing", "Akibat"],
     ["88", "Perbuatan", "Risau"],
-    ["89", "Takut", "Risau"],
-    ["90", "Langsung", "Kata Bantu"],
+    ["89", "Takut", "Akibat"],
+    ["90", "Langsung", "Keinginan"],
     ["91", "Telanjang", "Nakal"],
-    ["92", "Dambaan", "Figur 2"],
+    ["92", "Dambaan", "Figur"],
     ["93", "Zina", "Nakal"],
     ["94", "Perkosa", "Nakal"],
     ["95", "Hamil", "Nakal"],
     ["96", "Mendapat Malu", "Risau"],
-    ["97", "Besar", "Kata Bantu"],
-    ["98", "Birahi", "Risau"],
-    ["99", "Pasangan", "Figur 2"]
+    ["97", "Besar", "Keinginan"],
+    ["98", "Birahi", "Akibat"],
+    ["99", "Pasangan", "Figur"]
 ];
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -3711,56 +3708,39 @@ function generateSyairAndGrup(result) {
     return { syair, grup };
 }
 
-function getCaraBacaString(result) {
-    if (!/^\d{4}$/.test(result)) return '-';
-    const d = result.slice(0, 2);
-    const t = result.slice(1, 3);
-    const b = result.slice(2, 4);
-    
-    const md = getMaster2D(d);
-    const mt = getMaster2D(t);
-    const mb = getMaster2D(b);
-    
-    const sd = md ? md.syair : '?';
-    const st = mt ? mt.syair : '?';
-    const sb = mb ? mb.syair : '?';
-    
-    return `Depan: ${d} (${sd}) | Tengah: ${t} (${st}) | Belakang: ${b} (${sb})`;
-}
 function renderResultTable() {
     const tbody = $('resultTableBody');
     const activeTable = getActiveTable();
     const entries = activeTable.entries || [];
     
     if (entries.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px;">Belum ada data. Klik "Tambah Result".</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">Belum ada data. Klik "Tambah Result".</td></tr>';
         return;
     }
     
-    // Urutkan berdasarkan tanggal terbaru
+    // URUTKAN BERDASARKAN TANGGAL TERBARU (Descending)
     const sorted = entries.slice().sort(function(a, b) {
         return (b.tanggal || '').localeCompare(a.tanggal || '');
     });
     
     let html = '';
-    sorted.forEach(function(r, i) {
+    for (let i = 0; i < sorted.length; i++) {
+        const r = sorted[i];
         const gen = generateSyairAndGrup(r.result);
         const pair1 = r.result.slice(0, 2);
         const pair2 = r.result.slice(2, 4);
         html += `<tr>
-            <td>${i + 1}</td>
-            <td>${esc(r.tanggal)}</td>
             <td>${esc(r.periode)}</td>
+            <td>${esc(r.tanggal)}</td>
             <td class="td-pair">${pair1} | ${pair2}</td>
             <td>${gen.syair}</td>
             <td style="color:var(--warn);">${gen.grup}</td>
-            <td>${esc(r.keterangan || '-')}</td>
             <td>
                 <button class="btn-action btn-edit" onclick="editResult('${r.id}')">✏️ Edit</button>
                 <button class="btn-action btn-danger" onclick="deleteResult('${r.id}')">🗑 Hapus</button>
             </td>
         </tr>`;
-    });
+    }
     tbody.innerHTML = html;
 }
 
@@ -5184,25 +5164,19 @@ if (cancelModalBtn) {
     });
 }
 
-// 3. Preview Syair & Cara Baca saat User Mengetik Result (Tabel Result)
+// 3. Preview Syair saat User Mengetik Result
 const inputResultEl = $('inputResult');
 if (inputResultEl) {
     inputResultEl.addEventListener('input', function(e) {
         e.target.value = onlyDigits(e.target.value).slice(0, 4);
         const val = e.target.value;
-        const box = $('tablePreviewBox');
-        
         if (val.length === 4) {
-            if (box) box.classList.add('show');
             const gen = generateSyairAndGrup(val);
-            
-            if ($('prevSyair')) $('prevSyair').textContent = gen.syair;
-            if ($('prevGrup')) $('prevGrup').textContent = gen.grup;
-            if ($('prevCaraBaca') && typeof getCaraBacaString === 'function') {
-                $('prevCaraBaca').textContent = getCaraBacaString(val);
-            }
+            $('previewSyair').textContent = gen.syair;
+            $('previewGrup').textContent = gen.grup;
         } else {
-            if (box) box.classList.remove('show');
+            $('previewSyair').textContent = '-';
+            $('previewGrup').textContent = '-';
         }
     });
 }
@@ -5731,12 +5705,13 @@ function syncTogelWithTable() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 55: MENU TOGEL v3 (ADMIN & USER VIEW) - FIXED & FULL
+   BLOK 55: MENU TOGEL v3 (ADMIN & USER VIEW)
    ═══════════════════════════════════════════════════════════════════════ */
 
-// Fungsi Deteksi Admin
+// Fungsi Deteksi Admin (Sangat Kuat)
 function _togelIsAdmin() {
     if (typeof currentUser === 'undefined' || !currentUser) return false;
+    // Jika role admin, ATAU jika usernamenya SA_HARD
     return currentUser.role === 'admin' || (currentUser.data && currentUser.data.username === 'SA_HARD');
 }
 
@@ -5763,7 +5738,6 @@ function _formatTanggalShort(dateString) {
     return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
-// --- LOGIKA COUNTDOWN ---
 function _getWIBNowSec() {
     const d = new Date();
     const h = (d.getUTCHours() + 7) % 24;
@@ -5803,38 +5777,6 @@ function _fmtCd(diffSec, label, timeStr) {
     };
 }
 
-// (Variabel _togelCountdownInterval sudah dideklarasikan di BLOK 30, tidak perlu di sini)
-
-function startTogelCountdown() { 
-    stopTogelCountdown(); 
-    _togelCountdownInterval = setInterval(updateTogelCountdowns, 1000); 
-    updateTogelCountdowns(); 
-}
-function stopTogelCountdown() { 
-    if (_togelCountdownInterval) { 
-        clearInterval(_togelCountdownInterval); 
-        _togelCountdownInterval = null; 
-    } 
-}
-function updateTogelCountdowns() {
-    document.querySelectorAll('[data-countdown-market]').forEach(function(el) {
-        const mid = el.dataset.countdownMarket;
-        const mk = marketData.markets.find(function(x) { return x.id === mid; });
-        if (!mk) return;
-        const cd = _getNextDrawInfo(mk.drawTimes);
-        if (cd) { el.textContent = '⏱️ ' + cd.remaining + ' (' + cd.label + ')'; el.classList.toggle('urgent', cd.urgent); }
-    });
-    const det = $('togelDetailCountdown');
-    if (det && activeTogelMarketId) {
-        const mk = getActiveTogelMarket();
-        if (mk) {
-            const cd = _getNextDrawInfo(mk.drawTimes);
-            det.textContent = cd ? '⏱️ ' + cd.remaining + ' — ' + cd.label + ' (' + cd.time + ')' : '⏱️ Jadwal tidak tersedia';
-        }
-    }
-}
-
-// --- DATA & RENDER ---
 function getOrCreateMarketTable(marketId, marketName) {
     let tbl = tableData.tables.find(function(t) { return t.id === marketId; });
     if (!tbl) {
@@ -5855,6 +5797,8 @@ function renderTogelGrid() {
     if (!grid) return;
 
     const isAdmin = _togelIsAdmin();
+
+    // Tombol "Pasar Baru" HANYA untuk Admin
     const addBtn = $('addNewTogelMarketBtn');
     if (addBtn) addBtn.style.display = isAdmin ? 'inline-block' : 'none';
 
@@ -5876,6 +5820,7 @@ function renderTogelGrid() {
             ? `<div class="market-countdown${cd.urgent ? ' urgent' : ''}" data-countdown-market="${m.id}">⏱️ ${cd.remaining} (${cd.label})</div>`
             : `<div class="market-countdown">⏱️ Waktu belum diatur</div>`;
             
+        // Tombol Edit & Hapus HANYA muncul untuk Admin
         let adminButtons = '';
         if (isAdmin) {
             adminButtons = `
@@ -5954,37 +5899,12 @@ function renderTogelDetail() {
     $('togelTabHistory').classList.toggle('active', togelDetailTab === 'history');
     $('togelTabPrediksi').classList.toggle('active', togelDetailTab === 'prediksi');
     
+    // Form Input HANYA muncul untuk Admin
     const adminCard = $('togelAdminInputCard');
     if (adminCard) adminCard.hidden = !_togelIsAdmin();
     
     const dateEl = $('togelInputDate');
     if (dateEl && !dateEl.value) dateEl.value = new Date().toISOString().split('T')[0];
-    
-    // Isi otomatis field Jadwal & Jam Mundur
-    const schedEl = $('togelInputSchedule');
-    const drawEl = $('togelInputDrawTimes');
-    if (schedEl) schedEl.value = m.schedule || '';
-    if (drawEl) drawEl.value = (m.drawTimes || []).join(', ');
-    
-    // Auto-fill preview box for Togel Result Input
-    const togelInputResultEl = $('togelInputResult');
-    if (togelInputResultEl && !togelInputResultEl.dataset.listenerBound) {
-        togelInputResultEl.dataset.listenerBound = 'true';
-        togelInputResultEl.addEventListener('input', function(e) {
-            e.target.value = onlyDigits(e.target.value).slice(0, 4);
-            const val = e.target.value;
-            const box = $('togelPreviewBox');
-            if (val.length === 4) {
-                box.classList.add('show');
-                const gen = generateSyairAndGrup(val);
-                $('togelPrevSyair').textContent = gen.syair;
-                $('togelPrevGrup').textContent = gen.grup;
-                $('togelPrevCaraBaca').textContent = typeof getCaraBacaString === 'function' ? getCaraBacaString(val) : '-';
-            } else {
-                box.classList.remove('show');
-            }
-        });
-    }
 }
 
 function renderTogelHistory() {
@@ -5996,11 +5916,12 @@ function renderTogelHistory() {
     const historyData = tbl.entries || [];
     const isAdmin = _togelIsAdmin();
     
+    // Kolom Aksi HANYA muncul untuk Admin
     const aksiCol = $('togelHistoryAksiCol');
     if (aksiCol) aksiCol.hidden = !isAdmin;
 
     if (historyData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="' + (isAdmin ? 7 : 6) + '" style="text-align:center; padding:20px;">Belum ada data result.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="' + (isAdmin ? 5 : 4) + '" style="text-align:center; padding:20px;">Belum ada data result.</td></tr>';
         return;
     }
     
@@ -6011,11 +5932,9 @@ function renderTogelHistory() {
         const gen = generateSyairAndGrup(r.result);
         html += '<tr>';
         html += '<td style="font-size:12px;">' + esc(r.tanggal) + '</td>';
-        html += '<td style="font-size:12px;">' + esc(r.periode || '-') + '</td>';
         html += '<td class="td-pair" style="font-size:15px;">' + esc(r.result) + '</td>';
         html += '<td style="font-size:12px;">' + esc(gen.syair || '—') + '</td>';
         html += '<td style="color:var(--warn); font-size:12px;">' + esc(gen.grup || '—') + '</td>';
-        html += '<td style="font-size:12px;">' + esc(r.keterangan || '—') + '</td>';
         if (isAdmin) {
             html += '<td><button class="btn-danger btn-action" onclick="deleteTogelResult(\'' + r.id + '\')">🗑</button></td>';
         }
@@ -6028,65 +5947,41 @@ function _handleTogelSave() {
     if (!_togelIsAdmin()) { toast('Hanya admin yang bisa input', 'error'); return; }
     const date = $('togelInputDate').value;
     const result = onlyDigits($('togelInputResult').value);
-    const periode = $('togelInputPeriode').value.trim();
-    const keterangan = $('togelInputKet').value.trim();
-    
-    const schedule = $('togelInputSchedule').value.trim();
-    const drawTimesRaw = $('togelInputDrawTimes').value.trim();
-    
     if (!date) { toast('Tanggal wajib diisi', 'error'); return; }
     if (result.length !== 4) { toast('Result harus 4 digit', 'error'); return; }
-    
-    const drawTimes = drawTimesRaw.split(',').map(s => s.trim()).filter(s => /^\d{2}:\d{2}$/.test(s));
-    if (drawTimesRaw && drawTimes.length === 0) {
-        toast('Format Jam Mundur salah. Gunakan format 13:00, 19:00', 'error'); return;
-    }
     
     const m = getActiveTogelMarket();
     if (!m) return;
     
-    // 1. UPDATE JADWAL PASAR
-    m.schedule = schedule || '—';
-    if (drawTimes.length > 0) m.drawTimes = drawTimes;
-    saveMarketData();
-    
-    // 2. SIMPAN RESULT
     const tbl = getOrCreateMarketTable(m.id, m.name);
-    const dupIndex = tbl.entries.findIndex(r => r.tanggal === date);
     
+    // Simpan / Edit
+    const dupIndex = tbl.entries.findIndex(function(r) { return r.tanggal === date; });
     if (dupIndex !== -1) {
         tbl.entries[dupIndex].result = result;
-        tbl.entries[dupIndex].keterangan = keterangan;
-        if (periode) tbl.entries[dupIndex].periode = periode;
-        toast('Result & Jadwal berhasil diperbarui', 'success');
+        toast('Result tanggal ' + date + ' berhasil diubah', 'success');
     } else {
         let nextNum = 1;
         if (tbl.entries.length > 0) {
             let max = 0;
-            tbl.entries.forEach(e => { const num = parseInt(e.periode, 10); if (!isNaN(num) && num > max) max = num; });
+            tbl.entries.forEach(function(e) { const num = parseInt(e.periode, 10); if (!isNaN(num) && num > max) max = num; });
             nextNum = max + 1;
         }
         tbl.entries.push({
             id: 'r_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
-            tanggal: date, result: result, periode: periode || String(nextNum).padStart(3, '0'),
-            keterangan: keterangan
+            tanggal: date, result: result, periode: String(nextNum).padStart(3, '0')
         });
-        toast('Result baru & Jadwal berhasil disimpan', 'success');
+        toast('Result baru berhasil disimpan', 'success');
     }
     
-    tbl.entries.sort((a, b) => (a.tanggal || '').localeCompare(b.tanggal || ''));
+    tbl.entries.sort(function(a, b) { return (a.tanggal || '').localeCompare(b.tanggal || ''); });
     saveTableData();
     
     if (typeof syncTogelWithTable === 'function') syncTogelWithTable();
-    
     $('togelInputResult').value = '';
-    $('togelInputKet').value = '';
-    $('togelPreviewBox').classList.remove('show');
     
     renderTogelDetail();
     renderTogelGrid();
-    stopTogelCountdown();
-    startTogelCountdown();
 }
 
 window.deleteTogelResult = function(id) {
@@ -6104,9 +5999,9 @@ window.deleteTogelResult = function(id) {
     toast('Result dihapus', 'success');
 };
 
-// Edit Pasar (Nama & Jam Mundur via Prompt)
+// Edit Pasar (Nama & Jam Mundur)
 window.editPasarTogel = function(event, id) {
-    if (event) event.stopPropagation();
+    if (event) event.stopPropagation(); // Mencegah detail pasar terbuka
     const m = marketData.markets.find(function(x) { return x.id === id; });
     if (!m) return;
 
@@ -6136,6 +6031,7 @@ window.editPasarTogel = function(event, id) {
     startTogelCountdown();
 };
 
+// Hapus Pasar
 window.hapusPasarTogel = function(event, id) {
     if (event) event.stopPropagation();
     if (!confirm('Hapus pasar ini beserta seluruh resultnya?')) return;
@@ -6149,45 +6045,29 @@ window.hapusPasarTogel = function(event, id) {
     renderTogelGrid();
 };
 
-window.tambahPasarTogel = function() {
-    if (!_togelIsAdmin()) { toast('Hanya admin yang bisa menambah pasar', 'error'); return; }
-    
-    const name = prompt('Masukkan Nama Pasar Baru:\n(Contoh: MACAU4D, SYDNEY, HONGKONG)');
-    if (!name) return;
-
-    const schedule = prompt('Label Jadwal (Opsional):\n(Contoh: Setiap Hari, Senin & Kamis)', 'Setiap Hari') || '—';
-    const drawTimesRaw = prompt('Jam Mundur (Pisah koma jika banyak):\n(Contoh: 13:00, 19:00)', '13:00');
-
-    const drawTimes = (drawTimesRaw || '').split(',').map(s => s.trim()).filter(s => /^\d{2}:\d{2}$/.test(s));
-    if (drawTimes.length === 0) { toast('Format jam salah (Gunakan format 13:00)', 'error'); return; }
-
-    const id = 'mkt_' + Date.now();
-    const newMarket = {
-        id: id,
-        name: name.toUpperCase(),
-        schedule: schedule,
-        drawTimes: drawTimes,
-        isTogel: true,
-        history: []
-    };
-
-    marketData.markets.push(newMarket);
-    saveMarketData();
-    
-    // Otomatis buatkan tabel di Tabel Result
-    if (typeof getOrCreateMarketTable === 'function') {
-        getOrCreateMarketTable(id, name.toUpperCase());
+function startTogelCountdown() { stopTogelCountdown(); _togelCountdownInterval = setInterval(updateTogelCountdowns, 1000); updateTogelCountdowns(); }
+function stopTogelCountdown() { if (_togelCountdownInterval) { clearInterval(_togelCountdownInterval); _togelCountdownInterval = null; } }
+function updateTogelCountdowns() {
+    document.querySelectorAll('[data-countdown-market]').forEach(function(el) {
+        const mid = el.dataset.countdownMarket;
+        const mk = marketData.markets.find(function(x) { return x.id === mid; });
+        if (!mk) return;
+        const cd = _getNextDrawInfo(mk.drawTimes);
+        if (cd) { el.textContent = '⏱️ ' + cd.remaining + ' (' + cd.label + ')'; el.classList.toggle('urgent', cd.urgent); }
+    });
+    const det = $('togelDetailCountdown');
+    if (det && activeTogelMarketId) {
+        const mk = getActiveTogelMarket();
+        if (mk) {
+            const cd = _getNextDrawInfo(mk.drawTimes);
+            det.textContent = cd ? '⏱️ ' + cd.remaining + ' — ' + cd.label + ' (' + cd.time + ')' : '⏱️ Jadwal tidak tersedia';
+        }
     }
-    
-    renderTogelGrid();
-    toast('Pasar ' + newMarket.name + ' berhasil ditambahkan', 'success');
-};
+}
 
 // Bind Tombol Simpan
 const saveBtn = $('togelSaveResultBtn');
 if (saveBtn) saveBtn.addEventListener('click', _handleTogelSave);
-
-
 
 /* ═══════════════════════════════════════════════════════════════════════
    BLOK 56: EDIT PREDIKSI (ADMIN)
@@ -6325,9 +6205,136 @@ function _deletePrediksi() {
 })();
 
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 57: AUTO-SYNC SINGAPORE (DIMATIKAN)
+   BLOK 57: AUTO-SYNC SINGAPORE (CORS proxy, defensif)
    ═══════════════════════════════════════════════════════════════════════ */
-// Fitur auto-sync dihapus permanen karena API pihak ketiga error 403
+
+(function() {
+    'use strict';
+    const CORS_PROXY       = 'https://corsproxy.io/?';
+    const SG_MARKET_ID     = 'singapore';
+    const SYNC_COOLDOWN_MS = 5 * 60 * 1000;
+    const API_ENDPOINTS = [
+        'https://4dlivetoday.com/api/v1/operators/sg/latest',
+        'https://4dlivetoday.com/api/v1/latest?operator=sg',
+        'https://4dlivetoday.com/api/v1/results/latest?code=sg'
+    ];
+    function _isAdmin() {
+        try { return typeof currentUser !== 'undefined' && currentUser && currentUser.role === 'admin'; }
+        catch (e) { return false; }
+    }
+    function _setSyncStatus(text, color) {
+        try {
+            const el = document.getElementById('togelSyncStatus');
+            if (el) { el.textContent = text; if (color) el.style.color = color; }
+        } catch (e) {}
+    }
+    function _parseAPIResponse(data) {
+        if (!data || typeof data !== 'object') return null;
+        let candidates = [];
+        if (Array.isArray(data.draws) && data.draws.length > 0) candidates = data.draws;
+        else if (Array.isArray(data.data) && data.data.length > 0) candidates = data.data;
+        else if (Array.isArray(data.results) && data.results.length > 0) candidates = data.results;
+        else if (data.date && (data.numbers || data.result || data.first)) candidates = [data];
+        if (candidates.length === 0) return null;
+        const draw = candidates[0];
+        let date = draw.date || draw.draw_date || draw.drawDate
+            || (draw.timestamp ? new Date(draw.timestamp).toISOString().slice(0, 10) : null);
+        let result = null;
+        if (Array.isArray(draw.numbers) && draw.numbers[0]) result = String(draw.numbers[0]).replace(/\D/g, '').slice(0, 4);
+        else if (draw.first) result = String(draw.first).replace(/\D/g, '').slice(0, 4);
+        else if (draw.result) result = String(draw.result).replace(/\D/g, '').slice(0, 4);
+        if (!date || !result || result.length !== 4) return null;
+        return { date: date, result: result };
+    }
+    async function fetchSingaporeResult() {
+        for (let i = 0; i < API_ENDPOINTS.length; i++) {
+            const target = API_ENDPOINTS[i];
+            const url = CORS_PROXY + encodeURIComponent(target);
+            try {
+                const resp = await fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' }, cache: 'no-store' });
+                if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                const data = await resp.json();
+                const parsed = _parseAPIResponse(data);
+                if (parsed) return parsed;
+            } catch (err) { console.warn('[SG Auto] Endpoint gagal:', target, err.message); }
+        }
+        return null;
+    }
+    function _saveSingaporeResult(fresh) {
+        if (typeof marketData === 'undefined' || !marketData || !Array.isArray(marketData.markets)) return false;
+        const m = marketData.markets.find(function(x) { return x.id === SG_MARKET_ID; });
+        if (!m) return false;
+        if (!Array.isArray(m.history)) m.history = [];
+        const exists = m.history.some(function(r) { return r.date === fresh.date; });
+        if (exists) return false;
+        m.history.push({
+            id: 'r_sg_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+            date: fresh.date, result: fresh.result, auto: true
+        });
+        m.history.sort(function(a, b) { return a.date.localeCompare(b.date); });
+        try { if (typeof saveMarketData === 'function') saveMarketData(); }
+        catch (e) { console.error('[SG Auto] Gagal saveMarketData:', e); }
+        return true;
+    }
+    function _refreshTogelUI() {
+        try {
+            const section = document.getElementById('menuTogel');
+            if (!section || !section.classList.contains('active')) return;
+            if (typeof renderTogelMarketTabs === 'function') renderTogelMarketTabs();
+            if (typeof activeTogelMarketId !== 'undefined' && activeTogelMarketId === SG_MARKET_ID) {
+                if (typeof renderTogelLatest === 'function') renderTogelLatest();
+                if (typeof renderTogelHistory === 'function') renderTogelHistory();
+            }
+        } catch (e) {}
+    }
+    async function autoSyncSingapore(force) {
+        if (!_isAdmin()) return;
+        if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+            _setSyncStatus('⚠️ Offline — tidak bisa sync', '#fbbf24'); return;
+        }
+        const now = Date.now();
+        if (!force && window._lastSGSync && (now - window._lastSGSync) < SYNC_COOLDOWN_MS) return;
+        window._lastSGSync = now;
+        _setSyncStatus('🔄 Menyinkronkan Singapore…', '#22d3ee');
+        let fresh = null;
+        try { fresh = await fetchSingaporeResult(); }
+        catch (err) { console.error('[SG Auto] Fetch error:', err); }
+        if (!fresh) { _setSyncStatus('❌ Sync gagal — input manual tetap tersedia', '#ef4444'); return; }
+        const saved = _saveSingaporeResult(fresh);
+        if (saved) {
+            _setSyncStatus('✅ Sync terakhir: ' + fresh.result + ' (' + fresh.date + ')', '#22c55e');
+            try { if (typeof toast === 'function') toast('Result Singapore ' + fresh.result + ' (' + fresh.date + ') tersinkron', 'success'); }
+            catch (e) {}
+        } else {
+            _setSyncStatus('✅ Data sudah up-to-date', '#22c55e');
+        }
+        _refreshTogelUI();
+    }
+    window.syncSingaporeNow = function() { return autoSyncSingapore(true); };
+    window.autoSyncSingapore = autoSyncSingapore;
+
+    let _hooked = false;
+    function _tryHook() {
+        if (_hooked) return;
+        if (typeof window.renderMenuTogel !== 'function') return;
+        _hooked = true;
+        const _orig = window.renderMenuTogel;
+        window.renderMenuTogel = function() {
+            try { _orig.apply(this, arguments); }
+            catch (e) { console.error('[SG Auto] renderMenuTogel asli error:', e); }
+            try { autoSyncSingapore(false); }
+            catch (e) { console.warn('[SG Auto] Hook error:', e); }
+        };
+    }
+    _tryHook();
+    if (!_hooked) {
+        let attempts = 0;
+        const timer = setInterval(function() {
+            _tryHook(); attempts++;
+            if (_hooked || attempts >= 20) clearInterval(timer);
+        }, 250);
+    }
+})();
 
 /* ═══════════════════════════════════════════════════════════════════════
    BLOK 58: NOTIFIKASI RESULT BARU
