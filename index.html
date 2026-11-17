@@ -4713,35 +4713,37 @@ function renderAT65Rows() {
     const container = $('at65RowsContainer');
     if (!container) return;
     
-    if (typeof m23State === 'undefined' || !m23State.rows) {
-        container.innerHTML = '<div class="empty">Data "Mengandung 2/3" tidak tersedia.</div>';
-        return;
-    }
-    
-    const activeRows = m23State.rows.filter(function(r) {
-        return r.digits && String(r.digits).trim().length >= 2;
+    let html = '';
+    // Header Tabel
+    html += `<div style="display: grid; grid-template-columns: 20px 55px 1fr 65px 40px; gap: 4px; padding: 8px 4px; font-weight: bold; color: var(--muted); font-size: 9.5px; border-bottom: 2px solid var(--border); margin-bottom: 6px; text-transform: uppercase; background: var(--card-2); position: sticky; top: 0; z-index: 2; text-align: center; border-radius: 4px;">
+        <div>No</div>
+        <div>Input</div>
+        <div style="text-align: left;">3D Otomatis</div>
+        <div>Pasar</div>
+        <div>📋</div>
+    </div>`;
+
+    atState.rows.forEach(function(r) {
+        let comboText = '—';
+        if (r.digits && r.digits.length === 4) {
+            comboText = get3DigitCombos(r.digits).join(', ');
+        }
+        
+        html += `<div class="m23-row" data-idx="${r.idx}" style="display: grid; grid-template-columns: 20px 55px 1fr 65px 40px; gap: 4px; align-items: center; padding: 4px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 4px; font-size: 12px;">
+            
+            <div style="text-align:center; font-family: monospace; font-size: 11px; color: var(--muted); font-weight: 700;">${r.idx + 1}</div>
+            
+            <input type="text" class="m23-digits" maxlength="4" inputmode="numeric" placeholder="1234" value="${esc(r.digits)}" data-idx="${r.idx}" data-field="digits" style="width: 100%; padding: 6px 2px; text-align: center; font-family: monospace; font-weight: 700; color: var(--accent); letter-spacing: 1px; font-size: 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-2);">
+            
+            <div class="m23-combos" style="font-size: 10px; color: var(--accent); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 2px; font-family: monospace;" title="${comboText}">${comboText}</div>
+            
+            <input type="text" class="m23-pasar" placeholder="PASAR" value="${esc(r.pasar)}" data-idx="${r.idx}" data-field="pasar" style="width: 100%; padding: 6px 2px; font-size: 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-2); text-align: center;">
+            
+            <button class="m23-copy btn-primary" onclick="copyATFilter(${r.idx})" style="padding: 4px 0; font-size: 10px; border-radius: 4px; width: 100%;">📋</button>
+        </div>`;
     });
     
-    if (activeRows.length === 0) {
-        container.innerHTML = '<div class="empty">Belum ada data. Isi dulu di menu <b>"Mengandung 2/3 (55)"</b>.</div>';
-        return;
-    }
-    
-    let html = '<div style="font-size:11px; color:var(--success); margin-bottom:6px; padding:4px 8px; background:rgba(34,197,94,0.1); border-radius:4px; font-weight:600;">'
-        + '✓ ' + activeRows.length + ' baris aktif tersinkron dari "Mengandung 2/3 (55)"'
-        + '</div>';
-    
-    activeRows.forEach(function(r) {
-        const pasarHtml = r.pasar
-            ? '<span style="color:var(--muted); font-size:11px; margin-left:8px;">— ' + esc(r.pasar) + '</span>'
-            : '';
-        html += '<div class="m23-row" style="display:grid; grid-template-columns: 30px 1fr; gap:6px; padding:6px 8px; background:var(--card); border:1px solid var(--border); border-radius:4px; margin-bottom:4px; align-items:center;">'
-            + '<div class="m23-no" style="text-align:center; font-family:monospace; font-size:11px; color:var(--muted); font-weight:700;">' + (r.idx + 1) + '</div>'
-            + '<div><span style="font-family:monospace; font-weight:bold; color:var(--accent); font-size:13px;">' + esc(r.digits) + '</span>' + pasarHtml + '</div>'
-            + '</div>';
-    });
     container.innerHTML = html;
-}
 
     container.querySelectorAll('input').forEach(function(el) {
         el.addEventListener('input', function() {
