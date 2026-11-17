@@ -4782,6 +4782,7 @@ function renderAT65Rows() {
         for (let i = 0; i < atState.rows.length && i < m23State.rows.length; i++) {
             atState.rows[i].digits = m23State.rows[i].digits || '';
             atState.rows[i].pasar  = m23State.rows[i].pasar  || '';
+            // Ambil status ceklis dari M23
             atState.rows[i].selectedCombos = m23State.rows[i].selectedCombos ? [...m23State.rows[i].selectedCombos] : null;
             
             if (atState.rows[i].digits.length !== 4) {
@@ -4799,7 +4800,7 @@ function renderAT65Rows() {
     html += `<div style="display: grid; grid-template-columns: 20px 55px 1fr 65px 40px 35px; gap: 4px; padding: 8px 4px; font-weight: bold; color: var(--muted); font-size: 9.5px; border-bottom: 2px solid var(--border); margin-bottom: 6px; text-transform: uppercase; background: var(--card-2); position: sticky; top: 0; z-index: 2; text-align: center; border-radius: 4px;">
         <div>No</div>
         <div>Result</div>
-        <div style="text-align: left;">3D Otomatis (Ceklis)</div>
+        <div style="text-align: left;">3D Otomatis (Ikut M23)</div>
         <div>Pasar</div>
         <div>Total</div>
         <div>📋</div>
@@ -4813,16 +4814,18 @@ function renderAT65Rows() {
             const combos = get3DigitCombos(r.digits);
             if (!r.selectedCombos) r.selectedCombos = [...combos];
             
-            // Render Checkbox
+            // Render Checkbox yang DI-DISABLE (Tidak bisa diklik)
             comboHtml = combos.map(c => {
-                const isChecked = r.selectedCombos.includes(c) ? 'checked' : '';
-                return `<label style="display:inline-flex; align-items:center; gap:2px; margin-right:8px; cursor:pointer; font-size:10px; color:var(--accent); font-family:monospace;">
-                            <input type="checkbox" class="at-chk-3d" data-idx="${r.idx}" data-combo="${c}" ${isChecked} style="width:auto; margin:0; transform:scale(0.9);"> 
+                const isChecked = r.selectedCombos.includes(c);
+                const chkClass = isChecked ? 'color:var(--accent);' : 'color:var(--muted); opacity:0.6;';
+                
+                return `<label style="display:inline-flex; align-items:center; gap:2px; margin-right:8px; font-size:10px; font-family:monospace; ${chkClass}">
+                            <input type="checkbox" ${isChecked ? 'checked' : ''} disabled style="width:auto; margin:0; transform:scale(0.9);"> 
                             ${c}
                         </label>`;
             }).join('');
             
-            // Hitung total hanya dari yang dicentang
+            // Hitung total hanya dari yang dicentang di M23
             if (r.comboResults) {
                 r.selectedCombos.forEach(c => {
                     if (r.comboResults[c]) total += r.comboResults[c].length;
@@ -4852,7 +4855,7 @@ function renderAT65Rows() {
     
     container.innerHTML = html;
 
-    // Listener Input Angka
+    // Listener Input Angka (Jika diketik manual di AK)
     container.querySelectorAll('input.m23-digits').forEach(function(el) {
         el.addEventListener('input', function() {
             const idx = parseInt(el.dataset.idx, 10);
@@ -4892,39 +4895,6 @@ function renderAT65Rows() {
             atState.rows[idx].pasar = el.value;
             if (window._atRenderTimer) clearTimeout(window._atRenderTimer);
             window._atRenderTimer = setTimeout(renderATResults, 400);
-        });
-    });
-
-    // Listener Ceklis 3D
-    container.querySelectorAll('.at-chk-3d').forEach(function(chk) {
-        chk.addEventListener('change', function() {
-            const idx = parseInt(this.dataset.idx, 10);
-            const combo = this.dataset.combo;
-            const isChecked = this.checked;
-            const r = atState.rows[idx];
-            
-            if (isChecked) {
-                if (!r.selectedCombos.includes(combo)) r.selectedCombos.push(combo);
-            } else {
-                r.selectedCombos = r.selectedCombos.filter(c => c !== combo);
-            }
-            
-            // Update Total di Baris
-            let total = 0;
-            r.selectedCombos.forEach(c => {
-                if (r.comboResults[c]) total += r.comboResults[c].length;
-            });
-            
-            const rowEl = this.closest('.m23-row');
-            if (rowEl) {
-                const totEl = rowEl.querySelector('.m23-total');
-                const cpyBtn = rowEl.querySelector('.m23-copy');
-                if (totEl) totEl.textContent = total > 0 ? total.toLocaleString('id-ID') : '0';
-                if (cpyBtn) cpyBtn.disabled = total === 0;
-            }
-            
-            if (window._atRenderTimer) clearTimeout(window._atRenderTimer);
-            window._atRenderTimer = setTimeout(renderATResults, 300);
         });
     });
 }
