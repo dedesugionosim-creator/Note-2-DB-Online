@@ -7417,7 +7417,7 @@ if ($('c33ShowCaraBaca')) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 64: GABUNG 3 GRUP — REVISED (semua grup opsional, auto 00–99)
+   BLOK 64: GABUNG 3 GRUP — REVISI ANTI-FREEZE (BISA GENERATE BERKALI-KALI)
    ═══════════════════════════════════════════════════════════════════════ */
 
 function gabung3GetSets() {
@@ -7428,7 +7428,6 @@ function gabung3GetSets() {
         g1: g1, g2: g2, g3: g3,
         g1Auto: !g1,
         g3Auto: !g3,
-        // Jika kosong, gunakan semua 00-99
         s1: g1 ? getGroupAs2DigitDepan(g1) : ALL_00_99.slice(),
         s2: g2 ? [...new Set([...getGroupAs2DigitDepan(g2), ...getGroupAs2DigitBelakang(g2)])].sort() : [],
         s3: g3 ? getGroupAs2DigitBelakang(g3) : ALL_00_99.slice()
@@ -7438,15 +7437,20 @@ function gabung3GetSets() {
 function gabung3Compute() {
     const sets = gabung3GetSets();
     if (!sets.s1.length || !sets.s3.length) return { combos: [], sets };
+    
     const s2 = new Set(sets.s2);
     const results = [];
     const seen = new Set();
+    
     for (const ab of sets.s1) {
         for (const cd of sets.s3) {
             const bc = ab[1] + cd[0];
             if (sets.g2 && !s2.has(bc)) continue;
             const combo = ab + cd;
-            if (!seen.has(combo)) { seen.add(combo); results.push(combo); }
+            if (!seen.has(combo)) { 
+                seen.add(combo); 
+                results.push(combo); 
+            }
         }
     }
     results.sort();
@@ -7455,7 +7459,8 @@ function gabung3Compute() {
 
 if ($('gabungGrup1')) {
     ['gabungGrup1', 'gabungGrup2', 'gabungGrup3', 'gabungPermutasi'].forEach(function(id) {
-        const el = $(id); if (el) el.addEventListener('change', updateGabung3Info);
+        const el = $(id); 
+        if (el) el.addEventListener('change', updateGabung3Info);
     });
 }
 
@@ -7463,27 +7468,35 @@ function updateGabung3Info() {
     const info = $('gabungInfo');
     if (!info) return;
     const sets = gabung3GetSets();
+    
     renderGroupPreview(sets.g1, $('gabungPreviewDepan'), 'depan', sets.g1 ? 'Grup 1 → 2D Depan' : 'Tanpa Grup — pakai semua 00–99');
     renderGroupPreview(sets.g2, $('gabungPreviewTengah'), 'both', sets.g2 ? 'Grup 2 → 2D Tengah' : 'Tanpa Grup — tidak ada constraint BC');
     renderGroupPreview(sets.g3, $('gabungPreviewBelakang'), 'belakang', sets.g3 ? 'Grup 3 → 2D Belakang' : 'Tanpa Grup — pakai semua 00–99');
 
     if (!sets.s1.length || !sets.s3.length) {
         info.textContent = '⚠️ Salah satu grup kosong di master.';
-        info.style.color = '#fca5a5'; return;
+        info.style.color = '#fca5a5'; 
+        return;
     }
+    
     const comp = gabung3Compute();
     const permCheck = $('gabungPermutasi') && $('gabungPermutasi').checked;
     let totalAfterPerm = comp.combos.length;
+    
     if (permCheck) {
         const exp = new Set();
-        comp.combos.forEach(function(c) { permutasi4DariNomor(c).forEach(function(p) { exp.add(p); }); });
+        comp.combos.forEach(function(c) { 
+            permutasi4DariNomor(c).forEach(function(p) { exp.add(p); }); 
+        });
         totalAfterPerm = exp.size;
     }
+    
     info.style.color = 'var(--accent)';
     let modeLabel;
     if (!sets.g1 && !sets.g3 && !sets.g2) modeLabel = 'bebas total';
     else if (!sets.g2) modeLabel = '2-grup';
     else modeLabel = '3-grup';
+    
     info.textContent = 'Mode ' + modeLabel
         + ' • G1(' + (sets.g1Auto ? 'AUTO 100' : sets.s1.length) + ')'
         + ' × G3(' + (sets.g3Auto ? 'AUTO 100' : sets.s3.length) + ')'
@@ -7493,36 +7506,65 @@ function updateGabung3Info() {
         + ' • ' + Math.ceil(totalAfterPerm / PER_PAGE) + ' halaman';
 }
 
+// PROSES GENERATE DENGAN PENGAMAN ANTI-FREEZE
 if ($('gabungGenerateBtn')) {
     $('gabungGenerateBtn').addEventListener('click', function() {
+        // 1. Cegah klik beruntun saat sistem masih menghitung
+        if (window._gabungProcessing) return;
+        
         const sets = gabung3GetSets();
         if (!sets.s1.length || !sets.s3.length) {
             toast('Grup kosong di master', 'error'); return;
         }
+        
         const comp = gabung3Compute();
         if (!comp.combos.length) { toast('Tidak ada kombinasi', 'error'); return; }
 
         const permCheck = $('gabungPermutasi') && $('gabungPermutasi').checked;
-        let results = comp.combos;
-        if (permCheck) {
-            const exp = new Set();
-            comp.combos.forEach(function(c) { permutasi4DariNomor(c).forEach(function(p) { exp.add(p); }); });
-            results = Array.from(exp).sort();
-        }
+        
+        // 2. Kunci tombol dan tampilkan status proses
+        window._gabungProcessing = true;
+        const btn = $('gabungGenerateBtn');
+        const oldTxt = btn.textContent;
+        btn.textContent = '⏳ Menghitung...';
+        btn.disabled = true;
 
-        if (results.length > 5000) {
-            if (!confirm('Akan generate ' + results.length.toLocaleString('id-ID') + ' kombinasi. Lanjutkan?')) return;
-        }
+        // 3. Beri jeda agar UI bisa update teks tombol, baru hitung beratnya
+        setTimeout(function() {
+            let results = comp.combos;
+            if (permCheck) {
+                const exp = new Set();
+                comp.combos.forEach(function(c) { 
+                    permutasi4DariNomor(c).forEach(function(p) { exp.add(p); }); 
+                });
+                results = Array.from(exp).sort();
+            }
 
-        pageState.gabungGrup.pages = paginateArray(results);
-        pageState.gabungGrup.current = 0;
-        pageState.gabungGrup.meta = 'G1:' + (sets.g1 || 'AUTO')
-            + (sets.g2 ? ' G2:' + sets.g2 : '') + ' G3:' + (sets.g3 || 'AUTO')
-            + (permCheck ? ' • permutasi' : '');
-        pageState.gabungGrup._breakdown = '';
-        const breakdown = buildGabung3Breakdown(sets, results.length, permCheck);
-        renderPagination('gabungResult', 'gabungGrup', 'Hasil', breakdown);
-        toast('Berhasil: ' + results.length.toLocaleString('id-ID'), 'success');
+            if (results.length > 5000) {
+                // Jika hasil sangat banyak, kita bypass confirm karena sudah diklik generate
+                // (Opsional: Anda bisa hapus baris if ini jika tidak ingin konfirmasi)
+            }
+
+            // 4. Bersihkan state lama dan masukkan hasil baru
+            pageState.gabungGrup.pages = paginateArray(results);
+            pageState.gabungGrup.current = 0;
+            pageState.gabungGrup.meta = 'G1:' + (sets.g1 || 'AUTO')
+                + (sets.g2 ? ' G2:' + sets.g2 : '') + ' G3:' + (sets.g3 || 'AUTO')
+                + (permCheck ? ' • permutasi' : '');
+            pageState.gabungGrup._breakdown = '';
+            
+            const breakdown = buildGabung3Breakdown(sets, results.length, permCheck);
+            
+            // Render hasil
+            renderPagination('gabungResult', 'gabungGrup', 'Hasil', breakdown);
+            
+            // 5. Buka kembali kunci tombol
+            btn.textContent = oldTxt;
+            btn.disabled = false;
+            window._gabungProcessing = false;
+            
+            toast('Berhasil: ' + results.length.toLocaleString('id-ID'), 'success');
+        }, 100); // Jeda 100ms
     });
 }
 
