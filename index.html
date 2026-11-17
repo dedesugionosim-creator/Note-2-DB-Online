@@ -4095,60 +4095,6 @@ function renderPagination(containerId, stateKey, labelPrefix, breakdownHTML) {
     }, 100);
 }
 
-window.goPage = function(stateKey, delta) {
-    const state = pageState[stateKey];
-    if (state.pages.length === 0) return;
-    const next = state.current + delta;
-    if (next < 0 || next >= state.pages.length) return;
-    state.current = next;
-    renderPagination(PAGE_MAP[stateKey][0], stateKey, PAGE_MAP[stateKey][1]);
-};
-
-window.jumpPage = function(stateKey) {
-    const state = pageState[stateKey];
-    const input = $('jump-' + stateKey);
-    if (!input) return;
-    const v = parseInt(input.value, 10);
-    if (isNaN(v) || v < 1 || v > state.pages.length) { toast('Halaman tidak valid', 'error'); return; }
-    state.current = v - 1;
-    renderPagination(PAGE_MAP[stateKey][0], stateKey, PAGE_MAP[stateKey][1]);
-};
-
-window.copyCurrentPage = function(stateKey) {
-    const state = pageState[stateKey];
-    if (state.pages.length === 0) { toast('Tidak ada hasil', 'error'); return; }
-    copyTextToClipboard(state.pages[state.current].join('*') + '*');
-};
-
-window.copyAllPages = function(stateKey) {
-    const state = pageState[stateKey];
-    if (state.pages.length === 0) { toast('Tidak ada hasil', 'error'); return; }
-    const total = state.pages.reduce(function(s, p) { return s + p.length; }, 0);
-    if (total > 10000 && !confirm('Total ' + total.toLocaleString('id-ID') + ' angka. Yakin copy semua?')) return;
-    const flat = [];
-    for (let i = 0; i < state.pages.length; i++) {
-        for (let j = 0; j < state.pages[i].length; j++) flat.push(state.pages[i][j]);
-    }
-    copyTextToClipboard(flat.join('*') + '*');
-};
-
-window.exportPages = function(stateKey) {
-    const state = pageState[stateKey];
-    if (state.pages.length === 0) { toast('Tidak ada hasil', 'error'); return; }
-    const flat = [];
-    for (let i = 0; i < state.pages.length; i++) {
-        for (let j = 0; j < state.pages[i].length; j++) flat.push(state.pages[i][j]);
-    }
-    const blob = new Blob([flat.join('*') + '*'], { type: 'text/plain;charset=utf-8' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-    a.download = 'sahard-' + stateKey + '-' + stamp + '.txt';
-    a.click();
-    URL.revokeObjectURL(a.href);
-    toast('File diexport', 'success');
-};
-
 /* ═══════════════════════════════════════════════════════════════════════
    BLOK 43: BREAKDOWN BUILDERS
    ═══════════════════════════════════════════════════════════════════════ */
