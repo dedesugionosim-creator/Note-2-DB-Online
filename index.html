@@ -7663,8 +7663,8 @@ document.addEventListener('DOMContentLoaded', function() {
    ═══════════════════════════════════════════════════════════════════════ */
    
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 65A: MODE INPUT MENGANDUNG 3 ANGKA (65 BARIS) - FINAL V20
-   Fitur: Pasar Otomatis Terisi (Hardcoded) - Anda tinggal ketik 4D/5D
+   BLOK 65A: MODE INPUT MENGANDUNG 3 ANGKA (65 BARIS) - FINAL V21
+   Fitur: Pasar Otomatis Terisi & Ceklis Aktif/Nonaktif per Baris 4D
    ═══════════════════════════════════════════════════════════════════════ */
 
 const M23_ROW_COUNT = 65;
@@ -7682,17 +7682,18 @@ const PASAR_LIST = [
     "PREDIKSI 22", "PREDIKSI 23"
 ];
 
-// OTOMATIS MENGISI NAMA PASAR KE DALAM STATE
+// OTOMATIS MENGISI NAMA PASAR & STATUS AKTIF
 const m23State = {
     rows: Array(M23_ROW_COUNT).fill(null).map(function(_, i) {
         return { 
             idx: i, 
             digits: '', 
-            pasar: PASAR_LIST[i] || '', // <--- LANGSUNG DITULIS DALAM CODE
+            pasar: PASAR_LIST[i] || '',
             comboResults: {}, 
             pages: {}, 
             generated: false, 
-            selectedCombos: [] 
+            selectedCombos: [],
+            isActive: true // <-- State untuk ceklis aktif/nonaktif
         };
     })
 };
@@ -7804,7 +7805,9 @@ function renderM23Rows() {
     if (!container) return;
     
     let html = '';
-    html += `<div style="display: grid; grid-template-columns: 20px 55px 1fr 85px 40px 35px; gap: 4px; padding: 8px 4px; font-weight: bold; color: var(--muted); font-size: 9.5px; border-bottom: 2px solid var(--border); margin-bottom: 6px; text-transform: uppercase; background: var(--card-2); position: sticky; top: 0; z-index: 2; text-align: center; border-radius: 4px;">
+    // Menambahkan kolom ke-1 untuk Ceklis (25px)
+    html += `<div style="display: grid; grid-template-columns: 25px 20px 55px 1fr 85px 40px 35px; gap: 4px; padding: 8px 4px; font-weight: bold; color: var(--muted); font-size: 9.5px; border-bottom: 2px solid var(--border); margin-bottom: 6px; text-transform: uppercase; background: var(--card-2); position: sticky; top: 0; z-index: 2; text-align: center; border-radius: 4px;">
+        <div>✓</div>
         <div>No</div>
         <div>Result</div>
         <div style="text-align: left;">3D Otomatis (Ceklis)</div>
@@ -7831,22 +7834,29 @@ function renderM23Rows() {
                         </label>`;
             }).join('');
             
-            if (r.comboResults) {
+            // Hanya hitung total jika baris aktif
+            if (r.comboResults && r.isActive) {
                 r.selectedCombos.forEach(c => {
                     if (r.comboResults[c]) total += r.comboResults[c].length;
                 });
             }
         }
 
-        const totalTxt = r.generated && r.digits ? (total > 0 ? total.toLocaleString('id-ID') : '0') : '—';
-        const canCopy = r.generated && total > 0;
+        const totalTxt = (r.generated && r.digits && r.isActive) ? (total > 0 ? total.toLocaleString('id-ID') : '0') : '—';
+        const canCopy = r.generated && total > 0 && r.isActive;
         
         // Deteksi Macau 5D untuk maxlength
         const isMacau5D = (r.pasar || '').trim().toUpperCase() === 'MACAU 5D';
         const maxLen = isMacau5D ? 5 : 4;
         const ph = isMacau5D ? '12345' : '1234';
-
-        html += `<div class="m23-row" data-idx="${r.idx}" style="display: grid; grid-template-columns: 20px 55px 1fr 85px 40px 35px; gap: 4px; align-items: center; padding: 4px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 4px; font-size: 12px;">
+        
+        html += `<div class="m23-row" data-idx="${r.idx}" style="display: grid; grid-template-columns: 25px 20px 55px 1fr 85px 40px 35px; gap: 4px; align-items: center; padding: 4px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 4px; font-size: 12px;">
+            
+            <!-- CEKLIS AKTIF/NONAKTIF 4D -->
+            <div style="text-align: center;">
+                <input type="checkbox" class="m23-row-active" data-idx="${r.idx}" ${r.isActive ? 'checked' : ''} style="width: auto; margin: 0; transform: scale(1.2); cursor: pointer; accent-color: var(--accent);">
+            </div>
+            
             <div style="text-align:center; font-family: monospace; font-size: 11px; color: var(--muted); font-weight: 700;">${r.idx + 1}</div>
             
             <input type="text" class="m23-digits" maxlength="${maxLen}" inputmode="numeric" placeholder="${ph}" value="${esc(r.digits)}" data-idx="${r.idx}" data-field="digits" style="width: 100%; padding: 6px 2px; text-align: center; font-family: monospace; font-weight: 700; color: var(--accent); letter-spacing: 1px; font-size: 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-2);">
@@ -7855,7 +7865,6 @@ function renderM23Rows() {
                 ${comboHtml}
             </div>
             
-            <!-- INPUT TEXT YANG SUDAH TERISI OTOMATIS DARI CODE -->
             <input type="text" class="m23-pasar" placeholder="PASAR" value="${esc(r.pasar)}" data-idx="${r.idx}" data-field="pasar" style="width: 100%; padding: 6px 2px; font-size: 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-2); text-align: center;">
             
             <div class="m23-total" style="text-align:center; font-family: monospace; font-weight: 700; color: var(--success); font-size: 10px;">${totalTxt}</div>
@@ -7865,6 +7874,18 @@ function renderM23Rows() {
     });
     
     container.innerHTML = html;
+
+    // Listener Ceklis Aktif/Nonaktif Baris (4D)
+    container.querySelectorAll('.m23-row-active').forEach(function(chk) {
+        chk.addEventListener('change', function() {
+            const idx = parseInt(this.dataset.idx, 10);
+            m23State.rows[idx].isActive = this.checked;
+            
+            // Render ulang baris (untuk update total) & hasil bawah
+            renderM23Rows();
+            renderM23Results();
+        });
+    });
 
     // Listener Input Angka 4D/5D
     container.querySelectorAll('input.m23-digits').forEach(function(el) {
@@ -7901,7 +7922,7 @@ function renderM23Rows() {
         });
     });
 
-    // Listener Ceklis 3D
+    // Listener Ceklis 3D (Interior)
     container.querySelectorAll('.m23-chk-3d').forEach(function(chk) {
         chk.addEventListener('change', function() {
             const idx = parseInt(this.dataset.idx, 10);
@@ -7943,7 +7964,8 @@ function renderM23Results() {
     let html = '';
 
     m23State.rows.forEach(function(r) {
-        if (!r.generated || !r.digits || !r.comboResults) return;
+        // LEWATI JIKA BARIS TIDAK DICENTANG (NONAKTIF)
+        if (!r.isActive || !r.generated || !r.digits || !r.comboResults) return;
         
         const combos = get3DigitCombos(r.digits);
         
@@ -8205,6 +8227,7 @@ if ($('m23ClearAllBtn')) {
         if (!confirm('Kosongkan 65 baris?')) return;
         m23State.rows.forEach(function(r) {
             r.digits = ''; r.comboResults = {}; r.pages = {}; r.generated = false; r.selectedCombos = [];
+            r.isActive = true; // Reset ceklis aktif
         });
         m23MasterState.items = []; m23MasterState.page = 0;
         invalidateM23BaseCache();
