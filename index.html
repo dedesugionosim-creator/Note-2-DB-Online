@@ -7637,12 +7637,21 @@ function getM231DDepanSelected() {
 // Fungsi memecah 4 digit menjadi kombinasi 3 digit (unik)
 function get3DigitCombos(str4) {
     if (!str4 || str4.length !== 4) return [];
-    let res = new Set();
+    
+    // 1. Ambil 4 kombinasi dengan membuang 1 digit
+    let rawCombos = [];
     for (let i = 0; i < 4; i++) {
-        let combo = str4.slice(0, i) + str4.slice(i + 1);
-        res.add(combo);
+        rawCombos.push(str4.slice(0, i) + str4.slice(i + 1));
     }
-    return Array.from(res).sort();
+    
+    // 2. Urutkan setiap kombinasi (ini kunci agar duplikat hilang)
+    let sortedCombos = rawCombos.map(c => c.split('').sort().join(''));
+    
+    // 3. Hilangkan yang duplikat
+    let uniqueCombos = [...new Set(sortedCombos)];
+    
+    // 4. Kembalikan hasil
+    return uniqueCombos.sort();
 }
 
 // Cache filter (Grup, CB, 1D) agar tidak lag
