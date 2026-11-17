@@ -1674,19 +1674,20 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
             </div>
         </div>
 
-        <!-- MODE INPUT MENGANDUNG 3 ANGKA (65 BARIS DI AK) -->
-        <div class="field" style="background:var(--card-2); padding:12px; border-radius:8px; border:1px solid var(--border); margin-top:16px;">
-            <label style="color:var(--text); margin-bottom:8px; display:block; font-weight:bold; font-size:14px;">
-                □ Mode Input 3 Angka Mengandung (65 Baris)
-            </label>
-            <p style="font-size:11.5px; color:var(--muted); margin-bottom:12px; line-height:1.5;">
-                Ketik <b>4 angka</b> per baris. Sistem akan menyaring 4D dari AK yang mengandung kombinasi 3 angka tersebut.
-            </p>
-            
-            <div class="m23-container" id="at65RowsContainer" style="max-height: 400px; overflow-y: auto; padding: 6px; background: var(--card-2); border: 1px solid var(--border); border-radius: var(--radius-md);">
-                <!-- 65 Baris akan di-generate oleh JavaScript -->
-            </div>
-        </div>
+					<!-- MODE INPUT 3 ANGKA MENGANDUNG — AUTO-SYNC DARI SUBPANEL "MENGANDUNG 2/3 (55)" -->
+					<div class="field" style="background:var(--card-2); padding:12px; border-radius:8px; border:1px solid var(--border); margin-top:16px;">
+						<label style="color:var(--text); margin-bottom:8px; display:block; font-weight:bold; font-size:14px;">
+							□ Mode Input 3 Angka Mengandung (Auto-Sync dari "Mengandung 2/3 (55)")
+						</label>
+						<p style="font-size:11.5px; color:var(--muted); margin-bottom:12px; line-height:1.5;">
+							Baris di bawah ini <b>terisi otomatis</b> dari menu <b>"Mengandung 2/3 (55)"</b>.
+							Setiap perubahan di sana langsung tercermin di sini. Hanya baris yang terisi yang ditampilkan.
+						</p>
+						
+						<div class="m23-container" id="at65RowsContainer" style="max-height: 400px; overflow-y: auto; padding: 6px; background: var(--card-2); border: 1px solid var(--border); border-radius: var(--radius-md);">
+							<!-- Auto-render dari m23State -->
+						</div>
+					</div>
 
         <!-- FILTER 1D DEPAN -->
         <div class="field" style="margin-top:16px;">
@@ -4314,6 +4315,8 @@ $('manualCBMode').addEventListener('change', updateManualInfo);
 const _d1Wrap = $('manual1DDepan');
 if (_d1Wrap) _d1Wrap.addEventListener('change', updateManualInfo);
 
+
+
 function updateManualInfo() {
     const depanRaw = parseTwoDigitList($('manualDepan').value);
     const belakangRaw = parseTwoDigitList($('manualBelakang').value);
@@ -4710,37 +4713,35 @@ function renderAT65Rows() {
     const container = $('at65RowsContainer');
     if (!container) return;
     
-    let html = '';
-    // Header Tabel
-    html += `<div style="display: grid; grid-template-columns: 20px 55px 1fr 65px 40px; gap: 4px; padding: 8px 4px; font-weight: bold; color: var(--muted); font-size: 9.5px; border-bottom: 2px solid var(--border); margin-bottom: 6px; text-transform: uppercase; background: var(--card-2); position: sticky; top: 0; z-index: 2; text-align: center; border-radius: 4px;">
-        <div>No</div>
-        <div>Input</div>
-        <div style="text-align: left;">3D Otomatis</div>
-        <div>Pasar</div>
-        <div>📋</div>
-    </div>`;
-
-    atState.rows.forEach(function(r) {
-        let comboText = '—';
-        if (r.digits && r.digits.length === 4) {
-            comboText = get3DigitCombos(r.digits).join(', ');
-        }
-        
-        html += `<div class="m23-row" data-idx="${r.idx}" style="display: grid; grid-template-columns: 20px 55px 1fr 65px 40px; gap: 4px; align-items: center; padding: 4px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 4px; font-size: 12px;">
-            
-            <div style="text-align:center; font-family: monospace; font-size: 11px; color: var(--muted); font-weight: 700;">${r.idx + 1}</div>
-            
-            <input type="text" class="m23-digits" maxlength="4" inputmode="numeric" placeholder="1234" value="${esc(r.digits)}" data-idx="${r.idx}" data-field="digits" style="width: 100%; padding: 6px 2px; text-align: center; font-family: monospace; font-weight: 700; color: var(--accent); letter-spacing: 1px; font-size: 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-2);">
-            
-            <div class="m23-combos" style="font-size: 10px; color: var(--accent); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 2px; font-family: monospace;" title="${comboText}">${comboText}</div>
-            
-            <input type="text" class="m23-pasar" placeholder="PASAR" value="${esc(r.pasar)}" data-idx="${r.idx}" data-field="pasar" style="width: 100%; padding: 6px 2px; font-size: 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-2); text-align: center;">
-            
-            <button class="m23-copy btn-primary" onclick="copyATFilter(${r.idx})" style="padding: 4px 0; font-size: 10px; border-radius: 4px; width: 100%;">📋</button>
-        </div>`;
+    if (typeof m23State === 'undefined' || !m23State.rows) {
+        container.innerHTML = '<div class="empty">Data "Mengandung 2/3" tidak tersedia.</div>';
+        return;
+    }
+    
+    const activeRows = m23State.rows.filter(function(r) {
+        return r.digits && String(r.digits).trim().length >= 2;
     });
     
+    if (activeRows.length === 0) {
+        container.innerHTML = '<div class="empty">Belum ada data. Isi dulu di menu <b>"Mengandung 2/3 (55)"</b>.</div>';
+        return;
+    }
+    
+    let html = '<div style="font-size:11px; color:var(--success); margin-bottom:6px; padding:4px 8px; background:rgba(34,197,94,0.1); border-radius:4px; font-weight:600;">'
+        + '✓ ' + activeRows.length + ' baris aktif tersinkron dari "Mengandung 2/3 (55)"'
+        + '</div>';
+    
+    activeRows.forEach(function(r) {
+        const pasarHtml = r.pasar
+            ? '<span style="color:var(--muted); font-size:11px; margin-left:8px;">— ' + esc(r.pasar) + '</span>'
+            : '';
+        html += '<div class="m23-row" style="display:grid; grid-template-columns: 30px 1fr; gap:6px; padding:6px 8px; background:var(--card); border:1px solid var(--border); border-radius:4px; margin-bottom:4px; align-items:center;">'
+            + '<div class="m23-no" style="text-align:center; font-family:monospace; font-size:11px; color:var(--muted); font-weight:700;">' + (r.idx + 1) + '</div>'
+            + '<div><span style="font-family:monospace; font-weight:bold; color:var(--accent); font-size:13px;">' + esc(r.digits) + '</span>' + pasarHtml + '</div>'
+            + '</div>';
+    });
     container.innerHTML = html;
+}
 
     container.querySelectorAll('input').forEach(function(el) {
         el.addEventListener('input', function() {
@@ -4835,10 +4836,10 @@ function updateATInfo() {
     const g3 = $('atGrup3') ? $('atGrup3').value : '';
     const d1 = getAT1DDepanSelected();
     
-    let activeRows = 0;
-    if (typeof atState !== 'undefined' && atState.rows) {
-        atState.rows.forEach(r => { if (r.digits && r.digits.length === 4) activeRows++; });
-    }
+	let activeRows = 0;
+	if (typeof m23State !== 'undefined' && m23State.rows) {
+		activeRows = m23State.rows.filter(r => r.digits && String(r.digits).trim().length >= 2).length;
+	}
 
     const info = $('atInfo');
     if (!info) return;
@@ -4856,7 +4857,7 @@ function updateATInfo() {
         
     if (g1 || g2 || g3) text += ' • Filter Grup';
     if (d1.length > 0) text += ' • Awalan: ' + d1.join(',');
-    if (activeRows > 0) text += ' • Saring: ' + activeRows + ' baris 3D';
+    if (activeRows > 0) text += ' • Saring: ' + activeRows + ' baris (Mengandung 2/3)';
     if (cb.length > 0) text += ' • CB: ' + cb.join(' ');
     
     info.textContent = text;
@@ -4899,7 +4900,9 @@ $('atGenerateBtn').addEventListener('click', function() {
     const cbMode = $('atCBMode') ? $('atCBMode').value : 'or';
     const d1 = getAT1DDepanSelected();
     
-    let activeRows = atState.rows.filter(r => r.digits && r.digits.length === 4);
+    let activeRows = (typeof m23State !== 'undefined' && m23State.rows)
+    ? m23State.rows.filter(r => r.digits && String(r.digits).trim().length >= 2)
+    : [];
     
     function tampilkanKosong(pesan) {
         toast(pesan, 'error');
@@ -4932,21 +4935,18 @@ $('atGenerateBtn').addEventListener('click', function() {
         if (filtered.length === 0) { tampilkanKosong('Tidak ada 2D depan yang cocok dengan Awalan 1D'); return; }
     }
 
-    // 3. Filter 3 Angka Mengandung (65 Baris)
-    if (activeRows.length > 0) {
-        let matchedSet = new Set();
-        activeRows.forEach(r => {
-            const combos = get3DigitCombos(r.digits);
-            combos.forEach(combo => {
-                const ms = blParseMultiset(combo);
-                filtered.forEach(n => {
-                    if (blContainsCombo(n, ms)) matchedSet.add(n);
-                });
-            });
+    // 3. Filter "Mengandung 2/3" (auto dari m23State)
+if (activeRows.length > 0) {
+    let matchedSet = new Set();
+    activeRows.forEach(r => {
+        const ms = blParseMultiset(r.digits);
+        filtered.forEach(n => {
+            if (blContainsCombo(n, ms)) matchedSet.add(n);
         });
-        filtered = Array.from(matchedSet);
-        if (filtered.length === 0) { tampilkanKosong('Tidak ada hasil setelah filter 3 Angka Mengandung'); return; }
-    }
+    });
+    filtered = Array.from(matchedSet);
+    if (filtered.length === 0) { tampilkanKosong('Tidak ada hasil setelah filter "Mengandung 2/3"'); return; }
+}
 
     // 4. Filter CB
     if (cb.length > 0) {
@@ -4961,7 +4961,7 @@ $('atGenerateBtn').addEventListener('click', function() {
     let meta = 'P1:'+p1.length+' P2:'+p2.length+' P3:'+p3.length+' P4:'+p4.length;
     if (g1 || g2 || g3) meta += ' • Filter Grup';
     if (d1.length > 0) meta += ' • Awalan: ' + d1.join(',');
-    if (activeRows.length > 0) meta += ' • Saring ' + activeRows.length + ' baris 3D';
+    if (activeRows.length > 0) meta += ' • Saring ' + activeRows.length + ' baris (Mengandung 2/3)';
     if (cb.length > 0) meta += ' • CB: ' + cb.join(' ');
     pageState.angkaTarung.meta = meta;
 
@@ -8455,6 +8455,73 @@ console.log('Semua fitur siap. Selamat menggunakan SA_HARD!');
     window.addEventListener('beforeunload', simpan);
 })();
 </script>
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BLOK 76: FIX PAGINATION — Tombol Prev/Next/Copy/Export
+   Dipanggil oleh renderPagination() (BLOK 42), sebelumnya belum
+   didefinisikan → menyebabkan tombol tidak berfungsi.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+window.goPage = function(stateKey, dir) {
+    const st = pageState[stateKey];
+    if (!st || !st.pages || st.pages.length === 0) return;
+    const target = st.current + dir;
+    if (target < 0 || target >= st.pages.length) return;
+    st.current = target;
+    const map = PAGE_MAP[stateKey];
+    if (map) renderPagination(map[0], stateKey, map[1]);
+};
+
+window.jumpPage = function(stateKey) {
+    const st = pageState[stateKey];
+    if (!st || !st.pages || st.pages.length === 0) return;
+    const inp = document.getElementById('jump-' + stateKey);
+    if (!inp) return;
+    let n = parseInt(inp.value, 10);
+    if (isNaN(n)) return;
+    n = n - 1;
+    if (n < 0) n = 0;
+    if (n >= st.pages.length) n = st.pages.length - 1;
+    st.current = n;
+    const map = PAGE_MAP[stateKey];
+    if (map) renderPagination(map[0], stateKey, map[1]);
+};
+
+window.copyCurrentPage = function(stateKey) {
+    const st = pageState[stateKey];
+    if (!st || !st.pages || st.pages.length === 0) { toast('Belum ada hasil', 'error'); return; }
+    const page = st.pages[st.current];
+    if (!page || page.length === 0) { toast('Halaman kosong', 'error'); return; }
+    copyTextToClipboard(page.join('*') + '*');
+};
+
+window.copyAllPages = function(stateKey) {
+    const st = pageState[stateKey];
+    if (!st || !st.pages || st.pages.length === 0) { toast('Belum ada hasil', 'error'); return; }
+    const all = [];
+    for (let i = 0; i < st.pages.length; i++) {
+        for (let j = 0; j < st.pages[i].length; j++) all.push(st.pages[i][j]);
+    }
+    if (all.length === 0) { toast('Belum ada hasil', 'error'); return; }
+    copyTextToClipboard(all.join('*') + '*');
+};
+
+window.exportPages = function(stateKey) {
+    const st = pageState[stateKey];
+    if (!st || !st.pages || st.pages.length === 0) { toast('Belum ada hasil', 'error'); return; }
+    const all = [];
+    for (let i = 0; i < st.pages.length; i++) {
+        for (let j = 0; j < st.pages[i].length; j++) all.push(st.pages[i][j]);
+    }
+    if (all.length === 0) { toast('Belum ada hasil', 'error'); return; }
+    const blob = new Blob([all.join('*') + '*'], { type: 'text/plain;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'sahard-' + stateKey + '-' + new Date().toISOString().slice(0, 10) + '.txt';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast('Berhasil diexport', 'success');
+};
 
 <script>
 /* ═══════════════════════════════════════════════════════════════════════
