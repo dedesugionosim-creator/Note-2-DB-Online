@@ -1190,7 +1190,7 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   REVISI: Mengandung 2/3 (55 Baris) & Input Manual 3 Kolom
+   REVISI: Mengandung 2/3 (65 Baris) & Input Manual 3 Kolom
    ═══════════════════════════════════════════════════════════════════════ */
 .d1-checkbox-group {
     display: flex; flex-wrap: wrap; gap: 8px; padding: 10px;
@@ -7324,14 +7324,14 @@ document.addEventListener('DOMContentLoaded', function() {
    ═══════════════════════════════════════════════════════════════════════ */
    
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 65A: MODE INPUT MENGANDUNG 2/3 (55 BARIS) + FULL FILTER
+   BLOK 65A: MODE INPUT MENGANDUNG 3 ANGKA (65 BARIS) - REVISI TOTAL
    ═══════════════════════════════════════════════════════════════════════ */
 
 const M23_ROW_COUNT = 65;
 
 const m23State = {
     rows: Array(M23_ROW_COUNT).fill(null).map(function(_, i) {
-        return { idx: i, digits: '', pasar: '', results: [], page: 0, generated: false };
+        return { idx: i, digits: '', pasar: '', comboResults: {}, pages: {}, generated: false };
     })
 };
 
@@ -7343,6 +7343,12 @@ const M23_UNIVERSE = (function() {
     return arr;
 })();
 
+let _m23CachedBase = null;
+
+function invalidateM23BaseCache() {
+    _m23CachedBase = null;
+}
+
 function getM231DDepanSelected() {
     const arr = [];
     document.querySelectorAll('#m231DDepan input[type="checkbox"]:checked').forEach(function(e) {
@@ -7351,99 +7357,79 @@ function getM231DDepanSelected() {
     return arr;
 }
 
-// Fungsi untuk memecah 4 angka menjadi kombinasi 3 angka
+// Fungsi memecah 4 digit menjadi kombinasi 3 digit (unik)
 function get3DigitCombos(str4) {
     if (!str4 || str4.length !== 4) return [];
     let res = new Set();
     for (let i = 0; i < 4; i++) {
-        // Buang 1 digit di index ke-i
         let combo = str4.slice(0, i) + str4.slice(i + 1);
         res.add(combo);
     }
     return Array.from(res).sort();
 }
-function applyM23Filters(n) {
+
+// Cache filter (Grup, CB, 1D) agar tidak lag
+function getM23BaseUniverse() {
+    if (_m23CachedBase) return _m23CachedBase;
+
     const useGrup = $('m23UseGrup') ? $('m23UseGrup').checked : true;
     const useCB   = $('m23UseCB') ? $('m23UseCB').checked : true;
     const use1D   = $('m23Use1D') ? $('m23Use1D').checked : true;
 
-    // URUTAN 1: FILTER 3 GRUP
-    if (useGrup) {
-        const g1 = $('m23Grup1').value;
-        const g2 = $('m23Grup2').value;
-        const g3 = $('m23Grup3').value;
-        
+    const g1 = useGrup ? $('m23Grup1').value : '';
+    const g2 = useGrup ? $('m23Grup2').value : '';
+    const g3 = useGrup ? $('m23Grup3').value : '';
+    
+    const setG1 = g1 ? new Set(getGroupAs2DigitDepan(g1)) : null;
+    const setG2 = g2 ? new Set([...getGroupAs2DigitDepan(g2), ...getGroupAs2DigitBelakang(g2)]) : null;
+    const setG3 = g3 ? new Set(getGroupAs2DigitBelakang(g3)) : null;
+
+    const cb = useCB ? parseSingleDigitList($('m23CB').value) : [];
+    const cbMode = $('m23CBMode') ? $('m23CBMode').value : 'or';
+    const d1 = use1D ? getM231DDepanSelected() : [];
+
+    _m23CachedBase = M23_UNIVERSE.filter(function(n) {
+        // Filter 3 Grup
         if (g1 || g2 || g3) {
-            const setG1 = g1 ? new Set(getGroupAs2DigitDepan(g1)) : null;
-            const setG2 = g2 ? new Set([...getGroupAs2DigitDepan(g2), ...getGroupAs2DigitBelakang(g2)]) : null;
-            const setG3 = g3 ? new Set(getGroupAs2DigitBelakang(g3)) : null;
-            
             const ab = n.slice(0, 2), bc = n.slice(1, 3), cd = n.slice(2, 4);
             if (setG1 && !setG1.has(ab)) return false;
             if (setG2 && !setG2.has(bc)) return false;
             if (setG3 && !setG3.has(cd)) return false;
         }
-    }
-
-    // URUTAN 2: FILTER CB
-    if (useCB) {
-        const cb = parseSingleDigitList($('m23CB').value);
-        const cbMode = $('m23CBMode').value;
-        
+        // Filter CB
         if (cb.length > 0) {
             if (cbMode === 'and') {
                 if (!cb.every(d => n.includes(d))) return false;
             } else {
-                if (!cb.some(d => n.includes(d))) return false;
+                let found = false;
+                for (const d of cb) if (n.includes(d)) { found = true; break; }
+                if (!found) return false;
             }
         }
-    }
-
-    // URUTAN 3: FILTER ANGKA DEPAN (1D)
-    if (use1D) {
-        const d1 = getM231DDepanSelected();
+        // Filter 1D Depan
         if (d1.length > 0 && !d1.includes(n[0])) return false;
-    }
 
-    return true;
-}
-
-function recalcM23All() {
-    // 1. Ambil semua universe, lalu saring berdasarkan Grup, 1D, dan CB terlebih dahulu
-    const baseUniverse = M23_UNIVERSE.filter(applyM23Filters);
-
-    // 2. Hitung ulang hasil per baris berdasarkan baseUniverse
-    m23State.rows.forEach(function(r) {
-        if (!r.digits || r.digits.length !== 4) {
-            r.generated = false; r.results = []; return;
-        }
-        const combos = get3DigitCombos(r.digits);
-        let matchedSet = new Set();
-        combos.forEach(function(combo) {
-            const ms = blParseMultiset(combo);
-            baseUniverse.forEach(function(n) {
-                if (blContainsCombo(n, ms)) matchedSet.add(n);
-            });
-        });
-        r.results = Array.from(matchedSet).sort();
-        r.generated = true;
+        return true;
     });
 
-    // 3. Update Tampilan
-    renderM23Rows();
-    renderM23Results();
+    return _m23CachedBase;
 }
 
+// Cari 4D yang mengandung 3D combo
+function generate4DForCombo(comboStr, baseUniverse) {
+    const ms = blParseMultiset(comboStr);
+    return baseUniverse.filter(n => blContainsCombo(n, ms)).sort();
+}
+
+// Render Tabel Baris 65
 function renderM23Rows() {
     const container = $('m23RowsContainer');
     if (!container) return;
     
     let html = '';
-    
-    // Header Tabel
     html += `<div style="display: grid; grid-template-columns: 20px 55px 1fr 65px 40px 35px; gap: 4px; padding: 8px 4px; font-weight: bold; color: var(--muted); font-size: 9.5px; border-bottom: 2px solid var(--border); margin-bottom: 6px; text-transform: uppercase; background: var(--card-2); position: sticky; top: 0; z-index: 2; text-align: center; border-radius: 4px;">
         <div>No</div>
-        <div>Input</div>
+        <div>Result</div>
         <div style="text-align: left;">3D Otomatis</div>
         <div>Pasar</div>
         <div>Total</div>
@@ -7457,14 +7443,15 @@ function renderM23Rows() {
         if (r.digits && r.digits.length === 4) {
             const combos = get3DigitCombos(r.digits);
             comboText = combos.join(', ');
-            total = r.results.length;
+            if (r.comboResults) {
+                total = Object.values(r.comboResults).reduce((sum, arr) => sum + arr.length, 0);
+            }
         }
 
         const totalTxt = r.generated && r.digits ? (total > 0 ? total.toLocaleString('id-ID') : '0') : '—';
-        const canCopy = r.generated && r.results.length > 0;
+        const canCopy = r.generated && total > 0;
         
         html += `<div class="m23-row" data-idx="${r.idx}" style="display: grid; grid-template-columns: 20px 55px 1fr 65px 40px 35px; gap: 4px; align-items: center; padding: 4px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 4px; font-size: 12px;">
-            
             <div style="text-align:center; font-family: monospace; font-size: 11px; color: var(--muted); font-weight: 700;">${r.idx + 1}</div>
             
             <input type="text" class="m23-digits" maxlength="4" inputmode="numeric" placeholder="1234" value="${esc(r.digits)}" data-idx="${r.idx}" data-field="digits" style="width: 100%; padding: 6px 2px; text-align: center; font-family: monospace; font-weight: 700; color: var(--accent); letter-spacing: 1px; font-size: 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-2);">
@@ -7481,6 +7468,7 @@ function renderM23Rows() {
     
     container.innerHTML = html;
 
+    // Listener untuk setiap kotak input
     container.querySelectorAll('input').forEach(function(el) {
         el.addEventListener('input', function() {
             const idx = parseInt(el.dataset.idx, 10);
@@ -7491,33 +7479,31 @@ function renderM23Rows() {
             const r = m23State.rows[idx];
             r[field] = el.value;
             
+            // FITUR: Otomatis Generate saat user selesai ketik 4 angka
             if (r.digits.length === 4) {
+                const base = getM23BaseUniverse();
                 const combos = get3DigitCombos(r.digits);
-                let matchedSet = new Set();
-                const baseUniverse = M23_UNIVERSE.filter(applyM23Filters);
-                
+                r.comboResults = {};
                 combos.forEach(combo => {
-                    const ms = blParseMultiset(combo);
-                    baseUniverse.forEach(n => {
-                        if (blContainsCombo(n, ms)) matchedSet.add(n);
-                    });
+                    r.comboResults[combo] = generate4DForCombo(combo, base);
                 });
-
-                r.results = Array.from(matchedSet).sort();
                 r.generated = true;
+                r.pages = {}; 
             } else {
-                r.results = [];
+                r.comboResults = {};
                 r.generated = false;
             }
 
             const rowEl = el.closest('.m23-row');
             if (rowEl) {
-                const total = r.results.length;
                 const totEl = rowEl.querySelector('.m23-total');
                 const cpyBtn = rowEl.querySelector('.m23-copy');
                 const comboEl = rowEl.querySelector('.m23-combos');
+                
+                let total = 0;
+                if (r.generated) total = Object.values(r.comboResults).reduce((sum, arr) => sum + arr.length, 0);
 
-                if (totEl) totEl.textContent = total > 0 ? total.toLocaleString('id-ID') : '—';
+                if (totEl) totEl.textContent = total > 0 ? total.toLocaleString('id-ID') : (r.generated ? '0' : '—');
                 if (cpyBtn) cpyBtn.disabled = total === 0;
                 if (comboEl) {
                     const combos = get3DigitCombos(r.digits);
@@ -7526,29 +7512,66 @@ function renderM23Rows() {
                     comboEl.setAttribute('title', txt);
                 }
             }
+
+            // Debounce render hasil bawah agar tidak lag
+            if (window._m23RenderTimer) clearTimeout(window._m23RenderTimer);
+            window._m23RenderTimer = setTimeout(renderM23Results, 300);
         });
     });
 }
 
-window.m23CopyRow = function(idx) {
-    const r = m23State.rows[idx];
-    if (!r || !r.results.length) { toast('Belum ada hasil', 'error'); return; }
-    copyTextToClipboard(r.results.join('*') + '*');
-};
-
+// Render Hasil Bawah (Per Kombinasi 3D)
 function renderM23Results() {
     const c = $('m23ResultsContainer');
     if (!c) return;
 
     const masterSet = new Set();
-    m23State.rows.forEach(function(r) {
-        if (r.generated && r.results.length > 0) {
-            r.results.forEach(function(n) { masterSet.add(n); });
-        }
-    });
-    m23MasterState.items = Array.from(masterSet).sort();
-
     let html = '';
+
+    m23State.rows.forEach(function(r) {
+        if (!r.generated || !r.digits || !r.comboResults) return;
+        
+        const combos = get3DigitCombos(r.digits);
+        
+        // Tampilkan per 3D Combo
+        combos.forEach(function(combo) {
+            const results = r.comboResults[combo] || [];
+            if (results.length === 0) return;
+            
+            results.forEach(n => masterSet.add(n));
+
+            const tp = Math.ceil(results.length / PER_PAGE);
+            if (r.pages[combo] === undefined) r.pages[combo] = 0;
+            if (r.pages[combo] >= tp) r.pages[combo] = tp - 1;
+            if (r.pages[combo] < 0) r.pages[combo] = 0;
+            
+            const st = r.pages[combo] * PER_PAGE;
+            const pd = results.slice(st, st + PER_PAGE);
+            const pasarLabel = r.pasar ? r.pasar : '';
+            
+            // Desain Header: Hasil dari : Singapore 124
+            html += `<div class="m23-result-block" id="m23-block-${r.idx}-${combo}">
+                <div class="m23-res-header" style="font-size:14px; margin-bottom:4px; display:flex; justify-content:space-between; align-items:center;">
+                    <span>Hasil dari : <span style="color:var(--warn); font-size:16px;">${esc(pasarLabel)} ${esc(combo)}</span></span>
+                    <span style="font-size:12px; color:var(--success); background:rgba(34,197,94,0.1); padding:2px 8px; border-radius:4px; font-weight:bold;">${results.length.toLocaleString('id-ID')} angka</span>
+                </div>
+                <div class="page-info">Halaman ${r.pages[combo] + 1} / ${tp} • ${pd.length} di halaman ini</div>
+                <div class="page-content" style="max-height:240px;">${pd.join('*')}${pd.length ? '*' : ''}</div>
+                <div class="page-nav">
+                    <button ${r.pages[combo] === 0 ? 'disabled' : ''} onclick="m23PageCombo(${r.idx}, '${combo}', -1)">◀ Prev</button>
+                    <span>${r.pages[combo] + 1} / ${tp}</span>
+                    <button ${r.pages[combo] === tp - 1 ? 'disabled' : ''} onclick="m23PageCombo(${r.idx}, '${combo}', 1)">Next ▶</button>
+                </div>
+                <div class="page-actions">
+                    <button onclick="m23CopyComboPage(${r.idx}, '${combo}')">📋 Copy Hal</button>
+                    <button onclick="m23CopyComboAll(${r.idx}, '${combo}')">📋 Copy Semua</button>
+                    <button onclick="m23ExportCombo(${r.idx}, '${combo}')">⬇ TXT</button>
+                </div>
+            </div>`;
+        });
+    });
+
+    m23MasterState.items = Array.from(masterSet).sort();
 
     if (m23MasterState.items.length > 0) {
         const tp = Math.ceil(m23MasterState.items.length / m23MasterState.size);
@@ -7557,7 +7580,7 @@ function renderM23Results() {
         const st = m23MasterState.page * m23MasterState.size;
         const pd = m23MasterState.items.slice(st, st + m23MasterState.size);
 
-        html += `<div class="card" style="border-color:var(--success); background:rgba(34,197,94,0.05); margin-bottom:14px;">
+        html = `<div class="card" style="border-color:var(--success); background:rgba(34,197,94,0.05); margin-bottom:14px;">
             <h3 style="color:var(--success); margin-bottom:8px;">🎯 TOTAL KESELURUHAN GABUNGAN (UNIK)</h3>
             <div class="page-info">Halaman ${m23MasterState.page + 1} / ${tp} • ${pd.length} di halaman ini • Total ${m23MasterState.items.length.toLocaleString('id-ID')} angka unik</div>
             <div class="page-content" style="max-height:200px; border-color:var(--success);">${pd.join('*')}${pd.length ? '*' : ''}</div>
@@ -7571,112 +7594,129 @@ function renderM23Results() {
                 <button class="btn-success" onclick="m23CopyMasterAll()">📋 Copy Semua</button>
                 <button class="btn-warn" onclick="m23ExportMaster()">⬇ Export TXT</button>
             </div>
-        </div>`;
+        </div>` + html;
+    } else {
+        if (!html) {
+            html = '<div class="card"><div class="empty">Belum ada hasil. Ketik 4 angka di tabel atas, sistem akan otomatis meng-generate.</div></div>';
+        }
     }
-
-    m23State.rows.forEach(function(r) {
-        if (!r.generated || !r.digits || r.results.length === 0) return;
-        const tp = Math.ceil(r.results.length / PER_PAGE);
-        if (r.page >= tp) r.page = tp - 1;
-        if (r.page < 0) r.page = 0;
-        const st = r.page * PER_PAGE;
-        const pd = r.results.slice(st, st + PER_PAGE);
-        const combos = get3DigitCombos(r.digits);
-
-        html += `<div class="m23-result-block" id="m23-block-${r.idx}">
-            <div class="m23-res-header" style="font-size:14px; margin-bottom:4px;">Hasil dari <span style="color:var(--warn); font-size:16px;">${esc(r.digits)}</span> ${r.pasar ? `<span class="pasar-tag" style="color:var(--accent); font-size:12px;">— ${esc(r.pasar)}</span>` : ''}</div>
-            <div style="font-size:11px; color:var(--accent); margin-bottom:8px; font-family:monospace;">Kombinasi 3D: ${combos.join(', ')}</div>
-            <div class="page-info">Halaman ${r.page + 1} / ${tp} • ${pd.length} di halaman ini • Total ${r.results.length.toLocaleString('id-ID')}</div>
-            <div class="page-content" style="max-height:240px;">${pd.join('*')}${pd.length ? '*' : ''}</div>
-            <div class="page-nav">
-                <button ${r.page === 0 ? 'disabled' : ''} onclick="m23Page(${r.idx},-1)">◀ Prev</button>
-                <span>${r.page + 1} / ${tp}</span>
-                <button ${r.page === tp - 1 ? 'disabled' : ''} onclick="m23Page(${r.idx},1)">Next ▶</button>
-            </div>
-            <div class="page-actions">
-                <button onclick="m23CopyPage(${r.idx})">📋 Copy Hal</button>
-                <button onclick="m23CopyRow(${r.idx})">📋 Copy Semua</button>
-                <button onclick="m23ExportRow(${r.idx})">⬇ TXT</button>
-            </div>
-        </div>`;
-    });
-
-    if (!html) {
-        html = '<div class="card"><div class="empty">Belum ada hasil. Isi Result 4 Angka di baris, sistem akan otomatis meng-generate.</div></div>';
-    }
+    
     c.innerHTML = html;
 }
 
-window.m23Page = function(idx, d) {
-    const r = m23State.rows[idx]; if (!r) return;
-    const tp = Math.ceil(r.results.length / PER_PAGE);
-    const nx = r.page + d;
+// Paging & Copy Spesifik per Kombinasi
+window.m23PageCombo = function(idx, combo, d) {
+    const r = m23State.rows[idx]; if (!r || !r.comboResults[combo]) return;
+    const tp = Math.ceil(r.comboResults[combo].length / PER_PAGE);
+    const nx = r.pages[combo] + d;
     if (nx < 0 || nx >= tp) return;
-    r.page = nx; renderM23Results();
-};
-window.m23PageMaster = function(d) {
-    const tp = Math.ceil(m23MasterState.items.length / m23MasterState.size);
-    const nx = m23MasterState.page + d;
-    if (nx < 0 || nx >= tp) return;
-    m23MasterState.page = nx;
+    r.pages[combo] = nx; 
     renderM23Results();
 };
-window.m23CopyPage = function(idx) {
-    const r = m23State.rows[idx]; if (!r || !r.results.length) return;
-    const st = r.page * PER_PAGE;
-    copyTextToClipboard(r.results.slice(st, st + PER_PAGE).join('*') + '*');
+
+window.m23CopyComboPage = function(idx, combo) {
+    const r = m23State.rows[idx]; if (!r || !r.comboResults[combo]) return;
+    const results = r.comboResults[combo];
+    const st = r.pages[combo] * PER_PAGE;
+    copyTextToClipboard(results.slice(st, st + PER_PAGE).join('*') + '*');
 };
-window.m23CopyMasterPage = function() {
-    const st = m23MasterState.page * m23MasterState.size;
-    copyTextToClipboard(m23MasterState.items.slice(st, st + m23MasterState.size).join('*') + '*');
+
+window.m23CopyComboAll = function(idx, combo) {
+    const r = m23State.rows[idx]; if (!r || !r.comboResults[combo]) return;
+    copyTextToClipboard(r.comboResults[combo].join('*') + '*');
 };
-window.m23CopyMasterAll = function() {
-    copyTextToClipboard(m23MasterState.items.join('*') + '*');
-};
-window.m23ExportRow = function(idx) {
-    const r = m23State.rows[idx]; if (!r || !r.results.length) return;
-    const b = new Blob([r.results.join('*') + '*'], { type: 'text/plain;charset=utf-8' });
+
+window.m23ExportCombo = function(idx, combo) {
+    const r = m23State.rows[idx]; if (!r || !r.comboResults[combo]) return;
+    const b = new Blob([r.comboResults[combo].join('*') + '*'], { type: 'text/plain;charset=utf-8' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(b);
-    a.download = 'sahard-m23-' + (r.digits || idx) + '.txt';
-    a.click();
-    URL.revokeObjectURL(a.href);
-    toast('Diexport', 'success');
-};
-window.m23ExportMaster = function() {
-    const b = new Blob([m23MasterState.items.join('*') + '*'], { type: 'text/plain;charset=utf-8' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(b);
-    a.download = 'sahard-m23-master.txt';
+    a.download = 'sahard-m23-' + (r.pasar ? r.pasar + '-' : '') + combo + '.txt';
     a.click();
     URL.revokeObjectURL(a.href);
     toast('Diexport', 'success');
 };
 
-// Ceklis Otomatis (Bisa diklik)
-if ($('m23UseGrup')) $('m23UseGrup').addEventListener('change', function() {
-    if (!this.checked) {
-        $('m23Grup1').disabled = true; $('m23Grup2').disabled = true; $('m23Grup3').disabled = true;
-    } else {
-        $('m23Grup1').disabled = false; $('m23Grup2').disabled = false; $('m23Grup3').disabled = false;
-    }
+// Fitur Copy All untuk Tombol di Tabel Atas
+window.m23CopyRow = function(idx) {
+    const r = m23State.rows[idx];
+    if (!r || !r.comboResults || Object.keys(r.comboResults).length === 0) { toast('Belum ada hasil', 'error'); return; }
+    const masterSet = new Set();
+    Object.values(r.comboResults).forEach(arr => arr.forEach(n => masterSet.add(n)));
+    copyTextToClipboard(Array.from(masterSet).sort().join('*') + '*');
+};
+
+// Handler Filter diganti
+function onM23FilterChange() {
+    invalidateM23BaseCache();
     recalcM23All();
+}
+
+if ($('m23UseGrup')) $('m23UseGrup').addEventListener('change', function() {
+    if (!this.checked) { $('m23Grup1').disabled = true; $('m23Grup2').disabled = true; $('m23Grup3').disabled = true; }
+    else { $('m23Grup1').disabled = false; $('m23Grup2').disabled = false; $('m23Grup3').disabled = false; }
+    onM23FilterChange();
 });
 
 if ($('m23UseCB')) $('m23UseCB').addEventListener('change', function() {
-    if (!this.checked) {
-        $('m23CB').disabled = true; $('m23CBMode').disabled = true;
-    } else {
-        $('m23CB').disabled = false; $('m23CBMode').disabled = false;
-    }
-    recalcM23All();
+    if (!this.checked) { $('m23CB').disabled = true; $('m23CBMode').disabled = true; }
+    else { $('m23CB').disabled = false; $('m23CBMode').disabled = false; }
+    onM23FilterChange();
 });
 
 if ($('m23Use1D')) $('m23Use1D').addEventListener('change', function() {
     const boxes = $('m231DDepan').querySelectorAll('input');
     boxes.forEach(b => b.disabled = !this.checked);
-    recalcM23All();
+    onM23FilterChange();
 });
+
+['m23Grup1', 'm23Grup2', 'm23Grup3', 'm23CB', 'm23CBMode'].forEach(id => {
+    if ($(id)) $(id).addEventListener('change', onM23FilterChange);
+});
+if ($('m231DDepan')) $('m231DDepan').addEventListener('change', onM23FilterChange);
+
+function recalcM23All() {
+    const base = getM23BaseUniverse();
+    m23State.rows.forEach(function(r) {
+        if (!r.digits || r.digits.length !== 4) {
+            r.comboResults = {};
+            r.generated = false;
+            r.pages = {};
+            return;
+        }
+        const combos = get3DigitCombos(r.digits);
+        r.comboResults = {};
+        combos.forEach(combo => {
+            r.comboResults[combo] = generate4DForCombo(combo, base);
+        });
+        r.generated = true;
+    });
+    renderM23Rows();
+    renderM23Results();
+}
+
+// FIX: Tombol Generate & Kosongkan yang sebelumnya mati
+if ($('m23GenerateAllBtn')) {
+    $('m23GenerateAllBtn').addEventListener('click', function() {
+        recalcM23All();
+        toast('Semua baris berhasil di-generate', 'success');
+    });
+}
+
+if ($('m23ClearAllBtn')) {
+    $('m23ClearAllBtn').addEventListener('click', function() {
+        if (!confirm('Kosongkan 65 baris?')) return;
+        m23State.rows.forEach(function(r) {
+            r.digits = ''; r.pasar = ''; r.comboResults = {}; r.pages = {}; r.generated = false;
+        });
+        m23MasterState.items = [];
+        m23MasterState.page = 0;
+        invalidateM23BaseCache();
+        renderM23Rows();
+        renderM23Results();
+        toast('Semua baris dikosongkan', 'success');
+    });
+}
 
  /* ═══════════════════════════════════════════════════════════════════════
    BLOK 66: USER MANAGEMENT — EVENT LISTENERS
