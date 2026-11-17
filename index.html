@@ -7634,6 +7634,16 @@ function getM231DDepanSelected() {
     return arr;
 }
 
+function _refreshM23Preview() {
+    const g1 = $('m23Grup1') ? $('m23Grup1').value : '';
+    const g2 = $('m23Grup2') ? $('m23Grup2').value : '';
+    const g3 = $('m23Grup3') ? $('m23Grup3').value : '';
+    
+    renderGroupPreview(g1, $('m23Preview1'), 'depan', g1 ? 'Grup 1 → 2D Depan' : '');
+    renderGroupPreview(g2, $('m23Preview2'), 'both', g2 ? 'Grup 2 → 2D Tengah' : '');
+    renderGroupPreview(g3, $('m23Preview3'), 'belakang', g3 ? 'Grup 3 → 2D Belakang' : '');
+}
+
 // Fungsi memecah 4 digit menjadi kombinasi 3 digit (unik)
 function get3DigitCombos(str4) {
     if (!str4 || str4.length !== 4) return [];
@@ -7982,34 +7992,96 @@ window.m23CopyRow = function(idx) {
     copyTextToClipboard(Array.from(masterSet).sort().join('*') + '*');
 };
 
-// Handler Filter diganti
-function onM23FilterChange() {
-    invalidateM23BaseCache();
-    recalcM23All();
+// ═══════════════════════════════════════════════════════════════════════
+// PERBAIKAN FILTER (REAL-TIME & AUTO-CHECK)
+// ═══════════════════════════════════════════════════════════════════════
+
+function debounceM23Filter() {
+    if (window._m23DebounceTimer) clearTimeout(window._m23DebounceTimer);
+    window._m23DebounceTimer = setTimeout(function() {
+        invalidateM23BaseCache(); // Hapus cache agar hasil langsung berkurang
+        recalcM23All();
+    }, 400); // Beri jeda 0.4 detik setelah berhenti mengetik
 }
 
-if ($('m23UseGrup')) $('m23UseGrup').addEventListener('change', function() {
-    if (!this.checked) { $('m23Grup1').disabled = true; $('m23Grup2').disabled = true; $('m23Grup3').disabled = true; }
-    else { $('m23Grup1').disabled = false; $('m23Grup2').disabled = false; $('m23Grup3').disabled = false; }
-    onM23FilterChange();
+// 1. Otomatis Centang & Real-time saat mengetik CB
+if ($('m23CB')) {
+    $('m23CB').addEventListener('input', function() {
+        if (this.value.trim() !== '' && $('m23UseCB')) {
+            $('m23UseCB').checked = true;
+            $('m23CB').disabled = false;
+            if ($('m23CBMode')) $('m23CBMode').disabled = false;
+        }
+        debounceM23Filter();
+    });
+}
+
+// 2. Event untuk Pilihan CB Mode
+if ($('m23CBMode')) {
+    $('m23CBMode').addEventListener('change', debounceM23Filter);
+}
+
+// 3. Event untuk Dropdown Grup
+['m23Grup1', 'm23Grup2', 'm23Grup3'].forEach(function(id) {
+    if ($(id)) {
+        $(id).addEventListener('change', function() {
+            if (this.value !== '' && $('m23UseGrup')) {
+                $('m23UseGrup').checked = true;
+                $('m23Grup1').disabled = false;
+                $('m23Grup2').disabled = false;
+                $('m23Grup3').disabled = false;
+            }
+            _refreshM23Preview();
+            debounceM23Filter();
+        });
+    }
 });
 
-if ($('m23UseCB')) $('m23UseCB').addEventListener('change', function() {
-    if (!this.checked) { $('m23CB').disabled = true; $('m23CBMode').disabled = true; }
-    else { $('m23CB').disabled = false; $('m23CBMode').disabled = false; }
-    onM23FilterChange();
-});
+// 4. Event untuk Ceklis 1D Depan
+if ($('m231DDepan')) {
+    $('m231DDepan').addEventListener('change', debounceM23Filter);
+}
 
-if ($('m23Use1D')) $('m23Use1D').addEventListener('change', function() {
-    const boxes = $('m231DDepan').querySelectorAll('input');
-    boxes.forEach(b => b.disabled = !this.checked);
-    onM23FilterChange();
-});
+// 5. Event untuk Checkbox Induk (UseGrup, UseCB, Use1D)
+if ($('m23UseGrup')) {
+    $('m23UseGrup').addEventListener('change', function() {
+        const isChecked = this.checked;
+        ['m23Grup1', 'm23Grup2', 'm23Grup3'].forEach(id => { if ($(id)) $(id).disabled = !isChecked; });
+        debounceM23Filter();
+    });
+}
 
-['m23Grup1', 'm23Grup2', 'm23Grup3', 'm23CB', 'm23CBMode'].forEach(id => {
-    if ($(id)) $(id).addEventListener('change', onM23FilterChange);
-});
-if ($('m231DDepan')) $('m231DDepan').addEventListener('change', onM23FilterChange);
+if ($('m23UseCB')) {
+    $('m23UseCB').addEventListener('change', function() {
+        const isChecked = this.checked;
+        ['m23CB', 'm23CBMode'].forEach(id => { if ($(id)) $(id).disabled = !isChecked; });
+        debounceM23Filter();
+    });
+}
+
+if ($('m23Use1D')) {
+    $('m23Use1D').addEventListener('change', function() {
+        const isChecked = this.checked;
+        if ($('m231DDepan')) {
+            $('m231DDepan').querySelectorAll('input').forEach(b => b.disabled = !isChecked);
+        }
+        debounceM23Filter();
+    });
+}
+
+// Inisialisasi awal agar status disabled sesuai dengan checkbox
+setTimeout(function() {
+    if ($('m23UseCB') && !$('m23UseCB').checked) {
+        if ($('m23CB')) $('m23CB').disabled = true;
+        if ($('m23CBMode')) $('m23CBMode').disabled = true;
+    }
+    if ($('m23UseGrup') && !$('m23UseGrup').checked) {
+        ['m23Grup1', 'm23Grup2', 'm23Grup3'].forEach(id => { if ($(id)) $(id).disabled = true; });
+    }
+    if ($('m23Use1D') && !$('m23Use1D').checked) {
+        if ($('m231DDepan')) $('m231DDepan').querySelectorAll('input').forEach(b => b.disabled = true);
+    }
+}, 500);
 
 function recalcM23All() {
     const base = getM23BaseUniverse();
