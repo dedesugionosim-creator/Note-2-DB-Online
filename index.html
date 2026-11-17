@@ -7332,6 +7332,17 @@ function getM231DDepanSelected() {
     return arr;
 }
 
+// Fungsi untuk memecah 4 angka menjadi kombinasi 3 angka
+function get3DigitCombos(str4) {
+    if (!str4 || str4.length !== 4) return [];
+    let res = new Set();
+    for (let i = 0; i < 4; i++) {
+        // Buang 1 digit di index ke-i
+        let combo = str4.slice(0, i) + str4.slice(i + 1);
+        res.add(combo);
+    }
+    return Array.from(res).sort();
+}
 function applyM23Filters(n) {
     const useGrup = $('m23UseGrup') ? $('m23UseGrup').checked : true;
     const useCB   = $('m23UseCB') ? $('m23UseCB').checked : true;
