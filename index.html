@@ -7601,14 +7601,14 @@ document.addEventListener('DOMContentLoaded', function() {
    ═══════════════════════════════════════════════════════════════════════ */
    
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 65A: MODE INPUT MENGANDUNG 3 ANGKA (65 BARIS) - FINAL VERSION
+   BLOK 65A: MODE INPUT MENGANDUNG 3 ANGKA (65 BARIS) - REVISI TOTAL
    ═══════════════════════════════════════════════════════════════════════ */
 
 const M23_ROW_COUNT = 65;
 
 const m23State = {
     rows: Array(M23_ROW_COUNT).fill(null).map(function(_, i) {
-        return { idx: i, digits: '', pasar: '', comboResults: {}, pages: {}, generated: false, selectedCombos: [] };
+        return { idx: i, digits: '', pasar: '', comboResults: {}, pages: {}, generated: false };
     })
 };
 
@@ -7628,27 +7628,43 @@ function invalidateM23BaseCache() {
 
 function getM231DDepanSelected() {
     const arr = [];
-    const wrap = $('m231DDepan');
-    if (!wrap) return arr;
-    wrap.querySelectorAll('input[type="checkbox"]:checked').forEach(function(e) {
+    document.querySelectorAll('#m231DDepan input[type="checkbox"]:checked').forEach(function(e) {
         arr.push(e.value);
     });
     return arr;
 }
 
-// LOGIKA 3D ANTI-DOBEL (Sesuai Permintaan: 1134 jadi 3 kombinasi)
+function _refreshM23Preview() {
+    const g1 = $('m23Grup1') ? $('m23Grup1').value : '';
+    const g2 = $('m23Grup2') ? $('m23Grup2').value : '';
+    const g3 = $('m23Grup3') ? $('m23Grup3').value : '';
+    
+    renderGroupPreview(g1, $('m23Preview1'), 'depan', g1 ? 'Grup 1 → 2D Depan' : '');
+    renderGroupPreview(g2, $('m23Preview2'), 'both', g2 ? 'Grup 2 → 2D Tengah' : '');
+    renderGroupPreview(g3, $('m23Preview3'), 'belakang', g3 ? 'Grup 3 → 2D Belakang' : '');
+}
+
+// Fungsi memecah 4 digit menjadi kombinasi 3 digit (unik)
 function get3DigitCombos(str4) {
     if (!str4 || str4.length !== 4) return [];
+    
+    // 1. Ambil 4 kombinasi dengan membuang 1 digit
     let rawCombos = [];
     for (let i = 0; i < 4; i++) {
         rawCombos.push(str4.slice(0, i) + str4.slice(i + 1));
     }
+    
+    // 2. Urutkan setiap kombinasi (ini kunci agar duplikat hilang)
     let sortedCombos = rawCombos.map(c => c.split('').sort().join(''));
+    
+    // 3. Hilangkan yang duplikat
     let uniqueCombos = [...new Set(sortedCombos)];
+    
+    // 4. Kembalikan hasil
     return uniqueCombos.sort();
 }
 
-// BASE UNIVERSE DENGAN FILTER GRUP, CB, 1D
+// Cache filter (Grup, CB, 1D) agar tidak lag
 function getM23BaseUniverse() {
     if (_m23CachedBase) return _m23CachedBase;
 
@@ -7656,25 +7672,27 @@ function getM23BaseUniverse() {
     const useCB   = $('m23UseCB') ? $('m23UseCB').checked : true;
     const use1D   = $('m23Use1D') ? $('m23Use1D').checked : true;
 
-    const g1 = useGrup && $('m23Grup1') ? $('m23Grup1').value : '';
-    const g2 = useGrup && $('m23Grup2') ? $('m23Grup2').value : '';
-    const g3 = useGrup && $('m23Grup3') ? $('m23Grup3').value : '';
+    const g1 = useGrup ? $('m23Grup1').value : '';
+    const g2 = useGrup ? $('m23Grup2').value : '';
+    const g3 = useGrup ? $('m23Grup3').value : '';
     
     const setG1 = g1 ? new Set(getGroupAs2DigitDepan(g1)) : null;
     const setG2 = g2 ? new Set([...getGroupAs2DigitDepan(g2), ...getGroupAs2DigitBelakang(g2)]) : null;
     const setG3 = g3 ? new Set(getGroupAs2DigitBelakang(g3)) : null;
 
-    const cb = useCB && $('m23CB') ? parseSingleDigitList($('m23CB').value) : [];
+    const cb = useCB ? parseSingleDigitList($('m23CB').value) : [];
     const cbMode = $('m23CBMode') ? $('m23CBMode').value : 'or';
     const d1 = use1D ? getM231DDepanSelected() : [];
 
     _m23CachedBase = M23_UNIVERSE.filter(function(n) {
+        // Filter 3 Grup
         if (g1 || g2 || g3) {
             const ab = n.slice(0, 2), bc = n.slice(1, 3), cd = n.slice(2, 4);
             if (setG1 && !setG1.has(ab)) return false;
             if (setG2 && !setG2.has(bc)) return false;
             if (setG3 && !setG3.has(cd)) return false;
         }
+        // Filter CB
         if (cb.length > 0) {
             if (cbMode === 'and') {
                 if (!cb.every(d => n.includes(d))) return false;
@@ -7684,19 +7702,22 @@ function getM23BaseUniverse() {
                 if (!found) return false;
             }
         }
+        // Filter 1D Depan
         if (d1.length > 0 && !d1.includes(n[0])) return false;
+
         return true;
     });
 
     return _m23CachedBase;
 }
 
+// Cari 4D yang mengandung 3D combo
 function generate4DForCombo(comboStr, baseUniverse) {
     const ms = blParseMultiset(comboStr);
     return baseUniverse.filter(n => blContainsCombo(n, ms)).sort();
 }
 
-// RENDER TABEL 65 BARIS
+// Render Tabel Baris 65
 function renderM23Rows() {
     const container = $('m23RowsContainer');
     if (!container) return;
@@ -7719,6 +7740,7 @@ function renderM23Rows() {
             const combos = get3DigitCombos(r.digits);
             if (!r.selectedCombos) r.selectedCombos = [...combos];
             
+            // Render Checkbox
             comboHtml = combos.map(c => {
                 const isChecked = r.selectedCombos.includes(c) ? 'checked' : '';
                 return `<label style="display:inline-flex; align-items:center; gap:2px; margin-right:8px; cursor:pointer; font-size:10px; color:var(--accent); font-family:monospace;">
@@ -7727,6 +7749,7 @@ function renderM23Rows() {
                         </label>`;
             }).join('');
             
+            // Hitung total hanya dari yang dicentang
             if (r.comboResults) {
                 r.selectedCombos.forEach(c => {
                     if (r.comboResults[c]) total += r.comboResults[c].length;
@@ -7756,7 +7779,7 @@ function renderM23Rows() {
     
     container.innerHTML = html;
 
-    // Listener Input Result 4D
+    // Listener Input Angka
     container.querySelectorAll('input.m23-digits').forEach(function(el) {
         el.addEventListener('input', function() {
             const idx = parseInt(el.dataset.idx, 10);
@@ -7772,7 +7795,7 @@ function renderM23Rows() {
                     r.comboResults[combo] = generate4DForCombo(combo, base);
                 });
                 r.generated = true;
-                r.selectedCombos = [...combos]; 
+                r.selectedCombos = [...combos]; // Default ceklis semua
                 r.pages = {}; 
             } else {
                 r.comboResults = {};
@@ -7782,7 +7805,7 @@ function renderM23Rows() {
 
             if (window._m23RenderTimer) clearTimeout(window._m23RenderTimer);
             window._m23RenderTimer = setTimeout(() => {
-                renderM23Rows(); 
+                renderM23Rows(); // Render ulang baris agar checkbox muncul
                 renderM23Results();
             }, 400);
         });
@@ -7812,6 +7835,7 @@ function renderM23Rows() {
                 r.selectedCombos = r.selectedCombos.filter(c => c !== combo);
             }
             
+            // Update Total di Baris
             let total = 0;
             r.selectedCombos.forEach(c => {
                 if (r.comboResults[c]) total += r.comboResults[c].length;
@@ -7831,7 +7855,7 @@ function renderM23Rows() {
     });
 }
 
-// RENDER HASIL BAWAH
+// Render Hasil Bawah (Per Kombinasi 3D)
 function renderM23Results() {
     const c = $('m23ResultsContainer');
     if (!c) return;
@@ -7845,6 +7869,7 @@ function renderM23Results() {
         const combos = get3DigitCombos(r.digits);
         
         combos.forEach(function(combo) {
+            // LEWATI JIKA TIDAK DICENTANG
             if (!r.selectedCombos || !r.selectedCombos.includes(combo)) return; 
 
             const results = r.comboResults[combo] || [];
@@ -7852,6 +7877,7 @@ function renderM23Results() {
             
             results.forEach(n => masterSet.add(n));
             
+            // ... (Sisa kode render ke bawah SAMA SEPERTI SEBELUMNYA) ...
             const tp = Math.ceil(results.length / PER_PAGE);
             if (r.pages[combo] === undefined) r.pages[combo] = 0;
             if (r.pages[combo] >= tp) r.pages[combo] = tp - 1;
@@ -7915,13 +7941,14 @@ function renderM23Results() {
     c.innerHTML = html;
 }
 
-// FUNGSI COPY & PAGING (YANG SEMPAT MATI)
+// Paging & Copy Spesifik per Kombinasi
 window.m23PageCombo = function(idx, combo, d) {
     const r = m23State.rows[idx]; if (!r || !r.comboResults[combo]) return;
     const tp = Math.ceil(r.comboResults[combo].length / PER_PAGE);
     const nx = r.pages[combo] + d;
     if (nx < 0 || nx >= tp) return;
-    r.pages[combo] = nx; renderM23Results();
+    r.pages[combo] = nx; 
+    renderM23Results();
 };
 
 window.m23CopyComboPage = function(idx, combo) {
@@ -7947,63 +7974,139 @@ window.m23ExportCombo = function(idx, combo) {
     toast('Diexport', 'success');
 };
 
+// Fitur Copy All untuk Tombol di Tabel Atas
 window.m23CopyRow = function(idx) {
     const r = m23State.rows[idx];
     if (!r || !r.comboResults || !r.selectedCombos || r.selectedCombos.length === 0) { 
-        toast('Pilih minimal 1 kombinasi 3D', 'error'); return; 
+        toast('Pilih minimal 1 kombinasi 3D', 'error'); 
+        return; 
     }
+    
     const masterSet = new Set();
     r.selectedCombos.forEach(combo => {
-        if (r.comboResults[combo]) r.comboResults[combo].forEach(n => masterSet.add(n));
+        if (r.comboResults[combo]) {
+            r.comboResults[combo].forEach(n => masterSet.add(n));
+        }
     });
+    
     copyTextToClipboard(Array.from(masterSet).sort().join('*') + '*');
 };
 
-window.m23PageMaster = function(d) {
-    const tp = Math.ceil(m23MasterState.items.length / m23MasterState.size);
-    const nx = m23MasterState.page + d;
-    if (nx < 0 || nx >= tp) return;
-    m23MasterState.page = nx; renderM23Results();
-};
+// ═══════════════════════════════════════════════════════════════════════
+// PERBAIKAN FILTER (REAL-TIME & AUTO-CHECK)
+// ═══════════════════════════════════════════════════════════════════════
 
-window.m23CopyMasterPage = function() {
-    if (!m23MasterState.items || m23MasterState.items.length === 0) return toast('Tidak ada data', 'error');
-    const st = m23MasterState.page * m23MasterState.size;
-    copyTextToClipboard(m23MasterState.items.slice(st, st + m23MasterState.size).join('*') + '*');
-};
+function debounceM23Filter() {
+    if (window._m23DebounceTimer) clearTimeout(window._m23DebounceTimer);
+    window._m23DebounceTimer = setTimeout(function() {
+        invalidateM23BaseCache(); // Hapus cache agar hasil langsung berkurang
+        recalcM23All();
+    }, 400); // Beri jeda 0.4 detik setelah berhenti mengetik
+}
 
-window.m23CopyMasterAll = function() {
-    if (!m23MasterState.items || m23MasterState.items.length === 0) return toast('Tidak ada data', 'error');
-    copyTextToClipboard(m23MasterState.items.join('*') + '*');
-};
+// 1. Otomatis Centang & Real-time saat mengetik CB
+if ($('m23CB')) {
+    $('m23CB').addEventListener('input', function() {
+        if (this.value.trim() !== '' && $('m23UseCB')) {
+            $('m23UseCB').checked = true;
+            $('m23CB').disabled = false;
+            if ($('m23CBMode')) $('m23CBMode').disabled = false;
+        }
+        debounceM23Filter();
+    });
+}
 
-window.m23ExportMaster = function() {
-    if (!m23MasterState.items || m23MasterState.items.length === 0) return toast('Tidak ada data', 'error');
-    const b = new Blob([m23MasterState.items.join('*') + '*'], { type: 'text/plain;charset=utf-8' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(b);
-    a.download = 'sahard-m23-master.txt';
-    a.click();
-    URL.revokeObjectURL(a.href);
-    toast('Diexport', 'success');
-};
+// 2. Event untuk Pilihan CB Mode
+if ($('m23CBMode')) {
+    $('m23CBMode').addEventListener('change', debounceM23Filter);
+}
 
-// FUNGSI GENERATE & FILTER REALTIME
+// 3. Event untuk Dropdown Grup
+['m23Grup1', 'm23Grup2', 'm23Grup3'].forEach(function(id) {
+    if ($(id)) {
+        $(id).addEventListener('change', function() {
+            if (this.value !== '' && $('m23UseGrup')) {
+                $('m23UseGrup').checked = true;
+                $('m23Grup1').disabled = false;
+                $('m23Grup2').disabled = false;
+                $('m23Grup3').disabled = false;
+            }
+            _refreshM23Preview();
+            debounceM23Filter();
+        });
+    }
+});
+
+// 4. Event untuk Ceklis 1D Depan
+if ($('m231DDepan')) {
+    $('m231DDepan').addEventListener('change', debounceM23Filter);
+}
+
+// 5. Event untuk Checkbox Induk (UseGrup, UseCB, Use1D)
+if ($('m23UseGrup')) {
+    $('m23UseGrup').addEventListener('change', function() {
+        const isChecked = this.checked;
+        ['m23Grup1', 'm23Grup2', 'm23Grup3'].forEach(id => { if ($(id)) $(id).disabled = !isChecked; });
+        debounceM23Filter();
+    });
+}
+
+if ($('m23UseCB')) {
+    $('m23UseCB').addEventListener('change', function() {
+        const isChecked = this.checked;
+        ['m23CB', 'm23CBMode'].forEach(id => { if ($(id)) $(id).disabled = !isChecked; });
+        debounceM23Filter();
+    });
+}
+
+if ($('m23Use1D')) {
+    $('m23Use1D').addEventListener('change', function() {
+        const isChecked = this.checked;
+        if ($('m231DDepan')) {
+            $('m231DDepan').querySelectorAll('input').forEach(b => b.disabled = !isChecked);
+        }
+        debounceM23Filter();
+    });
+}
+
+// Inisialisasi awal agar status disabled sesuai dengan checkbox
+setTimeout(function() {
+    if ($('m23UseCB') && !$('m23UseCB').checked) {
+        if ($('m23CB')) $('m23CB').disabled = true;
+        if ($('m23CBMode')) $('m23CBMode').disabled = true;
+    }
+    if ($('m23UseGrup') && !$('m23UseGrup').checked) {
+        ['m23Grup1', 'm23Grup2', 'm23Grup3'].forEach(id => { if ($(id)) $(id).disabled = true; });
+    }
+    if ($('m23Use1D') && !$('m23Use1D').checked) {
+        if ($('m231DDepan')) $('m231DDepan').querySelectorAll('input').forEach(b => b.disabled = true);
+    }
+}, 500);
+
+// 1. Ganti fungsi recalcM23All dengan versi anti-lag ini
 function recalcM23All() {
+    // Pengaman: Jika sistem masih menghitung, cegah klik beruntun
     if (window._m23Processing) return;
     window._m23Processing = true;
-    
-    const btn = $('m23GenerateAllBtn');
-    const oldTxt = btn ? btn.textContent : '';
-    if (btn) { btn.textContent = '⏳ Menghitung...'; btn.disabled = true; }
 
-    setTimeout(() => {
-        invalidateM23BaseCache(); 
+    const btn = $('m23GenerateAllBtn');
+    const oldBtnText = btn ? btn.textContent : '';
+    if (btn) {
+        btn.textContent = '⏳ Menghitung...';
+        btn.disabled = true;
+    }
+
+    // Beri jeda sedikit agar UI bisa menampilkan status "Menghitung"
+    setTimeout(function() {
+        invalidateM23BaseCache(); // WAJIB: Bersihkan memori filter lama
         const base = getM23BaseUniverse();
 
         m23State.rows.forEach(function(r) {
             if (!r.digits || r.digits.length !== 4) {
-                r.comboResults = {}; r.generated = false; r.pages = {}; return;
+                r.comboResults = {};
+                r.generated = false;
+                r.pages = {};
+                return;
             }
             const combos = get3DigitCombos(r.digits);
             r.comboResults = {};
@@ -8011,54 +8114,20 @@ function recalcM23All() {
                 r.comboResults[combo] = generate4DForCombo(combo, base);
             });
             r.generated = true;
-            // Pastikan selectedCombos tetap ada
-            if (!r.selectedCombos || r.selectedCombos.length === 0) r.selectedCombos = [...combos];
         });
 
         renderM23Rows();
         renderM23Results();
 
-        if (btn) { btn.textContent = oldTxt; btn.disabled = false; }
+        if (btn) {
+            btn.textContent = oldBtnText;
+            btn.disabled = false;
+        }
         window._m23Processing = false;
     }, 100);
 }
 
-function debounceM23Filter() {
-    if (window._m23Debounce) clearTimeout(window._m23Debounce);
-    window._m23Debounce = setTimeout(recalcM23All, 400);
-}
-
-// EVENT LISTENERS FILTER
-['m23CB', 'm23CBMode', 'm231DDepan'].forEach(id => {
-    if ($(id)) $(id).addEventListener('change', debounceM23Filter);
-});
-if ($('m23CB')) $('m23CB').addEventListener('input', function() {
-    if (this.value.trim() !== '' && $('m23UseCB')) $('m23UseCB').checked = true;
-    debounceM23Filter();
-});
-
-['m23Grup1', 'm23Grup2', 'm23Grup3'].forEach(id => {
-    if ($(id)) $(id).addEventListener('change', function() {
-        if (this.value !== '' && $('m23UseGrup')) $('m23UseGrup').checked = true;
-        _refreshM23Preview();
-        debounceM23Filter();
-    });
-});
-
-['m23UseGrup', 'm23UseCB', 'm23Use1D'].forEach(id => {
-    if ($(id)) $(id).addEventListener('change', debounceM23Filter);
-});
-
-function _refreshM23Preview() {
-    const g1 = $('m23Grup1') ? $('m23Grup1').value : '';
-    const g2 = $('m23Grup2') ? $('m23Grup2').value : '';
-    const g3 = $('m23Grup3') ? $('m23Grup3').value : '';
-    renderGroupPreview(g1, $('m23Preview1'), 'depan', g1 ? 'Grup 1 → 2D Depan' : '');
-    renderGroupPreview(g2, $('m23Preview2'), 'both', g2 ? 'Grup 2 → 2D Tengah' : '');
-    renderGroupPreview(g3, $('m23Preview3'), 'belakang', g3 ? 'Grup 3 → 2D Belakang' : '');
-}
-
-// TOMBOL GENERATE & CLEAR
+// 2. Ganti event listener tombol Generate
 if ($('m23GenerateAllBtn')) {
     $('m23GenerateAllBtn').addEventListener('click', function() {
         recalcM23All();
@@ -8066,15 +8135,25 @@ if ($('m23GenerateAllBtn')) {
     });
 }
 
+// FIX: Tombol Generate & Kosongkan yang sebelumnya mati
+if ($('m23GenerateAllBtn')) {
+    $('m23GenerateAllBtn').addEventListener('click', function() {
+        recalcM23All();
+        toast('Semua baris berhasil di-generate', 'success');
+    });
+}
+
 if ($('m23ClearAllBtn')) {
     $('m23ClearAllBtn').addEventListener('click', function() {
         if (!confirm('Kosongkan 65 baris?')) return;
         m23State.rows.forEach(function(r) {
-            r.digits = ''; r.pasar = ''; r.comboResults = {}; r.pages = {}; r.generated = false; r.selectedCombos = [];
+            r.digits = ''; r.pasar = ''; r.comboResults = {}; r.pages = {}; r.generated = false;
         });
-        m23MasterState.items = []; m23MasterState.page = 0;
+        m23MasterState.items = [];
+        m23MasterState.page = 0;
         invalidateM23BaseCache();
-        renderM23Rows(); renderM23Results();
+        renderM23Rows();
+        renderM23Results();
         toast('Semua baris dikosongkan', 'success');
     });
 }
