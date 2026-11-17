@@ -4113,6 +4113,72 @@ function renderPagination(containerId, stateKey, labelPrefix, breakdownHTML) {
     }, 100);
 }
 
+
+/* ═══════════════════════════════════════════════════════════════════════
+   FIX ERROR: FUNGSI NAVIGASI PAGINATION YANG HILANG
+   ═══════════════════════════════════════════════════════════════════════ */
+
+window.goPage = function(stateKey, direction) {
+    const state = pageState[stateKey];
+    if (!state || !state.pages || state.pages.length === 0) return;
+    
+    const nx = state.current + direction;
+    if (nx < 0 || nx >= state.pages.length) return;
+    
+    state.current = nx;
+    renderPagination(PAGE_MAP[stateKey][0], stateKey, PAGE_MAP[stateKey][1], state._breakdown);
+};
+
+window.jumpPage = function(stateKey) {
+    const state = pageState[stateKey];
+    if (!state || !state.pages || state.pages.length === 0) return;
+    
+    const input = document.getElementById('jump-' + stateKey);
+    if (!input) return;
+    
+    let val = parseInt(input.value, 10) - 1;
+    if (isNaN(val)) return;
+    
+    if (val < 0) val = 0;
+    if (val >= state.pages.length) val = state.pages.length - 1;
+    
+    state.current = val;
+    renderPagination(PAGE_MAP[stateKey][0], stateKey, PAGE_MAP[stateKey][1], state._breakdown);
+};
+
+window.copyCurrentPage = function(stateKey) {
+    const state = pageState[stateKey];
+    if (!state || !state.pages || state.pages.length === 0) return;
+    
+    const pd = state.pages[state.current];
+    copyTextToClipboard(pd.join('*') + '*');
+};
+
+window.copyAllPages = function(stateKey) {
+    const state = pageState[stateKey];
+    if (!state || !state.pages || state.pages.length === 0) return;
+    
+    let all = [];
+    state.pages.forEach(p => { all = all.concat(p); });
+    copyTextToClipboard(all.join('*') + '*');
+};
+
+window.exportPages = function(stateKey) {
+    const state = pageState[stateKey];
+    if (!state || !state.pages || state.pages.length === 0) return;
+    
+    let all = [];
+    state.pages.forEach(p => { all = all.concat(p); });
+    
+    const b = new Blob([all.join('*') + '*'], { type: 'text/plain;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(b);
+    a.download = 'sahard-' + stateKey + '.txt';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast('Berhasil diexport', 'success');
+};
+
 /* ═══════════════════════════════════════════════════════════════════════
    BLOK 43: BREAKDOWN BUILDERS
    ═══════════════════════════════════════════════════════════════════════ */
