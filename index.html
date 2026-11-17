@@ -1738,8 +1738,8 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
                         Generate BBFS, lalu filter hanya yang mengandung digit CB.
                     </p>
                     <div class="field">
-                        <label for="cbBBFSInput">Input BBFS (4–16 digit)</label>
-                        <input type="text" id="cbBBFSInput" placeholder="0123456789" maxlength="16" inputmode="numeric">
+                        <label for="cbBBFSInput">Input BBFS (4–20 digit)</label>
+                        <input type="text" id="cbBBFSInput" placeholder="0123456789" maxlength="20" inputmode="numeric">
                     </div>
                     <div class="field">
                         <label for="cbBBFSDigits">Input CB (dipisah spasi) — opsional</label>
@@ -5174,51 +5174,68 @@ if ($('atGenerateBtn')) {
 }
 
 	/* ═══════════════════════════════════════════════════════════════════════
-	   BLOK 47: CB BBFS GENERATOR — REVISED (CB opsional)
-	   ═══════════════════════════════════════════════════════════════════════ */
+   BLOK 47 REVISI: CB BBFS GENERATOR (MAX 20 DIGIT & FIX BUG)
+   ═══════════════════════════════════════════════════════════════════════ */
 
-	$('cbBBFSInput').addEventListener('input', function(e) {
-		e.target.value = onlyDigits(e.target.value).slice(0, MAX_BBFS_DIGITS);
-		updateCBBFFSInfo();
-	});
-	$('cbBBFSDigits').addEventListener('input', updateCBBFFSInfo);
-	$('cbBBFSMode').addEventListener('change', updateCBBFFSInfo);
+$('cbBBFSInput').addEventListener('input', function(e) {
+    // Ubah limit dari 16 menjadi 20
+    e.target.value = onlyDigits(e.target.value).slice(0, 20);
+    updateCBBFFSInfo();
+});
 
-	function updateCBBFFSInfo() {
-		const bbfs = onlyDigits($('cbBBFSInput').value);
-		const cb = onlyDigits($('cbBBFSDigits').value);
-		const info = $('cbBBFSInfo');
-		if (!info) return;
-		if (bbfs.length < 4) { info.textContent = 'Info: isi BBFS minimal 4 digit'; return; }
-		const n = bbfs.length;
-		const total = n * (n - 1) * (n - 2) * (n - 3);
-		const pages = Math.ceil(total / PER_PAGE);
-		info.textContent = 'BBFS: ' + bbfs + (cb ? ' • CB: ' + cb.split('').join(' ') : ' • tanpa CB')
-			+ ' • Maks ' + total.toLocaleString('id-ID') + ' • ' + pages + ' halaman';
-	}
+$('cbBBFSDigits').addEventListener('input', updateCBBFFSInfo);
+$('cbBBFSMode').addEventListener('change', updateCBBFFSInfo);
 
-	$('cbBBFSGenerateBtn').addEventListener('click', function() {
-		const bbfs = onlyDigits($('cbBBFSInput').value);
-		const cb = onlyDigits($('cbBBFSDigits').value);
-		const mode = $('cbBBFSMode').value;
-		if (bbfs.length < 4) { toast('BBFS minimal 4 digit', 'error'); return; }
+function updateCBBFFSInfo() {
+    const bbfs = onlyDigits($('cbBBFSInput').value);
+    const cb = onlyDigits($('cbBBFSDigits').value);
+    const info = $('cbBBFSInfo');
+    
+    if (!info) return;
+    if (bbfs.length < 4) { 
+        info.textContent = 'Info: isi BBFS minimal 4 digit'; 
+        return; 
+    }
+    
+    const n = bbfs.length;
+    const total = n * (n - 1) * (n - 2) * (n - 3);
+    const pages = Math.ceil(total / PER_PAGE);
+    
+    info.textContent = 'BBFS: ' + bbfs + (cb ? ' • CB: ' + cb.split('').join(' ') : ' • tanpa CB')
+        + ' • Maks ' + total.toLocaleString('id-ID') + ' • ' + pages + ' halaman';
+}
 
-		const all = permutasi4DariDigit(bbfs);
-		const filtered = cb ? filterByCB(all, cb, mode) : all;
-		    if (filtered.length === 0) { 
-        toast('Tidak ada hasil', 'error'); 
-        pageState.bbfs.pages = []; 
-        renderPagination('bbfsResult', 'bbfs', 'Hasil', ''); 
+$('cbBBFSGenerateBtn').addEventListener('click', function() {
+    const bbfs = onlyDigits($('cbBBFSInput').value);
+    const cb = onlyDigits($('cbBBFSDigits').value);
+    const mode = $('cbBBFSMode').value;
+    
+    if (bbfs.length < 4) { toast('BBFS minimal 4 digit', 'error'); return; }
+    if (bbfs.length > 20) { toast('BBFS maksimal 20 digit', 'error'); return; }
+
+    const all = permutasi4DariDigit(bbfs);
+    const filtered = cb ? filterByCB(all, cb, mode) : all;
+
+    // FIX BUG: Jika kosong, bersihkan panel CB BBFS, BUKAN panel BBFS biasa
+    if (filtered.length === 0) { 
+        toast('Tidak ada hasil yang cocok dengan filter CB', 'error'); 
+        pageState.cbBBFS.pages = []; 
+        renderPagination('cbBBFSResult', 'cbBBFS', 'Hasil', ''); 
         return; 
     }
 
-		pageState.cbBBFS.pages = paginateArray(filtered);
-		pageState.cbBBFS.current = 0;
-		pageState.cbBBFS.meta = 'BBFS: ' + bbfs
-			+ (cb ? ' • CB: ' + cb.split('').join(' ') + ' • Mode: ' + mode.toUpperCase() : ' • tanpa CB');
-		renderPagination('cbBBFSResult', 'cbBBFS', 'Hasil');
-		toast('Berhasil: ' + filtered.length.toLocaleString('id-ID') + ' dari ' + all.length.toLocaleString('id-ID'), 'success');
-	});
+    pageState.cbBBFS.pages = paginateArray(filtered);
+    pageState.cbBBFS.current = 0;
+    pageState.cbBBFS.meta = 'BBFS: ' + bbfs
+        + (cb ? ' • CB: ' + cb.split('').join(' ') + ' • Mode: ' + mode.toUpperCase() : ' • tanpa CB');
+        
+    renderPagination('cbBBFSResult', 'cbBBFS', 'Hasil');
+    toast('Berhasil: ' + filtered.length.toLocaleString('id-ID') + ' dari ' + all.length.toLocaleString('id-ID'), 'success');
+    
+    // Scroll ke hasil
+    const resBox = $('cbBBFSResult');
+    if (resBox) resBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
 
 	/* ═══════════════════════════════════════════════════════════════════════
 	   BLOK 48: GRUP + CB GENERATOR — REVISED (CB opsional)
