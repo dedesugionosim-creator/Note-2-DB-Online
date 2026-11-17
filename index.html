@@ -7414,18 +7414,16 @@ function renderM23Rows() {
     
     let html = '';
     
-    // 1. TAMBAHKAN HEADER TABEL DI PALING ATAS
-    html += `<div style="display: grid; grid-template-columns: 25px 60px 1fr 75px 45px 45px 35px; gap: 4px; padding: 8px 6px; font-weight: bold; color: var(--muted); font-size: 10px; border-bottom: 2px solid var(--border); margin-bottom: 6px; text-transform: uppercase; background: var(--card-2); position: sticky; top: 0; z-index: 2; text-align: center; border-radius: 4px;">
+    // Header Tabel
+    html += `<div style="display: grid; grid-template-columns: 20px 55px 1fr 65px 40px 35px; gap: 4px; padding: 8px 4px; font-weight: bold; color: var(--muted); font-size: 9.5px; border-bottom: 2px solid var(--border); margin-bottom: 6px; text-transform: uppercase; background: var(--card-2); position: sticky; top: 0; z-index: 2; text-align: center; border-radius: 4px;">
         <div>No</div>
-        <div>Input 4D</div>
+        <div>Input</div>
         <div style="text-align: left;">3D Otomatis</div>
         <div>Pasar</div>
         <div>Total</div>
-        <div>Hal</div>
-        <div>Copy</div>
+        <div>📋</div>
     </div>`;
 
-    // 2. TAMPILKAN 65 BARIS
     m23State.rows.forEach(function(r) {
         let comboText = '—';
         let total = 0;
@@ -7437,30 +7435,26 @@ function renderM23Rows() {
         }
 
         const totalTxt = r.generated && r.digits ? (total > 0 ? total.toLocaleString('id-ID') : '0') : '—';
-        const pagesTxt = r.generated && r.digits ? (total > 0 ? Math.ceil(total / PER_PAGE) + ' hal' : '—') : '—';
         const canCopy = r.generated && r.results.length > 0;
         
-        html += `<div class="m23-row" data-idx="${r.idx}" style="display: grid; grid-template-columns: 25px 60px 1fr 75px 45px 45px 35px; gap: 4px; align-items: center; padding: 4px 6px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 4px; font-size: 12px;">
+        html += `<div class="m23-row" data-idx="${r.idx}" style="display: grid; grid-template-columns: 20px 55px 1fr 65px 40px 35px; gap: 4px; align-items: center; padding: 4px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 4px; font-size: 12px;">
             
             <div style="text-align:center; font-family: monospace; font-size: 11px; color: var(--muted); font-weight: 700;">${r.idx + 1}</div>
             
-            <input type="text" class="m23-digits" maxlength="4" inputmode="numeric" placeholder="1234" value="${esc(r.digits)}" data-idx="${r.idx}" data-field="digits" style="width: 100%; padding: 6px 2px; text-align: center; font-family: monospace; font-weight: 700; color: var(--accent); letter-spacing: 1px; font-size: 13px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-2);">
+            <input type="text" class="m23-digits" maxlength="4" inputmode="numeric" placeholder="1234" value="${esc(r.digits)}" data-idx="${r.idx}" data-field="digits" style="width: 100%; padding: 6px 2px; text-align: center; font-family: monospace; font-weight: 700; color: var(--accent); letter-spacing: 1px; font-size: 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-2);">
             
-            <div class="m23-combos" style="font-size: 11px; color: var(--accent); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 4px; font-family: monospace;" title="${comboText}">${comboText}</div>
+            <div class="m23-combos" style="font-size: 10px; color: var(--accent); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 2px; font-family: monospace;" title="${comboText}">${comboText}</div>
             
-            <input type="text" class="m23-pasar" placeholder="PASAR" value="${esc(r.pasar)}" data-idx="${r.idx}" data-field="pasar" style="width: 100%; padding: 6px 4px; font-size: 11px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-2); text-align: center;">
+            <input type="text" class="m23-pasar" placeholder="PASAR" value="${esc(r.pasar)}" data-idx="${r.idx}" data-field="pasar" style="width: 100%; padding: 6px 2px; font-size: 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-2); text-align: center;">
             
-            <div class="m23-total" style="text-align:center; font-family: monospace; font-weight: 700; color: var(--success); font-size: 11px;">${totalTxt}</div>
+            <div class="m23-total" style="text-align:center; font-family: monospace; font-weight: 700; color: var(--success); font-size: 10px;">${totalTxt}</div>
             
-            <div class="m23-pages" style="text-align:center; font-family: monospace; color: var(--warn); font-size: 10px;">${pagesTxt}</div>
-            
-            <button class="m23-copy btn-primary" ${canCopy ? '' : 'disabled'} onclick="m23CopyRow(${r.idx})" style="padding: 4px 2px; font-size: 10px; border-radius: 4px; width: 100%;">📋</button>
+            <button class="m23-copy btn-primary" ${canCopy ? '' : 'disabled'} onclick="m23CopyRow(${r.idx})" style="padding: 4px 0; font-size: 10px; border-radius: 4px; width: 100%;">📋</button>
         </div>`;
     });
     
     container.innerHTML = html;
 
-    // 3. EVENT LISTENER SAAT MENGETIK
     container.querySelectorAll('input').forEach(function(el) {
         el.addEventListener('input', function() {
             const idx = parseInt(el.dataset.idx, 10);
@@ -7490,18 +7484,14 @@ function renderM23Rows() {
                 r.generated = false;
             }
 
-            // Update tampilan baris secara instan tanpa render ulang seluruh tabel
             const rowEl = el.closest('.m23-row');
             if (rowEl) {
                 const total = r.results.length;
-                const pages = total > 0 ? Math.ceil(total / PER_PAGE) : 0;
                 const totEl = rowEl.querySelector('.m23-total');
-                const pgEl = rowEl.querySelector('.m23-pages');
                 const cpyBtn = rowEl.querySelector('.m23-copy');
                 const comboEl = rowEl.querySelector('.m23-combos');
 
                 if (totEl) totEl.textContent = total > 0 ? total.toLocaleString('id-ID') : '—';
-                if (pgEl) pgEl.textContent = pages > 0 ? pages + ' hal' : '—';
                 if (cpyBtn) cpyBtn.disabled = total === 0;
                 if (comboEl) {
                     const combos = get3DigitCombos(r.digits);
@@ -7565,9 +7555,11 @@ function renderM23Results() {
         if (r.page < 0) r.page = 0;
         const st = r.page * PER_PAGE;
         const pd = r.results.slice(st, st + PER_PAGE);
+        const combos = get3DigitCombos(r.digits);
 
         html += `<div class="m23-result-block" id="m23-block-${r.idx}">
-            <div class="m23-res-header">Hasil dari ${esc(r.digits)} ${r.pasar ? `<span class="pasar-tag">— ${esc(r.pasar)}</span>` : ''}</div>
+            <div class="m23-res-header" style="font-size:14px; margin-bottom:4px;">Hasil dari <span style="color:var(--warn); font-size:16px;">${esc(r.digits)}</span> ${r.pasar ? `<span class="pasar-tag" style="color:var(--accent); font-size:12px;">— ${esc(r.pasar)}</span>` : ''}</div>
+            <div style="font-size:11px; color:var(--accent); margin-bottom:8px; font-family:monospace;">Kombinasi 3D: ${combos.join(', ')}</div>
             <div class="page-info">Halaman ${r.page + 1} / ${tp} • ${pd.length} di halaman ini • Total ${r.results.length.toLocaleString('id-ID')}</div>
             <div class="page-content" style="max-height:240px;">${pd.join('*')}${pd.length ? '*' : ''}</div>
             <div class="page-nav">
@@ -7584,7 +7576,7 @@ function renderM23Results() {
     });
 
     if (!html) {
-        html = '<div class="card"><div class="empty">Belum ada hasil. Isi minimal 1 baris dengan 2–3 digit.</div></div>';
+        html = '<div class="card"><div class="empty">Belum ada hasil. Isi Result 4 Angka di baris, sistem akan otomatis meng-generate.</div></div>';
     }
     c.innerHTML = html;
 }
