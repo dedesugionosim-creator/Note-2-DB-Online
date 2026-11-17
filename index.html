@@ -4041,16 +4041,18 @@ function renderPagination(containerId, stateKey, labelPrefix, breakdownHTML) {
     if (breakdownHTML) state._breakdown = breakdownHTML;
     const breakdown = state._breakdown || '';
     
-    // JIKA HASIL KOSONG: Bersihkan layar dan tampilkan pesan
+    // Jika hasil kosong
     if (state.pages.length === 0 || state.pages[0].length === 0) {
-        container.innerHTML = '<div class="empty">Tidak ada hasil yang cocok. Coba ubah filter atau angka.</div>';
+        container.innerHTML = '<div class="empty">Tidak ada hasil yang cocok. Coba ubah filter.</div>';
         return;
     }
 
     const totalPages = state.pages.length;
     
-    // PENGAMAN: Pastikan halaman tidak error jika hasil baru lebih sedikit
-    if (state.current >= totalPages || state.current < 0) state.current = 0;
+    // ⬇️ PENGAMAN UTAMA: Jika halaman sekarang (misal 10) lebih besar dari total halaman baru (misal 1), reset ke 1.
+    if (state.current >= totalPages || state.current < 0) {
+        state.current = 0; 
+    }
 
     const current = state.current;
     const pageData = state.pages[current];
@@ -4059,10 +4061,9 @@ function renderPagination(containerId, stateKey, labelPrefix, breakdownHTML) {
     const prevDisabled = (current === 0) ? 'disabled' : '';
     const nextDisabled = (current === totalPages - 1) ? 'disabled' : '';
 
-    // KOSONGKAN DULU (Ini trik agar HP tidak bingung saat tinggi layar berubah)
+    // Bersihkan HTML lama agar HP tidak bingung
     container.innerHTML = '';
 
-    // Render HTML baru
     container.innerHTML = `
         ${breakdown}
         <div class="page-info">
@@ -4088,7 +4089,7 @@ function renderPagination(containerId, stateKey, labelPrefix, breakdownHTML) {
             <button onclick="exportPages('${stateKey}')">⬇ Export TXT</button>
         </div>`;
 
-    // PAKSA LAYAR HP MELUNCUR KE ATAS KE AREA HASIL
+    // Auto scroll ke atas (khusus HP)
     setTimeout(function() {
         container.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);
