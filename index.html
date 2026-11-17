@@ -3352,12 +3352,10 @@ window.switchSubTab = function(btn) {
     const container = document.getElementById('subTabs4Angka');
     if (!container) return;
 
-    // 1. Hilangkan efek aktif dari semua tombol tab
     container.querySelectorAll('button').forEach(function(b) { 
         b.classList.remove('active'); 
     });
     
-    // 2. Sembunyikan semua subpanel HANYA di dalam menu Input 4 Angka
     const section = document.getElementById('input4Angka');
     if (section) {
         section.querySelectorAll('.subpanel').forEach(function(p) { 
@@ -3365,17 +3363,30 @@ window.switchSubTab = function(btn) {
         });
     }
     
-    // 3. Aktifkan tombol yang diklik
     btn.classList.add('active');
     
-    // 4. Tampilkan panel yang dituju
     const targetId = btn.getAttribute('data-subpanel');
     const target = document.getElementById(targetId);
     
     if (target) {
         target.classList.add('active');
-        // Opsional: Scroll ke atas agar panel terlihat
         window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        // ⬇️ TAMBAHKAN BLOK INI ⬇️
+        // Render ulang baris jika tab AK dibuka
+        if (targetId === 'subpanel-angkaTarung' && typeof renderAT55Rows === 'function') {
+            renderAT55Rows();
+        }
+        if (targetId === 'subpanel-mengandung23' && typeof renderM23Rows === 'function') {
+            renderM23Rows();
+        }
+        if (targetId === 'subpanel-manual' && typeof renderManual55Rows === 'function') {
+            renderManual55Rows();
+        }
+        if (targetId === 'subpanel-bbfs' && typeof renderBBFS55Rows === 'function') {
+            renderBBFS55Rows();
+        }
+        // ⬆️ SAMPAI SINI ⬆️
     } else {
         alert("Sistem Error: Panel " + targetId + " tidak ditemukan di HTML.");
     }
@@ -4681,7 +4692,7 @@ if (document.readyState !== 'loading') {
 	   BLOK 46: ANGKA TARUNG GENERATOR (DENGAN 3 GRUP, 1D, 55 BARIS, CB)
 	   ═══════════════════════════════════════════════════════════════════════ */
 
-	function renderAT55Rows() {
+		function renderAT55Rows() {
 		const container = $('at55RowsContainer');
 		if (!container) return;
 		
