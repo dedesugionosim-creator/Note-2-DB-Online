@@ -4696,97 +4696,27 @@ if (document.readyState !== 'loading') {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 46: ANGKA TARUNG GENERATOR (3 GRUP, 1D, 65 BARIS 3D, CB)
+   BLOK 46 REVISI TOTAL: ANGKA TARUNG GENERATOR (3 GRUP, 1D, 65 BARIS 3D, CB)
+   Sistem 3 Angka Mengandung otomatis (seperti Blok 65A)
    ═══════════════════════════════════════════════════════════════════════ */
 
 const atRowCount = 65;
 const atState = {
     rows: Array(atRowCount).fill(null).map(function(_, i) {
-        return { idx: i, digits: '', pasar: '' };
+        return { idx: i, digits: '', pasar: '', comboResults: {}, pages: {}, generated: false };
     })
 };
 
-function renderAT65Rows() {
-    // AUTO-SYNC dari m23State
-    if (typeof m23State !== 'undefined' && m23State.rows) {
-        for (let i = 0; i < atState.rows.length && i < m23State.rows.length; i++) {
-            atState.rows[i].digits = m23State.rows[i].digits || '';
-            atState.rows[i].pasar  = m23State.rows[i].pasar  || '';
-        }
-    }
+let _atCachedBase = null;
 
-    const container = $('at65RowsContainer');
-    if (!container) return;
-    
-    let html = '';
-    // Header Tabel
-    html += `<div style="display: grid; grid-template-columns: 20px 55px 1fr 65px 40px; gap: 4px; padding: 8px 4px; font-weight: bold; color: var(--muted); font-size: 9.5px; border-bottom: 2px solid var(--border); margin-bottom: 6px; text-transform: uppercase; background: var(--card-2); position: sticky; top: 0; z-index: 2; text-align: center; border-radius: 4px;">
-        <div>No</div>
-        <div>Input</div>
-        <div style="text-align: left;">3D Otomatis</div>
-        <div>Pasar</div>
-        <div>📋</div>
-    </div>`;
-
-    atState.rows.forEach(function(r) {
-        let comboText = '—';
-        if (r.digits && r.digits.length === 4) {
-            comboText = get3DigitCombos(r.digits).join(', ');
-        }
-        
-        html += `<div class="m23-row" data-idx="${r.idx}" style="display: grid; grid-template-columns: 20px 55px 1fr 65px 40px; gap: 4px; align-items: center; padding: 4px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 4px; font-size: 12px;">
-            
-            <div style="text-align:center; font-family: monospace; font-size: 11px; color: var(--muted); font-weight: 700;">${r.idx + 1}</div>
-            
-            <input type="text" class="m23-digits" maxlength="4" inputmode="numeric" placeholder="1234" value="${esc(r.digits)}" data-idx="${r.idx}" data-field="digits" style="width: 100%; padding: 6px 2px; text-align: center; font-family: monospace; font-weight: 700; color: var(--accent); letter-spacing: 1px; font-size: 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-2);">
-            
-            <div class="m23-combos" style="font-size: 10px; color: var(--accent); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 2px; font-family: monospace;" title="${comboText}">${comboText}</div>
-            
-            <input type="text" class="m23-pasar" placeholder="PASAR" value="${esc(r.pasar)}" data-idx="${r.idx}" data-field="pasar" style="width: 100%; padding: 6px 2px; font-size: 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-2); text-align: center;">
-            
-            <button class="m23-copy btn-primary" onclick="copyATFilter(${r.idx})" style="padding: 4px 0; font-size: 10px; border-radius: 4px; width: 100%;">📋</button>
-        </div>`;
-    });
-    
-    container.innerHTML = html;
-
-    container.querySelectorAll('input').forEach(function(el) {
-        el.addEventListener('input', function() {
-            const idx = parseInt(el.dataset.idx, 10);
-            const field = el.dataset.field;
-            
-            if (field === 'digits') el.value = onlyDigits(el.value).slice(0, 4);
-            const r = atState.rows[idx];
-            r[field] = el.value;
-
-            const rowEl = el.closest('.m23-row');
-            if (rowEl) {
-                const comboEl = rowEl.querySelector('.m23-combos');
-                if (comboEl) {
-                    const combos = get3DigitCombos(r.digits);
-                    const txt = combos.length ? combos.join(', ') : '—';
-                    comboEl.textContent = txt;
-                    comboEl.setAttribute('title', txt);
-                }
-            }
-        });
-    });
+function invalidateATBaseCache() {
+    _atCachedBase = null;
 }
 
-function getAT1DDepanSelected() {
-    const arr = [];
-    const wrap = $('at1DDepan');
-    if (!wrap) return arr;
-    wrap.querySelectorAll('input[type="checkbox"]:checked').forEach(function(e) {
-        arr.push(e.value);
-    });
-    return arr;
-}
+// Helper: Ambil pool dasar (Cross Product P1xP2xP3xP4) lalu saring dengan Grup, 1D, dan CB
+function getATBaseUniverse() {
+    if (_atCachedBase) return _atCachedBase;
 
-window.copyATFilter = function(idx) {
-    const r = atState.rows[idx];
-    if (!r || !r.digits || r.digits.length !== 4) { toast('Isi 4 angka terlebih dahulu', 'error'); return; }
-    
     let p1 = parseSingleDigitList($('atDigit1') ? $('atDigit1').value : '');
     let p2 = parseSingleDigitList($('atDigit2') ? $('atDigit2').value : '');
     let p3 = parseSingleDigitList($('atDigit3') ? $('atDigit3').value : '');
@@ -4800,39 +4730,365 @@ window.copyATFilter = function(idx) {
     let pool = [];
     for (const a of p1) for (const b of p2) for (const c of p3) for (const d of p4) pool.push(a + b + c + d);
 
-    const combos = get3DigitCombos(r.digits);
-    let matchedSet = new Set();
-    combos.forEach(combo => {
-        const ms = blParseMultiset(combo);
-        pool.forEach(n => { if (blContainsCombo(n, ms)) matchedSet.add(n); });
+    const g1 = $('atGrup1') ? $('atGrup1').value : '';
+    const g2 = $('atGrup2') ? $('atGrup2').value : '';
+    const g3 = $('atGrup3') ? $('atGrup3').value : '';
+    
+    const setG1 = g1 ? new Set(getGroupAs2DigitDepan(g1)) : null;
+    const setG2 = g2 ? new Set([...getGroupAs2DigitDepan(g2), ...getGroupAs2DigitBelakang(g2)]) : null;
+    const setG3 = g3 ? new Set(getGroupAs2DigitBelakang(g3)) : null;
+
+    const cb = parseSingleDigitList($('atCB') ? $('atCB').value : '');
+    const cbMode = $('atCBMode') ? $('atCBMode').value : 'or';
+    const d1 = getAT1DDepanSelected();
+
+    _atCachedBase = pool.filter(function(n) {
+        if (g1 || g2 || g3) {
+            const ab = n.slice(0, 2), bc = n.slice(1, 3), cd = n.slice(2, 4);
+            if (setG1 && !setG1.has(ab)) return false;
+            if (setG2 && !setG2.has(bc)) return false;
+            if (setG3 && !setG3.has(cd)) return false;
+        }
+        if (cb.length > 0) {
+            if (cbMode === 'and') {
+                if (!cb.every(d => n.includes(d))) return false;
+            } else {
+                let found = false;
+                for (const d of cb) if (n.includes(d)) { found = true; break; }
+                if (!found) return false;
+            }
+        }
+        if (d1.length > 0 && !d1.includes(n[0])) return false;
+        return true;
     });
 
-    if (matchedSet.size === 0) { toast('Tidak ada hasil', 'error'); return; }
-    copyTextToClipboard(Array.from(matchedSet).sort().join('*') + '*');
+    return _atCachedBase;
+}
+
+function getAT1DDepanSelected() {
+    const arr = [];
+    const wrap = $('at1DDepan');
+    if (!wrap) return arr;
+    wrap.querySelectorAll('input[type="checkbox"]:checked').forEach(function(e) {
+        arr.push(e.value);
+    });
+    return arr;
+}
+
+// Render Tabel 65 Baris Angka Tarung
+function renderAT65Rows() {
+    // AUTO-SYNC dari m23State
+    if (typeof m23State !== 'undefined' && m23State.rows) {
+        for (let i = 0; i < atState.rows.length && i < m23State.rows.length; i++) {
+            atState.rows[i].digits = m23State.rows[i].digits || '';
+            atState.rows[i].pasar  = m23State.rows[i].pasar  || '';
+            if (atState.rows[i].digits.length !== 4) {
+                atState.rows[i].comboResults = {};
+                atState.rows[i].generated = false;
+            }
+        }
+    }
+
+    const container = $('at65RowsContainer');
+    if (!container) return;
+    
+    let html = '';
+    // Header Tabel
+    html += `<div style="display: grid; grid-template-columns: 20px 55px 1fr 65px 40px 35px; gap: 4px; padding: 8px 4px; font-weight: bold; color: var(--muted); font-size: 9.5px; border-bottom: 2px solid var(--border); margin-bottom: 6px; text-transform: uppercase; background: var(--card-2); position: sticky; top: 0; z-index: 2; text-align: center; border-radius: 4px;">
+        <div>No</div>
+        <div>Result</div>
+        <div style="text-align: left;">3D Otomatis</div>
+        <div>Pasar</div>
+        <div>Total</div>
+        <div>📋</div>
+    </div>`;
+
+    atState.rows.forEach(function(r) {
+        let comboText = '—';
+        let total = 0;
+        
+        if (r.digits && r.digits.length === 4) {
+            const combos = get3DigitCombos(r.digits);
+            comboText = combos.join(', ');
+            if (r.comboResults) {
+                total = Object.values(r.comboResults).reduce((sum, arr) => sum + arr.length, 0);
+            }
+        }
+
+        const totalTxt = r.generated && r.digits ? (total > 0 ? total.toLocaleString('id-ID') : '0') : '—';
+        const canCopy = r.generated && total > 0;
+        
+        html += `<div class="m23-row" data-idx="${r.idx}" style="display: grid; grid-template-columns: 20px 55px 1fr 65px 40px 35px; gap: 4px; align-items: center; padding: 4px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 4px; font-size: 12px;">
+            <div style="text-align:center; font-family: monospace; font-size: 11px; color: var(--muted); font-weight: 700;">${r.idx + 1}</div>
+            
+            <input type="text" class="m23-digits" maxlength="4" inputmode="numeric" placeholder="1234" value="${esc(r.digits)}" data-idx="${r.idx}" data-field="digits" style="width: 100%; padding: 6px 2px; text-align: center; font-family: monospace; font-weight: 700; color: var(--accent); letter-spacing: 1px; font-size: 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-2);">
+            
+            <div class="m23-combos" style="font-size: 10px; color: var(--accent); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 2px; font-family: monospace;" title="${comboText}">${comboText}</div>
+            
+            <input type="text" class="m23-pasar" placeholder="PASAR" value="${esc(r.pasar)}" data-idx="${r.idx}" data-field="pasar" style="width: 100%; padding: 6px 2px; font-size: 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-2); text-align: center;">
+            
+            <div class="m23-total" style="text-align:center; font-family: monospace; font-weight: 700; color: var(--success); font-size: 10px;">${totalTxt}</div>
+            
+            <button class="m23-copy btn-primary" ${canCopy ? '' : 'disabled'} onclick="atCopyRow(${r.idx})" style="padding: 4px 0; font-size: 10px; border-radius: 4px; width: 100%;">📋</button>
+        </div>`;
+    });
+    
+    container.innerHTML = html;
+
+    // Listener input otomatis
+    container.querySelectorAll('input').forEach(function(el) {
+        el.addEventListener('input', function() {
+            const idx = parseInt(el.dataset.idx, 10);
+            const field = el.dataset.field;
+            
+            if (field === 'digits') el.value = onlyDigits(el.value).slice(0, 4);
+            
+            const r = atState.rows[idx];
+            r[field] = el.value;
+            
+            if (r.digits.length === 4) {
+                const base = getATBaseUniverse();
+                const combos = get3DigitCombos(r.digits);
+                r.comboResults = {};
+                combos.forEach(combo => {
+                    const ms = blParseMultiset(combo);
+                    r.comboResults[combo] = base.filter(n => blContainsCombo(n, ms)).sort();
+                });
+                r.generated = true;
+                r.pages = {}; 
+            } else {
+                r.comboResults = {};
+                r.generated = false;
+            }
+
+            const rowEl = el.closest('.m23-row');
+            if (rowEl) {
+                const totEl = rowEl.querySelector('.m23-total');
+                const cpyBtn = rowEl.querySelector('.m23-copy');
+                const comboEl = rowEl.querySelector('.m23-combos');
+                
+                let total = 0;
+                if (r.generated) total = Object.values(r.comboResults).reduce((sum, arr) => sum + arr.length, 0);
+
+                if (totEl) totEl.textContent = total > 0 ? total.toLocaleString('id-ID') : (r.generated ? '0' : '—');
+                if (cpyBtn) cpyBtn.disabled = total === 0;
+                if (comboEl) {
+                    const combos = get3DigitCombos(r.digits);
+                    const txt = combos.length ? combos.join(', ') : '—';
+                    comboEl.textContent = txt;
+                    comboEl.setAttribute('title', txt);
+                }
+            }
+
+            if (window._atRenderTimer) clearTimeout(window._atRenderTimer);
+            window._atRenderTimer = setTimeout(renderATResults, 300);
+        });
+    });
+}
+
+// Render Hasil Bawah (Per Kombinasi 3D)
+function renderATResults() {
+    const c = $('atResult'); // Menggunakan container hasil yang ada di HTML
+    if (!c) return;
+
+    const masterSet = new Set();
+    let html = '';
+
+    atState.rows.forEach(function(r) {
+        if (!r.generated || !r.digits || !r.comboResults) return;
+        
+        const combos = get3DigitCombos(r.digits);
+        
+        combos.forEach(function(combo) {
+            const results = r.comboResults[combo] || [];
+            if (results.length === 0) return;
+            
+            results.forEach(n => masterSet.add(n));
+
+            const tp = Math.ceil(results.length / PER_PAGE);
+            if (r.pages[combo] === undefined) r.pages[combo] = 0;
+            if (r.pages[combo] >= tp) r.pages[combo] = tp - 1;
+            if (r.pages[combo] < 0) r.pages[combo] = 0;
+            
+            const st = r.pages[combo] * PER_PAGE;
+            const pd = results.slice(st, st + PER_PAGE);
+            const pasarLabel = r.pasar ? r.pasar : '';
+            
+            html += `<div class="m23-result-block" id="at-block-${r.idx}-${combo}">
+                <div class="m23-res-header" style="font-size:14px; margin-bottom:4px; display:flex; justify-content:space-between; align-items:center;">
+                    <span>Hasil dari : <span style="color:var(--warn); font-size:16px;">${esc(pasarLabel)} ${esc(combo)}</span></span>
+                    <span style="font-size:12px; color:var(--success); background:rgba(34,197,94,0.1); padding:2px 8px; border-radius:4px; font-weight:bold;">${results.length.toLocaleString('id-ID')} angka</span>
+                </div>
+                <div class="page-info">Halaman ${r.pages[combo] + 1} / ${tp} • ${pd.length} di halaman ini</div>
+                <div class="page-content" style="max-height:240px;">${pd.join('*')}${pd.length ? '*' : ''}</div>
+                <div class="page-nav">
+                    <button ${r.pages[combo] === 0 ? 'disabled' : ''} onclick="atPageCombo(${r.idx}, '${combo}', -1)">◀ Prev</button>
+                    <span>${r.pages[combo] + 1} / ${tp}</span>
+                    <button ${r.pages[combo] === tp - 1 ? 'disabled' : ''} onclick="atPageCombo(${r.idx}, '${combo}', 1)">Next ▶</button>
+                </div>
+                <div class="page-actions">
+                    <button onclick="atCopyComboPage(${r.idx}, '${combo}')">📋 Copy Hal</button>
+                    <button onclick="atCopyComboAll(${r.idx}, '${combo}')">📋 Copy Semua</button>
+                    <button onclick="atExportCombo(${r.idx}, '${combo}')">⬇ TXT</button>
+                </div>
+            </div>`;
+        });
+    });
+
+    const masterItems = Array.from(masterSet).sort();
+
+    if (masterItems.length > 0) {
+        // Panel Master Total Gabungan
+        const tp = Math.ceil(masterItems.length / PER_PAGE);
+        if (window._atMasterPage === undefined) window._atMasterPage = 0;
+        if (window._atMasterPage >= tp) window._atMasterPage = tp - 1;
+        if (window._atMasterPage < 0) window._atMasterPage = 0;
+        const st = window._atMasterPage * PER_PAGE;
+        const pd = masterItems.slice(st, st + PER_PAGE);
+
+        html = `<div class="card" style="border-color:var(--success); background:rgba(34,197,94,0.05); margin-bottom:14px;">
+            <h3 style="color:var(--success); margin-bottom:8px;">🎯 TOTAL KESELURUHAN GABUNGAN (UNIK)</h3>
+            <div class="page-info">Halaman ${window._atMasterPage + 1} / ${tp} • ${pd.length} di halaman ini • Total ${masterItems.length.toLocaleString('id-ID')} angka unik</div>
+            <div class="page-content" style="max-height:200px; border-color:var(--success);">${pd.join('*')}${pd.length ? '*' : ''}</div>
+            <div class="page-nav">
+                <button ${window._atMasterPage === 0 ? 'disabled' : ''} onclick="atPageMaster(-1)">◀ Prev</button>
+                <span>${window._atMasterPage + 1} / ${tp}</span>
+                <button ${window._atMasterPage === tp - 1 ? 'disabled' : ''} onclick="atPageMaster(1)">Next ▶</button>
+            </div>
+            <div class="page-actions">
+                <button class="btn-success" onclick="atCopyMasterPage()">📋 Copy Hal. Ini</button>
+                <button class="btn-success" onclick="atCopyMasterAll()">📋 Copy Semua</button>
+                <button class="btn-warn" onclick="atExportMaster()">⬇ Export TXT</button>
+            </div>
+        </div>` + html;
+    } else {
+        if (!html) {
+            html = '<div class="card"><div class="empty">Belum ada hasil. Isi P1-P4 atau ubah filter, lalu ketik 4 angka di tabel atas.</div></div>';
+        }
+    }
+    
+    c.innerHTML = html;
+}
+
+// Paging & Copy Spesifik per Kombinasi
+window.atPageCombo = function(idx, combo, d) {
+    const r = atState.rows[idx]; if (!r || !r.comboResults[combo]) return;
+    const tp = Math.ceil(r.comboResults[combo].length / PER_PAGE);
+    const nx = r.pages[combo] + d;
+    if (nx < 0 || nx >= tp) return;
+    r.pages[combo] = nx; 
+    renderATResults();
 };
 
+window.atCopyComboPage = function(idx, combo) {
+    const r = atState.rows[idx]; if (!r || !r.comboResults[combo]) return;
+    const results = r.comboResults[combo];
+    const st = r.pages[combo] * PER_PAGE;
+    copyTextToClipboard(results.slice(st, st + PER_PAGE).join('*') + '*');
+};
+
+window.atCopyComboAll = function(idx, combo) {
+    const r = atState.rows[idx]; if (!r || !r.comboResults[combo]) return;
+    copyTextToClipboard(r.comboResults[combo].join('*') + '*');
+};
+
+window.atExportCombo = function(idx, combo) {
+    const r = atState.rows[idx]; if (!r || !r.comboResults[combo]) return;
+    const b = new Blob([r.comboResults[combo].join('*') + '*'], { type: 'text/plain;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(b);
+    a.download = 'sahard-at-' + (r.pasar ? r.pasar + '-' : '') + combo + '.txt';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast('Diexport', 'success');
+};
+
+window.atCopyRow = function(idx) {
+    const r = atState.rows[idx];
+    if (!r || !r.comboResults || Object.keys(r.comboResults).length === 0) { toast('Belum ada hasil', 'error'); return; }
+    const masterSet = new Set();
+    Object.values(r.comboResults).forEach(arr => arr.forEach(n => masterSet.add(n)));
+    copyTextToClipboard(Array.from(masterSet).sort().join('*') + '*');
+};
+
+window.atPageMaster = function(d) {
+    const masterSet = new Set();
+    atState.rows.forEach(function(r) {
+        if (r.generated && r.comboResults) {
+            Object.values(r.comboResults).forEach(arr => arr.forEach(n => masterSet.add(n)));
+        }
+    });
+    const arr = Array.from(masterSet).sort();
+    const tp = Math.ceil(arr.length / PER_PAGE);
+    const nx = window._atMasterPage + d;
+    if (nx < 0 || nx >= tp) return;
+    window._atMasterPage = nx;
+    renderATResults();
+};
+
+window.atCopyMasterPage = function() {
+    const masterSet = new Set();
+    atState.rows.forEach(r => { if (r.generated && r.comboResults) Object.values(r.comboResults).forEach(arr => arr.forEach(n => masterSet.add(n))); });
+    const arr = Array.from(masterSet).sort();
+    const st = window._atMasterPage * PER_PAGE;
+    copyTextToClipboard(arr.slice(st, st + PER_PAGE).join('*') + '*');
+};
+
+window.atCopyMasterAll = function() {
+    const masterSet = new Set();
+    atState.rows.forEach(r => { if (r.generated && r.comboResults) Object.values(r.comboResults).forEach(arr => arr.forEach(n => masterSet.add(n))); });
+    copyTextToClipboard(Array.from(masterSet).sort().join('*') + '*');
+};
+
+window.atExportMaster = function() {
+    const masterSet = new Set();
+    atState.rows.forEach(r => { if (r.generated && r.comboResults) Object.values(r.comboResults).forEach(arr => arr.forEach(n => masterSet.add(n))); });
+    const b = new Blob([Array.from(masterSet).sort().join('*') + '*'], { type: 'text/plain;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(b);
+    a.download = 'sahard-at-master.txt';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast('Diexport', 'success');
+};
+
+// Event Listener untuk Filter (P1-P4, Grup, 1D, CB)
+function onATFilterChange() {
+    invalidateATBaseCache();
+    recalcATAll();
+}
+
+['atDigit1', 'atDigit2', 'atDigit3', 'atDigit4', 'atCB', 'atCBMode'].forEach(function(id) {
+    if ($(id)) {
+        $(id).addEventListener('change', onATFilterChange);
+        $(id).addEventListener('input', function(e) {
+            if (id.startsWith('atDigit')) e.target.value = onlyDigits(e.target.value).slice(0, MAX_AK_DIGITS);
+            onATFilterChange();
+        });
+    }
+});
+
+['atGrup1', 'atGrup2', 'atGrup3'].forEach(function(id) {
+    if ($(id)) $(id).addEventListener('change', function() {
+        _refreshATPreview();
+        onATFilterChange();
+    });
+});
+
+if ($('at1DDepan')) $('at1DDepan').addEventListener('change', onATFilterChange);
+
 function _refreshATPreview() {
-    const g1El = $('atGrup1');
-    const g2El = $('atGrup2');
-    const g3El = $('atGrup3');
-    
-    if (!g1El || !g2El || !g3El) return; 
-    
-    const g1 = g1El.value;
-    const g2 = g2El.value;
-    const g3 = g3El.value;
-    
+    const g1 = $('atGrup1') ? $('atGrup1').value : '';
+    const g2 = $('atGrup2') ? $('atGrup2').value : '';
+    const g3 = $('atGrup3') ? $('atGrup3').value : '';
     renderGroupPreview(g1, $('atPreview1'), 'depan', g1 ? 'Grup 1 → 2D Depan' : '');
     renderGroupPreview(g2, $('atPreview2'), 'both', g2 ? 'Grup 2 → 2D Tengah' : '');
     renderGroupPreview(g3, $('atPreview3'), 'belakang', g3 ? 'Grup 3 → 2D Belakang' : '');
-    
     updateATInfo();
 }
 
 function updateATInfo() {
-    const el1 = $('atDigit1');
-    if (!el1) return; 
-
+    const el1 = $('atDigit1'); if (!el1) return; 
     const p1 = parseSingleDigitList(el1.value);
     const p2 = parseSingleDigitList($('atDigit2') ? $('atDigit2').value : '');
     const p3 = parseSingleDigitList($('atDigit3') ? $('atDigit3').value : '');
@@ -4848,136 +5104,71 @@ function updateATInfo() {
         atState.rows.forEach(r => { if (r.digits && r.digits.length === 4) activeRows++; });
     }
 
-    const info = $('atInfo');
-    if (!info) return;
+    const info = $('atInfo'); if (!info) return;
     
     const c1 = p1.length === 0 ? 10 : p1.length;
     const c2 = p2.length === 0 ? 10 : p2.length;
     const c3 = p3.length === 0 ? 10 : p3.length;
     const c4 = p4.length === 0 ? 10 : p4.length;
-    
     const total = c1 * c2 * c3 * c4;
-    const pages = Math.ceil(total / PER_PAGE);
     
     let text = 'P1:' + c1 + ' P2:' + c2 + ' P3:' + c3 + ' P4:' + c4
-        + ' • Maks ' + total.toLocaleString('id-ID') + ' kombinasi (' + pages + ' hal)';
-        
+        + ' • Maks ' + total.toLocaleString('id-ID') + ' kombinasi';
     if (g1 || g2 || g3) text += ' • Filter Grup';
     if (d1.length > 0) text += ' • Awalan: ' + d1.join(',');
-    if (activeRows > 0) text += ' • Saring: ' + activeRows + ' baris 3D';
+    if (activeRows > 0) text += ' • ' + activeRows + ' baris 3D aktif';
     if (cb.length > 0) text += ' • CB: ' + cb.join(' ');
-    
     info.textContent = text;
 }
 
-if ($('atGrup1')) $('atGrup1').addEventListener('change', _refreshATPreview);
-if ($('atGrup2')) $('atGrup2').addEventListener('change', _refreshATPreview);
-if ($('atGrup3')) $('atGrup3').addEventListener('change', _refreshATPreview);
-
-['atDigit1', 'atDigit2', 'atDigit3', 'atDigit4'].forEach(function(id) {
-    const el = $(id); 
-    if (el) {
-        el.addEventListener('input', function(e) {
-            e.target.value = onlyDigits(e.target.value).slice(0, MAX_AK_DIGITS);
-            updateATInfo();
+function recalcATAll() {
+    const base = getATBaseUniverse();
+    atState.rows.forEach(function(r) {
+        if (!r.digits || r.digits.length !== 4) {
+            r.comboResults = {};
+            r.generated = false;
+            r.pages = {};
+            return;
+        }
+        const combos = get3DigitCombos(r.digits);
+        r.comboResults = {};
+        combos.forEach(combo => {
+            const ms = blParseMultiset(combo);
+            r.comboResults[combo] = base.filter(n => blContainsCombo(n, ms)).sort();
         });
-    }
-});
+        r.generated = true;
+    });
+    renderAT65Rows();
+    renderATResults();
+}
 
-if ($('atCB')) $('atCB').addEventListener('input', updateATInfo);
-if ($('atCBMode')) $('atCBMode').addEventListener('change', updateATInfo);
-if ($('at1DDepan')) $('at1DDepan').addEventListener('change', updateATInfo);
+if ($('atGenerateBtn')) {
+    $('atGenerateBtn').addEventListener('click', function() {
+        recalcATAll();
+        toast('Semua baris berhasil di-generate', 'success');
+    });
+}
 
-$('atGenerateBtn').addEventListener('click', function() {
-    let p1 = parseSingleDigitList($('atDigit1') ? $('atDigit1').value : '');
-    let p2 = parseSingleDigitList($('atDigit2') ? $('atDigit2').value : '');
-    let p3 = parseSingleDigitList($('atDigit3') ? $('atDigit3').value : '');
-    let p4 = parseSingleDigitList($('atDigit4') ? $('atDigit4').value : '');
-    
-    if (p1.length === 0) p1 = ['0','1','2','3','4','5','6','7','8','9'];
-    if (p2.length === 0) p2 = ['0','1','2','3','4','5','6','7','8','9'];
-    if (p3.length === 0) p3 = ['0','1','2','3','4','5','6','7','8','9'];
-    if (p4.length === 0) p4 = ['0','1','2','3','4','5','6','7','8','9'];
-
-    const g1 = $('atGrup1') ? $('atGrup1').value : '';
-    const g2 = $('atGrup2') ? $('atGrup2').value : '';
-    const g3 = $('atGrup3') ? $('atGrup3').value : '';
-    const cb = parseSingleDigitList($('atCB') ? $('atCB').value : '');
-    const cbMode = $('atCBMode') ? $('atCBMode').value : 'or';
-    const d1 = getAT1DDepanSelected();
-    
-    let activeRows = atState.rows.filter(r => r.digits && r.digits.length === 4);
-    
-    function tampilkanKosong(pesan) {
-        toast(pesan, 'error');
-        pageState.angkaTarung.pages = [];
-        pageState.angkaTarung.current = 0;
-        renderPagination('atResult', 'angkaTarung', 'Hasil', '');
-    }
-
-    let filtered = [];
-    for (const a of p1) for (const b of p2) for (const c of p3) for (const d of p4) filtered.push(a + b + c + d);
-
-    // 1. Filter 3 Grup
-    if (g1 || g2 || g3) {
-        const setG1 = g1 ? new Set(getGroupAs2DigitDepan(g1)) : null;
-        const setG2 = g2 ? new Set([...getGroupAs2DigitDepan(g2), ...getGroupAs2DigitBelakang(g2)]) : null;
-        const setG3 = g3 ? new Set(getGroupAs2DigitBelakang(g3)) : null;
-        filtered = filtered.filter(n => {
-            const ab = n.slice(0, 2), bc = n.slice(1, 3), cd = n.slice(2, 4);
-            if (setG1 && !setG1.has(ab)) return false;
-            if (setG2 && !setG2.has(bc)) return false;
-            if (setG3 && !setG3.has(cd)) return false;
-            return true;
+// Tambahkan tombol Kosongkan jika belum ada di HTML
+if ($('atGenerateBtn') && !$('atClearAllBtn')) {
+    const btnClear = document.createElement('button');
+    btnClear.id = 'atClearAllBtn';
+    btnClear.className = 'btn-warn';
+    btnClear.style.marginTop = '10px';
+    btnClear.textContent = '🗑 Kosongkan 65 Baris';
+    btnClear.addEventListener('click', function() {
+        if (!confirm('Kosongkan 65 baris Angka Tarung?')) return;
+        atState.rows.forEach(r => {
+            r.digits = ''; r.pasar = ''; r.comboResults = {}; r.pages = {}; r.generated = false;
         });
-        if (filtered.length === 0) { tampilkanKosong('Tidak ada kombinasi yang cocok dengan filter Grup'); return; }
-    }
-
-    // 2. Filter 1D Depan
-    if (d1.length > 0) {
-        filtered = filtered.filter(n => d1.includes(n[0]));
-        if (filtered.length === 0) { tampilkanKosong('Tidak ada 2D depan yang cocok dengan Awalan 1D'); return; }
-    }
-
-    // 3. Filter 65 Baris Mengandung 3 Angka
-    if (activeRows.length > 0) {
-        let matchedSet = new Set();
-        activeRows.forEach(r => {
-            const combos = get3DigitCombos(r.digits);
-            combos.forEach(combo => {
-                const ms = blParseMultiset(combo);
-                filtered.forEach(n => {
-                    if (blContainsCombo(n, ms)) matchedSet.add(n);
-                });
-            });
-        });
-        filtered = Array.from(matchedSet);
-        if (filtered.length === 0) { tampilkanKosong('Tidak ada hasil setelah filter 3 Angka Mengandung'); return; }
-    }
-
-    // 4. Filter CB
-    if (cb.length > 0) {
-        filtered = filterByCB(filtered, cb.join(''), cbMode);
-        if (filtered.length === 0) { tampilkanKosong('Tidak ada hasil setelah filter CB'); return; }
-    }
-
-    filtered.sort();
-    pageState.angkaTarung.pages = paginateArray(filtered);
-    pageState.angkaTarung.current = 0;
-    
-    let meta = 'P1:'+p1.length+' P2:'+p2.length+' P3:'+p3.length+' P4:'+p4.length;
-    if (g1 || g2 || g3) meta += ' • Filter Grup';
-    if (d1.length > 0) meta += ' • Awalan: ' + d1.join(',');
-    if (activeRows.length > 0) meta += ' • Saring ' + activeRows.length + ' baris 3D';
-    if (cb.length > 0) meta += ' • CB: ' + cb.join(' ');
-    pageState.angkaTarung.meta = meta;
-
-    renderPagination('atResult', 'angkaTarung', 'Hasil', '');
-    toast('Berhasil: ' + filtered.length.toLocaleString('id-ID') + ' kombinasi', 'success');
-    
-    const resBox = $('atResult');
-    if (resBox) resBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
-});
+        window._atMasterPage = 0;
+        invalidateATBaseCache();
+        renderAT65Rows();
+        renderATResults();
+        toast('Semua baris dikosongkan', 'success');
+    });
+    $('atGenerateBtn').parentNode.appendChild(btnClear);
+}
 
 	/* ═══════════════════════════════════════════════════════════════════════
 	   BLOK 47: CB BBFS GENERATOR — REVISED (CB opsional)
