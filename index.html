@@ -7663,19 +7663,32 @@ document.addEventListener('DOMContentLoaded', function() {
    ═══════════════════════════════════════════════════════════════════════ */
    
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 65A: MODE INPUT MENGANDUNG 3 ANGKA (65 BARIS) - REVISI TOTAL
+   BLOK 65A: MODE INPUT MENGANDUNG 3 ANGKA (65 BARIS) - FINAL V13
+   Support: Dropdown Pasar & Macau 5D (Ekstraksi 3D Unik)
    ═══════════════════════════════════════════════════════════════════════ */
 
 const M23_ROW_COUNT = 65;
 
+// DAFTAR PASAR
+const PASAR_LIST = [
+    "MACAU 5D", "MACAU 4D P1", "MACAU 4D P2", "MACAU 4D P3", "MACAU 4D P4", "MACAU 4D P5", "MACAU 4D P6",
+    "OREGON 03", "OREGON 06", "OREGON 09", "OREGON 12", "KINGKONG", "CAMBODIA", "TEXAS DAY", "SYDNEY",
+    "SINGAPORE", "HONGKONG", "GRABPOLLS", "GIORGIA NGT", "GIORGIA EVE", "GIORGIA MID", "TEXAS NIGHT",
+    "TEXAS EVE", "TEXAS MOR", "TENNESSE EVE", "TENNESSE DAY", "TENNESSE MOR", "TAIWAN", "JAPAN",
+    "CHINA", "MALAYSIA", "HK SIANG", "TOTO WUHAN", "JAKARTA", "NUSANTARA", "JOWO",
+    "PREDIKSI 01", "PREDIKSI 02", "PREDIKSI 03", "PREDIKSI 04", "PREDIKSI 05", "PREDIKSI 06", "PREDIKSI 07",
+    "PREDIKSI 08", "PREDIKSI 09", "PREDIKSI 10", "PREDIKSI 11", "PREDIKSI 12", "PREDIKSI 13", "PREDIKSI 14",
+    "PREDIKSI 15", "PREDIKSI 16", "PREDIKSI 17", "PREDIKSI 18", "PREDIKSI 19", "PREDIKSI 20", "PREDIKSI 21",
+    "PREDIKSI 22", "PREDIKSI 23"
+];
+
 const m23State = {
     rows: Array(M23_ROW_COUNT).fill(null).map(function(_, i) {
-        return { idx: i, digits: '', pasar: '', comboResults: {}, pages: {}, generated: false };
+        return { idx: i, digits: '', pasar: '', comboResults: {}, pages: {}, generated: false, selectedCombos: [] };
     })
 };
 
 const m23MasterState = { items: [], page: 0, size: PER_PAGE };
-
 const M23_UNIVERSE = (function() {
     const arr = [];
     for (let i = 0; i < 10000; i++) arr.push(String(i).padStart(4, '0'));
@@ -7690,7 +7703,9 @@ function invalidateM23BaseCache() {
 
 function getM231DDepanSelected() {
     const arr = [];
-    document.querySelectorAll('#m231DDepan input[type="checkbox"]:checked').forEach(function(e) {
+    const wrap = $('m231DDepan');
+    if (!wrap) return arr;
+    wrap.querySelectorAll('input[type="checkbox"]:checked').forEach(function(e) {
         arr.push(e.value);
     });
     return arr;
@@ -7706,24 +7721,26 @@ function _refreshM23Preview() {
     renderGroupPreview(g3, $('m23Preview3'), 'belakang', g3 ? 'Grup 3 → 2D Belakang' : '');
 }
 
-// Fungsi memecah 4 digit menjadi kombinasi 3 digit (unik)
-function get3DigitCombos(str4) {
-    if (!str4 || str4.length !== 4) return [];
+// FUNGSI EKSTRAKSI 3D DARI 4 ATAU 5 ANGKA
+function get3DigitCombos(str) {
+    if (!str || str.length < 3) return [];
+    let res = new Set();
     
-    // 1. Ambil 4 kombinasi dengan membuang 1 digit
-    let rawCombos = [];
-    for (let i = 0; i < 4; i++) {
-        rawCombos.push(str4.slice(0, i) + str4.slice(i + 1));
+    // Fungsi rekursif untuk mencari kombinasi 3 angka
+    function combine(start, current) {
+        if (current.length === 3) {
+            // Urutkan agar unik (mencegah duplikat)
+            let sortedCombo = current.split('').sort().join('');
+            res.add(sortedCombo);
+            return;
+        }
+        for (let i = start; i < str.length; i++) {
+            combine(i + 1, current + str[i]);
+        }
     }
     
-    // 2. Urutkan setiap kombinasi (ini kunci agar duplikat hilang)
-    let sortedCombos = rawCombos.map(c => c.split('').sort().join(''));
-    
-    // 3. Hilangkan yang duplikat
-    let uniqueCombos = [...new Set(sortedCombos)];
-    
-    // 4. Kembalikan hasil
-    return uniqueCombos.sort();
+    combine(0, '');
+    return Array.from(res).sort();
 }
 
 // Cache filter (Grup, CB, 1D) agar tidak lag
@@ -7747,14 +7764,12 @@ function getM23BaseUniverse() {
     const d1 = use1D ? getM231DDepanSelected() : [];
 
     _m23CachedBase = M23_UNIVERSE.filter(function(n) {
-        // Filter 3 Grup
         if (g1 || g2 || g3) {
             const ab = n.slice(0, 2), bc = n.slice(1, 3), cd = n.slice(2, 4);
             if (setG1 && !setG1.has(ab)) return false;
             if (setG2 && !setG2.has(bc)) return false;
             if (setG3 && !setG3.has(cd)) return false;
         }
-        // Filter CB
         if (cb.length > 0) {
             if (cbMode === 'and') {
                 if (!cb.every(d => n.includes(d))) return false;
@@ -7764,22 +7779,19 @@ function getM23BaseUniverse() {
                 if (!found) return false;
             }
         }
-        // Filter 1D Depan
         if (d1.length > 0 && !d1.includes(n[0])) return false;
-
         return true;
     });
 
     return _m23CachedBase;
 }
 
-// Cari 4D yang mengandung 3D combo
 function generate4DForCombo(comboStr, baseUniverse) {
     const ms = blParseMultiset(comboStr);
     return baseUniverse.filter(n => blContainsCombo(n, ms)).sort();
 }
 
-// Render Tabel Baris 65
+// RENDER TABEL BARIS 65
 function renderM23Rows() {
     const container = $('m23RowsContainer');
     if (!container) return;
@@ -7798,11 +7810,10 @@ function renderM23Rows() {
         let comboHtml = '—';
         let total = 0;
         
-        if (r.digits && r.digits.length === 4) {
+        if (r.digits && r.digits.length >= 3) {
             const combos = get3DigitCombos(r.digits);
             if (!r.selectedCombos) r.selectedCombos = [...combos];
             
-            // Render Checkbox
             comboHtml = combos.map(c => {
                 const isChecked = r.selectedCombos.includes(c) ? 'checked' : '';
                 return `<label style="display:inline-flex; align-items:center; gap:2px; margin-right:8px; cursor:pointer; font-size:10px; color:var(--accent); font-family:monospace;">
@@ -7811,7 +7822,6 @@ function renderM23Rows() {
                         </label>`;
             }).join('');
             
-            // Hitung total hanya dari yang dicentang
             if (r.comboResults) {
                 r.selectedCombos.forEach(c => {
                     if (r.comboResults[c]) total += r.comboResults[c].length;
@@ -7822,16 +7832,27 @@ function renderM23Rows() {
         const totalTxt = r.generated && r.digits ? (total > 0 ? total.toLocaleString('id-ID') : '0') : '—';
         const canCopy = r.generated && total > 0;
         
+        // Buat Dropdown Pasar
+        let selectPasarHtml = `<select class="m23-pasar" data-idx="${r.idx}" data-field="pasar" style="width: 100%; padding: 6px 2px; font-size: 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-2); text-align: center; outline:none; color:var(--text);">`;
+        selectPasarHtml += `<option value="">— PASAR —</option>`;
+        PASAR_LIST.forEach(p => {
+            selectPasarHtml += `<option value="${p}" ${r.pasar === p ? 'selected' : ''}>${p}</option>`;
+        });
+        selectPasarHtml += `</select>`;
+
+        // Tentukan maxlength
+        const maxLen = (r.pasar === 'MACAU 5D') ? 5 : 4;
+        
         html += `<div class="m23-row" data-idx="${r.idx}" style="display: grid; grid-template-columns: 20px 55px 1fr 65px 40px 35px; gap: 4px; align-items: center; padding: 4px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 4px; font-size: 12px;">
             <div style="text-align:center; font-family: monospace; font-size: 11px; color: var(--muted); font-weight: 700;">${r.idx + 1}</div>
             
-            <input type="text" class="m23-digits" maxlength="4" inputmode="numeric" placeholder="1234" value="${esc(r.digits)}" data-idx="${r.idx}" data-field="digits" style="width: 100%; padding: 6px 2px; text-align: center; font-family: monospace; font-weight: 700; color: var(--accent); letter-spacing: 1px; font-size: 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-2);">
+            <input type="text" class="m23-digits" maxlength="${maxLen}" inputmode="numeric" placeholder="${maxLen === 5 ? '12345' : '1234'}" value="${esc(r.digits)}" data-idx="${r.idx}" data-field="digits" style="width: 100%; padding: 6px 2px; text-align: center; font-family: monospace; font-weight: 700; color: var(--accent); letter-spacing: 1px; font-size: 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-2);">
             
             <div class="m23-combos" style="padding: 0 2px; white-space: nowrap; overflow-x: auto;">
                 ${comboHtml}
             </div>
             
-            <input type="text" class="m23-pasar" placeholder="PASAR" value="${esc(r.pasar)}" data-idx="${r.idx}" data-field="pasar" style="width: 100%; padding: 6px 2px; font-size: 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-2); text-align: center;">
+            ${selectPasarHtml}
             
             <div class="m23-total" style="text-align:center; font-family: monospace; font-weight: 700; color: var(--success); font-size: 10px;">${totalTxt}</div>
             
@@ -7841,15 +7862,62 @@ function renderM23Rows() {
     
     container.innerHTML = html;
 
+    // Listener Dropdown Pasar
+    container.querySelectorAll('select.m23-pasar').forEach(function(el) {
+        el.addEventListener('change', function() {
+            const idx = parseInt(el.dataset.idx, 10);
+            const r = m23State.rows[idx];
+            r.pasar = el.value;
+            
+            // Ubah maxlength secara dinamis
+            const rowEl = el.closest('.m23-row');
+            const digitInput = rowEl ? rowEl.querySelector('.m23-digits') : null;
+            if (digitInput) {
+                const newMax = (r.pasar === 'MACAU 5D') ? 5 : 4;
+                digitInput.maxLength = newMax;
+                digitInput.placeholder = newMax === 5 ? '12345' : '1234';
+                
+                // Jika sebelumnya 5 digit lalu ganti ke 4D, potong jadi 4
+                if (digitInput.value.length > newMax) {
+                    digitInput.value = digitInput.value.slice(0, newMax);
+                    r.digits = digitInput.value;
+                    // Hitung ulang
+                    if (r.digits.length >= 3) {
+                        const base = getM23BaseUniverse();
+                        const combos = get3DigitCombos(r.digits);
+                        r.comboResults = {};
+                        combos.forEach(combo => {
+                            r.comboResults[combo] = generate4DForCombo(combo, base);
+                        });
+                        r.generated = true;
+                        r.selectedCombos = [...combos];
+                        r.pages = {}; 
+                    } else {
+                        r.comboResults = {};
+                        r.generated = false;
+                        r.selectedCombos = [];
+                    }
+                }
+            }
+
+            if (window._m23RenderTimer) clearTimeout(window._m23RenderTimer);
+            window._m23RenderTimer = setTimeout(() => {
+                renderM23Rows();
+                renderM23Results();
+            }, 300);
+        });
+    });
+
     // Listener Input Angka
     container.querySelectorAll('input.m23-digits').forEach(function(el) {
         el.addEventListener('input', function() {
             const idx = parseInt(el.dataset.idx, 10);
             const r = m23State.rows[idx];
-            el.value = onlyDigits(el.value).slice(0, 4);
+            const maxLen = (r.pasar === 'MACAU 5D') ? 5 : 4;
+            el.value = onlyDigits(el.value).slice(0, maxLen);
             r.digits = el.value;
             
-            if (r.digits.length === 4) {
+            if (r.digits.length >= 3) {
                 const base = getM23BaseUniverse();
                 const combos = get3DigitCombos(r.digits);
                 r.comboResults = {};
@@ -7857,7 +7925,7 @@ function renderM23Rows() {
                     r.comboResults[combo] = generate4DForCombo(combo, base);
                 });
                 r.generated = true;
-                r.selectedCombos = [...combos]; // Default ceklis semua
+                r.selectedCombos = [...combos];
                 r.pages = {}; 
             } else {
                 r.comboResults = {};
@@ -7867,19 +7935,9 @@ function renderM23Rows() {
 
             if (window._m23RenderTimer) clearTimeout(window._m23RenderTimer);
             window._m23RenderTimer = setTimeout(() => {
-                renderM23Rows(); // Render ulang baris agar checkbox muncul
+                renderM23Rows(); 
                 renderM23Results();
             }, 400);
-        });
-    });
-
-    // Listener Input Pasar
-    container.querySelectorAll('input.m23-pasar').forEach(function(el) {
-        el.addEventListener('input', function() {
-            const idx = parseInt(el.dataset.idx, 10);
-            m23State.rows[idx].pasar = el.value;
-            if (window._m23RenderTimer) clearTimeout(window._m23RenderTimer);
-            window._m23RenderTimer = setTimeout(renderM23Results, 400);
         });
     });
 
@@ -7897,7 +7955,6 @@ function renderM23Rows() {
                 r.selectedCombos = r.selectedCombos.filter(c => c !== combo);
             }
             
-            // Update Total di Baris
             let total = 0;
             r.selectedCombos.forEach(c => {
                 if (r.comboResults[c]) total += r.comboResults[c].length;
@@ -7931,7 +7988,6 @@ function renderM23Results() {
         const combos = get3DigitCombos(r.digits);
         
         combos.forEach(function(combo) {
-            // LEWATI JIKA TIDAK DICENTANG
             if (!r.selectedCombos || !r.selectedCombos.includes(combo)) return; 
 
             const results = r.comboResults[combo] || [];
@@ -7939,7 +7995,6 @@ function renderM23Results() {
             
             results.forEach(n => masterSet.add(n));
             
-            // ... (Sisa kode render ke bawah SAMA SEPERTI SEBELUMNYA) ...
             const tp = Math.ceil(results.length / PER_PAGE);
             if (r.pages[combo] === undefined) r.pages[combo] = 0;
             if (r.pages[combo] >= tp) r.pages[combo] = tp - 1;
@@ -7996,21 +8051,20 @@ function renderM23Results() {
         </div>` + html;
     } else {
         if (!html) {
-            html = '<div class="card"><div class="empty">Belum ada hasil. Ketik 4 angka di tabel atas.</div></div>';
+            html = '<div class="card"><div class="empty">Belum ada hasil. Ketik angka & pilih pasar di tabel atas.</div></div>';
         }
     }
     
     c.innerHTML = html;
 }
 
-// Paging & Copy Spesifik per Kombinasi
+// FUNGSI COPY & PAGING
 window.m23PageCombo = function(idx, combo, d) {
     const r = m23State.rows[idx]; if (!r || !r.comboResults[combo]) return;
     const tp = Math.ceil(r.comboResults[combo].length / PER_PAGE);
     const nx = r.pages[combo] + d;
     if (nx < 0 || nx >= tp) return;
-    r.pages[combo] = nx; 
-    renderM23Results();
+    r.pages[combo] = nx; renderM23Results();
 };
 
 window.m23CopyComboPage = function(idx, combo) {
@@ -8036,139 +8090,63 @@ window.m23ExportCombo = function(idx, combo) {
     toast('Diexport', 'success');
 };
 
-// Fitur Copy All untuk Tombol di Tabel Atas
 window.m23CopyRow = function(idx) {
     const r = m23State.rows[idx];
     if (!r || !r.comboResults || !r.selectedCombos || r.selectedCombos.length === 0) { 
-        toast('Pilih minimal 1 kombinasi 3D', 'error'); 
-        return; 
+        toast('Pilih minimal 1 kombinasi 3D', 'error'); return; 
     }
-    
     const masterSet = new Set();
     r.selectedCombos.forEach(combo => {
-        if (r.comboResults[combo]) {
-            r.comboResults[combo].forEach(n => masterSet.add(n));
-        }
+        if (r.comboResults[combo]) r.comboResults[combo].forEach(n => masterSet.add(n));
     });
-    
     copyTextToClipboard(Array.from(masterSet).sort().join('*') + '*');
 };
 
-// ═══════════════════════════════════════════════════════════════════════
-// PERBAIKAN FILTER (REAL-TIME & AUTO-CHECK)
-// ═══════════════════════════════════════════════════════════════════════
+window.m23PageMaster = function(d) {
+    const tp = Math.ceil(m23MasterState.items.length / m23MasterState.size);
+    const nx = m23MasterState.page + d;
+    if (nx < 0 || nx >= tp) return;
+    m23MasterState.page = nx; renderM23Results();
+};
 
-function debounceM23Filter() {
-    if (window._m23DebounceTimer) clearTimeout(window._m23DebounceTimer);
-    window._m23DebounceTimer = setTimeout(function() {
-        invalidateM23BaseCache(); // Hapus cache agar hasil langsung berkurang
-        recalcM23All();
-    }, 400); // Beri jeda 0.4 detik setelah berhenti mengetik
-}
+window.m23CopyMasterPage = function() {
+    if (!m23MasterState.items || m23MasterState.items.length === 0) return toast('Tidak ada data', 'error');
+    const st = m23MasterState.page * m23MasterState.size;
+    copyTextToClipboard(m23MasterState.items.slice(st, st + m23MasterState.size).join('*') + '*');
+};
 
-// 1. Otomatis Centang & Real-time saat mengetik CB
-if ($('m23CB')) {
-    $('m23CB').addEventListener('input', function() {
-        if (this.value.trim() !== '' && $('m23UseCB')) {
-            $('m23UseCB').checked = true;
-            $('m23CB').disabled = false;
-            if ($('m23CBMode')) $('m23CBMode').disabled = false;
-        }
-        debounceM23Filter();
-    });
-}
+window.m23CopyMasterAll = function() {
+    if (!m23MasterState.items || m23MasterState.items.length === 0) return toast('Tidak ada data', 'error');
+    copyTextToClipboard(m23MasterState.items.join('*') + '*');
+};
 
-// 2. Event untuk Pilihan CB Mode
-if ($('m23CBMode')) {
-    $('m23CBMode').addEventListener('change', debounceM23Filter);
-}
+window.m23ExportMaster = function() {
+    if (!m23MasterState.items || m23MasterState.items.length === 0) return toast('Tidak ada data', 'error');
+    const b = new Blob([m23MasterState.items.join('*') + '*'], { type: 'text/plain;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(b);
+    a.download = 'sahard-m23-master.txt';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast('Diexport', 'success');
+};
 
-// 3. Event untuk Dropdown Grup
-['m23Grup1', 'm23Grup2', 'm23Grup3'].forEach(function(id) {
-    if ($(id)) {
-        $(id).addEventListener('change', function() {
-            if (this.value !== '' && $('m23UseGrup')) {
-                $('m23UseGrup').checked = true;
-                $('m23Grup1').disabled = false;
-                $('m23Grup2').disabled = false;
-                $('m23Grup3').disabled = false;
-            }
-            _refreshM23Preview();
-            debounceM23Filter();
-        });
-    }
-});
-
-// 4. Event untuk Ceklis 1D Depan
-if ($('m231DDepan')) {
-    $('m231DDepan').addEventListener('change', debounceM23Filter);
-}
-
-// 5. Event untuk Checkbox Induk (UseGrup, UseCB, Use1D)
-if ($('m23UseGrup')) {
-    $('m23UseGrup').addEventListener('change', function() {
-        const isChecked = this.checked;
-        ['m23Grup1', 'm23Grup2', 'm23Grup3'].forEach(id => { if ($(id)) $(id).disabled = !isChecked; });
-        debounceM23Filter();
-    });
-}
-
-if ($('m23UseCB')) {
-    $('m23UseCB').addEventListener('change', function() {
-        const isChecked = this.checked;
-        ['m23CB', 'm23CBMode'].forEach(id => { if ($(id)) $(id).disabled = !isChecked; });
-        debounceM23Filter();
-    });
-}
-
-if ($('m23Use1D')) {
-    $('m23Use1D').addEventListener('change', function() {
-        const isChecked = this.checked;
-        if ($('m231DDepan')) {
-            $('m231DDepan').querySelectorAll('input').forEach(b => b.disabled = !isChecked);
-        }
-        debounceM23Filter();
-    });
-}
-
-// Inisialisasi awal agar status disabled sesuai dengan checkbox
-setTimeout(function() {
-    if ($('m23UseCB') && !$('m23UseCB').checked) {
-        if ($('m23CB')) $('m23CB').disabled = true;
-        if ($('m23CBMode')) $('m23CBMode').disabled = true;
-    }
-    if ($('m23UseGrup') && !$('m23UseGrup').checked) {
-        ['m23Grup1', 'm23Grup2', 'm23Grup3'].forEach(id => { if ($(id)) $(id).disabled = true; });
-    }
-    if ($('m23Use1D') && !$('m23Use1D').checked) {
-        if ($('m231DDepan')) $('m231DDepan').querySelectorAll('input').forEach(b => b.disabled = true);
-    }
-}, 500);
-
-// 1. Ganti fungsi recalcM23All dengan versi anti-lag ini
+// FUNGSI GENERATE & FILTER REALTIME
 function recalcM23All() {
-    // Pengaman: Jika sistem masih menghitung, cegah klik beruntun
     if (window._m23Processing) return;
     window._m23Processing = true;
-
+    
     const btn = $('m23GenerateAllBtn');
-    const oldBtnText = btn ? btn.textContent : '';
-    if (btn) {
-        btn.textContent = '⏳ Menghitung...';
-        btn.disabled = true;
-    }
+    const oldTxt = btn ? btn.textContent : '';
+    if (btn) { btn.textContent = '⏳ Menghitung...'; btn.disabled = true; }
 
-    // Beri jeda sedikit agar UI bisa menampilkan status "Menghitung"
-    setTimeout(function() {
-        invalidateM23BaseCache(); // WAJIB: Bersihkan memori filter lama
+    setTimeout(() => {
+        invalidateM23BaseCache(); 
         const base = getM23BaseUniverse();
 
         m23State.rows.forEach(function(r) {
-            if (!r.digits || r.digits.length !== 4) {
-                r.comboResults = {};
-                r.generated = false;
-                r.pages = {};
-                return;
+            if (!r.digits || r.digits.length < 3) {
+                r.comboResults = {}; r.generated = false; r.pages = {}; return;
             }
             const combos = get3DigitCombos(r.digits);
             r.comboResults = {};
@@ -8176,20 +8154,42 @@ function recalcM23All() {
                 r.comboResults[combo] = generate4DForCombo(combo, base);
             });
             r.generated = true;
+            if (!r.selectedCombos || r.selectedCombos.length === 0) r.selectedCombos = [...combos];
         });
 
         renderM23Rows();
         renderM23Results();
 
-        if (btn) {
-            btn.textContent = oldBtnText;
-            btn.disabled = false;
-        }
+        if (btn) { btn.textContent = oldTxt; btn.disabled = false; }
         window._m23Processing = false;
     }, 100);
 }
 
-// 2. Ganti event listener tombol Generate
+function debounceM23Filter() {
+    if (window._m23Debounce) clearTimeout(window._m23Debounce);
+    window._m23Debounce = setTimeout(recalcM23All, 400);
+}
+
+['m23CB', 'm23CBMode', 'm231DDepan'].forEach(id => {
+    if ($(id)) $(id).addEventListener('change', debounceM23Filter);
+});
+if ($('m23CB')) $('m23CB').addEventListener('input', function() {
+    if (this.value.trim() !== '' && $('m23UseCB')) $('m23UseCB').checked = true;
+    debounceM23Filter();
+});
+
+['m23Grup1', 'm23Grup2', 'm23Grup3'].forEach(id => {
+    if ($(id)) $(id).addEventListener('change', function() {
+        if (this.value !== '' && $('m23UseGrup')) $('m23UseGrup').checked = true;
+        _refreshM23Preview();
+        debounceM23Filter();
+    });
+});
+
+['m23UseGrup', 'm23UseCB', 'm23Use1D'].forEach(id => {
+    if ($(id)) $(id).addEventListener('change', debounceM23Filter);
+});
+
 if ($('m23GenerateAllBtn')) {
     $('m23GenerateAllBtn').addEventListener('click', function() {
         recalcM23All();
@@ -8197,71 +8197,18 @@ if ($('m23GenerateAllBtn')) {
     });
 }
 
-// FIX: Tombol Generate & Kosongkan yang sebelumnya mati
-if ($('m23GenerateAllBtn')) {
-    $('m23GenerateAllBtn').addEventListener('click', function() {
-        recalcM23All();
-        toast('Semua baris berhasil di-generate', 'success');
-    });
-}
-
 if ($('m23ClearAllBtn')) {
     $('m23ClearAllBtn').addEventListener('click', function() {
         if (!confirm('Kosongkan 65 baris?')) return;
         m23State.rows.forEach(function(r) {
-            r.digits = ''; r.pasar = ''; r.comboResults = {}; r.pages = {}; r.generated = false;
+            r.digits = ''; r.pasar = ''; r.comboResults = {}; r.pages = {}; r.generated = false; r.selectedCombos = [];
         });
-        m23MasterState.items = [];
-        m23MasterState.page = 0;
+        m23MasterState.items = []; m23MasterState.page = 0;
         invalidateM23BaseCache();
-        renderM23Rows();
-        renderM23Results();
+        renderM23Rows(); renderM23Results();
         toast('Semua baris dikosongkan', 'success');
     });
 }
-
-/* ═══════════════════════════════════════════════════════════════════════
-   FUNGSI YANG HILANG: PANEL TOTAL KESELURUHAN (MASTER)
-   ═══════════════════════════════════════════════════════════════════════ */
-
-window.m23PageMaster = function(d) {
-    const tp = Math.ceil(m23MasterState.items.length / m23MasterState.size);
-    const nx = m23MasterState.page + d;
-    if (nx < 0 || nx >= tp) return;
-    m23MasterState.page = nx;
-    renderM23Results();
-};
-
-window.m23CopyMasterPage = function() {
-    if (!m23MasterState.items || m23MasterState.items.length === 0) {
-        toast('Tidak ada data', 'error'); 
-        return;
-    }
-    const st = m23MasterState.page * m23MasterState.size;
-    copyTextToClipboard(m23MasterState.items.slice(st, st + m23MasterState.size).join('*') + '*');
-};
-
-window.m23CopyMasterAll = function() {
-    if (!m23MasterState.items || m23MasterState.items.length === 0) {
-        toast('Tidak ada data', 'error'); 
-        return;
-    }
-    copyTextToClipboard(m23MasterState.items.join('*') + '*');
-};
-
-window.m23ExportMaster = function() {
-    if (!m23MasterState.items || m23MasterState.items.length === 0) {
-        toast('Tidak ada data', 'error'); 
-        return;
-    }
-    const b = new Blob([m23MasterState.items.join('*') + '*'], { type: 'text/plain;charset=utf-8' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(b);
-    a.download = 'sahard-m23-master.txt';
-    a.click();
-    URL.revokeObjectURL(a.href);
-    toast('Berhasil diexport', 'success');
-};
 
  /* ═══════════════════════════════════════════════════════════════════════
    BLOK 66: USER MANAGEMENT — EVENT LISTENERS
