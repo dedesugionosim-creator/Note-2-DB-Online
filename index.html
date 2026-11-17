@@ -5173,27 +5173,6 @@ if ($('atGenerateBtn')) {
     });
 }
 
-// Tambahkan tombol Kosongkan jika belum ada di HTML
-if ($('atGenerateBtn') && !$('atClearAllBtn')) {
-    const btnClear = document.createElement('button');
-    btnClear.id = 'atClearAllBtn';
-    btnClear.className = 'btn-warn';
-    btnClear.style.marginTop = '10px';
-    btnClear.textContent = '🗑 Kosongkan 65 Baris';
-    btnClear.addEventListener('click', function() {
-        if (!confirm('Kosongkan 65 baris Angka Tarung?')) return;
-        atState.rows.forEach(r => {
-            r.digits = ''; r.pasar = ''; r.comboResults = {}; r.pages = {}; r.generated = false;
-        });
-        window._atMasterPage = 0;
-        invalidateATBaseCache();
-        renderAT65Rows();
-        renderATResults();
-        toast('Semua baris dikosongkan', 'success');
-    });
-    $('atGenerateBtn').parentNode.appendChild(btnClear);
-}
-
 	/* ═══════════════════════════════════════════════════════════════════════
 	   BLOK 47: CB BBFS GENERATOR — REVISED (CB opsional)
 	   ═══════════════════════════════════════════════════════════════════════ */
