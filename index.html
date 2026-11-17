@@ -3374,19 +3374,11 @@ window.switchSubTab = function(btn) {
 
         // ⬇️ TAMBAHKAN BLOK INI ⬇️
         // Render ulang baris jika tab AK dibuka
-        if (targetId === 'subpanel-angkaTarung' && typeof renderAT55Rows === 'function') {
-            renderAT55Rows();
-        }
-        if (targetId === 'subpanel-mengandung23' && typeof renderM23Rows === 'function') {
-            renderM23Rows();
-        }
-        if (targetId === 'subpanel-manual' && typeof renderManual55Rows === 'function') {
-            renderManual55Rows();
-        }
-        if (targetId === 'subpanel-bbfs' && typeof renderBBFS55Rows === 'function') {
-            renderBBFS55Rows();
-        }
-        // ⬆️ SAMPAI SINI ⬆️
+        if (targetId === 'subpanel-angkaTarung' && typeof renderAT55Rows === 'function') renderAT55Rows();
+        if (targetId === 'subpanel-mengandung23' && typeof renderM23Rows === 'function') renderM23Rows();
+        if (targetId === 'subpanel-manual' && typeof renderManual55Rows === 'function') renderManual55Rows();
+        if (targetId === 'subpanel-bbfs' && typeof renderBBFS55Rows === 'function') renderBBFS55Rows();
+        if (targetId === 'subpanel-c33' && typeof renderC33Rows === 'function') renderC33Rows(); // ⬅️ TAMBAHKAN INI
     } else {
         alert("Sistem Error: Panel " + targetId + " tidak ditemukan di HTML.");
     }
