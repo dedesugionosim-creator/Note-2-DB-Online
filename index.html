@@ -6974,7 +6974,7 @@ function renderC33Results() {
         const pd = c33MasterState.items.slice(st, st + c33MasterState.size);
 
         html += `<div class="card" style="border-color:var(--success); background:rgba(34,197,94,0.05); margin-bottom:14px;">
-            <h3 style="color:var(--success); margin-bottom:8px;">🎯 TOTAL KESELURUHAN DARI 33 KOLOM (UNIK)</h3>
+            <h3 style="color:var(--success); margin-bottom:8px;">🎯 TOTAL KESELURUHAN GABUNGAN (UNIK)</h3>
             <div class="page-info">Halaman ${c33MasterState.page + 1} / ${tp} • ${pd.length} di halaman ini • Total ${c33MasterState.items.length.toLocaleString('id-ID')} angka unik</div>
             <div class="page-content" style="max-height:200px; border-color:var(--success);">${pd.join('*')}${pd.length ? '*' : ''}</div>
             <div class="page-nav">
@@ -6990,37 +6990,34 @@ function renderC33Results() {
         </div>`;
     }
 
-    // 3. TAMPILKAN HASIL PER KOLOM
+    // 3. TAMPILKAN HASIL PER KOLOM (TANPA PAGINASI, DIGABUNG SEPERTI AK)
     c33State.rows.forEach(function(r) {
         if (!r.generated || !r.digits || r.results.length === 0) return;
-        const tp = Math.ceil(r.results.length / PER_PAGE);
-        if (r.page >= tp) r.page = tp - 1;
-        if (r.page < 0) r.page = 0;
-        const st = r.page * PER_PAGE;
-        const pd = r.results.slice(st, st + PER_PAGE);
+        
+        // Batasi tampilan di layar agar HP tidak freeze (misal maksimal 3000 angka)
+        const displayLimit = 3000; 
+        const resultsToShow = r.results.slice(0, displayLimit);
+        const isTruncated = r.results.length > displayLimit;
 
         let cbHtml = '';
         if (showCB) {
             cbHtml = '<div style="margin-top:8px;"><div style="font-size:10.5px;color:var(--muted);margin-bottom:4px;">'
-                + 'Cara Baca (5 pertama):</div>' + renderCaraBacaGrid(pd, 5) + '</div>';
+                + 'Cara Baca (5 pertama):</div>' + renderCaraBacaGrid(resultsToShow, 5) + '</div>';
         }
 
-        html += '<div class="c33-result-block" id="c33-block-' + r.idx + '">'
-            + '<div class="c33-res-header">Hasil dari 3 Angka <span style="color:var(--warn);">' + esc(r.digits) + '</span>'
-            + (r.pasar ? ' <span class="pasar-tag">— ' + esc(r.pasar) + '</span>' : '') + '</div>'
-            + '<div class="page-info">Halaman ' + (r.page + 1) + ' / ' + tp
-            + ' • ' + pd.length + ' di halaman ini • Total ' + r.results.length.toLocaleString('id-ID') + '</div>'
-            + '<div class="page-content" style="max-height:240px;">' + pd.join('*') + (pd.length ? '*' : '') + '</div>'
-            + '<div class="page-nav">'
-            + '<button ' + (r.page === 0 ? 'disabled' : '') + ' onclick="c33Page(' + r.idx + ',-1)">◀ Prev</button>'
-            + '<span>' + (r.page + 1) + ' / ' + tp + '</span>'
-            + '<button ' + (r.page === tp - 1 ? 'disabled' : '') + ' onclick="c33Page(' + r.idx + ',1)">Next ▶</button>'
-            + '</div>'
-            + '<div class="page-actions">'
-            + '<button onclick="c33CopyPage(' + r.idx + ')">📋 Copy Hal</button>'
-            + '<button onclick="c33CopyAll(' + r.idx + ')">📋 Copy Semua</button>'
-            + '<button onclick="c33Export(' + r.idx + ')">⬇ TXT</button>'
-            + '</div>' + cbHtml + '</div>';
+        html += `<div class="card" style="border-left: 4px solid var(--warn); margin-bottom: 12px; padding: 12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:6px;">
+                <h4 style="color:var(--accent); margin:0;">Hasil Mengandung: <span style="color:var(--warn); font-family:monospace; font-size:16px;">${esc(r.digits)}</span> ${r.pasar ? `<span style="font-size:12px; color:var(--muted);">— ${esc(r.pasar)}</span>` : ''}</h4>
+                <span style="font-size:12px; color:var(--success); font-weight:bold; background:rgba(34,197,94,0.1); padding:2px 8px; border-radius:4px;">${r.results.length.toLocaleString('id-ID')} angka</span>
+            </div>
+            <div class="page-content" style="max-height:220px; margin:0 0 10px 0; font-size:12px;">${resultsToShow.join('*')}*</div>
+            ${isTruncated ? `<div style="font-size:11px; color:var(--danger); margin-bottom:8px;">*Layar hanya menampilkan ${displayLimit} angka pertama. Klik Copy untuk semua.</div>` : ''}
+            <div class="page-actions" style="margin-top:0;">
+                <button onclick="c33CopyAll(${r.idx})">📋 Copy Hasil</button>
+                <button onclick="c33Export(${r.idx})">⬇ Export TXT</button>
+            </div>
+            ${cbHtml}
+        </div>`;
     });
 
     if (!html) {
