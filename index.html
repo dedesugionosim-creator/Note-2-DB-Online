@@ -1674,20 +1674,19 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
             </div>
         </div>
 
-					<!-- MODE INPUT 3 ANGKA MENGANDUNG — AUTO-SYNC DARI SUBPANEL "MENGANDUNG 2/3 (55)" -->
-					<div class="field" style="background:var(--card-2); padding:12px; border-radius:8px; border:1px solid var(--border); margin-top:16px;">
-						<label style="color:var(--text); margin-bottom:8px; display:block; font-weight:bold; font-size:14px;">
-							□ Mode Input 3 Angka Mengandung (Auto-Sync dari "Mengandung 2/3 (55)")
-						</label>
-						<p style="font-size:11.5px; color:var(--muted); margin-bottom:12px; line-height:1.5;">
-							Baris di bawah ini <b>terisi otomatis</b> dari menu <b>"Mengandung 2/3 (55)"</b>.
-							Setiap perubahan di sana langsung tercermin di sini. Hanya baris yang terisi yang ditampilkan.
-						</p>
-						
-						<div class="m23-container" id="at65RowsContainer" style="max-height: 400px; overflow-y: auto; padding: 6px; background: var(--card-2); border: 1px solid var(--border); border-radius: var(--radius-md);">
-							<!-- Auto-render dari m23State -->
-						</div>
-					</div>
+                <!-- MODE INPUT MENGANDUNG 3 ANGKA (65 BARIS DI INPUT MANUAL) -->
+			<div class="field" style="background:var(--card-2); padding:12px; border-radius:8px; border:1px solid var(--border); margin-top:16px;">
+				<label style="color:var(--text); margin-bottom:8px; display:block; font-weight:bold; font-size:14px;">
+					□ Mode Input 3 Angka Mengandung (65 Baris)
+				</label>
+				<p style="font-size:11.5px; color:var(--muted); margin-bottom:12px; line-height:1.5;">
+					Ketik <b>4 angka</b> per baris. Sistem akan menyaring kombinasi 2D Manual yang mengandung 3 angka tersebut.
+				</p>
+				
+				<div class="m23-container" id="manual65RowsContainer" style="max-height: 400px; overflow-y: auto; padding: 6px; background: var(--card-2); border: 1px solid var(--border); border-radius: var(--radius-md);">
+					<!-- 65 Baris akan di-generate oleh JavaScript -->
+				</div>
+			</div>
 
         <!-- FILTER 1D DEPAN -->
         <div class="field" style="margin-top:16px;">
