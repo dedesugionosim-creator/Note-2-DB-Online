@@ -7417,13 +7417,14 @@ if ($('c33ShowCaraBaca')) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 64: GABUNG 3 GRUP — REVISI ANTI-FREEZE (BISA GENERATE BERKALI-KALI)
+   BLOK 64: GABUNG 3 GRUP — FINAL REVISION (BEBAS MACET & RESPONSIF)
    ═══════════════════════════════════════════════════════════════════════ */
 
 function gabung3GetSets() {
-    const g1 = $('gabungGrup1').value;
-    const g2 = $('gabungGrup2').value;
-    const g3 = $('gabungGrup3').value;
+    const g1 = $('gabungGrup1') ? $('gabungGrup1').value : '';
+    const g2 = $('gabungGrup2') ? $('gabungGrup2').value : '';
+    const g3 = $('gabungGrup3') ? $('gabungGrup3').value : '';
+    
     return {
         g1: g1, g2: g2, g3: g3,
         g1Auto: !g1,
@@ -7457,13 +7458,7 @@ function gabung3Compute() {
     return { combos: results, sets };
 }
 
-if ($('gabungGrup1')) {
-    ['gabungGrup1', 'gabungGrup2', 'gabungGrup3', 'gabungPermutasi'].forEach(function(id) {
-        const el = $(id); 
-        if (el) el.addEventListener('change', updateGabung3Info);
-    });
-}
-
+// FUNGSI UPDATE INFO (TAMPILAN PREVIEW & TOTAL)
 function updateGabung3Info() {
     const info = $('gabungInfo');
     if (!info) return;
@@ -7506,10 +7501,16 @@ function updateGabung3Info() {
         + ' • ' + Math.ceil(totalAfterPerm / PER_PAGE) + ' halaman';
 }
 
-// PROSES GENERATE DENGAN PENGAMAN ANTI-FREEZE
+// DAFTARKAN EVENT LISTENER DROPDOWN (REAL-TIME INFO)
+['gabungGrup1', 'gabungGrup2', 'gabungGrup3', 'gabungPermutasi'].forEach(function(id) {
+    if ($(id)) {
+        $(id).addEventListener('change', updateGabung3Info);
+    }
+});
+
+// TOMBOL GENERATE
 if ($('gabungGenerateBtn')) {
     $('gabungGenerateBtn').addEventListener('click', function() {
-        // 1. Cegah klik beruntun saat sistem masih menghitung
         if (window._gabungProcessing) return;
         
         const sets = gabung3GetSets();
@@ -7522,49 +7523,48 @@ if ($('gabungGenerateBtn')) {
 
         const permCheck = $('gabungPermutasi') && $('gabungPermutasi').checked;
         
-        // 2. Kunci tombol dan tampilkan status proses
         window._gabungProcessing = true;
         const btn = $('gabungGenerateBtn');
-        const oldTxt = btn.textContent;
-        btn.textContent = '⏳ Menghitung...';
-        btn.disabled = true;
+        const oldTxt = btn ? btn.textContent : '⚡ Gabung 3 Grup';
+        if (btn) {
+            btn.textContent = '⏳ Menghitung...';
+            btn.disabled = true;
+        }
 
-        // 3. Beri jeda agar UI bisa update teks tombol, baru hitung beratnya
         setTimeout(function() {
-            let results = comp.combos;
-            if (permCheck) {
-                const exp = new Set();
-                comp.combos.forEach(function(c) { 
-                    permutasi4DariNomor(c).forEach(function(p) { exp.add(p); }); 
-                });
-                results = Array.from(exp).sort();
-            }
+            try {
+                let results = comp.combos;
+                if (permCheck) {
+                    const exp = new Set();
+                    comp.combos.forEach(function(c) { 
+                        permutasi4DariNomor(c).forEach(function(p) { exp.add(p); }); 
+                    });
+                    results = Array.from(exp).sort();
+                }
 
-            if (results.length > 5000) {
-                // Jika hasil sangat banyak, kita bypass confirm karena sudah diklik generate
-                // (Opsional: Anda bisa hapus baris if ini jika tidak ingin konfirmasi)
+                pageState.gabungGrup.pages = paginateArray(results);
+                pageState.gabungGrup.current = 0;
+                pageState.gabungGrup.meta = 'G1:' + (sets.g1 || 'AUTO')
+                    + (sets.g2 ? ' G2:' + sets.g2 : '') + ' G3:' + (sets.g3 || 'AUTO')
+                    + (permCheck ? ' • permutasi' : '');
+                pageState.gabungGrup._breakdown = '';
+                
+                const breakdown = buildGabung3Breakdown(sets, results.length, permCheck);
+                renderPagination('gabungResult', 'gabungGrup', 'Hasil', breakdown);
+                
+                toast('Berhasil: ' + results.length.toLocaleString('id-ID') + ' kombinasi', 'success');
+            } catch (err) {
+                console.error(err);
+                toast('Terjadi kesalahan sistem', 'error');
+            } finally {
+                // PASTI MEMBUKA KUNCI TOMBOL
+                if (btn) {
+                    btn.textContent = oldTxt;
+                    btn.disabled = false;
+                }
+                window._gabungProcessing = false;
             }
-
-            // 4. Bersihkan state lama dan masukkan hasil baru
-            pageState.gabungGrup.pages = paginateArray(results);
-            pageState.gabungGrup.current = 0;
-            pageState.gabungGrup.meta = 'G1:' + (sets.g1 || 'AUTO')
-                + (sets.g2 ? ' G2:' + sets.g2 : '') + ' G3:' + (sets.g3 || 'AUTO')
-                + (permCheck ? ' • permutasi' : '');
-            pageState.gabungGrup._breakdown = '';
-            
-            const breakdown = buildGabung3Breakdown(sets, results.length, permCheck);
-            
-            // Render hasil
-            renderPagination('gabungResult', 'gabungGrup', 'Hasil', breakdown);
-            
-            // 5. Buka kembali kunci tombol
-            btn.textContent = oldTxt;
-            btn.disabled = false;
-            window._gabungProcessing = false;
-            
-            toast('Berhasil: ' + results.length.toLocaleString('id-ID'), 'success');
-        }, 100); // Jeda 100ms
+        }, 150);
     });
 }
 
@@ -7581,6 +7581,9 @@ function buildGabung3Breakdown(sets, total, perm) {
         + (perm ? ' (permutasi aktif)' : '') + ' ⬇</div>'
         + '<div class="rb-note">Filter konsisten: digit ke-2 dari Depan = digit ke-1 Tengah, dst.</div></div>';
 }
+
+// Jalankan info saat aplikasi dimuat
+setTimeout(updateGabung3Info, 1000);
 
 /* ═══════════════════════════════════════════════════════════════════════
    BLOK 65: POPULATE DROPDOWN BARU + INIT 33 ROWS
