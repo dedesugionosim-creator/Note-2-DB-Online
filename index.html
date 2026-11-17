@@ -7671,52 +7671,6 @@ if ($('m23Use1D')) $('m23Use1D').addEventListener('change', function() {
     recalcM23All();
 });
 
-/* ─── Filter Grup (3 dropdown) ─── */
-['m23Grup1', 'm23Grup2', 'm23Grup3'].forEach(function(id) {
-    const el = $(id);
-    if (el) el.addEventListener('change', recalcM23All);
-});
-
-/* ─── Filter CB (input + mode) ─── */
-if ($('m23CB')) $('m23CB').addEventListener('input', recalcM23All);
-if ($('m23CBMode')) $('m23CBMode').addEventListener('change', recalcM23All);
-
-/* ─── Filter Angka Depan (1D checkbox) ─── */
-if ($('m231DDepan')) $('m231DDepan').addEventListener('change', recalcM23All);
-
-/* ─── Tombol Generate Semua ─── */
-if ($('m23GenerateAllBtn')) {
-    $('m23GenerateAllBtn').addEventListener('click', function() {
-        recalcM23All();
-        let totalActive = 0, totalResults = 0;
-        m23State.rows.forEach(function(r) {
-            if (r.generated && r.results.length > 0) {
-                totalActive++;
-                totalResults += r.results.length;
-            }
-        });
-        if (totalActive === 0) {
-            toast('Tidak ada baris valid (isi 4 angka)', 'error');
-        } else {
-            toast('Generated ' + totalActive + ' baris • ' + totalResults.toLocaleString('id-ID') + ' total hasil', 'success');
-        }
-    });
-}
-
-/* ─── Tombol Kosongkan 65 Baris ─── */
-if ($('m23ClearAllBtn')) {
-    $('m23ClearAllBtn').addEventListener('click', function() {
-        if (!confirm('Kosongkan semua baris?')) return;
-        m23State.rows.forEach(function(r) {
-            r.digits = ''; r.pasar = ''; r.results = []; r.page = 0; r.generated = false;
-        });
-        m23MasterState.items = [];
-        m23MasterState.page = 0;
-        renderM23Rows();
-        renderM23Results();
-        toast('Semua baris dikosongkan', 'success');
-    });
-}
  /* ═══════════════════════════════════════════════════════════════════════
    BLOK 66: USER MANAGEMENT — EVENT LISTENERS
    ═══════════════════════════════════════════════════════════════════════ */
