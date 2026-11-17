@@ -8083,24 +8083,56 @@ setTimeout(function() {
     }
 }, 500);
 
+// 1. Ganti fungsi recalcM23All dengan versi anti-lag ini
 function recalcM23All() {
-    const base = getM23BaseUniverse();
-    m23State.rows.forEach(function(r) {
-        if (!r.digits || r.digits.length !== 4) {
+    // Pengaman: Jika sistem masih menghitung, cegah klik beruntun
+    if (window._m23Processing) return;
+    window._m23Processing = true;
+
+    const btn = $('m23GenerateAllBtn');
+    const oldBtnText = btn ? btn.textContent : '';
+    if (btn) {
+        btn.textContent = '⏳ Menghitung...';
+        btn.disabled = true;
+    }
+
+    // Beri jeda sedikit agar UI bisa menampilkan status "Menghitung"
+    setTimeout(function() {
+        invalidateM23BaseCache(); // WAJIB: Bersihkan memori filter lama
+        const base = getM23BaseUniverse();
+
+        m23State.rows.forEach(function(r) {
+            if (!r.digits || r.digits.length !== 4) {
+                r.comboResults = {};
+                r.generated = false;
+                r.pages = {};
+                return;
+            }
+            const combos = get3DigitCombos(r.digits);
             r.comboResults = {};
-            r.generated = false;
-            r.pages = {};
-            return;
-        }
-        const combos = get3DigitCombos(r.digits);
-        r.comboResults = {};
-        combos.forEach(combo => {
-            r.comboResults[combo] = generate4DForCombo(combo, base);
+            combos.forEach(combo => {
+                r.comboResults[combo] = generate4DForCombo(combo, base);
+            });
+            r.generated = true;
         });
-        r.generated = true;
+
+        renderM23Rows();
+        renderM23Results();
+
+        if (btn) {
+            btn.textContent = oldBtnText;
+            btn.disabled = false;
+        }
+        window._m23Processing = false;
+    }, 100);
+}
+
+// 2. Ganti event listener tombol Generate
+if ($('m23GenerateAllBtn')) {
+    $('m23GenerateAllBtn').addEventListener('click', function() {
+        recalcM23All();
+        toast('Data berhasil di-generate', 'success');
     });
-    renderM23Rows();
-    renderM23Results();
 }
 
 // FIX: Tombol Generate & Kosongkan yang sebelumnya mati
