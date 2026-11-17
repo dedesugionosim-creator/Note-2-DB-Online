@@ -4836,10 +4836,10 @@ function updateATInfo() {
     const g3 = $('atGrup3') ? $('atGrup3').value : '';
     const d1 = getAT1DDepanSelected();
     
-	let activeRows = 0;
-	if (typeof m23State !== 'undefined' && m23State.rows) {
-		activeRows = m23State.rows.filter(r => r.digits && String(r.digits).trim().length >= 2).length;
-	}
+    let activeRows = 0;
+    if (typeof atState !== 'undefined' && atState.rows) {
+        atState.rows.forEach(r => { if (r.digits && r.digits.length === 4) activeRows++; });
+    }
 
     const info = $('atInfo');
     if (!info) return;
@@ -4857,7 +4857,7 @@ function updateATInfo() {
         
     if (g1 || g2 || g3) text += ' • Filter Grup';
     if (d1.length > 0) text += ' • Awalan: ' + d1.join(',');
-    if (activeRows > 0) text += ' • Saring: ' + activeRows + ' baris (Mengandung 2/3)';
+    if (activeRows > 0) text += ' • Saring: ' + activeRows + ' baris 3D';
     if (cb.length > 0) text += ' • CB: ' + cb.join(' ');
     
     info.textContent = text;
@@ -4900,9 +4900,7 @@ $('atGenerateBtn').addEventListener('click', function() {
     const cbMode = $('atCBMode') ? $('atCBMode').value : 'or';
     const d1 = getAT1DDepanSelected();
     
-    let activeRows = (typeof m23State !== 'undefined' && m23State.rows)
-    ? m23State.rows.filter(r => r.digits && String(r.digits).trim().length >= 2)
-    : [];
+    let activeRows = atState.rows.filter(r => r.digits && r.digits.length === 4);
     
     function tampilkanKosong(pesan) {
         toast(pesan, 'error');
@@ -4935,18 +4933,21 @@ $('atGenerateBtn').addEventListener('click', function() {
         if (filtered.length === 0) { tampilkanKosong('Tidak ada 2D depan yang cocok dengan Awalan 1D'); return; }
     }
 
-    // 3. Filter "Mengandung 2/3" (auto dari m23State)
-if (activeRows.length > 0) {
-    let matchedSet = new Set();
-    activeRows.forEach(r => {
-        const ms = blParseMultiset(r.digits);
-        filtered.forEach(n => {
-            if (blContainsCombo(n, ms)) matchedSet.add(n);
+    // 3. Filter 3 Angka Mengandung (65 Baris)
+    if (activeRows.length > 0) {
+        let matchedSet = new Set();
+        activeRows.forEach(r => {
+            const combos = get3DigitCombos(r.digits);
+            combos.forEach(combo => {
+                const ms = blParseMultiset(combo);
+                filtered.forEach(n => {
+                    if (blContainsCombo(n, ms)) matchedSet.add(n);
+                });
+            });
         });
-    });
-    filtered = Array.from(matchedSet);
-    if (filtered.length === 0) { tampilkanKosong('Tidak ada hasil setelah filter "Mengandung 2/3"'); return; }
-}
+        filtered = Array.from(matchedSet);
+        if (filtered.length === 0) { tampilkanKosong('Tidak ada hasil setelah filter 3 Angka Mengandung'); return; }
+    }
 
     // 4. Filter CB
     if (cb.length > 0) {
@@ -4961,7 +4962,7 @@ if (activeRows.length > 0) {
     let meta = 'P1:'+p1.length+' P2:'+p2.length+' P3:'+p3.length+' P4:'+p4.length;
     if (g1 || g2 || g3) meta += ' • Filter Grup';
     if (d1.length > 0) meta += ' • Awalan: ' + d1.join(',');
-    if (activeRows.length > 0) meta += ' • Saring ' + activeRows.length + ' baris (Mengandung 2/3)';
+    if (activeRows.length > 0) meta += ' • Saring ' + activeRows.length + ' baris 3D';
     if (cb.length > 0) meta += ' • CB: ' + cb.join(' ');
     pageState.angkaTarung.meta = meta;
 
@@ -8455,6 +8456,73 @@ console.log('Semua fitur siap. Selamat menggunakan SA_HARD!');
     window.addEventListener('beforeunload', simpan);
 })();
 </script>
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BLOK 76: FIX PAGINATION — Tombol Prev/Next/Copy/Export
+   Dipanggil oleh renderPagination() (BLOK 42), sebelumnya belum
+   didefinisikan → menyebabkan tombol tidak berfungsi.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+window.goPage = function(stateKey, dir) {
+    const st = pageState[stateKey];
+    if (!st || !st.pages || st.pages.length === 0) return;
+    const target = st.current + dir;
+    if (target < 0 || target >= st.pages.length) return;
+    st.current = target;
+    const map = PAGE_MAP[stateKey];
+    if (map) renderPagination(map[0], stateKey, map[1]);
+};
+
+window.jumpPage = function(stateKey) {
+    const st = pageState[stateKey];
+    if (!st || !st.pages || st.pages.length === 0) return;
+    const inp = document.getElementById('jump-' + stateKey);
+    if (!inp) return;
+    let n = parseInt(inp.value, 10);
+    if (isNaN(n)) return;
+    n = n - 1;
+    if (n < 0) n = 0;
+    if (n >= st.pages.length) n = st.pages.length - 1;
+    st.current = n;
+    const map = PAGE_MAP[stateKey];
+    if (map) renderPagination(map[0], stateKey, map[1]);
+};
+
+window.copyCurrentPage = function(stateKey) {
+    const st = pageState[stateKey];
+    if (!st || !st.pages || st.pages.length === 0) { toast('Belum ada hasil', 'error'); return; }
+    const page = st.pages[st.current];
+    if (!page || page.length === 0) { toast('Halaman kosong', 'error'); return; }
+    copyTextToClipboard(page.join('*') + '*');
+};
+
+window.copyAllPages = function(stateKey) {
+    const st = pageState[stateKey];
+    if (!st || !st.pages || st.pages.length === 0) { toast('Belum ada hasil', 'error'); return; }
+    const all = [];
+    for (let i = 0; i < st.pages.length; i++) {
+        for (let j = 0; j < st.pages[i].length; j++) all.push(st.pages[i][j]);
+    }
+    if (all.length === 0) { toast('Belum ada hasil', 'error'); return; }
+    copyTextToClipboard(all.join('*') + '*');
+};
+
+window.exportPages = function(stateKey) {
+    const st = pageState[stateKey];
+    if (!st || !st.pages || st.pages.length === 0) { toast('Belum ada hasil', 'error'); return; }
+    const all = [];
+    for (let i = 0; i < st.pages.length; i++) {
+        for (let j = 0; j < st.pages[i].length; j++) all.push(st.pages[i][j]);
+    }
+    if (all.length === 0) { toast('Belum ada hasil', 'error'); return; }
+    const blob = new Blob([all.join('*') + '*'], { type: 'text/plain;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'sahard-' + stateKey + '-' + new Date().toISOString().slice(0, 10) + '.txt';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast('Berhasil diexport', 'success');
+};
 
 <script>
 /* ═══════════════════════════════════════════════════════════════════════
