@@ -4768,7 +4768,7 @@ function renderAT65Rows() {
 function getAT1DDepanSelected() {
     const arr = [];
     const wrap = $('at1DDepan');
-    if (!wrap) return arr;
+    if (!wrap) return arr; // Pengaman jika elemen hilang
     wrap.querySelectorAll('input[type="checkbox"]:checked').forEach(function(e) {
         arr.push(e.value);
     });
@@ -4779,11 +4779,10 @@ window.copyATFilter = function(idx) {
     const r = atState.rows[idx];
     if (!r || !r.digits || r.digits.length !== 4) { toast('Isi 4 angka terlebih dahulu', 'error'); return; }
     
-    let p1 = parseSingleDigitList($('atDigit1') ? $('atDigit1').value : '');
-    let p2 = parseSingleDigitList($('atDigit2') ? $('atDigit2').value : '');
-    let p3 = parseSingleDigitList($('atDigit3') ? $('atDigit3').value : '');
-    let p4 = parseSingleDigitList($('atDigit4') ? $('atDigit4').value : '');
-    
+    let p1 = parseSingleDigitList($('atDigit1').value);
+    let p2 = parseSingleDigitList($('atDigit2').value);
+    let p3 = parseSingleDigitList($('atDigit3').value);
+    let p4 = parseSingleDigitList($('atDigit4').value);
     if (p1.length === 0) p1 = ['0','1','2','3','4','5','6','7','8','9'];
     if (p2.length === 0) p2 = ['0','1','2','3','4','5','6','7','8','9'];
     if (p3.length === 0) p3 = ['0','1','2','3','4','5','6','7','8','9'];
@@ -4808,6 +4807,7 @@ function _refreshATPreview() {
     const g2El = $('atGrup2');
     const g3El = $('atGrup3');
     
+    // Pengaman: Jika salah satu dropdown Grup tidak ada, hentikan fungsi
     if (!g1El || !g2El || !g3El) return; 
     
     const g1 = g1El.value;
@@ -4821,8 +4821,28 @@ function _refreshATPreview() {
     updateATInfo();
 }
 
+$('atGrup1').addEventListener('change', _refreshATPreview);
+$('atGrup2').addEventListener('change', _refreshATPreview);
+$('atGrup3').addEventListener('change', _refreshATPreview);
+
+['atDigit1', 'atDigit2', 'atDigit3', 'atDigit4'].forEach(function(id) {
+    const el = $(id); 
+    if (el) {
+        el.addEventListener('input', function(e) {
+            e.target.value = onlyDigits(e.target.value).slice(0, MAX_AK_DIGITS);
+            updateATInfo();
+        });
+    }
+});
+
+$('atCB').addEventListener('input', updateATInfo);
+$('atCBMode').addEventListener('change', updateATInfo);
+const _a1Wrap = $('at1DDepan');
+if (_a1Wrap) _a1Wrap.addEventListener('change', updateATInfo);
+
 function updateATInfo() {
     const el1 = $('atDigit1');
+    // Pengaman: Jika Digit 1 tidak ada, hentikan fungsi
     if (!el1) return; 
 
     const p1 = parseSingleDigitList(el1.value);
@@ -4862,7 +4882,7 @@ function updateATInfo() {
     info.textContent = text;
 }
 
-// ⬇️ EVENT LISTENER (SUDAH DIKASIH PENGAMAN) ⬇️
+// ⬇️ INI DIA EVENT LISTENER YANG ANDA CARI ⬇️
 if ($('atGrup1')) $('atGrup1').addEventListener('change', _refreshATPreview);
 if ($('atGrup2')) $('atGrup2').addEventListener('change', _refreshATPreview);
 if ($('atGrup3')) $('atGrup3').addEventListener('change', _refreshATPreview);
@@ -4880,26 +4900,6 @@ if ($('atGrup3')) $('atGrup3').addEventListener('change', _refreshATPreview);
 if ($('atCB')) $('atCB').addEventListener('input', updateATInfo);
 if ($('atCBMode')) $('atCBMode').addEventListener('change', updateATInfo);
 if ($('at1DDepan')) $('at1DDepan').addEventListener('change', updateATInfo);
-
-$('atGenerateBtn').addEventListener('click', function() {
-    let p1 = parseSingleDigitList($('atDigit1') ? $('atDigit1').value : '');
-    let p2 = parseSingleDigitList($('atDigit2') ? $('atDigit2').value : '');
-    let p3 = parseSingleDigitList($('atDigit3') ? $('atDigit3').value : '');
-    let p4 = parseSingleDigitList($('atDigit4') ? $('atDigit4').value : '');
-    
-    if (p1.length === 0) p1 = ['0','1','2','3','4','5','6','7','8','9'];
-    if (p2.length === 0) p2 = ['0','1','2','3','4','5','6','7','8','9'];
-    if (p3.length === 0) p3 = ['0','1','2','3','4','5','6','7','8','9'];
-    if (p4.length === 0) p4 = ['0','1','2','3','4','5','6','7','8','9'];
-
-    const g1 = $('atGrup1') ? $('atGrup1').value : '';
-    const g2 = $('atGrup2') ? $('atGrup2').value : '';
-    const g3 = $('atGrup3') ? $('atGrup3').value : '';
-    const cb = parseSingleDigitList($('atCB') ? $('atCB').value : '');
-    const cbMode = $('atCBMode') ? $('atCBMode').value : 'or';
-    const d1 = getAT1DDepanSelected();
-    
-    let activeRows = atState.rows.filter(r => r.digits && r.digits.length === 4);
     
     function tampilkanKosong(pesan) {
         toast(pesan, 'error');
@@ -4932,7 +4932,7 @@ $('atGenerateBtn').addEventListener('click', function() {
         if (filtered.length === 0) { tampilkanKosong('Tidak ada 2D depan yang cocok dengan Awalan 1D'); return; }
     }
 
-    // 3. Filter 3 Angka Mengandung (65 Baris)
+    // 3. Filter 65 Baris Mengandung 3 Angka
     if (activeRows.length > 0) {
         let matchedSet = new Set();
         activeRows.forEach(r => {
