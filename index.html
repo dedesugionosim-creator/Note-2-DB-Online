@@ -7663,13 +7663,13 @@ document.addEventListener('DOMContentLoaded', function() {
    ═══════════════════════════════════════════════════════════════════════ */
    
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 65A: MODE INPUT MENGANDUNG 3 ANGKA (65 BARIS) - FINAL V17
-   Support: Input Text Murni (Tanpa Dropdown) & Macau 5D
+   BLOK 65A: MODE INPUT MENGANDUNG 3 ANGKA (65 BARIS) - FINAL V20
+   Fitur: Pasar Otomatis Terisi (Hardcoded) - Anda tinggal ketik 4D/5D
    ═══════════════════════════════════════════════════════════════════════ */
 
 const M23_ROW_COUNT = 65;
 
-// DAFTAR PASAR PATEN (Disimpan di kode sebagai referensi)
+// DAFTAR PASAR (Otomatis dimasukkan ke baris 1-59)
 const PASAR_LIST = [
     "MACAU 5D", "MACAU 4D P1", "MACAU 4D P2", "MACAU 4D P3", "MACAU 4D P4", "MACAU 4D P5", "MACAU 4D P6",
     "OREGON 03", "OREGON 06", "OREGON 09", "OREGON 12", "KINGKONG", "CAMBODIA", "TEXAS DAY", "SYDNEY",
@@ -7682,9 +7682,18 @@ const PASAR_LIST = [
     "PREDIKSI 22", "PREDIKSI 23"
 ];
 
+// OTOMATIS MENGISI NAMA PASAR KE DALAM STATE
 const m23State = {
     rows: Array(M23_ROW_COUNT).fill(null).map(function(_, i) {
-        return { idx: i, digits: '', pasar: '', comboResults: {}, pages: {}, generated: false, selectedCombos: [] };
+        return { 
+            idx: i, 
+            digits: '', 
+            pasar: PASAR_LIST[i] || '', // <--- LANGSUNG DITULIS DALAM CODE
+            comboResults: {}, 
+            pages: {}, 
+            generated: false, 
+            selectedCombos: [] 
+        };
     })
 };
 
@@ -7729,7 +7738,6 @@ function get3DigitCombos(str) {
     
     function combine(start, current) {
         if (current.length === 3) {
-            // Urutkan agar unik (anti-dobel)
             let sortedCombo = current.split('').sort().join('');
             res.add(sortedCombo);
             return;
@@ -7743,7 +7751,6 @@ function get3DigitCombos(str) {
     return Array.from(res).sort();
 }
 
-// Cache filter (Grup, CB, 1D) agar tidak lag
 function getM23BaseUniverse() {
     if (_m23CachedBase) return _m23CachedBase;
 
@@ -7764,14 +7771,12 @@ function getM23BaseUniverse() {
     const d1 = use1D ? getM231DDepanSelected() : [];
 
     _m23CachedBase = M23_UNIVERSE.filter(function(n) {
-        // Filter 3 Grup
         if (g1 || g2 || g3) {
             const ab = n.slice(0, 2), bc = n.slice(1, 3), cd = n.slice(2, 4);
             if (setG1 && !setG1.has(ab)) return false;
             if (setG2 && !setG2.has(bc)) return false;
             if (setG3 && !setG3.has(cd)) return false;
         }
-        // Filter CB
         if (cb.length > 0) {
             if (cbMode === 'and') {
                 if (!cb.every(d => n.includes(d))) return false;
@@ -7781,9 +7786,7 @@ function getM23BaseUniverse() {
                 if (!found) return false;
             }
         }
-        // Filter 1D Depan
         if (d1.length > 0 && !d1.includes(n[0])) return false;
-
         return true;
     });
 
@@ -7838,11 +7841,11 @@ function renderM23Rows() {
         const totalTxt = r.generated && r.digits ? (total > 0 ? total.toLocaleString('id-ID') : '0') : '—';
         const canCopy = r.generated && total > 0;
         
-        // Deteksi Macau 5D
+        // Deteksi Macau 5D untuk maxlength
         const isMacau5D = (r.pasar || '').trim().toUpperCase() === 'MACAU 5D';
         const maxLen = isMacau5D ? 5 : 4;
         const ph = isMacau5D ? '12345' : '1234';
-        
+
         html += `<div class="m23-row" data-idx="${r.idx}" style="display: grid; grid-template-columns: 20px 55px 1fr 85px 40px 35px; gap: 4px; align-items: center; padding: 4px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 4px; font-size: 12px;">
             <div style="text-align:center; font-family: monospace; font-size: 11px; color: var(--muted); font-weight: 700;">${r.idx + 1}</div>
             
@@ -7852,8 +7855,8 @@ function renderM23Rows() {
                 ${comboHtml}
             </div>
             
-            <!-- INPUT TEXT MURNI UNTUK PASAR -->
-            <input type="text" class="m23-pasar" placeholder="KETIK PASAR" value="${esc(r.pasar)}" data-idx="${r.idx}" data-field="pasar" style="width: 100%; padding: 6px 2px; font-size: 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-2); text-align: center;">
+            <!-- INPUT TEXT YANG SUDAH TERISI OTOMATIS DARI CODE -->
+            <input type="text" class="m23-pasar" placeholder="PASAR" value="${esc(r.pasar)}" data-idx="${r.idx}" data-field="pasar" style="width: 100%; padding: 6px 2px; font-size: 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-2); text-align: center;">
             
             <div class="m23-total" style="text-align:center; font-family: monospace; font-weight: 700; color: var(--success); font-size: 10px;">${totalTxt}</div>
             
@@ -7882,7 +7885,7 @@ function renderM23Rows() {
                     r.comboResults[combo] = generate4DForCombo(combo, base);
                 });
                 r.generated = true;
-                r.selectedCombos = [...combos]; // Default ceklis semua
+                r.selectedCombos = [...combos]; 
                 r.pages = {}; 
             } else {
                 r.comboResults = {};
@@ -7893,52 +7896,6 @@ function renderM23Rows() {
             if (window._m23RenderTimer) clearTimeout(window._m23RenderTimer);
             window._m23RenderTimer = setTimeout(() => {
                 renderM23Rows(); 
-                renderM23Results();
-            }, 400);
-        });
-    });
-
-    // Listener Input Pasar (Ubah maxlength otomatis jika Macau 5D)
-    container.querySelectorAll('input.m23-pasar').forEach(function(el) {
-        el.addEventListener('input', function() {
-            const idx = parseInt(el.dataset.idx, 10);
-            const r = m23State.rows[idx];
-            r.pasar = el.value;
-
-            const rowEl = el.closest('.m23-row');
-            const digitInput = rowEl ? rowEl.querySelector('.m23-digits') : null;
-            
-            if (digitInput) {
-                const isMacau5D = (r.pasar || '').trim().toUpperCase() === 'MACAU 5D';
-                const newMax = isMacau5D ? 5 : 4;
-                digitInput.maxLength = newMax;
-                digitInput.placeholder = newMax === 5 ? '12345' : '1234';
-
-                // Jika ganti dari 5D ke 4D, potong angkanya
-                if (digitInput.value.length > newMax) {
-                    digitInput.value = digitInput.value.slice(0, newMax);
-                    r.digits = digitInput.value;
-                    
-                    if (r.digits.length >= 3) {
-                        const base = getM23BaseUniverse();
-                        const combos = get3DigitCombos(r.digits);
-                        r.comboResults = {};
-                        combos.forEach(combo => {
-                            r.comboResults[combo] = generate4DForCombo(combo, base);
-                        });
-                        r.generated = true;
-                        r.selectedCombos = [...combos];
-                        r.pages = {}; 
-                    } else {
-                        r.comboResults = {};
-                        r.generated = false;
-                        r.selectedCombos = [];
-                    }
-                }
-            }
-
-            if (window._m23RenderTimer) clearTimeout(window._m23RenderTimer);
-            window._m23RenderTimer = setTimeout(() => {
                 renderM23Results();
             }, 400);
         });
@@ -7977,7 +7934,7 @@ function renderM23Rows() {
     });
 }
 
-// Render Hasil Bawah (Per Kombinasi 3D)
+// Render Hasil Bawah
 function renderM23Results() {
     const c = $('m23ResultsContainer');
     if (!c) return;
@@ -8054,7 +8011,7 @@ function renderM23Results() {
         </div>` + html;
     } else {
         if (!html) {
-            html = '<div class="card"><div class="empty">Belum ada hasil. Ketik 4 atau 5 angka di tabel atas.</div></div>';
+            html = '<div class="card"><div class="empty">Belum ada hasil. Ketik angka 4D/5D di tabel atas.</div></div>';
         }
     }
     
@@ -8247,7 +8204,7 @@ if ($('m23ClearAllBtn')) {
     $('m23ClearAllBtn').addEventListener('click', function() {
         if (!confirm('Kosongkan 65 baris?')) return;
         m23State.rows.forEach(function(r) {
-            r.digits = ''; r.pasar = ''; r.comboResults = {}; r.pages = {}; r.generated = false; r.selectedCombos = [];
+            r.digits = ''; r.comboResults = {}; r.pages = {}; r.generated = false; r.selectedCombos = [];
         });
         m23MasterState.items = []; m23MasterState.page = 0;
         invalidateM23BaseCache();
