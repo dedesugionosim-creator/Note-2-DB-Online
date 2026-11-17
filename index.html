@@ -7417,7 +7417,7 @@ if ($('c33ShowCaraBaca')) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 64: GABUNG 3 GRUP (HARD OVERRIDE - PASTI BERUBAH)
+   BLOK 64: GABUNG 3 GRUP (HARD OVERRIDE - SUPPORT BBFS & CB)
    ═══════════════════════════════════════════════════════════════════════ */
 
 function gabung3GetSets() {
@@ -7443,6 +7443,7 @@ function gabung3Compute() {
     const results = [];
     const seen = new Set();
     
+    // 1. Gabung 3 Grup
     for (const ab of sets.s1) {
         for (const cd of sets.s3) {
             const bc = ab[1] + cd[0];
@@ -7454,8 +7455,26 @@ function gabung3Compute() {
             }
         }
     }
-    results.sort();
-    return { combos: results, sets };
+    
+    let filtered = results;
+    
+    // 2. Filter BBFS (Jika diisi)
+    const bbfsEl = document.getElementById('gabungBBFS');
+    const bbfsStr = bbfsEl ? onlyDigits(bbfsEl.value) : '';
+    if (bbfsStr.length >= 4) {
+        const bbfsSet = new Set(permutasi4DariDigit(bbfsStr));
+        filtered = filtered.filter(n => bbfsSet.has(n));
+    }
+    
+    // 3. Filter CB (Jika diisi)
+    const cbEl = document.getElementById('gabungCB');
+    const cbStr = cbEl ? onlyDigits(cbEl.value) : '';
+    if (cbStr.length > 0) {
+        filtered = filterByCB(filtered, cbStr, 'or'); // OR: salah satu digit muncul
+    }
+
+    filtered.sort();
+    return { combos: filtered, sets };
 }
 
 function updateGabung3Info() {
@@ -7473,7 +7492,7 @@ function updateGabung3Info() {
         return;
     }
     
-    const comp = gabung3Compute();
+    const comp = gabung3Compute(); // Hasil sudah termasuk filter BBFS & CB
     const permCheck = document.getElementById('gabungPermutasi') && document.getElementById('gabungPermutasi').checked;
     let totalAfterPerm = comp.combos.length;
     
@@ -7486,23 +7505,38 @@ function updateGabung3Info() {
     }
     
     info.style.color = 'var(--accent)';
-    info.textContent = 'G1(' + (sets.g1Auto ? 'AUTO 100' : sets.s1.length) + ')'
-        + ' × G3(' + (sets.g3Auto ? 'AUTO 100' : sets.s3.length) + ')'
+    let text = 'G1(' + (sets.g1Auto ? 'AUTO' : sets.s1.length) + ')'
+        + ' × G3(' + (sets.g3Auto ? 'AUTO' : sets.s3.length) + ')'
         + (sets.g2 ? ' ∩ G2(' + sets.s2.length + ')' : '')
-        + ' = ' + comp.combos.length.toLocaleString('id-ID') + ' kombinasi'
-        + (permCheck ? ' → ' + totalAfterPerm.toLocaleString('id-ID') + ' (permutasi)' : '');
+        + ' = ' + comp.combos.length.toLocaleString('id-ID') + ' kombinasi';
+    
+    // Tampilkan info filter jika aktif
+    if (document.getElementById('gabungBBFS') && document.getElementById('gabungBBFS').value.trim() !== '') {
+        text += ' (BBFS aktif)';
+    }
+    if (document.getElementById('gabungCB') && document.getElementById('gabungCB').value.trim() !== '') {
+        text += ' (CB aktif)';
+    }
+    
+    if (permCheck) text += ' → ' + totalAfterPerm.toLocaleString('id-ID') + ' (permutasi)';
+    
+    info.textContent = text;
 }
 
-// HARD OVERRIDE: Matikan listener lama dan ganti dengan yang baru
+// HARD OVERRIDE: Daftarkan event listener untuk semua filter
 const g1El = document.getElementById('gabungGrup1');
 const g2El = document.getElementById('gabungGrup2');
 const g3El = document.getElementById('gabungGrup3');
 const gPermEl = document.getElementById('gabungPermutasi');
+const gBbfsEl = document.getElementById('gabungBBFS');
+const gCbEl = document.getElementById('gabungCB');
 
 if (g1El) g1El.onchange = updateGabung3Info;
 if (g2El) g2El.onchange = updateGabung3Info;
 if (g3El) g3El.onchange = updateGabung3Info;
 if (gPermEl) gPermEl.onchange = updateGabung3Info;
+if (gBbfsEl) gBbfsEl.oninput = updateGabung3Info;
+if (gCbEl) gCbEl.oninput = updateGabung3Info;
 
 const gBtn = document.getElementById('gabungGenerateBtn');
 if (gBtn) {
@@ -7512,8 +7546,8 @@ if (gBtn) {
             toast('Grup kosong di master', 'error'); return;
         }
         
-        const comp = gabung3Compute();
-        if (!comp.combos.length) { toast('Tidak ada kombinasi', 'error'); return; }
+        const comp = gabung3Compute(); // Hasil sudah termasuk filter
+        if (!comp.combos.length) { toast('Tidak ada kombinasi yang cocok dengan filter', 'error'); return; }
 
         const permCheck = gPermEl && gPermEl.checked;
         
@@ -7563,7 +7597,7 @@ function buildGabung3Breakdown(sets, total, perm) {
           + '<div class="rb-values highlight-b">' + sets.s2.join(' ') + '</div></div>' : '')
         + '<div class="rb-section"><div class="rb-title">📊 G3 "' + esc(sets.g3 || 'AUTO') + '" → 2D Belakang</div>'
         + '<div class="rb-values highlight">' + (sets.g3 ? sets.s3.join(' ') : 'AUTO') + '</div></div>'
-        + '<div class="rb-arrow">⬇ ' + total.toLocaleString('id-ID') + ' kombinasi ⬇</div></div>';
+        + '<div class="rb-arrow">⬇ ' + total.toLocaleString('id-ID') + ' kombinasi ' + (perm ? '(permutasi)' : '') + ' ⬇</div></div>';
 }
 
 setTimeout(updateGabung3Info, 1000);
