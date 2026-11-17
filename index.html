@@ -4777,14 +4777,17 @@ function getAT1DDepanSelected() {
 
 // Render Tabel 65 Baris Angka Tarung
 function renderAT65Rows() {
-    // AUTO-SYNC dari m23State
+    // AUTO-SYNC dari m23State (termasuk status ceklis)
     if (typeof m23State !== 'undefined' && m23State.rows) {
         for (let i = 0; i < atState.rows.length && i < m23State.rows.length; i++) {
             atState.rows[i].digits = m23State.rows[i].digits || '';
             atState.rows[i].pasar  = m23State.rows[i].pasar  || '';
+            atState.rows[i].selectedCombos = m23State.rows[i].selectedCombos ? [...m23State.rows[i].selectedCombos] : null;
+            
             if (atState.rows[i].digits.length !== 4) {
                 atState.rows[i].comboResults = {};
                 atState.rows[i].generated = false;
+                atState.rows[i].selectedCombos = [];
             }
         }
     }
@@ -4793,25 +4796,37 @@ function renderAT65Rows() {
     if (!container) return;
     
     let html = '';
-    // Header Tabel
     html += `<div style="display: grid; grid-template-columns: 20px 55px 1fr 65px 40px 35px; gap: 4px; padding: 8px 4px; font-weight: bold; color: var(--muted); font-size: 9.5px; border-bottom: 2px solid var(--border); margin-bottom: 6px; text-transform: uppercase; background: var(--card-2); position: sticky; top: 0; z-index: 2; text-align: center; border-radius: 4px;">
         <div>No</div>
         <div>Result</div>
-        <div style="text-align: left;">3D Otomatis</div>
+        <div style="text-align: left;">3D Otomatis (Ceklis)</div>
         <div>Pasar</div>
         <div>Total</div>
         <div>📋</div>
     </div>`;
 
     atState.rows.forEach(function(r) {
-        let comboText = '—';
+        let comboHtml = '—';
         let total = 0;
         
         if (r.digits && r.digits.length === 4) {
             const combos = get3DigitCombos(r.digits);
-            comboText = combos.join(', ');
+            if (!r.selectedCombos) r.selectedCombos = [...combos];
+            
+            // Render Checkbox
+            comboHtml = combos.map(c => {
+                const isChecked = r.selectedCombos.includes(c) ? 'checked' : '';
+                return `<label style="display:inline-flex; align-items:center; gap:2px; margin-right:8px; cursor:pointer; font-size:10px; color:var(--accent); font-family:monospace;">
+                            <input type="checkbox" class="at-chk-3d" data-idx="${r.idx}" data-combo="${c}" ${isChecked} style="width:auto; margin:0; transform:scale(0.9);"> 
+                            ${c}
+                        </label>`;
+            }).join('');
+            
+            // Hitung total hanya dari yang dicentang
             if (r.comboResults) {
-                total = Object.values(r.comboResults).reduce((sum, arr) => sum + arr.length, 0);
+                r.selectedCombos.forEach(c => {
+                    if (r.comboResults[c]) total += r.comboResults[c].length;
+                });
             }
         }
 
@@ -4823,7 +4838,9 @@ function renderAT65Rows() {
             
             <input type="text" class="m23-digits" maxlength="4" inputmode="numeric" placeholder="1234" value="${esc(r.digits)}" data-idx="${r.idx}" data-field="digits" style="width: 100%; padding: 6px 2px; text-align: center; font-family: monospace; font-weight: 700; color: var(--accent); letter-spacing: 1px; font-size: 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-2);">
             
-            <div class="m23-combos" style="font-size: 10px; color: var(--accent); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 2px; font-family: monospace;" title="${comboText}">${comboText}</div>
+            <div class="m23-combos" style="padding: 0 2px; white-space: nowrap; overflow-x: auto;">
+                ${comboHtml}
+            </div>
             
             <input type="text" class="m23-pasar" placeholder="PASAR" value="${esc(r.pasar)}" data-idx="${r.idx}" data-field="pasar" style="width: 100%; padding: 6px 2px; font-size: 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-2); text-align: center;">
             
@@ -4835,16 +4852,13 @@ function renderAT65Rows() {
     
     container.innerHTML = html;
 
-    // Listener input otomatis
-    container.querySelectorAll('input').forEach(function(el) {
+    // Listener Input Angka
+    container.querySelectorAll('input.m23-digits').forEach(function(el) {
         el.addEventListener('input', function() {
             const idx = parseInt(el.dataset.idx, 10);
-            const field = el.dataset.field;
-            
-            if (field === 'digits') el.value = onlyDigits(el.value).slice(0, 4);
-            
             const r = atState.rows[idx];
-            r[field] = el.value;
+            el.value = onlyDigits(el.value).slice(0, 4);
+            r.digits = el.value;
             
             if (r.digits.length === 4) {
                 const base = getATBaseUniverse();
@@ -4855,31 +4869,60 @@ function renderAT65Rows() {
                     r.comboResults[combo] = base.filter(n => blContainsCombo(n, ms)).sort();
                 });
                 r.generated = true;
+                r.selectedCombos = [...combos]; // Default ceklis semua
                 r.pages = {}; 
             } else {
                 r.comboResults = {};
                 r.generated = false;
+                r.selectedCombos = [];
             }
 
-            const rowEl = el.closest('.m23-row');
+            if (window._atRenderTimer) clearTimeout(window._atRenderTimer);
+            window._atRenderTimer = setTimeout(() => {
+                renderAT65Rows(); // Render ulang untuk munculkan checkbox
+                renderATResults();
+            }, 400);
+        });
+    });
+
+    // Listener Input Pasar
+    container.querySelectorAll('input.m23-pasar').forEach(function(el) {
+        el.addEventListener('input', function() {
+            const idx = parseInt(el.dataset.idx, 10);
+            atState.rows[idx].pasar = el.value;
+            if (window._atRenderTimer) clearTimeout(window._atRenderTimer);
+            window._atRenderTimer = setTimeout(renderATResults, 400);
+        });
+    });
+
+    // Listener Ceklis 3D
+    container.querySelectorAll('.at-chk-3d').forEach(function(chk) {
+        chk.addEventListener('change', function() {
+            const idx = parseInt(this.dataset.idx, 10);
+            const combo = this.dataset.combo;
+            const isChecked = this.checked;
+            const r = atState.rows[idx];
+            
+            if (isChecked) {
+                if (!r.selectedCombos.includes(combo)) r.selectedCombos.push(combo);
+            } else {
+                r.selectedCombos = r.selectedCombos.filter(c => c !== combo);
+            }
+            
+            // Update Total di Baris
+            let total = 0;
+            r.selectedCombos.forEach(c => {
+                if (r.comboResults[c]) total += r.comboResults[c].length;
+            });
+            
+            const rowEl = this.closest('.m23-row');
             if (rowEl) {
                 const totEl = rowEl.querySelector('.m23-total');
                 const cpyBtn = rowEl.querySelector('.m23-copy');
-                const comboEl = rowEl.querySelector('.m23-combos');
-                
-                let total = 0;
-                if (r.generated) total = Object.values(r.comboResults).reduce((sum, arr) => sum + arr.length, 0);
-
-                if (totEl) totEl.textContent = total > 0 ? total.toLocaleString('id-ID') : (r.generated ? '0' : '—');
+                if (totEl) totEl.textContent = total > 0 ? total.toLocaleString('id-ID') : '0';
                 if (cpyBtn) cpyBtn.disabled = total === 0;
-                if (comboEl) {
-                    const combos = get3DigitCombos(r.digits);
-                    const txt = combos.length ? combos.join(', ') : '—';
-                    comboEl.textContent = txt;
-                    comboEl.setAttribute('title', txt);
-                }
             }
-
+            
             if (window._atRenderTimer) clearTimeout(window._atRenderTimer);
             window._atRenderTimer = setTimeout(renderATResults, 300);
         });
@@ -4888,7 +4931,7 @@ function renderAT65Rows() {
 
 // Render Hasil Bawah (Per Kombinasi 3D)
 function renderATResults() {
-    const c = $('atResult'); // Menggunakan container hasil yang ada di HTML
+    const c = $('atResult');
     if (!c) return;
 
     const masterSet = new Set();
@@ -4900,6 +4943,9 @@ function renderATResults() {
         const combos = get3DigitCombos(r.digits);
         
         combos.forEach(function(combo) {
+            // LEWATI JIKA TIDAK DICENTANG
+            if (!r.selectedCombos || !r.selectedCombos.includes(combo)) return;
+
             const results = r.comboResults[combo] || [];
             if (results.length === 0) return;
             
@@ -4938,7 +4984,6 @@ function renderATResults() {
     const masterItems = Array.from(masterSet).sort();
 
     if (masterItems.length > 0) {
-        // Panel Master Total Gabungan
         const tp = Math.ceil(masterItems.length / PER_PAGE);
         if (window._atMasterPage === undefined) window._atMasterPage = 0;
         if (window._atMasterPage >= tp) window._atMasterPage = tp - 1;
@@ -4963,7 +5008,7 @@ function renderATResults() {
         </div>` + html;
     } else {
         if (!html) {
-            html = '<div class="card"><div class="empty">Belum ada hasil. Isi P1-P4 atau ubah filter, lalu ketik 4 angka di tabel atas.</div></div>';
+            html = '<div class="card"><div class="empty">Belum ada hasil. Ketik 4 angka di tabel atas.</div></div>';
         }
     }
     
@@ -5005,9 +5050,18 @@ window.atExportCombo = function(idx, combo) {
 
 window.atCopyRow = function(idx) {
     const r = atState.rows[idx];
-    if (!r || !r.comboResults || Object.keys(r.comboResults).length === 0) { toast('Belum ada hasil', 'error'); return; }
+    if (!r || !r.comboResults || !r.selectedCombos || r.selectedCombos.length === 0) { 
+        toast('Pilih minimal 1 kombinasi 3D', 'error'); 
+        return; 
+    }
+    
     const masterSet = new Set();
-    Object.values(r.comboResults).forEach(arr => arr.forEach(n => masterSet.add(n)));
+    r.selectedCombos.forEach(combo => {
+        if (r.comboResults[combo]) {
+            r.comboResults[combo].forEach(n => masterSet.add(n));
+        }
+    });
+    
     copyTextToClipboard(Array.from(masterSet).sort().join('*') + '*');
 };
 
