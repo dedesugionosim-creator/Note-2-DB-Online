@@ -7663,11 +7663,24 @@ document.addEventListener('DOMContentLoaded', function() {
    ═══════════════════════════════════════════════════════════════════════ */
    
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 65A: MODE INPUT MENGANDUNG 3 ANGKA (65 BARIS) - FINAL V16
-   Fitur: Support 4D & 5D (Macau 5D), Ceklis 3D Unik, Filter Real-time
+   BLOK 65A: MODE INPUT MENGANDUNG 3 ANGKA (65 BARIS) - FINAL V17
+   Support: Input Text Murni (Tanpa Dropdown) & Macau 5D
    ═══════════════════════════════════════════════════════════════════════ */
 
 const M23_ROW_COUNT = 65;
+
+// DAFTAR PASAR PATEN (Disimpan di kode sebagai referensi)
+const PASAR_LIST = [
+    "MACAU 5D", "MACAU 4D P1", "MACAU 4D P2", "MACAU 4D P3", "MACAU 4D P4", "MACAU 4D P5", "MACAU 4D P6",
+    "OREGON 03", "OREGON 06", "OREGON 09", "OREGON 12", "KINGKONG", "CAMBODIA", "TEXAS DAY", "SYDNEY",
+    "SINGAPORE", "HONGKONG", "GRABPOLLS", "GIORGIA NGT", "GIORGIA EVE", "GIORGIA MID", "TEXAS NIGHT",
+    "TEXAS EVE", "TEXAS MOR", "TENNESSE EVE", "TENNESSE DAY", "TENNESSE MOR", "TAIWAN", "JAPAN",
+    "CHINA", "MALAYSIA", "HK SIANG", "TOTO WUHAN", "JAKARTA", "NUSANTARA", "JOWO",
+    "PREDIKSI 01", "PREDIKSI 02", "PREDIKSI 03", "PREDIKSI 04", "PREDIKSI 05", "PREDIKSI 06", "PREDIKSI 07",
+    "PREDIKSI 08", "PREDIKSI 09", "PREDIKSI 10", "PREDIKSI 11", "PREDIKSI 12", "PREDIKSI 13", "PREDIKSI 14",
+    "PREDIKSI 15", "PREDIKSI 16", "PREDIKSI 17", "PREDIKSI 18", "PREDIKSI 19", "PREDIKSI 20", "PREDIKSI 21",
+    "PREDIKSI 22", "PREDIKSI 23"
+];
 
 const m23State = {
     rows: Array(M23_ROW_COUNT).fill(null).map(function(_, i) {
@@ -7709,13 +7722,14 @@ function _refreshM23Preview() {
     renderGroupPreview(g3, $('m23Preview3'), 'belakang', g3 ? 'Grup 3 → 2D Belakang' : '');
 }
 
-// FUNGSI KOMBINASI 3D (Support 4 & 5 Digit, Anti-Dobel)
+// FUNGSI KOMBINASI 3D (Mendukung 4 & 5 Digit)
 function get3DigitCombos(str) {
     if (!str || str.length < 3) return [];
     let res = new Set();
     
     function combine(start, current) {
         if (current.length === 3) {
+            // Urutkan agar unik (anti-dobel)
             let sortedCombo = current.split('').sort().join('');
             res.add(sortedCombo);
             return;
@@ -7724,6 +7738,7 @@ function get3DigitCombos(str) {
             combine(i + 1, current + str[i]);
         }
     }
+    
     combine(0, '');
     return Array.from(res).sort();
 }
@@ -7768,6 +7783,7 @@ function getM23BaseUniverse() {
         }
         // Filter 1D Depan
         if (d1.length > 0 && !d1.includes(n[0])) return false;
+
         return true;
     });
 
@@ -7785,7 +7801,7 @@ function renderM23Rows() {
     if (!container) return;
     
     let html = '';
-    html += `<div style="display: grid; grid-template-columns: 20px 55px 1fr 80px 40px 35px; gap: 4px; padding: 8px 4px; font-weight: bold; color: var(--muted); font-size: 9.5px; border-bottom: 2px solid var(--border); margin-bottom: 6px; text-transform: uppercase; background: var(--card-2); position: sticky; top: 0; z-index: 2; text-align: center; border-radius: 4px;">
+    html += `<div style="display: grid; grid-template-columns: 20px 55px 1fr 85px 40px 35px; gap: 4px; padding: 8px 4px; font-weight: bold; color: var(--muted); font-size: 9.5px; border-bottom: 2px solid var(--border); margin-bottom: 6px; text-transform: uppercase; background: var(--card-2); position: sticky; top: 0; z-index: 2; text-align: center; border-radius: 4px;">
         <div>No</div>
         <div>Result</div>
         <div style="text-align: left;">3D Otomatis (Ceklis)</div>
@@ -7822,12 +7838,12 @@ function renderM23Rows() {
         const totalTxt = r.generated && r.digits ? (total > 0 ? total.toLocaleString('id-ID') : '0') : '—';
         const canCopy = r.generated && total > 0;
         
-        // Deteksi Macau 5D untuk maxlength
+        // Deteksi Macau 5D
         const isMacau5D = (r.pasar || '').trim().toUpperCase() === 'MACAU 5D';
         const maxLen = isMacau5D ? 5 : 4;
         const ph = isMacau5D ? '12345' : '1234';
         
-        html += `<div class="m23-row" data-idx="${r.idx}" style="display: grid; grid-template-columns: 20px 55px 1fr 80px 40px 35px; gap: 4px; align-items: center; padding: 4px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 4px; font-size: 12px;">
+        html += `<div class="m23-row" data-idx="${r.idx}" style="display: grid; grid-template-columns: 20px 55px 1fr 85px 40px 35px; gap: 4px; align-items: center; padding: 4px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 4px; font-size: 12px;">
             <div style="text-align:center; font-family: monospace; font-size: 11px; color: var(--muted); font-weight: 700;">${r.idx + 1}</div>
             
             <input type="text" class="m23-digits" maxlength="${maxLen}" inputmode="numeric" placeholder="${ph}" value="${esc(r.digits)}" data-idx="${r.idx}" data-field="digits" style="width: 100%; padding: 6px 2px; text-align: center; font-family: monospace; font-weight: 700; color: var(--accent); letter-spacing: 1px; font-size: 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-2);">
@@ -7836,7 +7852,8 @@ function renderM23Rows() {
                 ${comboHtml}
             </div>
             
-            <input type="text" class="m23-pasar" placeholder="PASAR" value="${esc(r.pasar)}" data-idx="${r.idx}" data-field="pasar" style="width: 100%; padding: 6px 2px; font-size: 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-2); text-align: center;">
+            <!-- INPUT TEXT MURNI UNTUK PASAR -->
+            <input type="text" class="m23-pasar" placeholder="KETIK PASAR" value="${esc(r.pasar)}" data-idx="${r.idx}" data-field="pasar" style="width: 100%; padding: 6px 2px; font-size: 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-2); text-align: center;">
             
             <div class="m23-total" style="text-align:center; font-family: monospace; font-weight: 700; color: var(--success); font-size: 10px;">${totalTxt}</div>
             
