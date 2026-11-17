@@ -7861,9 +7861,33 @@ if ($('m23Use1D')) $('m23Use1D').addEventListener('change', function() {
     onM23FilterChange();
 });
 
-['m23Grup1', 'm23Grup2', 'm23Grup3', 'm23CB', 'm23CBMode'].forEach(id => {
-    if ($(id)) $(id).addEventListener('change', onM23FilterChange);
+/* ═══════════════════════════════════════════════════════════════════════
+   FUNGSI PREVIEW GRUP AGAR MUNCUL SEPERTI DI MENU LAIN
+   ═══════════════════════════════════════════════════════════════════════ */
+
+function _refreshM23Preview() {
+    const g1 = $('m23Grup1') ? $('m23Grup1').value : '';
+    const g2 = $('m23Grup2') ? $('m23Grup2').value : '';
+    const g3 = $('m23Grup3') ? $('m23Grup3').value : '';
+    
+    // Memunculkan kotak preview
+    renderGroupPreview(g1, $('m23Preview1'), 'depan', g1 ? 'Grup 1 → 2D Depan' : '');
+    renderGroupPreview(g2, $('m23Preview2'), 'both', g2 ? 'Grup 2 → 2D Tengah' : '');
+    renderGroupPreview(g3, $('m23Preview3'), 'belakang', g3 ? 'Grup 3 → 2D Belakang' : '');
+    
+    // Hitung ulang hasil 4D setelah preview muncul
+    onM23FilterChange(); 
+}
+
+// Panggil preview saat dropdown GRUP diubah
+['m23Grup1', 'm23Grup2', 'm23Grup3'].forEach(function(id) {
+    if ($(id)) $(id).addEventListener('change', _refreshM23Preview);
 });
+
+// Panggil preview untuk CB (tanpa perlu update kotak preview grup)
+if ($('m23CB')) $('m23CB').addEventListener('change', onM23FilterChange);
+
+
 if ($('m231DDepan')) $('m231DDepan').addEventListener('change', onM23FilterChange);
 
 function recalcM23All() {
