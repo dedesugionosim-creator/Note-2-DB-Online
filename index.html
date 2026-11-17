@@ -1985,18 +1985,20 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
                 <div id="c33ResultsContainer"></div>
             </div>
 			
-<!-- ─────────── SUBPANEL 10: MODE INPUT MENGANDUNG 2/3 (55 BARIS) ─────────── -->
+<!-- ─────────── SUBPANEL 10: MASTER 3 ANGKA MENGANDUNG (65 BARIS) ─────────── -->
 <div id="subpanel-mengandung23" class="subpanel">
     <div class="card">
-        <h3 style="margin-bottom:6px;">🔍 Mode Input Mengandung 2/3 (55 Baris)</h3>
+        <h3 style="margin-bottom:6px;">🎯 Master 3 Angka Mengandung (65 Baris)</h3>
         <p class="text-muted" style="font-size:12.5px; margin-bottom:12px;">
-            Isi 2–3 digit per baris + label pasar. Sistem akan men-generate semua 4D (dari universe 0000–9999) yang <b>mengandung</b> digit tersebut (multiset). Kosongkan baris yang tidak dipakai.<br>
-            Contoh: <code>237</code> → 4D yang mengandung minimal satu <code>2</code>, satu <code>3</code>, dan satu <code>7</code>.
+            Ketik <b>4 angka</b> per baris. Sistem otomatis memecahnya menjadi kombinasi <b>3 angka</b> (membuang 1 digit), lalu men-generate semua 4D yang mengandung kombinasi tersebut.
         </p>
         
-        <!-- 3 PILIH GRUP -->
+        <!-- 1. FILTER 3 GRUP -->
         <div style="background:var(--card-3); padding:12px; border-radius:8px; border:1px solid var(--border); margin-bottom:16px;">
-            <label style="color:var(--accent); margin-bottom:8px; display:block; font-weight:bold;">Pilih Grup Penyaring (Opsional)</label>
+            <label style="color:var(--accent); margin-bottom:8px; display:flex; align-items:center; gap:8px; font-weight:bold; cursor:pointer;">
+                <input type="checkbox" id="m23UseGrup" checked style="width:18px; height:18px; accent-color:var(--accent);"> 
+                Aktifkan Filter 3 Grup
+            </label>
             <div class="grid-2" style="margin-bottom:8px;">
                 <div class="field" style="margin:0;">
                     <label for="m23Grup1">Grup 1 → 2D Depan</label>
@@ -2016,12 +2018,30 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
             </div>
         </div>
 
-        <div class="m23-container" id="m23RowsContainer" style="max-height: 450px; overflow-y: auto; padding: 6px; background: var(--card-2); border: 1px solid var(--border); border-radius: var(--radius-md);">
-            <!-- 55 Baris akan di-generate oleh JavaScript -->
+        <!-- 2. FILTER CB -->
+        <div class="grid-2" style="margin-bottom:16px; background:var(--card-3); padding:12px; border-radius:8px; border:1px solid var(--border);">
+            <div class="field">
+                <label for="m23CB" style="display:flex; align-items:center; gap:8px; font-weight:bold; color:var(--accent); cursor:pointer;">
+                    <input type="checkbox" id="m23UseCB" checked style="width:18px; height:18px; accent-color:var(--accent);"> 
+                    Aktifkan Filter CB
+                </label>
+                <input type="text" id="m23CB" placeholder="0 1 2 3 5" autocomplete="off">
+            </div>
+            <div class="field">
+                <label for="m23CBMode">Mode Filter CB</label>
+                <select id="m23CBMode">
+                    <option value="or" selected>Salah Satu Digit Muncul (OR)</option>
+                    <option value="and">Semua Digit Harus Muncul (AND)</option>
+                </select>
+            </div>
         </div>
-        
-        <div class="field" style="margin-top:16px;">
-            <label>Mode Input Angka 1D Depan (Opsional)</label>
+
+        <!-- 3. FILTER ANGKA DEPAN (1D) -->
+        <div class="field" style="background:var(--card-3); padding:12px; border-radius:8px; border:1px solid var(--border);">
+            <label style="display:flex; align-items:center; gap:8px; font-weight:bold; color:var(--accent); cursor:pointer; margin-bottom:8px;">
+                <input type="checkbox" id="m23Use1D" checked style="width:18px; height:18px; accent-color:var(--accent);"> 
+                Aktifkan Filter Angka Depan (1D)
+            </label>
             <div class="d1-checkbox-group" id="m231DDepan">
                 <div><input type="checkbox" id="m1-0" value="0"><label for="m1-0">0</label></div>
                 <div><input type="checkbox" id="m1-1" value="1"><label for="m1-1">1</label></div>
@@ -2036,23 +2056,13 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
             </div>
         </div>
 
-        <div class="grid-2">
-            <div class="field">
-                <label for="m23CB">Input CB (Opsional)</label>
-                <input type="text" id="m23CB" placeholder="0 1 2 3 5" autocomplete="off">
-            </div>
-            <div class="field">
-                <label for="m23CBMode">Mode Filter CB</label>
-                <select id="m23CBMode">
-                    <option value="or" selected>Salah Satu Digit Muncul (OR)</option>
-                    <option value="and">Semua Digit Harus Muncul (AND)</option>
-                </select>
-            </div>
+        <div class="m23-container" id="m23RowsContainer" style="max-height: 450px; overflow-y: auto; padding: 6px; background: var(--card-2); border: 1px solid var(--border); border-radius: var(--radius-md); margin-top:16px;">
+            <!-- 65 Baris akan di-generate oleh JavaScript -->
         </div>
 
-        <div class="pred-action-bar">
-            <button class="btn-primary" id="m23GenerateAllBtn">⚡ Generate Semua</button>
-            <button class="btn-warn" id="m23ClearAllBtn">🗑 Kosongkan 55 Baris</button>
+        <div class="pred-action-bar" style="margin-top:16px;">
+            <button class="btn-primary" id="m23GenerateAllBtn">⚡ Generate Semua (65 Baris)</button>
+            <button class="btn-warn" id="m23ClearAllBtn">🗑 Kosongkan 65 Baris</button>
         </div>
     </div>
     
@@ -7323,39 +7333,48 @@ function getM231DDepanSelected() {
 }
 
 function applyM23Filters(n) {
-    const g1 = $('m23Grup1').value;
-    const g2 = $('m23Grup2').value;
-    const g3 = $('m23Grup3').value;
-    const d1 = getM231DDepanSelected();
-    const cb = parseSingleDigitList($('m23CB').value);
-    const cbMode = $('m23CBMode').value;
+    const useGrup = $('m23UseGrup') ? $('m23UseGrup').checked : true;
+    const useCB   = $('m23UseCB') ? $('m23UseCB').checked : true;
+    const use1D   = $('m23Use1D') ? $('m23Use1D').checked : true;
 
-    // 1. Filter 3 Grup
-    if (g1 || g2 || g3) {
-        const setG1 = g1 ? new Set(getGroupAs2DigitDepan(g1)) : null;
-        const setG2 = g2 ? new Set([...getGroupAs2DigitDepan(g2), ...getGroupAs2DigitBelakang(g2)]) : null;
-        const setG3 = g3 ? new Set(getGroupAs2DigitBelakang(g3)) : null;
+    // URUTAN 1: FILTER 3 GRUP
+    if (useGrup) {
+        const g1 = $('m23Grup1').value;
+        const g2 = $('m23Grup2').value;
+        const g3 = $('m23Grup3').value;
         
-        const ab = n.slice(0, 2);
-        const bc = n.slice(1, 3);
-        const cd = n.slice(2, 4);
-        
-        if (setG1 && !setG1.has(ab)) return false;
-        if (setG2 && !setG2.has(bc)) return false;
-        if (setG3 && !setG3.has(cd)) return false;
-    }
-
-    // 2. Filter 1D Depan
-    if (d1.length > 0 && !d1.includes(n[0])) return false;
-
-    // 3. Filter CB
-    if (cb.length > 0) {
-        if (cbMode === 'and') {
-            if (!cb.every(d => n.includes(d))) return false;
-        } else {
-            if (!cb.some(d => n.includes(d))) return false;
+        if (g1 || g2 || g3) {
+            const setG1 = g1 ? new Set(getGroupAs2DigitDepan(g1)) : null;
+            const setG2 = g2 ? new Set([...getGroupAs2DigitDepan(g2), ...getGroupAs2DigitBelakang(g2)]) : null;
+            const setG3 = g3 ? new Set(getGroupAs2DigitBelakang(g3)) : null;
+            
+            const ab = n.slice(0, 2), bc = n.slice(1, 3), cd = n.slice(2, 4);
+            if (setG1 && !setG1.has(ab)) return false;
+            if (setG2 && !setG2.has(bc)) return false;
+            if (setG3 && !setG3.has(cd)) return false;
         }
     }
+
+    // URUTAN 2: FILTER CB
+    if (useCB) {
+        const cb = parseSingleDigitList($('m23CB').value);
+        const cbMode = $('m23CBMode').value;
+        
+        if (cb.length > 0) {
+            if (cbMode === 'and') {
+                if (!cb.every(d => n.includes(d))) return false;
+            } else {
+                if (!cb.some(d => n.includes(d))) return false;
+            }
+        }
+    }
+
+    // URUTAN 3: FILTER ANGKA DEPAN (1D)
+    if (use1D) {
+        const d1 = getM231DDepanSelected();
+        if (d1.length > 0 && !d1.includes(n[0])) return false;
+    }
+
     return true;
 }
 
@@ -7558,53 +7577,30 @@ window.m23ExportMaster = function() {
     toast('Diexport', 'success');
 };
 
-// --- Event Listeners untuk Filter M23 ---
-function _refreshM23Preview() {
-    const g1 = $('m23Grup1').value;
-    const g2 = $('m23Grup2').value;
-    const g3 = $('m23Grup3').value;
-    
-    renderGroupPreview(g1, $('m23Preview1'), 'depan', g1 ? 'Grup 1 → 2D Depan' : '');
-    renderGroupPreview(g2, $('m23Preview2'), 'both', g2 ? 'Grup 2 → 2D Tengah' : '');
-    renderGroupPreview(g3, $('m23Preview3'), 'belakang', g3 ? 'Grup 3 → 2D Belakang' : '');
-    
+// Ceklis Otomatis (Bisa diklik)
+if ($('m23UseGrup')) $('m23UseGrup').addEventListener('change', function() {
+    if (!this.checked) {
+        $('m23Grup1').disabled = true; $('m23Grup2').disabled = true; $('m23Grup3').disabled = true;
+    } else {
+        $('m23Grup1').disabled = false; $('m23Grup2').disabled = false; $('m23Grup3').disabled = false;
+    }
     recalcM23All();
-}
+});
 
-$('m23Grup1').addEventListener('change', _refreshM23Preview);
-$('m23Grup2').addEventListener('change', _refreshM23Preview);
-$('m23Grup3').addEventListener('change', _refreshM23Preview);
-$('m23CB').addEventListener('input', recalcM23All);
-$('m23CBMode').addEventListener('change', recalcM23All);
-const _m1Wrap = $('m231DDepan');
-if (_m1Wrap) _m1Wrap.addEventListener('change', recalcM23All);
+if ($('m23UseCB')) $('m23UseCB').addEventListener('change', function() {
+    if (!this.checked) {
+        $('m23CB').disabled = true; $('m23CBMode').disabled = true;
+    } else {
+        $('m23CB').disabled = false; $('m23CBMode').disabled = false;
+    }
+    recalcM23All();
+});
 
-if ($('m23GenerateAllBtn')) {
-    $('m23GenerateAllBtn').addEventListener('click', function() {
-        m23MasterState.page = 0;
-        recalcM23All();
-        toast('Berhasil di-generate dengan filter aktif', 'success');
-    });
-}
-
-if ($('m23ClearAllBtn')) {
-    $('m23ClearAllBtn').addEventListener('click', function() {
-        if (!confirm('Kosongkan semua 55 baris?')) return;
-        m23State.rows.forEach(function(r) {
-            r.digits = ''; r.pasar = ''; r.results = []; r.page = 0; r.generated = false;
-        });
-        m23MasterState.items = [];
-        m23MasterState.page = 0;
-        renderM23Rows();
-        renderM23Results();
-    });
-}
-
-if (document.readyState !== 'loading') {
-    renderM23Rows();
-} else {
-    document.addEventListener('DOMContentLoaded', renderM23Rows);
-}
+if ($('m23Use1D')) $('m23Use1D').addEventListener('change', function() {
+    const boxes = $('m231DDepan').querySelectorAll('input');
+    boxes.forEach(b => b.disabled = !this.checked);
+    recalcM23All();
+});
 
  /* ═══════════════════════════════════════════════════════════════════════
    BLOK 66: USER MANAGEMENT — EVENT LISTENERS
