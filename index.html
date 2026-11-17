@@ -7417,13 +7417,13 @@ if ($('c33ShowCaraBaca')) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 64: GABUNG 3 GRUP (FINAL - ANTI-BENTROK & RESPONSIF)
+   BLOK 64: GABUNG 3 GRUP (HARD OVERRIDE - PASTI BERUBAH)
    ═══════════════════════════════════════════════════════════════════════ */
 
 function gabung3GetSets() {
-    const g1 = $('gabungGrup1') ? $('gabungGrup1').value : '';
-    const g2 = $('gabungGrup2') ? $('gabungGrup2').value : '';
-    const g3 = $('gabungGrup3') ? $('gabungGrup3').value : '';
+    const g1 = document.getElementById('gabungGrup1') ? document.getElementById('gabungGrup1').value : '';
+    const g2 = document.getElementById('gabungGrup2') ? document.getElementById('gabungGrup2').value : '';
+    const g3 = document.getElementById('gabungGrup3') ? document.getElementById('gabungGrup3').value : '';
     
     return {
         g1: g1, g2: g2, g3: g3,
@@ -7445,7 +7445,7 @@ function gabung3Compute() {
     
     for (const ab of sets.s1) {
         for (const cd of sets.s3) {
-            const bc = ab[1] + cd[0]; // Digit belakang G1 + Digit depan G3
+            const bc = ab[1] + cd[0];
             if (sets.g2 && !s2.has(bc)) continue;
             const combo = ab + cd;
             if (!seen.has(combo)) { 
@@ -7459,13 +7459,13 @@ function gabung3Compute() {
 }
 
 function updateGabung3Info() {
-    const info = $('gabungInfo');
+    const info = document.getElementById('gabungInfo');
     if (!info) return;
     const sets = gabung3GetSets();
     
-    renderGroupPreview(sets.g1, $('gabungPreviewDepan'), 'depan', sets.g1 ? 'Grup 1 → 2D Depan' : 'Tanpa Grup — pakai semua 00–99');
-    renderGroupPreview(sets.g2, $('gabungPreviewTengah'), 'both', sets.g2 ? 'Grup 2 → 2D Tengah' : 'Tanpa Grup — tidak ada constraint BC');
-    renderGroupPreview(sets.g3, $('gabungPreviewBelakang'), 'belakang', sets.g3 ? 'Grup 3 → 2D Belakang' : 'Tanpa Grup — pakai semua 00–99');
+    renderGroupPreview(sets.g1, document.getElementById('gabungPreviewDepan'), 'depan', sets.g1 ? 'Grup 1 → 2D Depan' : 'Tanpa Grup');
+    renderGroupPreview(sets.g2, document.getElementById('gabungPreviewTengah'), 'both', sets.g2 ? 'Grup 2 → 2D Tengah' : 'Tanpa Grup');
+    renderGroupPreview(sets.g3, document.getElementById('gabungPreviewBelakang'), 'belakang', sets.g3 ? 'Grup 3 → 2D Belakang' : 'Tanpa Grup');
 
     if (!sets.s1.length || !sets.s3.length) {
         info.textContent = '⚠️ Salah satu grup kosong di master.';
@@ -7474,7 +7474,7 @@ function updateGabung3Info() {
     }
     
     const comp = gabung3Compute();
-    const permCheck = $('gabungPermutasi') && $('gabungPermutasi').checked;
+    const permCheck = document.getElementById('gabungPermutasi') && document.getElementById('gabungPermutasi').checked;
     let totalAfterPerm = comp.combos.length;
     
     if (permCheck) {
@@ -7486,25 +7486,27 @@ function updateGabung3Info() {
     }
     
     info.style.color = 'var(--accent)';
-    info.textContent = 'G1(' + (sets.g1Auto ? 'AUTO' : sets.s1.length) + ')'
-        + ' × G3(' + (sets.g3Auto ? 'AUTO' : sets.s3.length) + ')'
+    info.textContent = 'G1(' + (sets.g1Auto ? 'AUTO 100' : sets.s1.length) + ')'
+        + ' × G3(' + (sets.g3Auto ? 'AUTO 100' : sets.s3.length) + ')'
         + (sets.g2 ? ' ∩ G2(' + sets.s2.length + ')' : '')
         + ' = ' + comp.combos.length.toLocaleString('id-ID') + ' kombinasi'
         + (permCheck ? ' → ' + totalAfterPerm.toLocaleString('id-ID') + ' (permutasi)' : '');
 }
 
-// Daftarkan event listener dropdown agar info berubah saat grup diganti
-['gabungGrup1', 'gabungGrup2', 'gabungGrup3', 'gabungPermutasi'].forEach(function(id) {
-    if ($(id)) {
-        $(id).addEventListener('change', updateGabung3Info);
-    }
-});
+// HARD OVERRIDE: Matikan listener lama dan ganti dengan yang baru
+const g1El = document.getElementById('gabungGrup1');
+const g2El = document.getElementById('gabungGrup2');
+const g3El = document.getElementById('gabungGrup3');
+const gPermEl = document.getElementById('gabungPermutasi');
 
-// TOMBOL GENERATE
-if ($('gabungGenerateBtn')) {
-    $('gabungGenerateBtn').addEventListener('click', function() {
-        if (window._gabungProcessing) return;
-        
+if (g1El) g1El.onchange = updateGabung3Info;
+if (g2El) g2El.onchange = updateGabung3Info;
+if (g3El) g3El.onchange = updateGabung3Info;
+if (gPermEl) gPermEl.onchange = updateGabung3Info;
+
+const gBtn = document.getElementById('gabungGenerateBtn');
+if (gBtn) {
+    gBtn.onclick = function() {
         const sets = gabung3GetSets();
         if (!sets.s1.length || !sets.s3.length) {
             toast('Grup kosong di master', 'error'); return;
@@ -7513,13 +7515,11 @@ if ($('gabungGenerateBtn')) {
         const comp = gabung3Compute();
         if (!comp.combos.length) { toast('Tidak ada kombinasi', 'error'); return; }
 
-        const permCheck = $('gabungPermutasi') && $('gabungPermutasi').checked;
+        const permCheck = gPermEl && gPermEl.checked;
         
-        window._gabungProcessing = true;
-        const btn = $('gabungGenerateBtn');
-        const oldTxt = btn.textContent;
-        btn.textContent = '⏳ Menghitung...';
-        btn.disabled = true;
+        const oldTxt = gBtn.textContent;
+        gBtn.textContent = '⏳ Menghitung...';
+        gBtn.disabled = true;
 
         setTimeout(function() {
             try {
@@ -7532,33 +7532,40 @@ if ($('gabungGenerateBtn')) {
                     results = Array.from(exp).sort();
                 }
 
-                // Simpan hasil ke state
+                // Bersihkan state lama
                 pageState.gabungGrup.pages = paginateArray(results);
                 pageState.gabungGrup.current = 0;
                 pageState.gabungGrup.meta = 'G1:' + (sets.g1 || 'AUTO')
                     + (sets.g2 ? ' G2:' + sets.g2 : '') + ' G3:' + (sets.g3 || 'AUTO')
                     + (permCheck ? ' • permutasi' : '');
+                pageState.gabungGrup._breakdown = '';
                 
-                // Render hasil ke layar
                 const breakdown = buildGabung3Breakdown(sets, results.length, permCheck);
                 renderPagination('gabungResult', 'gabungGrup', 'Hasil', breakdown);
                 
-                // Tampilkan notifikasi sukses
                 toast('Berhasil: ' + results.length.toLocaleString('id-ID') + ' kombinasi', 'success');
-                
             } catch (err) {
                 console.error(err);
-                toast('Terjadi kesalahan sistem', 'error');
+                toast('Error: ' + err.message, 'error');
             } finally {
-                btn.textContent = oldTxt;
-                btn.disabled = false;
-                window._gabungProcessing = false;
+                gBtn.textContent = oldTxt;
+                gBtn.disabled = false;
             }
         }, 150);
-    });
+    };
 }
 
-// Jalankan info saat pertama dimuat
+function buildGabung3Breakdown(sets, total, perm) {
+    return '<div class="result-breakdown">'
+        + '<div class="rb-section"><div class="rb-title">📊 G1 "' + esc(sets.g1 || 'AUTO') + '" → 2D Depan</div>'
+        + '<div class="rb-values highlight">' + (sets.g1 ? sets.s1.join(' ') : 'AUTO') + '</div></div>'
+        + (sets.g2 ? '<div class="rb-section"><div class="rb-title">📊 G2 "' + esc(sets.g2) + '" → 2D Tengah</div>'
+          + '<div class="rb-values highlight-b">' + sets.s2.join(' ') + '</div></div>' : '')
+        + '<div class="rb-section"><div class="rb-title">📊 G3 "' + esc(sets.g3 || 'AUTO') + '" → 2D Belakang</div>'
+        + '<div class="rb-values highlight">' + (sets.g3 ? sets.s3.join(' ') : 'AUTO') + '</div></div>'
+        + '<div class="rb-arrow">⬇ ' + total.toLocaleString('id-ID') + ' kombinasi ⬇</div></div>';
+}
+
 setTimeout(updateGabung3Info, 1000);
 
 /* ═══════════════════════════════════════════════════════════════════════
