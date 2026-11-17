@@ -7663,13 +7663,13 @@ document.addEventListener('DOMContentLoaded', function() {
    ═══════════════════════════════════════════════════════════════════════ */
    
 /* ═══════════════════════════════════════════════════════════════════════
-   BLOK 65A: MODE INPUT MENGANDUNG 3 ANGKA (65 BARIS) - FINAL V13
-   Support: Dropdown Pasar & Macau 5D (Ekstraksi 3D Unik)
+   BLOK 65A: MODE INPUT MENGANDUNG 3 ANGKA (65 BARIS) - FINAL V14
+   Support: Input Text (Datalist) & Macau 5D (Ekstraksi 3D Unik)
    ═══════════════════════════════════════════════════════════════════════ */
 
 const M23_ROW_COUNT = 65;
 
-// DAFTAR PASAR
+// DAFTAR PASAR (Paten)
 const PASAR_LIST = [
     "MACAU 5D", "MACAU 4D P1", "MACAU 4D P2", "MACAU 4D P3", "MACAU 4D P4", "MACAU 4D P5", "MACAU 4D P6",
     "OREGON 03", "OREGON 06", "OREGON 09", "OREGON 12", "KINGKONG", "CAMBODIA", "TEXAS DAY", "SYDNEY",
@@ -7726,10 +7726,8 @@ function get3DigitCombos(str) {
     if (!str || str.length < 3) return [];
     let res = new Set();
     
-    // Fungsi rekursif untuk mencari kombinasi 3 angka
     function combine(start, current) {
         if (current.length === 3) {
-            // Urutkan agar unik (mencegah duplikat)
             let sortedCombo = current.split('').sort().join('');
             res.add(sortedCombo);
             return;
@@ -7743,7 +7741,6 @@ function get3DigitCombos(str) {
     return Array.from(res).sort();
 }
 
-// Cache filter (Grup, CB, 1D) agar tidak lag
 function getM23BaseUniverse() {
     if (_m23CachedBase) return _m23CachedBase;
 
@@ -7796,8 +7793,13 @@ function renderM23Rows() {
     const container = $('m23RowsContainer');
     if (!container) return;
     
-    let html = '';
-    html += `<div style="display: grid; grid-template-columns: 20px 55px 1fr 65px 40px 35px; gap: 4px; padding: 8px 4px; font-weight: bold; color: var(--muted); font-size: 9.5px; border-bottom: 2px solid var(--border); margin-bottom: 6px; text-transform: uppercase; background: var(--card-2); position: sticky; top: 0; z-index: 2; text-align: center; border-radius: 4px;">
+    // Render Datalist untuk Autocomplete
+    let datalistHtml = `<datalist id="m23-pasar-list">`;
+    PASAR_LIST.forEach(p => { datalistHtml += `<option value="${p}">`; });
+    datalistHtml += `</datalist>`;
+
+    let html = datalistHtml;
+    html += `<div style="display: grid; grid-template-columns: 20px 55px 1fr 85px 40px 35px; gap: 4px; padding: 8px 4px; font-weight: bold; color: var(--muted); font-size: 9.5px; border-bottom: 2px solid var(--border); margin-bottom: 6px; text-transform: uppercase; background: var(--card-2); position: sticky; top: 0; z-index: 2; text-align: center; border-radius: 4px;">
         <div>No</div>
         <div>Result</div>
         <div style="text-align: left;">3D Otomatis (Ceklis)</div>
@@ -7832,27 +7834,22 @@ function renderM23Rows() {
         const totalTxt = r.generated && r.digits ? (total > 0 ? total.toLocaleString('id-ID') : '0') : '—';
         const canCopy = r.generated && total > 0;
         
-        // Buat Dropdown Pasar
-        let selectPasarHtml = `<select class="m23-pasar" data-idx="${r.idx}" data-field="pasar" style="width: 100%; padding: 6px 2px; font-size: 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-2); text-align: center; outline:none; color:var(--text);">`;
-        selectPasarHtml += `<option value="">— PASAR —</option>`;
-        PASAR_LIST.forEach(p => {
-            selectPasarHtml += `<option value="${p}" ${r.pasar === p ? 'selected' : ''}>${p}</option>`;
-        });
-        selectPasarHtml += `</select>`;
+        // Tentukan maxlength & placeholder di awal render
+        const isMacau5D = (r.pasar || '').trim().toUpperCase() === 'MACAU 5D';
+        const maxLen = isMacau5D ? 5 : 4;
+        const ph = isMacau5D ? '12345' : '1234';
 
-        // Tentukan maxlength
-        const maxLen = (r.pasar === 'MACAU 5D') ? 5 : 4;
-        
-        html += `<div class="m23-row" data-idx="${r.idx}" style="display: grid; grid-template-columns: 20px 55px 1fr 65px 40px 35px; gap: 4px; align-items: center; padding: 4px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 4px; font-size: 12px;">
+        html += `<div class="m23-row" data-idx="${r.idx}" style="display: grid; grid-template-columns: 20px 55px 1fr 85px 40px 35px; gap: 4px; align-items: center; padding: 4px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 4px; font-size: 12px;">
             <div style="text-align:center; font-family: monospace; font-size: 11px; color: var(--muted); font-weight: 700;">${r.idx + 1}</div>
             
-            <input type="text" class="m23-digits" maxlength="${maxLen}" inputmode="numeric" placeholder="${maxLen === 5 ? '12345' : '1234'}" value="${esc(r.digits)}" data-idx="${r.idx}" data-field="digits" style="width: 100%; padding: 6px 2px; text-align: center; font-family: monospace; font-weight: 700; color: var(--accent); letter-spacing: 1px; font-size: 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-2);">
+            <input type="text" class="m23-digits" maxlength="${maxLen}" inputmode="numeric" placeholder="${ph}" value="${esc(r.digits)}" data-idx="${r.idx}" data-field="digits" style="width: 100%; padding: 6px 2px; text-align: center; font-family: monospace; font-weight: 700; color: var(--accent); letter-spacing: 1px; font-size: 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-2);">
             
             <div class="m23-combos" style="padding: 0 2px; white-space: nowrap; overflow-x: auto;">
                 ${comboHtml}
             </div>
             
-            ${selectPasarHtml}
+            <!-- INPUT TEXT DENGAN DATALIST -->
+            <input type="text" class="m23-pasar" list="m23-pasar-list" data-idx="${r.idx}" data-field="pasar" value="${esc(r.pasar)}" placeholder="PASAR" style="width: 100%; padding: 6px 2px; font-size: 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-2); text-align: center; outline:none; color:var(--text);">
             
             <div class="m23-total" style="text-align:center; font-family: monospace; font-weight: 700; color: var(--success); font-size: 10px;">${totalTxt}</div>
             
@@ -7862,26 +7859,27 @@ function renderM23Rows() {
     
     container.innerHTML = html;
 
-    // Listener Dropdown Pasar
-    container.querySelectorAll('select.m23-pasar').forEach(function(el) {
-        el.addEventListener('change', function() {
+    // Listener Input Pasar (Text)
+    container.querySelectorAll('input.m23-pasar').forEach(function(el) {
+        el.addEventListener('input', function() {
             const idx = parseInt(el.dataset.idx, 10);
             const r = m23State.rows[idx];
             r.pasar = el.value;
-            
-            // Ubah maxlength secara dinamis
+
             const rowEl = el.closest('.m23-row');
             const digitInput = rowEl ? rowEl.querySelector('.m23-digits') : null;
+            
             if (digitInput) {
-                const newMax = (r.pasar === 'MACAU 5D') ? 5 : 4;
+                const isMacau5D = (r.pasar || '').trim().toUpperCase() === 'MACAU 5D';
+                const newMax = isMacau5D ? 5 : 4;
                 digitInput.maxLength = newMax;
                 digitInput.placeholder = newMax === 5 ? '12345' : '1234';
-                
-                // Jika sebelumnya 5 digit lalu ganti ke 4D, potong jadi 4
+
+                // Jika sebelumnya 5 digit lalu ganti ke 4D, potong angkanya
                 if (digitInput.value.length > newMax) {
                     digitInput.value = digitInput.value.slice(0, newMax);
                     r.digits = digitInput.value;
-                    // Hitung ulang
+                    
                     if (r.digits.length >= 3) {
                         const base = getM23BaseUniverse();
                         const combos = get3DigitCombos(r.digits);
@@ -7902,9 +7900,8 @@ function renderM23Rows() {
 
             if (window._m23RenderTimer) clearTimeout(window._m23RenderTimer);
             window._m23RenderTimer = setTimeout(() => {
-                renderM23Rows();
-                renderM23Results();
-            }, 300);
+                renderM23Results(); // Cukup render hasilnya, baris atas tidak perlu di-render ulang agar kursor tidak loncat
+            }, 400);
         });
     });
 
@@ -7913,7 +7910,9 @@ function renderM23Rows() {
         el.addEventListener('input', function() {
             const idx = parseInt(el.dataset.idx, 10);
             const r = m23State.rows[idx];
-            const maxLen = (r.pasar === 'MACAU 5D') ? 5 : 4;
+            const isMacau5D = (r.pasar || '').trim().toUpperCase() === 'MACAU 5D';
+            const maxLen = isMacau5D ? 5 : 4;
+            
             el.value = onlyDigits(el.value).slice(0, maxLen);
             r.digits = el.value;
             
@@ -8051,7 +8050,7 @@ function renderM23Results() {
         </div>` + html;
     } else {
         if (!html) {
-            html = '<div class="card"><div class="empty">Belum ada hasil. Ketik angka & pilih pasar di tabel atas.</div></div>';
+            html = '<div class="card"><div class="empty">Belum ada hasil. Ketik angka & pasar di tabel atas.</div></div>';
         }
     }
     
