@@ -4793,9 +4793,16 @@ window.copyATFilter = function(idx) {
 };
 
 function _refreshATPreview() {
-    const g1 = $('atGrup1').value;
-    const g2 = $('atGrup2').value;
-    const g3 = $('atGrup3').value;
+    const g1El = $('atGrup1');
+    const g2El = $('atGrup2');
+    const g3El = $('atGrup3');
+    
+    // Pengaman: Jika salah satu dropdown Grup tidak ada, hentikan fungsi
+    if (!g1El || !g2El || !g3El) return; 
+    
+    const g1 = g1El.value;
+    const g2 = g2El.value;
+    const g3 = g3El.value;
     
     renderGroupPreview(g1, $('atPreview1'), 'depan', g1 ? 'Grup 1 → 2D Depan' : '');
     renderGroupPreview(g2, $('atPreview2'), 'both', g2 ? 'Grup 2 → 2D Tengah' : '');
@@ -4824,18 +4831,24 @@ const _a1Wrap = $('at1DDepan');
 if (_a1Wrap) _a1Wrap.addEventListener('change', updateATInfo);
 
 function updateATInfo() {
-    const p1 = parseSingleDigitList($('atDigit1').value);
-    const p2 = parseSingleDigitList($('atDigit2').value);
-    const p3 = parseSingleDigitList($('atDigit3').value);
-    const p4 = parseSingleDigitList($('atDigit4').value);
-    const cb = parseSingleDigitList($('atCB').value);
-    const g1 = $('atGrup1').value;
-    const g2 = $('atGrup2').value;
-    const g3 = $('atGrup3').value;
+    const el1 = $('atDigit1');
+    // Pengaman utama: Jika Digit 1 tidak ada, berarti HTML subpanel AK bermasalah. Hentikan fungsi.
+    if (!el1) return; 
+
+    const p1 = parseSingleDigitList(el1.value);
+    const p2 = parseSingleDigitList($('atDigit2') ? $('atDigit2').value : '');
+    const p3 = parseSingleDigitList($('atDigit3') ? $('atDigit3').value : '');
+    const p4 = parseSingleDigitList($('atDigit4') ? $('atDigit4').value : '');
+    const cb = parseSingleDigitList($('atCB') ? $('atCB').value : '');
+    const g1 = $('atGrup1') ? $('atGrup1').value : '';
+    const g2 = $('atGrup2') ? $('atGrup2').value : '';
+    const g3 = $('atGrup3') ? $('atGrup3').value : '';
     const d1 = getAT1DDepanSelected();
     
     let activeRows = 0;
-    atState.rows.forEach(r => { if (r.digits && r.digits.length === 4) activeRows++; });
+    if (typeof atState !== 'undefined' && atState.rows) {
+        atState.rows.forEach(r => { if (r.digits && r.digits.length === 4) activeRows++; });
+    }
 
     const info = $('atInfo');
     if (!info) return;
