@@ -2196,7 +2196,7 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
         <!-- ═══════════════════════════════════════════════════════════════
              SECTION: DATA PASAR
              ═══════════════════════════════════════════════════════════════ -->
-                    <!-- ═══════════════════════════════════════════════════════════════
+        <!-- ═══════════════════════════════════════════════════════════════
              SECTION: DATA PASAR (MANDIRI DENGAN 3 MASTER)
              ═══════════════════════════════════════════════════════════════ -->
         <section id="dataPasar">
@@ -2212,7 +2212,7 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
 				<button onclick="switchPasarTab('pasarRumus', this)">🧮 Rumus Pasar</button>
             </div>
 			
-			            <!-- PANEL 3: RUMUS PASAR -->
+			<!-- PANEL 3: RUMUS PASAR -->
             <div id="pasarRumus" class="subpanel">
                 <div class="card">
                     <div class="field">
@@ -2351,12 +2351,20 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
             </div
 
             <!-- PANEL 2: INPUT & HISTORY -->
-            <div id="pasarInput" class="subpanel">
-                <div class="card">
-                    <div class="field">
-                        <label for="pasarInputSelector">Pilih Pasar:</label>
-                        <select id="pasarInputSelector"></select>
-                    </div>
+			<div id="pasarInput" class="subpanel">
+				<div class="card">
+					<div class="field">
+						<label for="pasarInputSelector">Pilih Pasar:</label>
+						<div style="display:flex; gap:8px; align-items:stretch;">
+							<select id="pasarInputSelector" style="flex:1;"></select>
+							<button class="btn-primary" type="button"
+									id="addNewPasarFromInputBtn"
+									onclick="tambahPasarDariInput()"
+									style="width:auto; padding:8px 14px; font-size:12px; white-space:nowrap;">
+								➕ Tambah Pasar
+							</button>
+						</div>
+					</div>
 
                     <!-- FORM INPUT -->
                     <div class="grid-2">
@@ -10857,6 +10865,36 @@ function renderMultiPasarBreakdown() {
 }
 window.renderMultiPasarBreakdown = renderMultiPasarBreakdown;
 
+
+// ═══════════════════════════════════════════════════════════════════
+// TOMBOL TAMBAH PASAR — DI PANEL INPUT & HISTORY RESULT
+// ═══════════════════════════════════════════════════════════════════
+window.tambahPasarDariInput = function () {
+    if (typeof tambahPasarTogel !== 'function') {
+        if (typeof toast === 'function') toast('Fungsi Tambah Pasar tidak tersedia', 'error');
+        return;
+    }
+    tambahPasarTogel();
+    setTimeout(function () { refreshSemuaDropdownPasar(); }, 400);
+};
+
+function refreshSemuaDropdownPasar() {
+    if (typeof marketData === 'undefined' || !marketData.markets) return;
+
+    const opts = marketData.markets
+        .map(m => `<option value="${m.id}">${typeof esc === 'function' ? esc(m.name) : m.name}</option>`)
+        .join('');
+
+    if ($('pasarInputSelector'))  $('pasarInputSelector').innerHTML  = opts;
+    if ($('pasarMasterSelector')) $('pasarMasterSelector').innerHTML = opts;
+    if ($('prediksiMarketSelect')) $('prediksiMarketSelect').innerHTML = opts;
+    if ($('syairMarketSelect'))    $('syairMarketSelect').innerHTML    = opts;
+
+    if ($('rumusPasarSelector')) {
+        $('rumusPasarSelector').innerHTML = opts;
+        if (typeof loadRumusGrupDropdowns === 'function') loadRumusGrupDropdowns();
+    }
+}
 </script>
 
 </body>
