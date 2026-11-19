@@ -2196,24 +2196,101 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
         <!-- ═══════════════════════════════════════════════════════════════
              SECTION: DATA PASAR
              ═══════════════════════════════════════════════════════════════ -->
-                 <section id="dataPasar">
+                    <!-- ═══════════════════════════════════════════════════════════════
+             SECTION: DATA PASAR (MANDIRI DENGAN 3 MASTER)
+             ═══════════════════════════════════════════════════════════════ -->
+        <section id="dataPasar">
             <h2>📚 Data Pasar Global</h2>
             <p class="text-muted mb-10" style="font-size:13px;">
-                Pilih pasar di bawah ini untuk dianalisa oleh <b>Rumus Syair (Mode Global)</b>.
+                Kelola Master Nomor (Depan, Tengah, Belakang) dan input Result Pasar secara mandiri.
             </p>
-            <div class="card">
-                <div class="field">
-                    <label for="marketSelector">Pilih Pasar</label>
-                    <select id="marketSelector"></select>
-                </div>
-                <div class="togel-disclaimer" style="margin-top:10px;">
-                    ℹ️ Data history dari pasar yang Anda tambahkan di menu Togel akan otomatis masuk ke sini untuk dijadikan bahan analisa.
+
+            <!-- TAB MENU DATA PASAR -->
+            <div class="subtabs" id="subTabsPasar">
+                <button class="active" onclick="switchPasarTab('pasarMaster', this)">🗂️ Master Pasar</button>
+                <button onclick="switchPasarTab('pasarInput', this)">📝 Input & History Result</button>
+            </div>
+
+            <!-- PANEL 1: MASTER PASAR -->
+            <div id="pasarMaster" class="subpanel active">
+                <div class="card">
+                    <div class="field">
+                        <label for="pasarMasterSelector">Pilih Pasar untuk Diedit:</label>
+                        <select id="pasarMasterSelector"></select>
+                    </div>
+                    
+                    <div class="subtabs" style="margin-top:10px;">
+                        <button class="active" onclick="switchPasarMasterTab(1, this)">Master 1 (2D Depan)</button>
+                        <button onclick="switchPasarMasterTab(2, this)">Master 2 (2D Tengah)</button>
+                        <button onclick="switchPasarMasterTab(3, this)">Master 3 (2D Belakang)</button>
+                    </div>
+
+                    <div class="m23-container" style="max-height: 400px; margin-top:10px;">
+                        <div id="pasarMasterRows"></div>
+                    </div>
                 </div>
             </div>
-            
-            <!-- TAMBAHKAN BARIS INI -->
-            <div id="marketResultContainer" style="margin-top: 14px;"></div>
-            
+
+            <!-- PANEL 2: INPUT & HISTORY -->
+            <div id="pasarInput" class="subpanel">
+                <div class="card">
+                    <div class="field">
+                        <label for="pasarInputSelector">Pilih Pasar:</label>
+                        <select id="pasarInputSelector"></select>
+                    </div>
+
+                    <!-- FORM INPUT -->
+                    <div class="grid-2">
+                        <div class="field">
+                            <label for="pasarInputPeriode">1. Input Periode</label>
+                            <input type="text" id="pasarInputPeriode" placeholder="SGP-001" autocomplete="off">
+                        </div>
+                        <div class="field">
+                            <label for="pasarInputTanggal">2. Tanggal</label>
+                            <input type="date" id="pasarInputTanggal">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="pasarInputResult">3. Input Result (4 Digit)</label>
+                        <input type="text" id="pasarInputResult" maxlength="4" inputmode="numeric" placeholder="1109" autocomplete="off">
+                    </div>
+
+                    <!-- HASIL CARA BACA -->
+                    <div id="pasarCaraBacaContainer" style="background:var(--card-2); padding:12px; border-radius:8px; border:1px solid var(--border); margin-bottom:16px; display:none;">
+                        <div style="font-size:12px; font-weight:bold; color:var(--accent); margin-bottom:8px;">4. Cara Baca (Otomatis)</div>
+                        <div id="pasarCaraBacaContent" style="font-size:13px; line-height:1.6; color:var(--text-dim);"></div>
+                    </div>
+
+                    <!-- ALASAN & PREDIKSI -->
+                    <div id="pasarPrediksiContainer" style="background:rgba(34,197,94,0.05); padding:12px; border-radius:8px; border:1px solid var(--success); margin-bottom:16px; display:none;">
+                        <div style="font-size:12px; font-weight:bold; color:var(--success); margin-bottom:8px;">6. Analisa Alasan (Sistem)</div>
+                        <div id="pasarAlasanContent" style="font-size:13px; font-style:italic; color:var(--text); margin-bottom:12px; line-height:1.6;"></div>
+                        
+                        <div style="font-size:12px; font-weight:bold; color:var(--warn); margin-bottom:8px;">7. 20 Angka Prediksi (2D Depan)</div>
+                        <div id="pasarAngkaPrediksi" style="font-family:monospace; font-size:14px; color:var(--warn); word-break:break-all; background:var(--card-2); padding:8px; border-radius:4px;"></div>
+                    </div>
+
+                    <button class="btn-primary" id="pasarSaveBtn">💾 Simpan Result & Prediksi</button>
+                </div>
+
+                <!-- TABEL HISTORY -->
+                <div class="card">
+                    <h3 style="margin-bottom:10px;">📜 History Result Pasar</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Periode</th>
+                                    <th>Tanggal</th>
+                                    <th>Result</th>
+                                    <th>Analisa & Prediksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pasarHistoryBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <!-- ═══════════════════════════════════════════════════════════════
@@ -9654,6 +9731,263 @@ setTimeout(() => {
     injectManualUI();
     renderManual65Rows();
 }, 1000);
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BLOK BARU: SISTEM DATA PASAR MANDIRI (3 MASTER + PREDIKSI)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+const LS_PASAR_MASTER = 'sa_pasar_master_v1';
+const LS_PASAR_HISTORY = 'sa_pasar_history_v1';
+
+let pasarMasterData = {}; // Format: { 'market_id': { m1: [], m2: [], m3: [] } }
+let pasarHistoryData = {}; // Format: { 'market_id': [ { periode, tanggal, result, alasan, prediksi } ] }
+let activePasarMasterIdx = 1;
+
+// 1. INIT & LOAD DATA
+function initPasarData() {
+    try { pasarMasterData = JSON.parse(localStorage.getItem(LS_PASAR_MASTER) || '{}'); } catch(e) { pasarMasterData = {}; }
+    try { pasarHistoryData = JSON.parse(localStorage.getItem(LS_PASAR_HISTORY) || '{}'); } catch(e) { pasarHistoryData = {}; }
+    
+    // Inisialisasi Master untuk semua pasar jika belum ada
+    marketData.markets.forEach(m => {
+        if (!pasarMasterData[m.id]) {
+            // Copy dari SEED_MASTER (100 nomor default)
+            const defaultMaster = SEED_MASTER.map(item => ({ nomor: item[0], syair: item[1], grup: item[2] }));
+            pasarMasterData[m.id] = { m1: [...defaultMaster], m2: [...defaultMaster], m3: [...defaultMaster] };
+        }
+        if (!pasarHistoryData[m.id]) pasarHistoryData[m.id] = [];
+    });
+    savePasarData();
+}
+
+function savePasarData() {
+    localStorage.setItem(LS_PASAR_MASTER, JSON.stringify(pasarMasterData));
+    localStorage.setItem(LS_PASAR_HISTORY, JSON.stringify(pasarHistoryData));
+}
+
+// 2. TAB NAVIGATION
+window.switchPasarTab = function(panelId, btn) {
+    document.querySelectorAll('#subTabsPasar button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('#dataPasar .subpanel').forEach(p => p.classList.remove('active'));
+    $(panelId).classList.add('active');
+    if (panelId === 'pasarMaster') renderPasarMasterEditor();
+    if (panelId === 'pasarInput') renderPasarHistory();
+};
+
+window.switchPasarMasterTab = function(idx, btn) {
+    activePasarMasterIdx = idx;
+    document.querySelectorAll('#pasarMaster .subtabs button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderPasarMasterEditor();
+};
+
+// 3. RENDER MASTER EDITOR (DEPAN, TENGAH, BELAKANG)
+function renderPasarMasterEditor() {
+    const sel = $('pasarMasterSelector');
+    if (!sel || !marketData.markets.length) return;
+    
+    // Isi dropdown pasar
+    let opts = '';
+    marketData.markets.forEach(m => { opts += `<option value="${m.id}">${esc(m.name)}</option>`; });
+    sel.innerHTML = opts;
+    
+    const mId = sel.value;
+    if (!mId || !pasarMasterData[mId]) return;
+    
+    const masterArr = pasarMasterData[mId]['m' + activePasarMasterIdx] || [];
+    const container = $('pasarMasterRows');
+    
+    let html = '';
+    masterArr.forEach((item, idx) => {
+        html += `<div class="m23-row" style="display: grid; grid-template-columns: 40px 1fr 1fr; gap: 8px; padding: 6px; background: var(--card); border: 1px solid var(--border); border-radius: 4px; margin-bottom: 4px;">
+            <div style="font-family:monospace; font-weight:bold; text-align:center; color:var(--accent); font-size:14px;">${esc(item.nomor)}</div>
+            <input type="text" class="pasar-edit-syair" data-idx="${idx}" value="${esc(item.syair)}" placeholder="Syair" style="padding:6px; font-size:12px; border-radius:4px; border:1px solid var(--border); background:var(--card-2); color:var(--text);">
+            <input type="text" class="pasar-edit-grup" data-idx="${idx}" value="${esc(item.grup)}" placeholder="Grup" style="padding:6px; font-size:12px; border-radius:4px; border:1px solid var(--border); background:var(--card-2); color:var(--text);">
+        </div>`;
+    });
+    container.innerHTML = html;
+    
+    // Simpan otomatis saat diedit
+    container.querySelectorAll('input').forEach(el => {
+        el.addEventListener('change', function() {
+            const idx = parseInt(this.dataset.idx, 10);
+            const isSyair = this.classList.contains('pasar-edit-syair');
+            if (isSyair) masterArr[idx].syair = this.value.trim();
+            else masterArr[idx].grup = this.value.trim();
+            savePasarData();
+            toast('Master Pasar diperbarui', 'success');
+        });
+    });
+}
+
+// 4. LOGIKA INPUT RESULT & PREDIKSI
+function cariMaster(mId, idxMaster, nomor) {
+    const arr = pasarMasterData[mId]['m' + idxMaster];
+    return arr.find(item => item.nomor === nomor) || { syair: '?', grup: '?' };
+}
+
+$('pasarInputResult').addEventListener('input', function(e) {
+    e.target.value = onlyDigits(e.target.value).slice(0, 4);
+    const res = e.target.value;
+    const mId = $('pasarInputSelector').value;
+    
+    if (res.length === 4 && mId && pasarMasterData[mId]) {
+        const depan = res.slice(0, 2);
+        const tengah = res.slice(1, 3);
+        const belakang = res.slice(2, 4);
+        
+        const m1 = cariMaster(mId, 1, depan);
+        const m2 = cariMaster(mId, 2, tengah);
+        const m3 = cariMaster(mId, 3, belakang);
+        
+        // Tampilkan Cara Baca
+        $('pasarCaraBacaContainer').style.display = 'block';
+        $('pasarCaraBacaContent').innerHTML = `
+            <div style="display:flex; justify-content:space-between; border-bottom:1px dashed var(--border); padding:4px 0;">
+                <span>2D Depan (<b>${depan}</b>)</span>
+                <span style="color:var(--accent);">${m1.syair} <b>(${m1.grup})</b></span>
+            </div>
+            <div style="display:flex; justify-content:space-between; border-bottom:1px dashed var(--border); padding:4px 0;">
+                <span>2D Tengah (<b>${tengah}</b>)</span>
+                <span style="color:var(--accent);">${m2.syair} <b>(${m2.grup})</b></span>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding:4px 0;">
+                <span>2D Belakang (<b>${belakang}</b>)</span>
+                <span style="color:var(--accent);">${m3.syair} <b>(${m3.grup})</b></span>
+            </div>
+        `;
+        
+        generateNarasiPrediksi(mId, res);
+    } else {
+        $('pasarCaraBacaContainer').style.display = 'none';
+        $('pasarPrediksiContainer').style.display = 'none';
+    }
+});
+
+// 5. MESIN NARASI & PREDIKSI
+function generateNarasiPrediksi(mId, currentRes) {
+    const history = pasarHistoryData[mId] || [];
+    // Ambil maksimal 6 result terakhir
+    const recent = history.slice(-6);
+    
+    // Jika belum ada history, pakai result saat ini sebagai acuan
+    if (recent.length === 0) {
+        $('pasarPrediksiContainer').style.display = 'block';
+        $('pasarAlasanContent').innerText = "Belum ada history. Ini adalah result pertama untuk pasar ini.";
+        $('pasarAngkaPrediksi').innerText = "Isi history minimal 1 data untuk melihat prediksi.";
+        return;
+    }
+
+    // Hitung frekuensi Grup dari 6 result terakhir
+    let grupCount = {};
+    recent.forEach(r => {
+        const b = r.result.slice(2, 4);
+        const m3 = cariMaster(mId, 3, b);
+        grupCount[m3.grup] = (grupCount[m3.grup] || 0) + 1;
+    });
+
+    // Cari grup terkuat
+    let strongestGrup = 'AKIBAT';
+    let maxCount = 0;
+    for (let g in grupCount) {
+        if (grupCount[g] > maxCount) {
+            maxCount = grupCount[g];
+            strongestGrup = g;
+        }
+    }
+
+    // Buat Narasi
+    const latestSyair = cariMaster(mId, 3, recent[recent.length - 1].result.slice(2, 4)).syair;
+    let narasi = `Berdasarkan ${recent.length} result terakhir, terlihat dominasi mutlak dari **Grup ${strongestGrup}** (muncul ${maxCount} kali). `;
+    narasi += `Alur cerita bergerak dinamis, dan pada result terakhir muncul syair *'${latestSyair}'*. `;
+    narasi += `Secara logika syair, puncak dari pola ini biasanya akan memicu reaksi lanjutan yang masih berkaitan dengan **Grup ${strongestGrup}**.`;
+
+    $('pasarPrediksiContainer').style.display = 'block';
+    $('pasarAlasanContent').innerText = narasi;
+
+    // Ambil 20 Angka dari Master 1 (2D Depan) yang sesuai Grup Terkuat
+    const masterDepan = pasarMasterData[mId]['m1'];
+    const prediksiAngka = masterDepan.filter(item => item.grup.toUpperCase() === strongestGrup.toUpperCase()).slice(0, 20);
+    
+    let htmlPrediksi = prediksiAngka.map(item => item.nomor).join(', ');
+    if (prediksiAngka.length < 20) {
+        // Jika grup tersebut kurang dari 20 angka, tambah acak dari master
+        const sisa = masterDepan.filter(item => item.grup.toUpperCase() !== strongestGrup.toUpperCase()).slice(0, 20 - prediksiAngka.length);
+        htmlPrediksi += ', ' + sisa.map(item => item.nomor).join(', ');
+    }
+    $('pasarAngkaPrediksi').innerText = htmlPrediksi;
+}
+
+// 6. SIMPAN & RENDER HISTORY
+$('pasarSaveBtn').addEventListener('click', function() {
+    const mId = $('pasarInputSelector').value;
+    const periode = $('pasarInputPeriode').value.trim();
+    const tanggal = $('pasarInputTanggal').value;
+    const result = onlyDigits($('pasarInputResult').value);
+    
+    if (!mId || !periode || !result || result.length !== 4) {
+        toast('Lengkapi Periode dan Result 4 Digit', 'error'); return;
+    }
+    
+    const alasan = $('pasarAlasanContent').innerText;
+    const prediksi = $('pasarAngkaPrediksi').innerText;
+    
+    if (!pasarHistoryData[mId]) pasarHistoryData[mId] = [];
+    
+    pasarHistoryData[mId].push({
+        id: 'p_' + Date.now(),
+        periode, tanggal, result, alasan, prediksi, createdAt: Date.now()
+    });
+    
+    savePasarData();
+    renderPasarHistory();
+    
+    // Reset form
+    $('pasarInputPeriode').value = '';
+    $('pasarInputResult').value = '';
+    $('pasarCaraBacaContainer').style.display = 'none';
+    $('pasarPrediksiContainer').style.display = 'none';
+    
+    toast('Data Pasar berhasil disimpan', 'success');
+});
+
+function renderPasarHistory() {
+    const sel = $('pasarInputSelector');
+    if (!sel) return;
+    
+    let opts = '';
+    marketData.markets.forEach(m => { opts += `<option value="${m.id}">${esc(m.name)}</option>`; });
+    sel.innerHTML = opts;
+    
+    const mId = sel.value;
+    const tbody = $('pasarHistoryBody');
+    if (!mId || !pasarHistoryData[mId]) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Belum ada data.</td></tr>'; return; }
+    
+    const sorted = pasarHistoryData[mId].slice().sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
+    let html = '';
+    sorted.forEach(r => {
+        html += `<tr>
+            <td style="font-family:monospace;">${esc(r.periode)}</td>
+            <td>${esc(r.tanggal || '-')}</td>
+            <td class="td-pair">${esc(r.result)}</td>
+            <td style="font-size:11px; line-height:1.4;">
+                <div style="color:var(--success); font-style:italic; margin-bottom:4px;">${esc(r.alasan)}</div>
+                <div style="color:var(--warn); font-family:monospace;">Prediksi: ${esc(r.prediksi)}</div>
+            </td>
+        </tr>`;
+    });
+    tbody.innerHTML = html;
+}
+
+// 7. INIT SAAT APLIKASI DIBUKA
+document.addEventListener('DOMContentLoaded', function() {
+    initPasarData();
+});
+
+// Re-render saat dropdown diganti
+$('pasarMasterSelector').addEventListener('change', renderPasarMasterEditor);
+$('pasarInputSelector').addEventListener('change', renderPasarHistory);
 
 </script>
 
