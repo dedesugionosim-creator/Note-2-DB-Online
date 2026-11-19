@@ -10608,12 +10608,12 @@ function renderMultiPasarBreakdown() {
 
     for (let namaPasar in window.multiPasarResultsState) {
         const data = window.multiPasarResultsState[namaPasar];
-        if (data.matches.length === 0) continue; 
+        if (data.matches.length === 0) continue;
 
         hasData = true;
-        const displayLimit = 300; 
-        const preview = data.matches.slice(0, displayLimit);
-        const isTruncated = data.matches.length > displayLimit;
+
+        // ✅ Tampilkan SEMUA angka, tanpa batas
+        const preview = data.matches;
 
         html += `<div class="card" style="border-left: 4px solid var(--warn); margin-bottom: 12px; padding: 12px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:6px;">
@@ -10622,7 +10622,6 @@ function renderMultiPasarBreakdown() {
             </div>
             <div style="font-size:11px; color:var(--accent); margin-bottom:8px; font-family:monospace;">Kombinasi 3D (${data.input}): ${data.combos.join(', ')}</div>
             <div class="page-content" style="max-height:200px; margin:0 0 10px 0; font-size:12px;">${preview.join('*')}${preview.length ? '*' : ''}</div>
-            ${isTruncated ? `<div style="font-size:11px; color:var(--danger); margin-bottom:8px;">*Menampilkan ${displayLimit} angka pertama. Klik Copy untuk semua.</div>` : ''}
             <div class="page-actions" style="margin-top:0;">
                 <button onclick="copyMultiPasarRow('${esc(namaPasar)}')">📋 Copy Hasil</button>
             </div>
@@ -10636,17 +10635,7 @@ function renderMultiPasarBreakdown() {
 
     container.innerHTML = `<h3 style="color:var(--warn); margin: 16px 0 10px 0; font-size:15px;">📊 Rincian Hasil Per Pasar (Mengandung 3 Angka)</h3>` + html;
 }
-
-window.copyMultiPasarRow = function(namaPasar) {
-    const data = window.multiPasarResultsState[namaPasar];
-    if (!data || !data.matches.length) { toast('Tidak ada hasil', 'error'); return; }
-    copyTextToClipboard(data.matches.join('*') + '*');
-};
-
-// Panggil render saat inisialisasi (Gunakan Timeout agar aman)
-setTimeout(function() {
-    if (typeof renderMultiPasarInputs === 'function') renderMultiPasarInputs();
-}, 500);
+window.renderMultiPasarBreakdown = renderMultiPasarBreakdown;
 
 </script>
 
