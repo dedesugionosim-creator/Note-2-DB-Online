@@ -2209,6 +2209,106 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
             <div class="subtabs" id="subTabsPasar">
                 <button class="active" onclick="switchPasarTab('pasarMaster', this)">🗂️ Master Pasar</button>
                 <button onclick="switchPasarTab('pasarInput', this)">📝 Input & History Result</button>
+				<button onclick="switchPasarTab('pasarRumus', this)">🧮 Rumus Pasar</button>
+            </div>
+			
+			            <!-- PANEL 3: RUMUS PASAR -->
+            <div id="pasarRumus" class="subpanel">
+                <div class="card">
+                    <div class="field">
+                        <label for="rumusPasarSelector">Pilih Pasar (Untuk Master Grup):</label>
+                        <select id="rumusPasarSelector"></select>
+                    </div>
+
+                    <!-- 1. BBFS -->
+                    <div class="field" style="background:var(--card-2); padding:10px; border-radius:8px; border:1px solid var(--border);">
+                        <label style="display:flex; align-items:center; gap:8px; font-weight:bold; color:var(--accent); cursor:pointer;">
+                            <input type="checkbox" id="rumusUseBBFS" style="width:18px; height:18px; accent-color:var(--accent);"> 
+                            1. BBFS (Max 20 Angka)
+                        </label>
+                        <input type="text" id="rumusBBFS" maxlength="20" inputmode="numeric" placeholder="0123456789" disabled style="margin-top:8px;">
+                    </div>
+
+                    <!-- 2. Angka Tarung -->
+                    <div class="field" style="background:var(--card-2); padding:10px; border-radius:8px; border:1px solid var(--border);">
+                        <label style="display:flex; align-items:center; gap:8px; font-weight:bold; color:var(--accent); cursor:pointer;">
+                            <input type="checkbox" id="rumusUseAK" style="width:18px; height:18px; accent-color:var(--accent);"> 
+                            2. Angka Tarung (AK)
+                        </label>
+                        <div class="grid-2" style="margin-top:8px;">
+                            <input type="text" id="rumusAK1" maxlength="10" placeholder="P1" disabled>
+                            <input type="text" id="rumusAK2" maxlength="10" placeholder="P2" disabled>
+                            <input type="text" id="rumusAK3" maxlength="10" placeholder="P3" disabled>
+                            <input type="text" id="rumusAK4" maxlength="10" placeholder="P4" disabled>
+                        </div>
+                    </div>
+
+                    <!-- 3. CB -->
+                    <div class="field" style="background:var(--card-2); padding:10px; border-radius:8px; border:1px solid var(--border);">
+                        <label style="display:flex; align-items:center; gap:8px; font-weight:bold; color:var(--accent); cursor:pointer;">
+                            <input type="checkbox" id="rumusUseCB" style="width:18px; height:18px; accent-color:var(--accent);"> 
+                            3. CB (Colok Bebas)
+                        </label>
+                        <div class="grid-2" style="margin-top:8px;">
+                            <input type="text" id="rumusCB" placeholder="0 1 2" disabled>
+                            <select id="rumusCBMode" disabled>
+                                <option value="or">OR (Salah Satu)</option>
+                                <option value="and">AND (Semua)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- 4. 2D Manual -->
+                    <div class="field" style="background:var(--card-2); padding:10px; border-radius:8px; border:1px solid var(--border);">
+                        <label style="display:flex; align-items:center; gap:8px; font-weight:bold; color:var(--accent); cursor:pointer;">
+                            <input type="checkbox" id="rumusUse2D" style="width:18px; height:18px; accent-color:var(--accent);"> 
+                            4. 2D Manual (Depan, Tengah, Belakang)
+                        </label>
+                        <div class="grid-2" style="margin-top:8px;">
+                            <input type="text" id="rumus2DDepan" placeholder="Depan (Pisah Spasi)" disabled>
+                            <input type="text" id="rumus2DTengah" placeholder="Tengah (Pisah Spasi)" disabled>
+                            <input type="text" id="rumus2DBelakang" placeholder="Belakang (Pisah Spasi)" disabled>
+                        </div>
+                    </div>
+
+                    <!-- 5. Penyaring Grup -->
+                    <div class="field" style="background:var(--card-2); padding:10px; border-radius:8px; border:1px solid var(--border);">
+                        <label style="display:flex; align-items:center; gap:8px; font-weight:bold; color:var(--accent); cursor:pointer;">
+                            <input type="checkbox" id="rumusUseGrup" style="width:18px; height:18px; accent-color:var(--accent);"> 
+                            5. Penyaring Grup (Dari Master Pasar)
+                        </label>
+                        <div class="grid-2" style="margin-top:8px;">
+                            <select id="rumusGrupDepan" disabled><option value="">— Grup Depan —</option></select>
+                            <select id="rumusGrupTengah" disabled><option value="">— Grup Tengah —</option></select>
+                            <select id="rumusGrupBelakang" disabled><option value="">— Grup Belakang —</option></select>
+                        </div>
+                    </div>
+
+                    <!-- 6. 1D Depan -->
+                    <div class="field" style="background:var(--card-2); padding:10px; border-radius:8px; border:1px solid var(--border);">
+                        <label style="display:flex; align-items:center; gap:8px; font-weight:bold; color:var(--accent); cursor:pointer;">
+                            <input type="checkbox" id="rumusUse1D" style="width:18px; height:18px; accent-color:var(--accent);"> 
+                            6. 1D Depan
+                        </label>
+                        <div class="d1-checkbox-group" id="rumus1DGroup" style="margin-top:8px; opacity:0.5; pointer-events:none;">
+                            <div><input type="checkbox" id="r1-0" value="0"><label for="r1-0">0</label></div>
+                            <div><input type="checkbox" id="r1-1" value="1"><label for="r1-1">1</label></div>
+                            <div><input type="checkbox" id="r1-2" value="2"><label for="r1-2">2</label></div>
+                            <div><input type="checkbox" id="r1-3" value="3"><label for="r1-3">3</label></div>
+                            <div><input type="checkbox" id="r1-4" value="4"><label for="r1-4">4</label></div>
+                            <div><input type="checkbox" id="r1-5" value="5"><label for="r1-5">5</label></div>
+                            <div><input type="checkbox" id="r1-6" value="6"><label for="r1-6">6</label></div>
+                            <div><input type="checkbox" id="r1-7" value="7"><label for="r1-7">7</label></div>
+                            <div><input type="checkbox" id="r1-8" value="8"><label for="r1-8">8</label></div>
+                            <div><input type="checkbox" id="r1-9" value="9"><label for="r1-9">9</label></div>
+                        </div>
+                    </div>
+
+                    <p id="rumusInfo" class="text-accent" style="font-size:13px; margin:12px 0;">Info: —</p>
+                    <button class="btn-primary" id="rumusGenerateBtn">⚡ Generate Rumus Pasar</button>
+                </div>
+
+                <div class="card"><div id="pasarRumusResult"></div></div>
             </div>
 
             <!-- PANEL 1: MASTER PASAR -->
@@ -2830,7 +2930,8 @@ const pageState = {
     angkaTarung:  { pages: [], current: 0, meta: '', _breakdown: '' },
     cbBBFS:       { pages: [], current: 0, meta: '', _breakdown: '' },
     gabungGrup:   { pages: [], current: 0, meta: '', _breakdown: '' },
-    grupCB:       { pages: [], current: 0, meta: '', _breakdown: '' }
+    grupCB:       { pages: [], current: 0, meta: '', _breakdown: '' },
+	pasarRumus:   { pages: [], current: 0, meta: '', _breakdown: '' }
 };
 
 const PAGE_MAP = {
@@ -2839,7 +2940,8 @@ const PAGE_MAP = {
     angkaTarung: ['atResult',      'Hasil'],
     cbBBFS:      ['cbBBFSResult',  'Hasil'],
     gabungGrup:  ['gabungResult',  'Hasil'],
-    grupCB:      ['grupCBResult',  'Hasil']
+    grupCB:      ['grupCBResult',  'Hasil'],
+	pasarRumus:  ['pasarRumusResult', 'Hasil']
 };
 
 const $ = (id) => document.getElementById(id);
@@ -9988,6 +10090,207 @@ document.addEventListener('DOMContentLoaded', function() {
 // Re-render saat dropdown diganti
 $('pasarMasterSelector').addEventListener('change', renderPasarMasterEditor);
 $('pasarInputSelector').addEventListener('change', renderPasarHistory);
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LOGIKA RUMUS PASAR (CEKLIS, 3 MASTER, INTERSECTION)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+// 1. Fungsi Bantuan untuk Ceklis (Enable/Disable Input)
+function toggleRumusInputs() {
+    const cbB = $('rumusUseBBFS').checked;
+    $('rumusBBFS').disabled = !cbB;
+
+    const cbAK = $('rumusUseAK').checked;
+    $('rumusAK1').disabled = !cbAK; $('rumusAK2').disabled = !cbAK; $('rumusAK3').disabled = !cbAK; $('rumusAK4').disabled = !cbAK;
+
+    const cbCB = $('rumusUseCB').checked;
+    $('rumusCB').disabled = !cbCB; $('rumusCBMode').disabled = !cbCB;
+
+    const cb2D = $('rumusUse2D').checked;
+    $('rumus2DDepan').disabled = !cb2D; $('rumus2DTengah').disabled = !cb2D; $('rumus2DBelakang').disabled = !cb2D;
+
+    const cbG = $('rumusUseGrup').checked;
+    $('rumusGrupDepan').disabled = !cbG; $('rumusGrupTengah').disabled = !cbG; $('rumusGrupBelakang').disabled = !cbG;
+
+    const cb1D = $('rumusUse1D').checked;
+    $('rumus1DGroup').style.opacity = cb1D ? '1' : '0.5';
+    $('rumus1DGroup').style.pointerEvents = cb1D ? 'auto' : 'none';
+}
+
+['rumusUseBBFS', 'rumusUseAK', 'rumusUseCB', 'rumusUse2D', 'rumusUseGrup', 'rumusUse1D'].forEach(id => {
+    if ($(id)) $(id).addEventListener('change', toggleRumusInputs);
+});
+
+// 2. Isi Dropdown Grup dari Master Pasar
+function loadRumusGrupDropdowns() {
+    const mId = $('rumusPasarSelector').value;
+    if (!mId || !pasarMasterData[mId]) return;
+
+    const getGroups = (arr) => {
+        let g = new Set();
+        arr.forEach(item => { if (item.grup) g.add(item.grup.trim().toUpperCase()); });
+        return Array.from(g).sort();
+    };
+
+    const g1 = getGroups(pasarMasterData[mId].m1);
+    const g2 = getGroups(pasarMasterData[mId].m2);
+    const g3 = getGroups(pasarMasterData[mId].m3);
+
+    let opt1 = '<option value="">— Grup Depan —</option>';
+    g1.forEach(x => opt1 += `<option value="${x}">${x}</option>`);
+    $('rumusGrupDepan').innerHTML = opt1;
+
+    let opt2 = '<option value="">— Grup Tengah —</option>';
+    g2.forEach(x => opt2 += `<option value="${x}">${x}</option>`);
+    $('rumusGrupTengah').innerHTML = opt2;
+
+    let opt3 = '<option value="">— Grup Belakang —</option>';
+    g3.forEach(x => opt3 += `<option value="${x}">${x}</option>`);
+    $('rumusGrupBelakang').innerHTML = opt3;
+}
+
+$('rumusPasarSelector').addEventListener('change', loadRumusGrupDropdowns);
+
+// Panggil saat tab dibuka
+const originalSwitchPasarTab = window.switchPasarTab;
+window.switchPasarTab = function(panelId, btn) {
+    originalSwitchPasarTab(panelId, btn);
+    if (panelId === 'pasarRumus') {
+        // Isi dropdown pasar
+        let opts = '';
+        marketData.markets.forEach(m => { opts += `<option value="${m.id}">${esc(m.name)}</option>`; });
+        $('rumusPasarSelector').innerHTML = opts;
+        loadRumusGrupDropdowns();
+    }
+};
+
+// 3. Logika Utama Generate
+$('rumusGenerateBtn').addEventListener('click', function() {
+    const mId = $('rumusPasarSelector').value;
+    if (!mId) { toast('Pilih Pasar terlebih dahulu', 'error'); return; }
+
+    const useBBFS = $('rumusUseBBFS').checked;
+    const useAK = $('rumusUseAK').checked;
+    const useCB = $('rumusUseCB').checked;
+    const use2D = $('rumusUse2D').checked;
+    const useGrup = $('rumusUseGrup').checked;
+    const use1D = $('rumusUse1D').checked;
+
+    let bbfsPool = null;
+    let akPool = null;
+    let filtered = [];
+
+    // A. BASIS ANGKA (BBFS & AK)
+    if (useBBFS && onlyDigits($('rumusBBFS').value).length >= 4) {
+        bbfsPool = permutasi4DariDigit($('rumusBBFS').value);
+    }
+    
+    if (useAK) {
+        let p1 = parseSingleDigitList($('rumusAK1').value) || ['0','1','2','3','4','5','6','7','8','9'];
+        let p2 = parseSingleDigitList($('rumusAK2').value) || ['0','1','2','3','4','5','6','7','8','9'];
+        let p3 = parseSingleDigitList($('rumusAK3').value) || ['0','1','2','3','4','5','6','7','8','9'];
+        let p4 = parseSingleDigitList($('rumusAK4').value) || ['0','1','2','3','4','5','6','7','8','9'];
+        
+        akPool = [];
+        for (const a of p1) for (const b of p2) for (const c of p3) for (const d of p4) akPool.push(a + b + c + d);
+    }
+
+    // Intersection BBFS & AK
+    if (bbfsPool && akPool) {
+        const akSet = new Set(akPool);
+        filtered = bbfsPool.filter(n => akSet.has(n));
+    } else if (bbfsPool) {
+        filtered = bbfsPool;
+    } else if (akPool) {
+        filtered = akPool;
+    } else {
+        // Jika tidak ada yang dipilih, pakai universe 0000-9999
+        filtered = M23_UNIVERSE.slice();
+    }
+
+    if (filtered.length === 0) { toast('Basis angka kosong / tidak ada irisan', 'error'); return; }
+
+    // B. FILTER 2D MANUAL
+    if (use2D) {
+        const depan = parseTwoDigitList($('rumus2DDepan').value);
+        const tengah = parseTwoDigitList($('rumus2DTengah').value);
+        const belakang = parseTwoDigitList($('rumus2DBelakang').value);
+
+        filtered = filtered.filter(n => {
+            if (depan.length > 0 && !depan.includes(n.slice(0, 2))) return false;
+            if (tengah.length > 0 && !tengah.includes(n.slice(1, 3))) return false;
+            if (belakang.length > 0 && !belakang.includes(n.slice(2, 4))) return false;
+            return true;
+        });
+    }
+
+    // C. FILTER GRUP (DARI 3 MASTER)
+    if (useGrup) {
+        const targetDepan = $('rumusGrupDepan').value.trim().toUpperCase();
+        const targetTengah = $('rumusGrupTengah').value.trim().toUpperCase();
+        const targetBelakang = $('rumusGrupBelakang').value.trim().toUpperCase();
+
+        if (targetDepan || targetTengah || targetBelakang) {
+            filtered = filtered.filter(n => {
+                const p1 = n.slice(0, 2);
+                const p2 = n.slice(1, 3);
+                const p3 = n.slice(2, 4);
+
+                if (targetDepan) {
+                    const m1 = cariMaster(mId, 1, p1);
+                    if (m1.grup.trim().toUpperCase() !== targetDepan) return false;
+                }
+                if (targetTengah) {
+                    const m2 = cariMaster(mId, 2, p2);
+                    if (m2.grup.trim().toUpperCase() !== targetTengah) return false;
+                }
+                if (targetBelakang) {
+                    const m3 = cariMaster(mId, 3, p3);
+                    if (m3.grup.trim().toUpperCase() !== targetBelakang) return false;
+                }
+                return true;
+            });
+        }
+    }
+
+    // D. FILTER 1D DEPAN
+    if (use1D) {
+        const d1 = [];
+        $('rumus1DGroup').querySelectorAll('input:checked').forEach(e => d1.push(e.value));
+        if (d1.length > 0) {
+            filtered = filtered.filter(n => d1.includes(n[0]));
+        }
+    }
+
+    // E. FILTER CB
+    if (useCB) {
+        const cb = parseSingleDigitList($('rumusCB').value);
+        const mode = $('rumusCBMode').value;
+        if (cb.length > 0) {
+            filtered = filterByCB(filtered, cb.join(''), mode);
+        }
+    }
+
+    // TAMPILKAN HASIL
+    if (filtered.length === 0) {
+        toast('Tidak ada kombinasi yang cocok', 'error');
+        pageState.pasarRumus.pages = [];
+        renderPagination('pasarRumusResult', 'pasarRumus', 'Hasil', '');
+        return;
+    }
+
+    filtered.sort();
+    pageState.pasarRumus.pages = paginateArray(filtered);
+    pageState.pasarRumus.current = 0;
+    pageState.pasarRumus.meta = 'Rumus Pasar: ' + $('rumusPasarSelector').options[$('rumusPasarSelector').selectedIndex].text;
+
+    renderPagination('pasarRumusResult', 'pasarRumus', 'Hasil', '');
+    toast('Berhasil: ' + filtered.length.toLocaleString('id-ID') + ' kombinasi', 'success');
+    
+    const resBox = $('pasarRumusResult');
+    if (resBox) resBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
 
 </script>
 
