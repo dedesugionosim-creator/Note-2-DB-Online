@@ -10876,26 +10876,32 @@ window.tambahPasarDariInput = function () {
         return;
     }
     tambahPasarTogel();
-    setTimeout(function () { refreshSemuaDropdownPasar(); }, 400);
+
+    let tries = 0;
+    const maxTries = 30;      // 30 × 300ms = 9 detik
+    const timer = setInterval(function () {
+        tries++;
+        const sel = $('pasarInputSelector');
+        const hasData = typeof marketData !== 'undefined'
+                     && marketData.markets
+                     && marketData.markets.length > 0;
+
+        if (hasData && sel) {
+            try { refreshSemuaDropdownPasar(); } catch (e) { console.warn('refresh err:', e); }
+            // Berhasil terisi?
+            if (sel.options.length > 0) {
+                clearInterval(timer);
+                console.log('[Tambah Pasar] Dropdown siap setelah ' + (tries * 300) + 'ms');
+                return;
+            }
+        }
+        if (tries >= maxTries) {
+            clearInterval(timer);
+            console.warn('[Tambah Pasar] Timeout — dropdown tidak terisi');
+            if (typeof toast === 'function') toast('Dropdown pasar belum terisi, coba refresh', 'error');
+        }
+    }, 300);
 };
-
-function refreshSemuaDropdownPasar() {
-    if (typeof marketData === 'undefined' || !marketData.markets) return;
-
-    const opts = marketData.markets
-        .map(m => `<option value="${m.id}">${typeof esc === 'function' ? esc(m.name) : m.name}</option>`)
-        .join('');
-
-    if ($('pasarInputSelector'))  $('pasarInputSelector').innerHTML  = opts;
-    if ($('pasarMasterSelector')) $('pasarMasterSelector').innerHTML = opts;
-    if ($('prediksiMarketSelect')) $('prediksiMarketSelect').innerHTML = opts;
-    if ($('syairMarketSelect'))    $('syairMarketSelect').innerHTML    = opts;
-
-    if ($('rumusPasarSelector')) {
-        $('rumusPasarSelector').innerHTML = opts;
-        if (typeof loadRumusGrupDropdowns === 'function') loadRumusGrupDropdowns();
-    }
-}
 
 /* ═══════════════════════════════════════════════════════════════════════
    ANALISA & PREDIKSI MULTI PASAR — v2 (fix storage key sa_pasar_history_v1)
