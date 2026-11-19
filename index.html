@@ -10911,20 +10911,44 @@ function refreshSemuaDropdownPasar() {
 
     /* ── Ambil history per pasar (fleksibel ke banyak pola storage) ── */
     function getMarketHistoryLocal(marketId) {
-        // 1. Key tunggal per pasar
-        const singleKeys = [
-            'sa_history_'       + marketId,
-            'sa_pasar_history_' + marketId,
-            'pasarHistory_'     + marketId,
-            'history_'          + marketId,
-            'sa_result_'        + marketId
-        ];
-        for (const k of singleKeys) {
-            const raw = localStorage.getItem(k);
-            if (raw) {
-                try { const arr = JSON.parse(raw); if (Array.isArray(arr)) return arr; } catch (e) {}
-            }
-        }
+    // ✅ Key utama aplikasi kamu
+    const MAIN_KEY = 'sa_pasar_history_v1';
+    let obj = null;
+
+    try {
+        const raw = localStorage.getItem(MAIN_KEY);
+        if (raw) obj = JSON.parse(raw);
+    } catch (e) {}
+
+    if (!obj) return [];
+
+    // Coba beberapa bentuk struktur yang umum
+    const candidate = obj[marketId];
+
+    // Format A: { "macau": [ {result, tanggal}, ... ] }
+    if (Array.isArray(candidate)) return candidate;
+
+    // Format B: { "macau": { history: [...] } }
+    if (candidate && Array.isArray(candidate.history)) return candidate.history;
+
+    // Format C: { "macau": { results: [...] } }
+    if (candidate && Array.isArray(candidate.results)) return candidate.results;
+
+    // Format D: { "macau": { data: [...] } }
+    if (candidate && Array.isArray(candidate.data)) return candidate.data;
+
+    // Format E: { "macau": { list: [...] } }
+    if (candidate && Array.isArray(candidate.list)) return candidate.list;
+
+    // Format F: data disimpan dengan prefix "market_<id>"
+    if (obj['market_' + marketId]) {
+        const v = obj['market_' + marketId];
+        if (Array.isArray(v)) return v;
+        if (v && Array.isArray(v.history)) return v.history;
+    }
+
+    return [];
+}
 
         // 2. Key global berupa objek { marketId: [...] }
         for (const k of ['sa_history', 'sa_pasar_history', 'pasarHistory', 'sa_results']) {
@@ -10948,12 +10972,20 @@ function refreshSemuaDropdownPasar() {
     }
 
     function extract4D(entry) {
-        if (!entry) return null;
-        const raw = entry.result ?? entry.angka ?? entry.value ?? entry.result4d ?? entry.nomor;
-        if (raw == null) return null;
-        const s = String(raw).replace(/\D/g, '');
-        return s.length >= 4 ? s.slice(0, 4) : null;
-    }
+    if (!entry) return null;
+    // Coba semua field yang umum dipakai
+    const raw = entry.result
+             ?? entry.angka
+             ?? entry.value
+             ?? entry.result4d
+             ?? entry.nomor
+             ?? entry.output
+             ?? entry.res
+             ?? entry.r4d;
+    if (raw == null) return null;
+    const s = String(raw).replace(/\D/g, '');
+    return s.length >= 4 ? s.slice(0, 4) : null;
+}
 
     function getEntryDate(entry) {
         return entry.tanggal || entry.date || entry.createdAt || entry.time || '';
