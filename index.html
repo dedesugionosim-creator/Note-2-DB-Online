@@ -10171,364 +10171,365 @@ window.clearPasarHistory = function() {
 /* ═══════════════════════════════════════════════════════════════════════
    LOGIKA RUMUS PASAR & MULTI PASAR (VERSI BERSIH & ANTI ERROR)
    ═══════════════════════════════════════════════════════════════════════ */
-
-// 1. FUNGSI TOGGLE CEKLIS (SUDAH DIGABUNG DENGAN MULTI PASAR)
-function toggleRumusInputs() {
-    if ($('rumusBBFS')) $('rumusBBFS').disabled = !$('rumusUseBBFS').checked;
-    
-    const cbAK = $('rumusUseAK').checked;
-    if ($('rumusAK1')) $('rumusAK1').disabled = !cbAK;
-    if ($('rumusAK2')) $('rumusAK2').disabled = !cbAK;
-    if ($('rumusAK3')) $('rumusAK3').disabled = !cbAK;
-    if ($('rumusAK4')) $('rumusAK4').disabled = !cbAK;
-
-    const cbCB = $('rumusUseCB').checked;
-    if ($('rumusCB')) $('rumusCB').disabled = !cbCB;
-    if ($('rumusCBMode')) $('rumusCBMode').disabled = !cbCB;
-
-    const cb2D = $('rumusUse2D').checked;
-    if ($('rumus2DDepan')) $('rumus2DDepan').disabled = !cb2D;
-    if ($('rumus2DTengah')) $('rumus2DTengah').disabled = !cb2D;
-    if ($('rumus2DBelakang')) $('rumus2DBelakang').disabled = !cb2D;
-
-    const cbG = $('rumusUseGrup').checked;
-    if ($('rumusGrupDepan')) $('rumusGrupDepan').disabled = !cbG;
-    if ($('rumusGrupTengah')) $('rumusGrupTengah').disabled = !cbG;
-    if ($('rumusGrupBelakang')) $('rumusGrupBelakang').disabled = !cbG;
-
-    const cb1D = $('rumusUse1D').checked;
-    if ($('rumus1DGroup')) {
-        $('rumus1DGroup').style.opacity = cb1D ? '1' : '0.5';
-        $('rumus1DGroup').style.pointerEvents = cb1D ? 'auto' : 'none';
-    }
-
-    // Logika Multi Pasar
-    if ($('rumusUseMultiPasar') && $('rumusMultiPasarContainer')) {
-        const cbMulti = $('rumusUseMultiPasar').checked;
-        $('rumusMultiPasarContainer').style.display = cbMulti ? 'block' : 'none';
-        if (cbMulti && typeof renderMultiPasarInputs === 'function') {
-            renderMultiPasarInputs();
-        }
-    }
-}
-
-// Bind event listener ke semua ceklis
-['rumusUseBBFS', 'rumusUseAK', 'rumusUseCB', 'rumusUse2D', 'rumusUseGrup', 'rumusUse1D', 'rumusUseMultiPasar'].forEach(id => {
-    if ($(id)) $(id).addEventListener('change', toggleRumusInputs);
-});
-
-// 2. ISI DROPDOWN GRUP DARI MASTER PASAR
-function loadRumusGrupDropdowns() {
-    const mId = $('rumusPasarSelector').value;
-    if (!mId || !pasarMasterData[mId]) return;
-
-    const getGroups = (arr) => {
-        let g = new Set();
-        arr.forEach(item => { if (item.grup) g.add(item.grup.trim().toUpperCase()); });
-        return Array.from(g).sort();
-    };
-
-    const g1 = getGroups(pasarMasterData[mId].m1);
-    const g2 = getGroups(pasarMasterData[mId].m2);
-    const g3 = getGroups(pasarMasterData[mId].m3);
-
-    let opt1 = '<option value="">— Grup Depan —</option>';
-    g1.forEach(x => opt1 += `<option value="${x}">${x}</option>`);
-    $('rumusGrupDepan').innerHTML = opt1;
-
-    let opt2 = '<option value="">— Grup Tengah —</option>';
-    g2.forEach(x => opt2 += `<option value="${x}">${x}</option>`);
-    $('rumusGrupTengah').innerHTML = opt2;
-
-    let opt3 = '<option value="">— Grup Belakang —</option>';
-    g3.forEach(x => opt3 += `<option value="${x}">${x}</option>`);
-    $('rumusGrupBelakang').innerHTML = opt3;
-}
-
-if ($('rumusPasarSelector')) $('rumusPasarSelector').addEventListener('change', loadRumusGrupDropdowns);
-
-// Wrapper Tab Pasar
-const originalSwitchPasarTab = window.switchPasarTab;
-window.switchPasarTab = function(panelId, btn) {
-    originalSwitchPasarTab(panelId, btn);
-    if (panelId === 'pasarRumus') {
-        let opts = '';
-        marketData.markets.forEach(m => { opts += `<option value="${m.id}">${esc(m.name)}</option>`; });
-        $('rumusPasarSelector').innerHTML = opts;
-        loadRumusGrupDropdowns();
-        toggleRumusInputs();
-    }
-};
-
-// 3. VARIABEL & FUNGSI MULTI PASAR
-const LS_MULTI_PASAR = 'sa_multi_pasar_v1';
-window.multiPasarResultsState = {}; 
-
-const daftarPasarMulti = [
-    "MACAU 5D", "MACAU 4D P1", "MACAU 4D P2", "MACAU 4D P3", "MACAU 4D P4", "MACAU 4D P5", "MACAU 4D P6",
-    "OREGON 03", "OREGON 06", "OREGON 09", "OREGON 12",
-    "KINGKONG", "CAMBODIA", "TEXAS DAY", "SYDNEY", "SINGAPORE", "HONGKONG", "GRABPOLLS",
-    "GIORGIA NGT", "GIORGIA EVE", "GIORGIA MID",
-    "TEXAS NIGHT", "TEXAS EVE", "TEXAS MOR",
-    "TENNESSE EVE", "TENNESSE DAY", "TENNESSE MOR",
-    "TAIWAN", "JAPAN", "CHINA", "MALAYSIA", "HK SIANG", "TOTO WUHAN", "MONGOLIA", "JAKARTA", "NUSANTARA", "JOWO",
-    "PREDIKSI 01", "PREDIKSI 02", "PREDIKSI 03", "PREDIKSI 04", "PREDIKSI 05", "PREDIKSI 06", "PREDIKSI 07", "PREDIKSI 08", "PREDIKSI 09", "PREDIKSI 10",
-    "PREDIKSI 11", "PREDIKSI 12", "PREDIKSI 13", "PREDIKSI 14", "PREDIKSI 15", "PREDIKSI 16", "PREDIKSI 17", "PREDIKSI 18", "PREDIKSI 19", "PREDIKSI 20",
-    "PREDIKSI 21", "PREDIKSI 22", "PREDIKSI 23"
-];
-
-let stateMultiPasar = {};
-try { stateMultiPasar = JSON.parse(localStorage.getItem(LS_MULTI_PASAR) || '{}'); } catch(e) { stateMultiPasar = {}; }
-
-function renderMultiPasarInputs() {
-    const container = $('rumusMultiPasarContainer');
-    if (!container) return;
-    
-    let html = '';
-    daftarPasarMulti.forEach((nama) => {
-        const isMacau5D = nama === "MACAU 5D";
-        const maxLen = isMacau5D ? 5 : 4;
-        const val = stateMultiPasar[nama] || '';
-        
-        html += `<div style="display: grid; grid-template-columns: 100px 1fr; gap: 8px; align-items: center; margin-bottom: 4px;">
-            <div style="font-size: 11px; font-weight: bold; color: var(--text-dim); text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${nama}</div>
-            <input type="text" class="multi-pasar-input" data-nama="${nama}" maxlength="${maxLen}" inputmode="numeric" placeholder="${isMacau5D ? '5 Angka' : '4 Angka'}" value="${esc(val)}" style="padding: 6px; font-size: 13px; border-radius: 4px; border: 1px solid var(--border); background: var(--card-2); color: var(--accent); font-family: monospace;">
-        </div>`;
-    });
-    container.innerHTML = html;
-
-    container.querySelectorAll('input').forEach(el => {
-        el.addEventListener('input', function(e) {
-            e.target.value = onlyDigits(e.target.value).slice(0, parseInt(e.target.maxLength));
-            stateMultiPasar[e.target.dataset.nama] = e.target.value;
-            localStorage.setItem(LS_MULTI_PASAR, JSON.stringify(stateMultiPasar));
-        });
-    });
-}
-
-function get3DCombosFromStr(str) {
-    if (!str || str.length < 3) return [];
-    let res = new Set();
-    function combine(start, current) {
-        if (current.length === 3) {
-            res.add(current.split('').sort().join('')); 
-            return;
-        }
-        for (let i = start; i < str.length; i++) {
-            combine(i + 1, current + str[i]);
-        }
-    }
-    combine(0, '');
-    return Array.from(res);
-}
-
-function renderMultiPasarBreakdown() {
-    const container = $('rumusMultiPasarResultContainer');
-    if (!container) return;
-
-    let html = '';
-    let hasData = false;
-
-    for (let namaPasar in window.multiPasarResultsState) {
-        const data = window.multiPasarResultsState[namaPasar];
-        if (data.matches.length === 0) continue; 
-
-        hasData = true;
-        const displayLimit = 300; 
-        const preview = data.matches.slice(0, displayLimit);
-        const isTruncated = data.matches.length > displayLimit;
-
-        html += `<div class="card" style="border-left: 4px solid var(--warn); margin-bottom: 12px; padding: 12px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:6px;">
-                <h4 style="color:var(--accent); margin:0;">Hasil dari: <span style="color:var(--warn); font-family:monospace; font-size:16px;">${esc(namaPasar)}</span></h4>
-                <span style="font-size:12px; color:var(--success); font-weight:bold; background:rgba(34,197,94,0.1); padding:2px 8px; border-radius:4px;">${data.matches.length.toLocaleString('id-ID')} angka</span>
-            </div>
-            <div style="font-size:11px; color:var(--accent); margin-bottom:8px; font-family:monospace;">Kombinasi 3D (${data.input}): ${data.combos.join(', ')}</div>
-            <div class="page-content" style="max-height:200px; margin:0 0 10px 0; font-size:12px;">${preview.join('*')}${preview.length ? '*' : ''}</div>
-            ${isTruncated ? `<div style="font-size:11px; color:var(--danger); margin-bottom:8px;">*Menampilkan ${displayLimit} angka pertama. Klik Copy untuk semua.</div>` : ''}
-            <div class="page-actions" style="margin-top:0;">
-                <button onclick="copyMultiPasarRow('${esc(namaPasar)}')">📋 Copy Hasil</button>
-            </div>
-        </div>`;
-    }
-
-    if (!hasData) {
-        container.innerHTML = '';
+(function () {
+    // ── Guard: cegah eksekusi ganda ─────────────────────────────────
+    if (window.__SA_RUMUS_PASAR_LOADED__) {
+        console.warn('[Rumus Pasar] Script sudah dimuat sebelumnya, duplikat dilewati.');
         return;
     }
+    window.__SA_RUMUS_PASAR_LOADED__ = true;
+    // ────────────────────────────────────────────────────────────────
 
-    container.innerHTML = `<h3 style="color:var(--warn); margin: 16px 0 10px 0; font-size:15px;">📊 Rincian Hasil Per Pasar (Mengandung 3 Angka)</h3>` + html;
-}
+    // 1. FUNGSI TOGGLE CEKLIS (SUDAH DIGABUNG DENGAN MULTI PASAR)
+    function toggleRumusInputs() {
+        if ($('rumusBBFS')) $('rumusBBFS').disabled = !$('rumusUseBBFS').checked;
 
-window.copyMultiPasarRow = function(namaPasar) {
-    const data = window.multiPasarResultsState[namaPasar];
-    if (!data || !data.matches.length) { toast('Tidak ada hasil', 'error'); return; }
-    copyTextToClipboard(data.matches.join('*') + '*');
-};
+        const cbAK = $('rumusUseAK').checked;
+        if ($('rumusAK1')) $('rumusAK1').disabled = !cbAK;
+        if ($('rumusAK2')) $('rumusAK2').disabled = !cbAK;
+        if ($('rumusAK3')) $('rumusAK3').disabled = !cbAK;
+        if ($('rumusAK4')) $('rumusAK4').disabled = !cbAK;
 
-// Render input saat inisialisasi
-setTimeout(function() {
-    if (typeof renderMultiPasarInputs === 'function') renderMultiPasarInputs();
-}, 500);
+        const cbCB = $('rumusUseCB').checked;
+        if ($('rumusCB')) $('rumusCB').disabled = !cbCB;
+        if ($('rumusCBMode')) $('rumusCBMode').disabled = !cbCB;
 
-// 4. LOGIKA UTAMA GENERATE (SUDAH DIMASUKKAN FILTER MULTI PASAR)
-$('rumusGenerateBtn').addEventListener('click', function() {
-    const mId = $('rumusPasarSelector').value;
-    if (!mId) { toast('Pilih Pasar terlebih dahulu', 'error'); return; }
+        const cb2D = $('rumusUse2D').checked;
+        if ($('rumus2DDepan')) $('rumus2DDepan').disabled = !cb2D;
+        if ($('rumus2DTengah')) $('rumus2DTengah').disabled = !cb2D;
+        if ($('rumus2DBelakang')) $('rumus2DBelakang').disabled = !cb2D;
 
-    const useBBFS = $('rumusUseBBFS').checked;
-    const useAK = $('rumusUseAK').checked;
-    const useCB = $('rumusUseCB').checked;
-    const use2D = $('rumusUse2D').checked;
-    const useGrup = $('rumusUseGrup').checked;
-    const use1D = $('rumusUse1D').checked;
-    const useMultiPasar = $('rumusUseMultiPasar') ? $('rumusUseMultiPasar').checked : false;
+        const cbG = $('rumusUseGrup').checked;
+        if ($('rumusGrupDepan')) $('rumusGrupDepan').disabled = !cbG;
+        if ($('rumusGrupTengah')) $('rumusGrupTengah').disabled = !cbG;
+        if ($('rumusGrupBelakang')) $('rumusGrupBelakang').disabled = !cbG;
 
-    let bbfsPool = null;
-    let akPool = null;
-    let filtered = [];
+        const cb1D = $('rumusUse1D').checked;
+        if ($('rumus1DGroup')) {
+            $('rumus1DGroup').style.opacity = cb1D ? '1' : '0.5';
+            $('rumus1DGroup').style.pointerEvents = cb1D ? 'auto' : 'none';
+        }
 
-    // A. BASIS ANGKA (BBFS & AK)
-    if (useBBFS && onlyDigits($('rumusBBFS').value).length >= 4) {
-        bbfsPool = permutasi4DariDigit($('rumusBBFS').value);
+        if ($('rumusUseMultiPasar') && $('rumusMultiPasarContainer')) {
+            const cbMulti = $('rumusUseMultiPasar').checked;
+            $('rumusMultiPasarContainer').style.display = cbMulti ? 'block' : 'none';
+            if (cbMulti && typeof renderMultiPasarInputs === 'function') {
+                renderMultiPasarInputs();
+            }
+        }
     }
-    
-    if (useAK) {
-        let p1 = parseSingleDigitList($('rumusAK1').value) || ['0','1','2','3','4','5','6','7','8','9'];
-        let p2 = parseSingleDigitList($('rumusAK2').value) || ['0','1','2','3','4','5','6','7','8','9'];
-        let p3 = parseSingleDigitList($('rumusAK3').value) || ['0','1','2','3','4','5','6','7','8','9'];
-        let p4 = parseSingleDigitList($('rumusAK4').value) || ['0','1','2','3','4','5','6','7','8','9'];
-        
-        akPool = [];
-        for (const a of p1) for (const b of p2) for (const c of p3) for (const d of p4) akPool.push(a + b + c + d);
+    window.toggleRumusInputs = toggleRumusInputs;
+
+    ['rumusUseBBFS', 'rumusUseAK', 'rumusUseCB', 'rumusUse2D', 'rumusUseGrup', 'rumusUse1D', 'rumusUseMultiPasar'].forEach(id => {
+        if ($(id)) $(id).addEventListener('change', toggleRumusInputs);
+    });
+
+    // 2. ISI DROPDOWN GRUP
+    function loadRumusGrupDropdowns() {
+        const mId = $('rumusPasarSelector').value;
+        if (!mId || !pasarMasterData[mId]) return;
+
+        const getGroups = (arr) => {
+            let g = new Set();
+            arr.forEach(item => { if (item.grup) g.add(item.grup.trim().toUpperCase()); });
+            return Array.from(g).sort();
+        };
+
+        const g1 = getGroups(pasarMasterData[mId].m1);
+        const g2 = getGroups(pasarMasterData[mId].m2);
+        const g3 = getGroups(pasarMasterData[mId].m3);
+
+        let opt1 = '<option value="">— Grup Depan —</option>';
+        g1.forEach(x => opt1 += `<option value="${x}">${x}</option>`);
+        $('rumusGrupDepan').innerHTML = opt1;
+
+        let opt2 = '<option value="">— Grup Tengah —</option>';
+        g2.forEach(x => opt2 += `<option value="${x}">${x}</option>`);
+        $('rumusGrupTengah').innerHTML = opt2;
+
+        let opt3 = '<option value="">— Grup Belakang —</option>';
+        g3.forEach(x => opt3 += `<option value="${x}">${x}</option>`);
+        $('rumusGrupBelakang').innerHTML = opt3;
     }
+    window.loadRumusGrupDropdowns = loadRumusGrupDropdowns;
 
-    // Intersection BBFS & AK
-    if (bbfsPool && akPool) {
-        const akSet = new Set(akPool);
-        filtered = bbfsPool.filter(n => akSet.has(n));
-    } else if (bbfsPool) {
-        filtered = bbfsPool;
-    } else if (akPool) {
-        filtered = akPool;
-    } else {
-        filtered = M23_UNIVERSE.slice();
-    }
+    if ($('rumusPasarSelector')) $('rumusPasarSelector').addEventListener('change', loadRumusGrupDropdowns);
 
-    if (filtered.length === 0) { toast('Basis angka kosong / tidak ada irisan', 'error'); return; }
+    const originalSwitchPasarTab = window.switchPasarTab;
+    window.switchPasarTab = function (panelId, btn) {
+        originalSwitchPasarTab(panelId, btn);
+        if (panelId === 'pasarRumus') {
+            let opts = '';
+            marketData.markets.forEach(m => { opts += `<option value="${m.id}">${esc(m.name)}</option>`; });
+            $('rumusPasarSelector').innerHTML = opts;
+            loadRumusGrupDropdowns();
+            toggleRumusInputs();
+        }
+    };
 
-    // B. FILTER 2D MANUAL
-    if (use2D) {
-        const depan = parseTwoDigitList($('rumus2DDepan').value);
-        const tengah = parseTwoDigitList($('rumus2DTengah').value);
-        const belakang = parseTwoDigitList($('rumus2DBelakang').value);
+    // 3. VARIABEL & FUNGSI MULTI PASAR
+    const LS_MULTI_PASAR = 'sa_multi_pasar_v1';
+    window.multiPasarResultsState = window.multiPasarResultsState || {};
 
-        filtered = filtered.filter(n => {
-            if (depan.length > 0 && !depan.includes(n.slice(0, 2))) return false;
-            if (tengah.length > 0 && !tengah.includes(n.slice(1, 3))) return false;
-            if (belakang.length > 0 && !belakang.includes(n.slice(2, 4))) return false;
-            return true;
+    const daftarPasarMulti = [
+        "MACAU 5D", "MACAU 4D P1", "MACAU 4D P2", "MACAU 4D P3", "MACAU 4D P4", "MACAU 4D P5", "MACAU 4D P6",
+        "OREGON 03", "OREGON 06", "OREGON 09", "OREGON 12",
+        "KINGKONG", "CAMBODIA", "TEXAS DAY", "SYDNEY", "SINGAPORE", "HONGKONG", "GRABPOLLS",
+        "GIORGIA NGT", "GIORGIA EVE", "GIORGIA MID",
+        "TEXAS NIGHT", "TEXAS EVE", "TEXAS MOR",
+        "TENNESSE EVE", "TENNESSE DAY", "TENNESSE MOR",
+        "TAIWAN", "JAPAN", "CHINA", "MALAYSIA", "HK SIANG", "TOTO WUHAN", "MONGOLIA", "JAKARTA", "NUSANTARA", "JOWO",
+        "PREDIKSI 01", "PREDIKSI 02", "PREDIKSI 03", "PREDIKSI 04", "PREDIKSI 05", "PREDIKSI 06", "PREDIKSI 07", "PREDIKSI 08", "PREDIKSI 09", "PREDIKSI 10",
+        "PREDIKSI 11", "PREDIKSI 12", "PREDIKSI 13", "PREDIKSI 14", "PREDIKSI 15", "PREDIKSI 16", "PREDIKSI 17", "PREDIKSI 18", "PREDIKSI 19", "PREDIKSI 20",
+        "PREDIKSI 21", "PREDIKSI 22", "PREDIKSI 23"
+    ];
+
+    let stateMultiPasar = {};
+    try { stateMultiPasar = JSON.parse(localStorage.getItem(LS_MULTI_PASAR) || '{}'); } catch (e) { stateMultiPasar = {}; }
+
+    function renderMultiPasarInputs() {
+        const container = $('rumusMultiPasarContainer');
+        if (!container) return;
+
+        let html = '';
+        daftarPasarMulti.forEach((nama) => {
+            const isMacau5D = nama === "MACAU 5D";
+            const maxLen = isMacau5D ? 5 : 4;
+            const val = stateMultiPasar[nama] || '';
+
+            html += `<div style="display: grid; grid-template-columns: 100px 1fr; gap: 8px; align-items: center; margin-bottom: 4px;">
+                <div style="font-size: 11px; font-weight: bold; color: var(--text-dim); text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${nama}</div>
+                <input type="text" class="multi-pasar-input" data-nama="${nama}" maxlength="${maxLen}" inputmode="numeric" placeholder="${isMacau5D ? '5 Angka' : '4 Angka'}" value="${esc(val)}" style="padding: 6px; font-size: 13px; border-radius: 4px; border: 1px solid var(--border); background: var(--card-2); color: var(--accent); font-family: monospace;">
+            </div>`;
+        });
+        container.innerHTML = html;
+
+        container.querySelectorAll('input').forEach(el => {
+            el.addEventListener('input', function (e) {
+                e.target.value = onlyDigits(e.target.value).slice(0, parseInt(e.target.maxLength));
+                stateMultiPasar[e.target.dataset.nama] = e.target.value;
+                localStorage.setItem(LS_MULTI_PASAR, JSON.stringify(stateMultiPasar));
+            });
         });
     }
+    window.renderMultiPasarInputs = renderMultiPasarInputs;
 
-    // C. FILTER GRUP
-    if (useGrup) {
-        const targetDepan = $('rumusGrupDepan').value.trim().toUpperCase();
-        const targetTengah = $('rumusGrupTengah').value.trim().toUpperCase();
-        const targetBelakang = $('rumusGrupBelakang').value.trim().toUpperCase();
+    function get3DCombosFromStr(str) {
+        if (!str || str.length < 3) return [];
+        let res = new Set();
+        function combine(start, current) {
+            if (current.length === 3) {
+                res.add(current.split('').sort().join(''));
+                return;
+            }
+            for (let i = start; i < str.length; i++) {
+                combine(i + 1, current + str[i]);
+            }
+        }
+        combine(0, '');
+        return Array.from(res);
+    }
 
-        if (targetDepan || targetTengah || targetBelakang) {
+    function renderMultiPasarBreakdown() {
+        const container = $('rumusMultiPasarResultContainer');
+        if (!container) return;
+
+        let html = '';
+        let hasData = false;
+
+        for (let namaPasar in window.multiPasarResultsState) {
+            const data = window.multiPasarResultsState[namaPasar];
+            if (data.matches.length === 0) continue;
+
+            hasData = true;
+            const displayLimit = 300;
+            const preview = data.matches.slice(0, displayLimit);
+            const isTruncated = data.matches.length > displayLimit;
+
+            html += `<div class="card" style="border-left: 4px solid var(--warn); margin-bottom: 12px; padding: 12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:6px;">
+                    <h4 style="color:var(--accent); margin:0;">Hasil dari: <span style="color:var(--warn); font-family:monospace; font-size:16px;">${esc(namaPasar)}</span></h4>
+                    <span style="font-size:12px; color:var(--success); font-weight:bold; background:rgba(34,197,94,0.1); padding:2px 8px; border-radius:4px;">${data.matches.length.toLocaleString('id-ID')} angka</span>
+                </div>
+                <div style="font-size:11px; color:var(--accent); margin-bottom:8px; font-family:monospace;">Kombinasi 3D (${data.input}): ${data.combos.join(', ')}</div>
+                <div class="page-content" style="max-height:200px; margin:0 0 10px 0; font-size:12px;">${preview.join('*')}${preview.length ? '*' : ''}</div>
+                ${isTruncated ? `<div style="font-size:11px; color:var(--danger); margin-bottom:8px;">*Menampilkan ${displayLimit} angka pertama. Klik Copy untuk semua.</div>` : ''}
+                <div class="page-actions" style="margin-top:0;">
+                    <button onclick="copyMultiPasarRow('${esc(namaPasar)}')">📋 Copy Hasil</button>
+                </div>
+            </div>`;
+        }
+
+        if (!hasData) {
+            container.innerHTML = '';
+            return;
+        }
+
+        container.innerHTML = `<h3 style="color:var(--warn); margin: 16px 0 10px 0; font-size:15px;">📊 Rincian Hasil Per Pasar (Mengandung 3 Angka)</h3>` + html;
+    }
+    window.renderMultiPasarBreakdown = renderMultiPasarBreakdown;
+
+    window.copyMultiPasarRow = function (namaPasar) {
+        const data = window.multiPasarResultsState[namaPasar];
+        if (!data || !data.matches.length) { toast('Tidak ada hasil', 'error'); return; }
+        copyTextToClipboard(data.matches.join('*') + '*');
+    };
+
+    setTimeout(function () {
+        if (typeof renderMultiPasarInputs === 'function') renderMultiPasarInputs();
+    }, 500);
+
+    // 4. LOGIKA UTAMA GENERATE
+    $('rumusGenerateBtn').addEventListener('click', function () {
+        const mId = $('rumusPasarSelector').value;
+        if (!mId) { toast('Pilih Pasar terlebih dahulu', 'error'); return; }
+
+        const useBBFS = $('rumusUseBBFS').checked;
+        const useAK = $('rumusUseAK').checked;
+        const useCB = $('rumusUseCB').checked;
+        const use2D = $('rumusUse2D').checked;
+        const useGrup = $('rumusUseGrup').checked;
+        const use1D = $('rumusUse1D').checked;
+        const useMultiPasar = $('rumusUseMultiPasar') ? $('rumusUseMultiPasar').checked : false;
+
+        let bbfsPool = null;
+        let akPool = null;
+        let filtered = [];
+
+        if (useBBFS && onlyDigits($('rumusBBFS').value).length >= 4) {
+            bbfsPool = permutasi4DariDigit($('rumusBBFS').value);
+        }
+
+        if (useAK) {
+            let p1 = parseSingleDigitList($('rumusAK1').value) || ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+            let p2 = parseSingleDigitList($('rumusAK2').value) || ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+            let p3 = parseSingleDigitList($('rumusAK3').value) || ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+            let p4 = parseSingleDigitList($('rumusAK4').value) || ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+
+            akPool = [];
+            for (const a of p1) for (const b of p2) for (const c of p3) for (const d of p4) akPool.push(a + b + c + d);
+        }
+
+        if (bbfsPool && akPool) {
+            const akSet = new Set(akPool);
+            filtered = bbfsPool.filter(n => akSet.has(n));
+        } else if (bbfsPool) {
+            filtered = bbfsPool;
+        } else if (akPool) {
+            filtered = akPool;
+        } else {
+            filtered = M23_UNIVERSE.slice();
+        }
+
+        if (filtered.length === 0) { toast('Basis angka kosong / tidak ada irisan', 'error'); return; }
+
+        if (use2D) {
+            const depan = parseTwoDigitList($('rumus2DDepan').value);
+            const tengah = parseTwoDigitList($('rumus2DTengah').value);
+            const belakang = parseTwoDigitList($('rumus2DBelakang').value);
+
             filtered = filtered.filter(n => {
-                const p1 = n.slice(0, 2);
-                const p2 = n.slice(1, 3);
-                const p3 = n.slice(2, 4);
-
-                if (targetDepan) {
-                    const m1 = cariMaster(mId, 1, p1);
-                    if (m1.grup.trim().toUpperCase() !== targetDepan) return false;
-                }
-                if (targetTengah) {
-                    const m2 = cariMaster(mId, 2, p2);
-                    if (m2.grup.trim().toUpperCase() !== targetTengah) return false;
-                }
-                if (targetBelakang) {
-                    const m3 = cariMaster(mId, 3, p3);
-                    if (m3.grup.trim().toUpperCase() !== targetBelakang) return false;
-                }
+                if (depan.length > 0 && !depan.includes(n.slice(0, 2))) return false;
+                if (tengah.length > 0 && !tengah.includes(n.slice(1, 3))) return false;
+                if (belakang.length > 0 && !belakang.includes(n.slice(2, 4))) return false;
                 return true;
             });
         }
-    }
 
-    // D. FILTER 1D DEPAN
-    if (use1D) {
-        const d1 = [];
-        $('rumus1DGroup').querySelectorAll('input:checked').forEach(e => d1.push(e.value));
-        if (d1.length > 0) {
-            filtered = filtered.filter(n => d1.includes(n[0]));
-        }
-    }
+        if (useGrup) {
+            const targetDepan = $('rumusGrupDepan').value.trim().toUpperCase();
+            const targetTengah = $('rumusGrupTengah').value.trim().toUpperCase();
+            const targetBelakang = $('rumusGrupBelakang').value.trim().toUpperCase();
 
-    // D2. FILTER MULTI PASAR (MENGANDUNG 3 ANGKA)
-    window.multiPasarResultsState = {}; 
-    if (useMultiPasar) {
-        let all3DCombos = new Set();
-        const basePool = filtered.slice(); 
-        
-        for (let namaPasar in stateMultiPasar) {
-            const val = stateMultiPasar[namaPasar];
-            if (val && val.length >= 3) {
-                const combos = get3DCombosFromStr(val);
-                combos.forEach(c => all3DCombos.add(c));
+            if (targetDepan || targetTengah || targetBelakang) {
+                filtered = filtered.filter(n => {
+                    const p1 = n.slice(0, 2);
+                    const p2 = n.slice(1, 3);
+                    const p3 = n.slice(2, 4);
 
-                const matchesForMarket = basePool.filter(n => {
-                    return combos.some(combo => blContainsCombo(n, blParseMultiset(combo)));
+                    if (targetDepan) {
+                        const m1 = cariMaster(mId, 1, p1);
+                        if (m1.grup.trim().toUpperCase() !== targetDepan) return false;
+                    }
+                    if (targetTengah) {
+                        const m2 = cariMaster(mId, 2, p2);
+                        if (m2.grup.trim().toUpperCase() !== targetTengah) return false;
+                    }
+                    if (targetBelakang) {
+                        const m3 = cariMaster(mId, 3, p3);
+                        if (m3.grup.trim().toUpperCase() !== targetBelakang) return false;
+                    }
+                    return true;
                 });
-
-                window.multiPasarResultsState[namaPasar] = {
-                    input: val, combos: combos, matches: matchesForMarket
-                };
             }
         }
 
-        if (all3DCombos.size > 0) {
-            const comboArray = Array.from(all3DCombos);
-            filtered = filtered.filter(n => {
-                return comboArray.some(combo => blContainsCombo(n, blParseMultiset(combo)));
-            });
+        if (use1D) {
+            const d1 = [];
+            $('rumus1DGroup').querySelectorAll('input:checked').forEach(e => d1.push(e.value));
+            if (d1.length > 0) {
+                filtered = filtered.filter(n => d1.includes(n[0]));
+            }
         }
-    }
 
-    // E. FILTER CB
-    if (useCB) {
-        const cb = parseSingleDigitList($('rumusCB').value);
-        const mode = $('rumusCBMode').value;
-        if (cb.length > 0) {
-            filtered = filterByCB(filtered, cb.join(''), mode);
+        window.multiPasarResultsState = {};
+        if (useMultiPasar) {
+            let all3DCombos = new Set();
+            const basePool = filtered.slice();
+
+            for (let namaPasar in stateMultiPasar) {
+                const val = stateMultiPasar[namaPasar];
+                if (val && val.length >= 3) {
+                    const combos = get3DCombosFromStr(val);
+                    combos.forEach(c => all3DCombos.add(c));
+
+                    const matchesForMarket = basePool.filter(n => {
+                        return combos.some(combo => blContainsCombo(n, blParseMultiset(combo)));
+                    });
+
+                    window.multiPasarResultsState[namaPasar] = {
+                        input: val, combos: combos, matches: matchesForMarket
+                    };
+                }
+            }
+
+            if (all3DCombos.size > 0) {
+                const comboArray = Array.from(all3DCombos);
+                filtered = filtered.filter(n => {
+                    return comboArray.some(combo => blContainsCombo(n, blParseMultiset(combo)));
+                });
+            }
         }
-    }
 
-    // TAMPILKAN HASIL
-    if (filtered.length === 0) {
-        toast('Tidak ada kombinasi yang cocok', 'error');
-        pageState.pasarRumus.pages = [];
+        if (useCB) {
+            const cb = parseSingleDigitList($('rumusCB').value);
+            const mode = $('rumusCBMode').value;
+            if (cb.length > 0) {
+                filtered = filterByCB(filtered, cb.join(''), mode);
+            }
+        }
+
+        if (filtered.length === 0) {
+            toast('Tidak ada kombinasi yang cocok', 'error');
+            pageState.pasarRumus.pages = [];
+            renderPagination('pasarRumusResult', 'pasarRumus', 'Hasil', '');
+            renderMultiPasarBreakdown();
+            return;
+        }
+
+        filtered.sort();
+        pageState.pasarRumus.pages = paginateArray(filtered);
+        pageState.pasarRumus.current = 0;
+        pageState.pasarRumus.meta = 'Rumus Pasar: ' + $('rumusPasarSelector').options[$('rumusPasarSelector').selectedIndex].text;
+
         renderPagination('pasarRumusResult', 'pasarRumus', 'Hasil', '');
-        renderMultiPasarBreakdown(); // Tetap panggil untuk membersihkan layar
-        return;
-    }
+        renderMultiPasarBreakdown();
+        toast('Berhasil: ' + filtered.length.toLocaleString('id-ID') + ' kombinasi', 'success');
 
-    filtered.sort();
-    pageState.pasarRumus.pages = paginateArray(filtered);
-    pageState.pasarRumus.current = 0;
-    pageState.pasarRumus.meta = 'Rumus Pasar: ' + $('rumusPasarSelector').options[$('rumusPasarSelector').selectedIndex].text;
-
-    renderPagination('pasarRumusResult', 'pasarRumus', 'Hasil', '');
-    renderMultiPasarBreakdown();
-    toast('Berhasil: ' + filtered.length.toLocaleString('id-ID') + ' kombinasi', 'success');
-    
-    const resBox = $('pasarRumusResult');
-    if (resBox) resBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
-});
+        const resBox = $('pasarRumusResult');
+        if (resBox) resBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+})();
 
 /* ═══════════════════════════════════════════════════════════════════════
    FITUR MULTI PASAR (MENGANDUNG 3 ANGKA) - ANTI ERROR
