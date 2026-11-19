@@ -3532,7 +3532,18 @@ document.querySelectorAll('nav button').forEach(function(btn) {
         if (typeof refreshTableSelector === 'function') refreshTableSelector(); 
             renderResultTable(); 
         }
-        if (btn.dataset.section === 'dataPasar') renderMarketResultTable();
+                if (btn.dataset.section === 'dataPasar') {
+            // Inisialisasi data pasar yang baru
+            if (typeof initPasarData === 'function') initPasarData();
+            
+            // Isi dropdown & render tampilan awal (Tab Master Pasar)
+            if (typeof renderPasarMasterEditor === 'function') renderPasarMasterEditor();
+            if (typeof renderPasarHistory === 'function') renderPasarHistory();
+            
+            // Pastikan tab yang aktif adalah tab pertama (Master Pasar)
+            const firstPasarTab = document.querySelector('#subTabsPasar button');
+            if (firstPasarTab) firstPasarTab.click();
+        }
         stopTogelCountdown();
         if (btn.dataset.section === 'menuTogel') { renderMenuTogel(); startTogelCountdown(); }
         if (btn.dataset.section === 'editPrediksi') renderEditPrediksi();
