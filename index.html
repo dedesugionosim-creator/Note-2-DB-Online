@@ -2303,6 +2303,19 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
                             <div><input type="checkbox" id="r1-9" value="9"><label for="r1-9">9</label></div>
                         </div>
                     </div>
+					
+				    <!-- 7. Mengandung 3 Angka (Multi Pasar) -->
+                    <div class="field" style="background:var(--card-2); padding:10px; border-radius:8px; border:1px solid var(--border);">
+                        <label style="display:flex; align-items:center; gap:8px; font-weight:bold; color:var(--accent); cursor:pointer;">
+                            <input type="checkbox" id="rumusUseMultiPasar" style="width:18px; height:18px; accent-color:var(--accent);"> 
+                            7. Mengandung 3 Angka (Multi Pasar)
+                        </label>
+                        <p style="font-size:11px; color:var(--muted); margin: 4px 0 8px 0;">Isi 4 angka (khusus MACAU 5D isi 5 angka). Sistem akan mencari 4D yang mengandung salah satu kombinasi 3 angka dari pasar yang diisi.</p>
+                        
+                        <div id="rumusMultiPasarContainer" style="display:none; max-height: 350px; overflow-y: auto; padding: 6px; background: var(--card); border: 1px solid var(--border); border-radius: 4px;">
+                            <!-- Input Multi Pasar akan di-render oleh JS -->
+                        </div>
+                    </div>
 
                     <p id="rumusInfo" class="text-accent" style="font-size:13px; margin:12px 0;">Info: —</p>
                     <button class="btn-primary" id="rumusGenerateBtn">⚡ Generate Rumus Pasar</button>
@@ -10228,6 +10241,110 @@ window.switchPasarTab = function(panelId, btn) {
     }
 };
 
+
+/* ═══════════════════════════════════════════════════════════════════════
+   FITUR MULTI PASAR (MENGANDUNG 3 ANGKA)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+const LS_MULTI_PASAR = 'sa_multi_pasar_v1';
+const daftarPasarMulti = [
+    "MACAU 5D", "MACAU 4D P1", "MACAU 4D P2", "MACAU 4D P3", "MACAU 4D P4", "MACAU 4D P5", "MACAU 4D P6",
+    "OREGON 03", "OREGON 06", "OREGON 09", "OREGON 12",
+    "KINGKONG", "CAMBODIA", "TEXAS DAY", "SYDNEY", "SINGAPORE", "HONGKONG", "GRABPOLLS",
+    "GIORGIA NGT", "GIORGIA EVE", "GIORGIA MID",
+    "TEXAS NIGHT", "TEXAS EVE", "TEXAS MOR",
+    "TENNESSE EVE", "TENNESSE DAY", "TENNESSE MOR",
+    "TAIWAN", "JAPAN", "CHINA", "MALAYSIA", "HK SIANG", "TOTO WUHAN", "MONGOLIA", "JAKARTA", "NUSANTARA", "JOWO",
+    "PREDIKSI 01", "PREDIKSI 02", "PREDIKSI 03", "PREDIKSI 04", "PREDIKSI 05", "PREDIKSI 06", "PREDIKSI 07", "PREDIKSI 08", "PREDIKSI 09", "PREDIKSI 10",
+    "PREDIKSI 11", "PREDIKSI 12", "PREDIKSI 13", "PREDIKSI 14", "PREDIKSI 15", "PREDIKSI 16", "PREDIKSI 17", "PREDIKSI 18", "PREDIKSI 19", "PREDIKSI 20",
+    "PREDIKSI 21", "PREDIKSI 22", "PREDIKSI 23"
+];
+
+let stateMultiPasar = {};
+try { stateMultiPasar = JSON.parse(localStorage.getItem(LS_MULTI_PASAR) || '{}'); } catch(e) { stateMultiPasar = {}; }
+
+function renderMultiPasarInputs() {
+    const container = $('rumusMultiPasarContainer');
+    if (!container) return;
+    
+    let html = '';
+    daftarPasarMulti.forEach((nama, idx) => {
+        const isMacau5D = nama === "MACAU 5D";
+        const maxLen = isMacau5D ? 5 : 4;
+        const val = stateMultiPasar[nama] || '';
+        
+        html += `<div style="display: grid; grid-template-columns: 100px 1fr; gap: 8px; align-items: center; margin-bottom: 4px;">
+            <div style="font-size: 11px; font-weight: bold; color: var(--text-dim); text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${nama}</div>
+            <input type="text" class="multi-pasar-input" data-nama="${nama}" maxlength="${maxLen}" inputmode="numeric" placeholder="${isMacau5D ? '5 Angka' : '4 Angka'}" value="${esc(val)}" style="padding: 6px; font-size: 13px; border-radius: 4px; border: 1px solid var(--border); background: var(--card-2); color: var(--accent); font-family: monospace;">
+        </div>`;
+    });
+    container.innerHTML = html;
+
+    // Event input untuk auto-save
+    container.querySelectorAll('input').forEach(el => {
+        el.addEventListener('input', function(e) {
+            e.target.value = onlyDigits(e.target.value).slice(0, parseInt(e.target.maxLength));
+            stateMultiPasar[e.target.dataset.nama] = e.target.value;
+            localStorage.setItem(LS_MULTI_PASAR, JSON.stringify(stateMultiPasar));
+        });
+    });
+}
+
+// Fungsi pembuat kombinasi 3 angka (Mendukung 4 digit & 5 digit)
+function get3DCombosFromStr(str) {
+    if (!str || str.length < 3) return [];
+    let res = new Set();
+    // Ambil kombinasi 3 dari N
+    function combine(start, current) {
+        if (current.length === 3) {
+            res.add(current.split('').sort().join('')); // Sort agar 123 & 321 sama
+            return;
+        }
+        for (let i = start; i < str.length; i++) {
+            combine(i + 1, current + str[i]);
+        }
+    }
+    combine(0, '');
+    return Array.from(res);
+}
+
+// Panggil render saat inisialisasi
+if (document.readyState !== 'loading') { renderMultiPasarInputs(); } else { document.addEventListener('DOMContentLoaded', renderMultiPasarInputs); }
+
+// Update Toggle Ceklis
+const origToggle = toggleRumusInputs;
+toggleRumusInputs = function() {
+    origToggle();
+    const cbMulti = $('rumusUseMultiPasar').checked;
+    $('rumusMultiPasarContainer').style.display = cbMulti ? 'block' : 'none';
+};
+if ($('rumusUseMultiPasar')) $('rumusUseMultiPasar').addEventListener('change', toggleRumusInputs);
+
+    // D2. FILTER MULTI PASAR (MENGANDUNG 3 ANGKA)
+    if ($('rumusUseMultiPasar') && $('rumusUseMultiPasar').checked) {
+        let all3DCombos = new Set();
+        
+        // Kumpulkan semua kombinasi 3D dari pasar yang diisi
+        for (let namaPasar in stateMultiPasar) {
+            const val = stateMultiPasar[namaPasar];
+            if (val && val.length >= 3) {
+                const combos = get3DCombosFromStr(val);
+                combos.forEach(c => all3DCombos.add(c));
+            }
+        }
+
+        // Jika ada kombinasi yang harus dicari
+        if (all3DCombos.size > 0) {
+            const comboArray = Array.from(all3DCombos);
+            filtered = filtered.filter(n => {
+                // Angka 4D lolos jika mengandung SALAH SATU kombinasi 3D (OR)
+                return comboArray.some(combo => {
+                    return blContainsCombo(n, blParseMultiset(combo));
+                });
+            });
+        }
+    }
+	
 // 3. Logika Utama Generate
 $('rumusGenerateBtn').addEventListener('click', function() {
     const mId = $('rumusPasarSelector').value;
