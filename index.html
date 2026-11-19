@@ -10867,28 +10867,86 @@ function renderMultiPasarBreakdown() {
 window.renderMultiPasarBreakdown = renderMultiPasarBreakdown;
 
 
-// ═══════════════════════════════════════════════════════════════════
-// TOMBOL TAMBAH PASAR — DI PANEL INPUT & HISTORY RESULT
-// ═══════════════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════════════
+   TAMBAH PASAR — WRAPPER + REFRESH DROPDOWN (versi global-safe)
+   ═══════════════════════════════════════════════════════════════════════ */
+window.refreshSemuaDropdownPasar = function () {
+    try {
+        if (typeof marketData === 'undefined' || !marketData || !Array.isArray(marketData.markets)) {
+            console.warn('[Refresh] marketData belum siap');
+            return;
+        }
+        if (marketData.markets.length === 0) {
+            console.warn('[Refresh] marketData.markets kosong');
+            return;
+        }
+
+        const safe = (s) => {
+            const str = String(s ?? '');
+            if (typeof esc === 'function') return esc(str);
+            return str.replace(/[&<>"']/g, c => ({
+                '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+            }[c]));
+        };
+
+        const opts = marketData.markets
+            .map(m => `<option value="${safe(m.id)}">${safe(m.name)}</option>`)
+            .join('');
+
+        const ids = [
+            'pasarInputSelector',
+            'pasarMasterSelector',
+            'prediksiMarketSelect',
+            'syairMarketSelect'
+        ];
+
+        ids.forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const prev = el.value;
+            el.innerHTML = opts;
+            el.disabled = false;
+            el.style.pointerEvents = '';
+            el.style.opacity = '1';
+            if (prev && [...el.options].some(o => o.value === prev)) el.value = prev;
+        });
+
+        const rumusSel = document.getElementById('rumusPasarSelector');
+        if (rumusSel) {
+            const prev = rumusSel.value;
+            rumusSel.innerHTML = opts;
+            rumusSel.disabled = false;
+            if (prev && [...rumusSel.options].some(o => o.value === prev)) rumusSel.value = prev;
+            if (typeof window.loadRumusGrupDropdowns === 'function') {
+                try { window.loadRumusGrupDropdowns(); } catch (e) { console.warn(e); }
+            }
+        }
+
+        console.log('[Refresh] Dropdown terisi:', marketData.markets.length, 'pasar');
+    } catch (err) {
+        console.error('[Refresh] Gagal:', err);
+    }
+};
+
 window.tambahPasarDariInput = function () {
-    if (typeof tambahPasarTogel !== 'function') {
+    if (typeof window.tambahPasarTogel !== 'function') {
         if (typeof toast === 'function') toast('Fungsi Tambah Pasar tidak tersedia', 'error');
         return;
     }
-    tambahPasarTogel();
+    window.tambahPasarTogel();
 
+    // Polling: refresh berulang sampai dropdown benar-benar terisi
     let tries = 0;
-    const maxTries = 30;      // 30 × 300ms = 9 detik
+    const maxTries = 30;
     const timer = setInterval(function () {
         tries++;
-        const sel = $('pasarInputSelector');
         const hasData = typeof marketData !== 'undefined'
                      && marketData.markets
                      && marketData.markets.length > 0;
+        const sel = document.getElementById('pasarInputSelector');
 
         if (hasData && sel) {
-            try { refreshSemuaDropdownPasar(); } catch (e) { console.warn('refresh err:', e); }
-            // Berhasil terisi?
+            window.refreshSemuaDropdownPasar();
             if (sel.options.length > 0) {
                 clearInterval(timer);
                 console.log('[Tambah Pasar] Dropdown siap setelah ' + (tries * 300) + 'ms');
@@ -10897,8 +10955,7 @@ window.tambahPasarDariInput = function () {
         }
         if (tries >= maxTries) {
             clearInterval(timer);
-            console.warn('[Tambah Pasar] Timeout — dropdown tidak terisi');
-            if (typeof toast === 'function') toast('Dropdown pasar belum terisi, coba refresh', 'error');
+            console.warn('[Tambah Pasar] Timeout — dropdown belum terisi');
         }
     }, 300);
 };
