@@ -10170,6 +10170,8 @@ window.clearPasarHistory = function() {
 
 /* ═══════════════════════════════════════════════════════════════════════
    LOGIKA RUMUS PASAR & MULTI PASAR (VERSI BERSIH & ANTI ERROR)
+   - Guard idempoten (aman kalau file ke-load 2x)
+   - Multi Pasar: pagination 350 angka/halaman + Copy + Next
    ═══════════════════════════════════════════════════════════════════════ */
 (function () {
     // ── Guard: cegah eksekusi ganda ─────────────────────────────────
@@ -10180,7 +10182,9 @@ window.clearPasarHistory = function() {
     window.__SA_RUMUS_PASAR_LOADED__ = true;
     // ────────────────────────────────────────────────────────────────
 
+    // ═════════════════════════════════════════════════════════════════
     // 1. FUNGSI TOGGLE CEKLIS (SUDAH DIGABUNG DENGAN MULTI PASAR)
+    // ═════════════════════════════════════════════════════════════════
     function toggleRumusInputs() {
         if ($('rumusBBFS')) $('rumusBBFS').disabled = !$('rumusUseBBFS').checked;
 
@@ -10210,6 +10214,7 @@ window.clearPasarHistory = function() {
             $('rumus1DGroup').style.pointerEvents = cb1D ? 'auto' : 'none';
         }
 
+        // Logika Multi Pasar
         if ($('rumusUseMultiPasar') && $('rumusMultiPasarContainer')) {
             const cbMulti = $('rumusUseMultiPasar').checked;
             $('rumusMultiPasarContainer').style.display = cbMulti ? 'block' : 'none';
@@ -10220,11 +10225,14 @@ window.clearPasarHistory = function() {
     }
     window.toggleRumusInputs = toggleRumusInputs;
 
+    // Bind event listener ke semua ceklis
     ['rumusUseBBFS', 'rumusUseAK', 'rumusUseCB', 'rumusUse2D', 'rumusUseGrup', 'rumusUse1D', 'rumusUseMultiPasar'].forEach(id => {
         if ($(id)) $(id).addEventListener('change', toggleRumusInputs);
     });
 
-    // 2. ISI DROPDOWN GRUP
+    // ═════════════════════════════════════════════════════════════════
+    // 2. ISI DROPDOWN GRUP DARI MASTER PASAR
+    // ═════════════════════════════════════════════════════════════════
     function loadRumusGrupDropdowns() {
         const mId = $('rumusPasarSelector').value;
         if (!mId || !pasarMasterData[mId]) return;
@@ -10255,6 +10263,7 @@ window.clearPasarHistory = function() {
 
     if ($('rumusPasarSelector')) $('rumusPasarSelector').addEventListener('change', loadRumusGrupDropdowns);
 
+    // Wrapper Tab Pasar
     const originalSwitchPasarTab = window.switchPasarTab;
     window.switchPasarTab = function (panelId, btn) {
         originalSwitchPasarTab(panelId, btn);
@@ -10267,9 +10276,13 @@ window.clearPasarHistory = function() {
         }
     };
 
+    // ═════════════════════════════════════════════════════════════════
     // 3. VARIABEL & FUNGSI MULTI PASAR
-    const LS_MULTI_PASAR = 'sa_multi_pasar_v1';
+    // ═════════════════════════════════════════════════════════════════
+    const LS_MULTI_PASAR         = 'sa_multi_pasar_v1';
+    const MULTI_PASAR_PER_PAGE   = 350;                                 // ← jumlah angka per halaman
     window.multiPasarResultsState = window.multiPasarResultsState || {};
+    window.multiPasarPageState    = window.multiPasarPageState    || {}; // ← posisi halaman per-pasar
 
     const daftarPasarMulti = [
         "MACAU 5D", "MACAU 4D P1", "MACAU 4D P2", "MACAU 4D P3", "MACAU 4D P4", "MACAU 4D P5", "MACAU 4D P6",
@@ -10330,6 +10343,13 @@ window.clearPasarHistory = function() {
         return Array.from(res);
     }
 
+    // Navigasi halaman per pasar
+    function multiPasarGoPage(namaPasar, page) {
+        window.multiPasarPageState[namaPasar] = page;
+        renderMultiPasarBreakdown();
+    }
+    window.multiPasarGoPage = multiPasarGoPage;
+
     function renderMultiPasarBreakdown() {
         const container = $('rumusMultiPasarResultContainer');
         if (!container) return;
@@ -10339,24 +10359,49 @@ window.clearPasarHistory = function() {
 
         for (let namaPasar in window.multiPasarResultsState) {
             const data = window.multiPasarResultsState[namaPasar];
-            if (data.matches.length === 0) continue;
-
+            if (!data.matches.length) continue;
             hasData = true;
-            const displayLimit = 300;
-            const preview = data.matches.slice(0, displayLimit);
-            const isTruncated = data.matches.length > displayLimit;
+
+            const total      = data.matches.length;
+            const perPage    = MULTI_PASAR_PER_PAGE;
+            const totalPages = Math.max(1, Math.ceil(total / perPage));
+
+            // Normalisasi nomor halaman
+            let page = window.multiPasarPageState[namaPasar] || 0;
+            if (page >= totalPages) page = totalPages - 1;
+            if (page < 0) page = 0;
+            window.multiPasarPageState[namaPasar] = page;
+
+            const start = page * perPage;
+            const end   = Math.min(start + perPage, total);
+            const slice = data.matches.slice(start, end);
+
+            // ── Tombol navigasi & copy ──
+            let navBtns = '';
+            if (page > 0) {
+                navBtns += `<button onclick="multiPasarGoPage('${esc(namaPasar)}', ${page - 1})">⬅ Prev</button>`;
+            }
+            navBtns += `<button onclick="copyMultiPasarRow('${esc(namaPasar)}', 'page')">📋 Copy (${slice.length} angka)</button>`;
+            if (page < totalPages - 1) {
+                navBtns += `<button onclick="multiPasarGoPage('${esc(namaPasar)}', ${page + 1})">Next ➡</button>`;
+            }
+            navBtns += `<button onclick="copyMultiPasarRow('${esc(namaPasar)}', 'all')">📋 Copy Semua (${total.toLocaleString('id-ID')})</button>`;
 
             html += `<div class="card" style="border-left: 4px solid var(--warn); margin-bottom: 12px; padding: 12px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:6px;">
                     <h4 style="color:var(--accent); margin:0;">Hasil dari: <span style="color:var(--warn); font-family:monospace; font-size:16px;">${esc(namaPasar)}</span></h4>
-                    <span style="font-size:12px; color:var(--success); font-weight:bold; background:rgba(34,197,94,0.1); padding:2px 8px; border-radius:4px;">${data.matches.length.toLocaleString('id-ID')} angka</span>
+                    <span style="font-size:12px; color:var(--success); font-weight:bold; background:rgba(34,197,94,0.1); padding:2px 8px; border-radius:4px;">${total.toLocaleString('id-ID')} angka</span>
                 </div>
                 <div style="font-size:11px; color:var(--accent); margin-bottom:8px; font-family:monospace;">Kombinasi 3D (${data.input}): ${data.combos.join(', ')}</div>
-                <div class="page-content" style="max-height:200px; margin:0 0 10px 0; font-size:12px;">${preview.join('*')}${preview.length ? '*' : ''}</div>
-                ${isTruncated ? `<div style="font-size:11px; color:var(--danger); margin-bottom:8px;">*Menampilkan ${displayLimit} angka pertama. Klik Copy untuk semua.</div>` : ''}
-                <div class="page-actions" style="margin-top:0;">
-                    <button onclick="copyMultiPasarRow('${esc(namaPasar)}')">📋 Copy Hasil</button>
+
+                <div style="font-size:11px; color:var(--text-dim); margin-bottom:6px;">
+                    Halaman <b>${page + 1}</b> / <b>${totalPages}</b>
+                    (angka ${start + 1}–${end} dari ${total.toLocaleString('id-ID')})
                 </div>
+
+                <div class="page-content" style="max-height:200px; margin:0 0 10px 0; font-size:12px;">${slice.join('*')}${slice.length ? '*' : ''}</div>
+
+                <div class="page-actions" style="margin-top:0; display:flex; flex-wrap:wrap; gap:6px;">${navBtns}</div>
             </div>`;
         }
 
@@ -10369,47 +10414,66 @@ window.clearPasarHistory = function() {
     }
     window.renderMultiPasarBreakdown = renderMultiPasarBreakdown;
 
-    window.copyMultiPasarRow = function (namaPasar) {
+    window.copyMultiPasarRow = function (namaPasar, mode) {
         const data = window.multiPasarResultsState[namaPasar];
         if (!data || !data.matches.length) { toast('Tidak ada hasil', 'error'); return; }
-        copyTextToClipboard(data.matches.join('*') + '*');
+
+        let arr = data.matches;
+        if (mode === 'page') {
+            const perPage = MULTI_PASAR_PER_PAGE;
+            const pg = window.multiPasarPageState[namaPasar] || 0;
+            arr = data.matches.slice(pg * perPage, (pg + 1) * perPage);
+        }
+
+        copyTextToClipboard(arr.join('*') + '*');
+        toast(
+            (mode === 'page'
+                ? `Halaman ini di-copy (${arr.length} angka)`
+                : `Semua di-copy (${arr.length.toLocaleString('id-ID')} angka)`),
+            'success'
+        );
     };
 
+    // Render input saat inisialisasi
     setTimeout(function () {
         if (typeof renderMultiPasarInputs === 'function') renderMultiPasarInputs();
     }, 500);
 
-    // 4. LOGIKA UTAMA GENERATE
+    // ═════════════════════════════════════════════════════════════════
+    // 4. LOGIKA UTAMA GENERATE (SUDAH DIMASUKKAN FILTER MULTI PASAR)
+    // ═════════════════════════════════════════════════════════════════
     $('rumusGenerateBtn').addEventListener('click', function () {
         const mId = $('rumusPasarSelector').value;
         if (!mId) { toast('Pilih Pasar terlebih dahulu', 'error'); return; }
 
-        const useBBFS = $('rumusUseBBFS').checked;
-        const useAK = $('rumusUseAK').checked;
-        const useCB = $('rumusUseCB').checked;
-        const use2D = $('rumusUse2D').checked;
-        const useGrup = $('rumusUseGrup').checked;
-        const use1D = $('rumusUse1D').checked;
-        const useMultiPasar = $('rumusUseMultiPasar') ? $('rumusUseMultiPasar').checked : false;
+        const useBBFS        = $('rumusUseBBFS').checked;
+        const useAK          = $('rumusUseAK').checked;
+        const useCB          = $('rumusUseCB').checked;
+        const use2D          = $('rumusUse2D').checked;
+        const useGrup        = $('rumusUseGrup').checked;
+        const use1D          = $('rumusUse1D').checked;
+        const useMultiPasar  = $('rumusUseMultiPasar') ? $('rumusUseMultiPasar').checked : false;
 
         let bbfsPool = null;
-        let akPool = null;
+        let akPool   = null;
         let filtered = [];
 
+        // A. BASIS ANGKA (BBFS & AK)
         if (useBBFS && onlyDigits($('rumusBBFS').value).length >= 4) {
             bbfsPool = permutasi4DariDigit($('rumusBBFS').value);
         }
 
         if (useAK) {
-            let p1 = parseSingleDigitList($('rumusAK1').value) || ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-            let p2 = parseSingleDigitList($('rumusAK2').value) || ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-            let p3 = parseSingleDigitList($('rumusAK3').value) || ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-            let p4 = parseSingleDigitList($('rumusAK4').value) || ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+            let p1 = parseSingleDigitList($('rumusAK1').value) || ['0','1','2','3','4','5','6','7','8','9'];
+            let p2 = parseSingleDigitList($('rumusAK2').value) || ['0','1','2','3','4','5','6','7','8','9'];
+            let p3 = parseSingleDigitList($('rumusAK3').value) || ['0','1','2','3','4','5','6','7','8','9'];
+            let p4 = parseSingleDigitList($('rumusAK4').value) || ['0','1','2','3','4','5','6','7','8','9'];
 
             akPool = [];
             for (const a of p1) for (const b of p2) for (const c of p3) for (const d of p4) akPool.push(a + b + c + d);
         }
 
+        // Intersection BBFS & AK
         if (bbfsPool && akPool) {
             const akSet = new Set(akPool);
             filtered = bbfsPool.filter(n => akSet.has(n));
@@ -10423,9 +10487,10 @@ window.clearPasarHistory = function() {
 
         if (filtered.length === 0) { toast('Basis angka kosong / tidak ada irisan', 'error'); return; }
 
+        // B. FILTER 2D MANUAL
         if (use2D) {
-            const depan = parseTwoDigitList($('rumus2DDepan').value);
-            const tengah = parseTwoDigitList($('rumus2DTengah').value);
+            const depan    = parseTwoDigitList($('rumus2DDepan').value);
+            const tengah   = parseTwoDigitList($('rumus2DTengah').value);
             const belakang = parseTwoDigitList($('rumus2DBelakang').value);
 
             filtered = filtered.filter(n => {
@@ -10436,9 +10501,10 @@ window.clearPasarHistory = function() {
             });
         }
 
+        // C. FILTER GRUP
         if (useGrup) {
-            const targetDepan = $('rumusGrupDepan').value.trim().toUpperCase();
-            const targetTengah = $('rumusGrupTengah').value.trim().toUpperCase();
+            const targetDepan    = $('rumusGrupDepan').value.trim().toUpperCase();
+            const targetTengah   = $('rumusGrupTengah').value.trim().toUpperCase();
             const targetBelakang = $('rumusGrupBelakang').value.trim().toUpperCase();
 
             if (targetDepan || targetTengah || targetBelakang) {
@@ -10464,6 +10530,7 @@ window.clearPasarHistory = function() {
             }
         }
 
+        // D. FILTER 1D DEPAN
         if (use1D) {
             const d1 = [];
             $('rumus1DGroup').querySelectorAll('input:checked').forEach(e => d1.push(e.value));
@@ -10472,7 +10539,9 @@ window.clearPasarHistory = function() {
             }
         }
 
+        // D2. FILTER MULTI PASAR (MENGANDUNG 3 ANGKA)
         window.multiPasarResultsState = {};
+        window.multiPasarPageState    = {};   // ← reset halaman tiap pasar
         if (useMultiPasar) {
             let all3DCombos = new Set();
             const basePool = filtered.slice();
@@ -10501,26 +10570,28 @@ window.clearPasarHistory = function() {
             }
         }
 
+        // E. FILTER CB
         if (useCB) {
-            const cb = parseSingleDigitList($('rumusCB').value);
+            const cb   = parseSingleDigitList($('rumusCB').value);
             const mode = $('rumusCBMode').value;
             if (cb.length > 0) {
                 filtered = filterByCB(filtered, cb.join(''), mode);
             }
         }
 
+        // TAMPILKAN HASIL
         if (filtered.length === 0) {
             toast('Tidak ada kombinasi yang cocok', 'error');
             pageState.pasarRumus.pages = [];
             renderPagination('pasarRumusResult', 'pasarRumus', 'Hasil', '');
-            renderMultiPasarBreakdown();
+            renderMultiPasarBreakdown(); // tetap panggil untuk membersihkan layar
             return;
         }
 
         filtered.sort();
-        pageState.pasarRumus.pages = paginateArray(filtered);
+        pageState.pasarRumus.pages   = paginateArray(filtered);
         pageState.pasarRumus.current = 0;
-        pageState.pasarRumus.meta = 'Rumus Pasar: ' + $('rumusPasarSelector').options[$('rumusPasarSelector').selectedIndex].text;
+        pageState.pasarRumus.meta    = 'Rumus Pasar: ' + $('rumusPasarSelector').options[$('rumusPasarSelector').selectedIndex].text;
 
         renderPagination('pasarRumusResult', 'pasarRumus', 'Hasil', '');
         renderMultiPasarBreakdown();
