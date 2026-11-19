@@ -10442,6 +10442,140 @@ window.clearPasarHistory = function() {
     // ═════════════════════════════════════════════════════════════════
     // 4. LOGIKA UTAMA GENERATE (SUDAH DIMASUKKAN FILTER MULTI PASAR)
     // ═════════════════════════════════════════════════════════════════
+	/* ═══════════════════════════════════════════════════════════════════
+   FITUR ANALISA PENYARING GRUP — DAFTAR 2D PER POSISI
+   ═══════════════════════════════════════════════════════════════════ */
+
+	// Simpan hasil filter terakhir untuk breakdown 2D pasca-generate
+	window.__lastFilteredResult = window.__lastFilteredResult || null;
+
+	function ensureGrupInfoContainer() {
+		let el = $('rumusGrupInfoContainer');
+		if (!el) {
+			el = document.createElement('div');
+			el.id = 'rumusGrupInfoContainer';
+			const anchor = $('pasarRumusResult');
+			if (anchor && anchor.parentNode) {
+				anchor.parentNode.insertBefore(el, anchor);
+			} else if ($('rumusGenerateBtn') && $('rumusGenerateBtn').parentNode) {
+				$('rumusGenerateBtn').parentNode.appendChild(el);
+			} else {
+				document.body.appendChild(el);
+			}
+		}
+		return el;
+	}
+
+	// Ambil daftar kode 2D yang anggotanya termasuk grup tertentu di posisi tertentu
+	function getGrup2DList(mId, pos, grupTarget) {
+		const m = pasarMasterData[mId];
+		if (!m) return [];
+		const arr = pos === 1 ? m.m1 : pos === 2 ? m.m2 : m.m3;
+		const target = (grupTarget || '').trim().toUpperCase();
+		if (!target || !arr) return [];
+
+		const out = [];
+		arr.forEach((item, idx) => {
+			if ((item.grup || '').trim().toUpperCase() === target) {
+				// Coba pakai field .kode kalau ada; fallback ke index (00–99)
+				const kode = (item.kode != null) ? String(item.kode) : String(idx);
+				out.push(kode.padStart(2, '0'));
+			}
+		});
+		return out.sort();
+	}
+
+	// Hitung 2D unik per posisi dari array hasil 4D
+	function computeUnique2D(filtered) {
+		const d = new Set(), t = new Set(), b = new Set();
+		filtered.forEach(n => {
+			d.add(n.slice(0, 2));
+			t.add(n.slice(1, 3));
+			b.add(n.slice(2, 4));
+		});
+		return { depan: [...d].sort(), tengah: [...t].sort(), belakang: [...b].sort() };
+	}
+
+	function renderGrupFilterInfo() {
+		const container = ensureGrupInfoContainer();
+		if (!container) return;
+
+		const mId = $('rumusPasarSelector') ? $('rumusPasarSelector').value : '';
+		const useGrup = $('rumusUseGrup') && $('rumusUseGrup').checked;
+
+		if (!mId || !pasarMasterData[mId] || !useGrup) {
+			container.innerHTML = '';
+			return;
+		}
+
+		const tDepan    = ($('rumusGrupDepan').value    || '').trim().toUpperCase();
+		const tTengah   = ($('rumusGrupTengah').value   || '').trim().toUpperCase();
+		const tBelakang = ($('rumusGrupBelakang').value || '').trim().toUpperCase();
+
+		if (!tDepan && !tTengah && !tBelakang) {
+			container.innerHTML = '';
+			return;
+		}
+
+		const blocks = [
+			{ label: 'Grup Depan',    target: tDepan,    pos: 1 },
+			{ label: 'Grup Tengah',   target: tTengah,   pos: 2 },
+			{ label: 'Grup Belakang', target: tBelakang, pos: 3 }
+		];
+
+		let html = `<div class="card" style="border-left:4px solid var(--success);margin:12px 0;padding:12px;">
+			<h4 style="color:var(--success);margin:0 0 10px 0;font-size:14px;">🔍 Analisa Penyaring Grup — Daftar 2D</h4>`;
+
+		// ── Bagian A: Komposisi 2D anggota grup ──
+		html += `<div style="font-size:12px;color:var(--warn);font-weight:bold;margin:0 0 6px 0;">📚 Komposisi 2D Anggota Grup</div>`;
+		blocks.forEach(b => {
+			if (!b.target) return;
+			const list = getGrup2DList(mId, b.pos, b.target);
+			html += `<div style="margin-bottom:10px;">
+				<div style="font-size:12px;color:var(--accent);font-weight:bold;margin-bottom:4px;">
+					${b.label} <span style="color:var(--warn);font-family:monospace;">"${esc(b.target)}"</span>
+					&nbsp;—&nbsp;<span style="color:var(--text-dim);">${list.length} angka 2D</span>
+				</div>
+				<div class="page-content" style="margin:0;font-size:12px;font-family:monospace;">${list.length ? list.join(', ') : '<i>(tidak ada 2D pada grup ini)</i>'}</div>
+			</div>`;
+		});
+
+		// ── Bagian B: 2D unik dari hasil generate terakhir ──
+		const filtered = window.__lastFilteredResult;
+		if (Array.isArray(filtered) && filtered.length > 0) {
+			const u = computeUnique2D(filtered);
+			html += `<div style="font-size:12px;color:var(--warn);font-weight:bold;margin:12px 0 6px 0;">
+				📊 2D Unik dari Hasil Generate &nbsp;<span style="color:var(--text-dim);font-weight:normal;">(${filtered.length.toLocaleString('id-ID')} angka 4D)</span>
+			</div>`;
+			[
+				{ label: '2D Depan',    list: u.depan    },
+				{ label: '2D Tengah',   list: u.tengah   },
+				{ label: '2D Belakang', list: u.belakang }
+			].forEach(p => {
+				html += `<div style="margin-bottom:10px;">
+					<div style="font-size:12px;color:var(--accent);font-weight:bold;margin-bottom:4px;">
+						${p.label} &nbsp;—&nbsp;<span style="color:var(--text-dim);">${p.list.length} angka unik</span>
+					</div>
+					<div class="page-content" style="margin:0;font-size:12px;font-family:monospace;">${p.list.join(', ')}</div>
+				</div>`;
+			});
+		}
+
+		html += `</div>`;
+		container.innerHTML = html;
+	}
+
+	window.renderGrupFilterInfo = renderGrupFilterInfo;
+
+	// ── Event wiring: update live saat pilihan berubah ──
+	['rumusGrupDepan', 'rumusGrupTengah', 'rumusGrupBelakang', 'rumusUseGrup', 'rumusPasarSelector'].forEach(id => {
+		if ($(id)) $(id).addEventListener('change', function () {
+			// Pilihan grup berubah ⇒ breakdown 2D dari generate lama sudah tidak relevan
+			window.__lastFilteredResult = null;
+			renderGrupFilterInfo();
+		});
+	});
+
     $('rumusGenerateBtn').addEventListener('click', function () {
         const mId = $('rumusPasarSelector').value;
         if (!mId) { toast('Pilih Pasar terlebih dahulu', 'error'); return; }
