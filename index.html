@@ -2320,7 +2320,7 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
                     <p id="rumusInfo" class="text-accent" style="font-size:13px; margin:12px 0;">Info: —</p>
                     <button class="btn-primary" id="rumusGenerateBtn">⚡ Generate Rumus Pasar</button>
                 </div>
-
+				<div id="rumusMultiPasarResultContainer"></div>	
                 <div class="card"><div id="pasarRumusResult"></div></div>
             </div>
 
@@ -10320,32 +10320,45 @@ toggleRumusInputs = function() {
 };
 if ($('rumusUseMultiPasar')) $('rumusUseMultiPasar').addEventListener('change', toggleRumusInputs);
 
-    // D2. FILTER MULTI PASAR (MENGANDUNG 3 ANGKA)
+        // D2. FILTER MULTI PASAR (MENGANDUNG 3 ANGKA) & SIMPAN RINCIAN
+    multiPasarResultsState = {}; // Reset state
+
     if ($('rumusUseMultiPasar') && $('rumusUseMultiPasar').checked) {
         let all3DCombos = new Set();
+        const basePool = filtered.slice(); // Simpan pool dasar sebelum difilter untuk rincian
         
-        // Kumpulkan semua kombinasi 3D dari pasar yang diisi
+        // 1. Kumpulkan kombinasi dan hasil per pasar
         for (let namaPasar in stateMultiPasar) {
             const val = stateMultiPasar[namaPasar];
             if (val && val.length >= 3) {
                 const combos = get3DCombosFromStr(val);
                 combos.forEach(c => all3DCombos.add(c));
+
+                // Hitung hasil untuk pasar ini saja
+                const matchesForMarket = basePool.filter(n => {
+                    return combos.some(combo => blContainsCombo(n, blParseMultiset(combo)));
+                });
+
+                // Simpan ke state untuk ditampilkan di UI
+                multiPasarResultsState[namaPasar] = {
+                    input: val,
+                    combos: combos,
+                    matches: matchesForMarket
+                };
             }
         }
 
-        // Jika ada kombinasi yang harus dicari
+        // 2. Filter hasil utama (OR)
         if (all3DCombos.size > 0) {
             const comboArray = Array.from(all3DCombos);
             filtered = filtered.filter(n => {
-                // Angka 4D lolos jika mengandung SALAH SATU kombinasi 3D (OR)
-                return comboArray.some(combo => {
-                    return blContainsCombo(n, blParseMultiset(combo));
-                });
+                return comboArray.some(combo => blContainsCombo(n, blParseMultiset(combo)));
             });
         }
     }
 	
 // 3. Logika Utama Generate
+let multiPasarResultsState = {}; // Untuk menyimpan hasil per pasar
 $('rumusGenerateBtn').addEventListener('click', function() {
     const mId = $('rumusPasarSelector').value;
     if (!mId) { toast('Pilih Pasar terlebih dahulu', 'error'); return; }
@@ -10467,10 +10480,56 @@ $('rumusGenerateBtn').addEventListener('click', function() {
 
     renderPagination('pasarRumusResult', 'pasarRumus', 'Hasil', '');
     toast('Berhasil: ' + filtered.length.toLocaleString('id-ID') + ' kombinasi', 'success');
-    
+    renderMultiPasarBreakdown();
     const resBox = $('pasarRumusResult');
     if (resBox) resBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
+
+function renderMultiPasarBreakdown() {
+    const container = $('rumusMultiPasarResultContainer');
+    if (!container) return;
+
+    let html = '';
+    let hasData = false;
+
+    for (let namaPasar in multiPasarResultsState) {
+        const data = multiPasarResultsState[namaPasar];
+        if (data.matches.length === 0) continue; // Skip jika tidak ada hasil
+
+        hasData = true;
+        const displayLimit = 300; // Batasi tampilan agar HP tidak lag
+        const preview = data.matches.slice(0, displayLimit);
+        const isTruncated = data.matches.length > displayLimit;
+
+        html += `<div class="card" style="border-left: 4px solid var(--warn); margin-bottom: 12px; padding: 12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:6px;">
+                <h4 style="color:var(--accent); margin:0;">Hasil dari: <span style="color:var(--warn); font-family:monospace; font-size:16px;">${esc(namaPasar)}</span></h4>
+                <span style="font-size:12px; color:var(--success); font-weight:bold; background:rgba(34,197,94,0.1); padding:2px 8px; border-radius:4px;">${data.matches.length.toLocaleString('id-ID')} angka</span>
+            </div>
+            <div style="font-size:11px; color:var(--accent); margin-bottom:8px; font-family:monospace;">Kombinasi 3D (${data.input}): ${data.combos.join(', ')}</div>
+            <div class="page-content" style="max-height:200px; margin:0 0 10px 0; font-size:12px;">${preview.join('*')}${preview.length ? '*' : ''}</div>
+            ${isTruncated ? `<div style="font-size:11px; color:var(--danger); margin-bottom:8px;">*Menampilkan ${displayLimit} angka pertama. Klik Copy untuk semua.</div>` : ''}
+            <div class="page-actions" style="margin-top:0;">
+                <button onclick="copyMultiPasarRow('${esc(namaPasar)}')">📋 Copy Hasil</button>
+            </div>
+        </div>`;
+    }
+
+    if (!hasData) {
+        container.innerHTML = '';
+        return;
+    }
+
+    // Tambahkan Header Judul
+    container.innerHTML = `<h3 style="color:var(--warn); margin: 16px 0 10px 0; font-size:15px;">📊 Rincian Hasil Per Pasar (Mengandung 3 Angka)</h3>` + html;
+}
+
+// Fungsi untuk tombol Copy per pasar
+window.copyMultiPasarRow = function(namaPasar) {
+    const data = multiPasarResultsState[namaPasar];
+    if (!data || !data.matches.length) { toast('Tidak ada hasil', 'error'); return; }
+    copyTextToClipboard(data.matches.join('*') + '*');
+};
 
 </script>
 
