@@ -2319,6 +2319,12 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
                         <select id="pasarMasterSelector"></select>
                     </div>
                     
+					<div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+                        <button class="btn-warn" onclick="resetPasarMaster()" style="padding:6px 12px; font-size:12px;">
+                            🔄 Reset Master ke SEED_MASTER
+                        </button>
+                    </div>
+					
                     <div class="subtabs" style="margin-top:10px;">
                         <button class="active" onclick="switchPasarMasterTab(1, this)">Master 1 (2D Depan)</button>
                         <button onclick="switchPasarMasterTab(2, this)">Master 2 (2D Tengah)</button>
@@ -2329,7 +2335,7 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
                         <div id="pasarMasterRows"></div>
                     </div>
                 </div>
-            </div>
+            </div
 
             <!-- PANEL 2: INPUT & HISTORY -->
             <div id="pasarInput" class="subpanel">
@@ -2376,7 +2382,12 @@ tr:hover { background-color: rgba(255,255,255,0.02); }
                 <!-- TABEL HISTORY -->
                 <div class="card">
                     <h3 style="margin-bottom:10px;">📜 History Result Pasar</h3>
+					<button class="btn-danger" onclick="clearPasarHistory()" style="padding:6px 12px; font-size:12px;">
+                            🗑 Hapus Semua History
+                        </button>
+                    </div>
                     <div class="table-container">
+               
                         <table>
                             <thead>
                                 <tr>
@@ -10101,6 +10112,47 @@ document.addEventListener('DOMContentLoaded', function() {
 // Re-render saat dropdown diganti
 $('pasarMasterSelector').addEventListener('change', renderPasarMasterEditor);
 $('pasarInputSelector').addEventListener('change', renderPasarHistory);
+
+// 1. FUNGSI RESET MASTER KE SEED_MASTER
+window.resetPasarMaster = function() {
+    const mId = $('pasarMasterSelector').value;
+    if (!mId) { toast('Pilih pasar terlebih dahulu', 'error'); return; }
+    
+    if (!confirm('Reset Master 1, 2, dan 3 untuk pasar ini ke data bawaan (SEED_MASTER)?\nSemua perubahan Syair & Grup manual akan hilang.')) return;
+    
+    // Ambil data bawaan SEED_MASTER
+    const defaultMaster = SEED_MASTER.map(item => ({ 
+        nomor: item[0], 
+        syair: item[1], 
+        grup: item[2] 
+    }));
+    
+    // Timpa Master Pasar dengan data bawaan
+    pasarMasterData[mId] = { 
+        m1: [...defaultMaster], 
+        m2: [...defaultMaster], 
+        m3: [...defaultMaster] 
+    };
+    
+    savePasarData(); // Simpan ke LocalStorage
+    renderPasarMasterEditor(); // Render ulang tampilan editor
+    
+    toast('Master Pasar berhasil di-reset ke bawaan', 'success');
+};
+
+// 2. FUNGSI HAPUS HISTORY PASAR
+window.clearPasarHistory = function() {
+    const mId = $('pasarInputSelector').value;
+    if (!mId) { toast('Pilih pasar terlebih dahulu', 'error'); return; }
+    
+    if (!confirm('Hapus SEMUA History Result & Prediksi untuk pasar ini?\nTindakan ini tidak bisa dibatalkan.')) return;
+    
+    pasarHistoryData[mId] = [];
+    savePasarData(); // Simpan ke LocalStorage
+    renderPasarHistory(); // Render ulang tabel history
+    
+    toast('History Pasar berhasil dihapus', 'success');
+};
 
 
 /* ═══════════════════════════════════════════════════════════════════════
